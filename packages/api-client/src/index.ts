@@ -19,11 +19,6 @@ export interface AuthUserResponse {
   createdAt: string;
 }
 
-export interface SignInResponse {
-  token: string;
-  user: AuthUserResponse;
-}
-
 export interface ApiClientConfig {
   baseUrl: string;
   getAuthToken?: () => Promise<string | null>;
@@ -103,13 +98,6 @@ export class DiadeApiClient {
 
   async health(): Promise<HealthResponse> {
     return this.request<HealthResponse>('/health');
-  }
-
-  async signInWithEmail(email: string, password: string): Promise<SignInResponse> {
-    return this.request<SignInResponse>('/api/auth/sign-in/email', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
   }
 
   /** Returns the signed-in user, or null when the stored token is no longer valid. */
