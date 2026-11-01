@@ -5,11 +5,14 @@ import { getActiveEvents } from '../data/queries';
 import { buildAgenda } from '../data/agenda';
 import { useLiveQuery } from '../data/useLiveQuery';
 import { EventForm } from '../components/EventForm';
+import { Alert } from 'react-native';
+import { useAuth } from '../context/AuthContext';
 import { Button, Card, EmptyState, Pill, ScreenScaffold, SyncBadge } from '../components/ui';
 
 const HORIZON_DAYS = 400; // covers a full yearly cycle plus a margin
 
 export const UsScreen: React.FC = () => {
+  const { user, signOut } = useAuth();
   const events = useLiveQuery(getActiveEvents, [] as CalendarEvent[]);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<CalendarEvent | null>(null);
@@ -77,6 +80,21 @@ export const UsScreen: React.FC = () => {
             </View>
           );
         })}
+      </Card>
+
+      <Card>
+        <Text className="text-xs font-bold text-ink-muted tracking-wider uppercase mb-2">Account</Text>
+        <Text className="text-sm text-ink-muted mb-3">Signed in as {user?.email}</Text>
+        <Button
+          label="Sign out"
+          variant="ghost"
+          onPress={() =>
+            Alert.alert('Sign out?', 'Local data on this device will be removed. Changes not yet synced will be lost.', [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Sign out', style: 'destructive', onPress: () => signOut() },
+            ])
+          }
+        />
       </Card>
 
       <EventForm
