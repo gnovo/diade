@@ -49,3 +49,8 @@ coverage/
 
 # Local Worker secrets (wrangler dev)
 .dev.vars
+
+# Generated native projects (Expo CNG; regenerate with expo prebuild)
+apps/mobile/ios/
+apps/mobile/android/
+.expo/
