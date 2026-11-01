@@ -29,7 +29,15 @@
       "expo-sqlite",
       "expo-asset",
       "expo-font",
-      "./plugins/with-diade-icons"
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "diade",
+          "project": "diade-mobile"
+        }
+      ],
+      "./plugins/with-diade-icons",
+      "./plugins/with-diade-release-signing"
     ]
   }
 }

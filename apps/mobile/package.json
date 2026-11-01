@@ -8,6 +8,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "prebuild": "expo prebuild",
+    "build:android:prod": "bash scripts/build-android-prod.sh",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --no-cache"
   },
@@ -20,6 +21,7 @@
     "@diade/validation": "workspace:*",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
+    "@sentry/react-native": "^8.33.0",
     "better-auth": "1.7.15",
     "expo": "~58.0.22",
     "expo-asset": "~58.0.19",
@@ -46,9 +48,11 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@babel/plugin-transform-react-jsx": "7.29.7",
     "@babel/runtime": "^7.20.0",
     "@diade/config": "workspace:*",
     "@types/react": "~19.3.0",
+    "babel-preset-expo": "58.0.23",
     "tailwindcss": "^3.4.17",
     "typescript": "^6.0.3"
   }
