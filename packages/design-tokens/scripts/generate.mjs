@@ -126,7 +126,13 @@ writeFileSync(resolve(root, '../../apps/mobile/global.css'), css);
 // Tailwind reads this JSON directly (tailwind.config.js is CommonJS).
 writeFileSync(
   resolve(root, 'src/tailwind-tokens.json'),
-  JSON.stringify({ colorNames, fontSizes: typography, spacing, radius }, null, 2) + '\n',
+  JSON.stringify({
+    colorNames,
+    fontSizes: typography,
+    // Unprefixed keys (sm, md, ...) so tailwind.config.js can read them directly.
+    spacing: Object.fromEntries(Object.entries(spacing).map(([k, v]) => [k.replace('space-', ''), v])),
+    radius: Object.fromEntries(Object.entries(radius).map(([k, v]) => [k.replace('radius-', ''), v])),
+  }, null, 2) + '\n',
 );
 
 console.log(`Generated ${colorNames.length} colours, ${Object.keys(typography).length} type styles, ${Object.keys(shadows.light).length} shadows.`);

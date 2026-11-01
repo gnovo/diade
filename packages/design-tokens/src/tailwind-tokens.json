@@ -99,20 +99,20 @@
     }
   },
   "spacing": {
-    "space-1": 4,
-    "space-2": 8,
-    "space-3": 12,
-    "space-4": 16,
-    "space-5": 20,
-    "space-6": 24,
-    "space-8": 32,
-    "space-12": 48
+    "1": 4,
+    "2": 8,
+    "3": 12,
+    "4": 16,
+    "5": 20,
+    "6": 24,
+    "8": 32,
+    "12": 48
   },
   "radius": {
-    "radius-sm": 8,
-    "radius-md": 12,
-    "radius-lg": 16,
-    "radius-xl": 24,
-    "radius-full": 9999
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "full": 9999
   }
 }
