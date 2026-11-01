@@ -7,8 +7,11 @@ import * as schema from '../db/schema';
 
 /** Native app deep-link scheme (apps/mobile/app.json `scheme`). Trusted for OAuth callbacks. */
 export const APP_SCHEME = 'diade://';
+/** Expo Go development scheme. Matches any exp:// host because no authority is given. */
+export const EXPO_GO_SCHEME = 'exp://';
 
 export interface AuthEnv {
+  ENVIRONMENT?: string;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
   BETTER_AUTH_SECRET?: string;
@@ -55,7 +58,9 @@ export function createAuth(db: DbClient, env: AuthEnv) {
     baseURL: env.BETTER_AUTH_URL || 'http://localhost:8787',
     // Email and password sign-in is off: Google is the only way in.
     emailAndPassword: { enabled: false },
-    trustedOrigins: [APP_SCHEME],
+    // Expo Go returns to exp://<dev-server>. The plugin only trusts that under NODE_ENV=development,
+    // which Workers do not set, so trust it explicitly outside production.
+    trustedOrigins: [APP_SCHEME, ...(env.ENVIRONMENT === 'production' ? [] : [EXPO_GO_SCHEME])],
     socialProviders: {
       google: {
         clientId: env.GOOGLE_CLIENT_ID || 'dummy-google-client-id',
