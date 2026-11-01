@@ -124,7 +124,7 @@ export const clientMutationSchema = z.object({
   entity: syncEntityNameSchema,
   operation: mutationOperationSchema,
   recordId: z.string().uuid('Record ID must be a valid UUID'),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   clientTimestamp: z.number().int().positive(),
 });
 

@@ -1,0 +1,32 @@
+{
+  "name": "@diade/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@diade/contracts": "workspace:*",
+    "@diade/domain": "workspace:*",
+    "@diade/validation": "workspace:*",
+    "@hono/zod-validator": "^0.4.3",
+    "better-auth": "^1.2.6",
+    "drizzle-orm": "^0.40.0",
+    "hono": "^4.7.4",
+    "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250224.0",
+    "@diade/config": "workspace:*",
+    "drizzle-kit": "^0.30.5",
+    "typescript": "^5.8.2",
+    "vitest": "^5.0.5",
+    "wrangler": "^3.114.0"
+  }
+}
