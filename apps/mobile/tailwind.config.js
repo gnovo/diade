@@ -1,45 +1,36 @@
+// Colours, type and radius come from the Díade design system (packages/design-tokens/tokens.json).
+// Colours resolve through CSS custom properties in global.css, so light/dark switch automatically.
+const tokens = require('../../packages/design-tokens/src/tailwind-tokens.json');
+
+const colors = Object.fromEntries(tokens.colorNames.map((name) => [name, `var(--color-${name})`]));
+
+const fontSize = Object.fromEntries(
+  Object.entries(tokens.fontSizes).map(([name, s]) => [
+    name,
+    [`${s.fontSize}px`, { lineHeight: `${s.lineHeight}px`, letterSpacing: `${s.letterSpacing}px` }],
+  ]),
+);
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./src/**/*.{js,jsx,ts,tsx}'],
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
-      colors: {
-        primary: {
-          DEFAULT: '#0D4F46',
-          dark: '#08332D',
-          light: '#156B5F',
-        },
-        secondary: {
-          DEFAULT: '#65C5B3',
-          dark: '#45A896',
-          light: '#88D6C7',
-        },
-        accent: {
-          DEFAULT: '#A7E3D6',
-          dark: '#85C7BA',
-          light: '#CBF0E8',
-        },
-        canvas: '#F7FAF9',
-        surface: {
-          DEFAULT: '#FFFFFF',
-          subtle: '#EFF6F4',
-        },
-        border: {
-          DEFAULT: '#E2E8F0',
-          subtle: '#CBD5E1',
-        },
-        ink: {
-          DEFAULT: '#0F172A',
-          muted: '#64748B',
-          light: '#94A3B8',
-        },
+      colors,
+      fontSize,
+      borderRadius: {
+        sm: `${tokens.radius.sm}px`,
+        md: `${tokens.radius.md}px`,
+        lg: `${tokens.radius.lg}px`,
+        xl: `${tokens.radius.xl}px`,
+        full: `${tokens.radius.full}px`,
       },
       fontFamily: {
-        sans: ['PlusJakartaSans-Regular', 'system-ui', 'sans-serif'],
-        medium: ['PlusJakartaSans-Medium', 'system-ui', 'sans-serif'],
-        semibold: ['PlusJakartaSans-SemiBold', 'system-ui', 'sans-serif'],
-        bold: ['PlusJakartaSans-Bold', 'system-ui', 'sans-serif'],
+        sans: ['PlusJakartaSans_400Regular', 'system-ui', 'sans-serif'],
+        medium: ['PlusJakartaSans_500Medium', 'system-ui', 'sans-serif'],
+        semibold: ['PlusJakartaSans_600SemiBold', 'system-ui', 'sans-serif'],
+        bold: ['PlusJakartaSans_700Bold', 'system-ui', 'sans-serif'],
       },
     },
   },
