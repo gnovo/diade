@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Díade",
+    "slug": "diade",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "scheme": "diade",
+    "splash": {
+      "backgroundColor": "#F7FAF9"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.diade.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0D4F46"
+      },
+      "package": "com.diade.app"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-sqlite"
+    ]
+  }
+}

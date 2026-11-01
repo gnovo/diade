@@ -8,7 +8,7 @@ describe('Díade API - Foundation & Health Endpoints', () => {
     const res = await app.request('/health');
     expect(res.status).toBe(200);
 
-    const data = await res.json();
+    const data = (await res.json()) as any;
     expect(data).toMatchObject({
       status: 'ok',
       version: '0.1.0',

@@ -1,0 +1,10 @@
+{
+  "extends": "@diade/config/tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "jsx": "react-jsx",
+    "types": ["react", "react-native"]
+  },
+  "include": ["src/**/*", "index.js", "app.json"]
+}

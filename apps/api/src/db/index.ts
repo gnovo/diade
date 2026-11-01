@@ -10,10 +10,11 @@ export interface DatabaseEnv {
 }
 
 export function createDb(env?: DatabaseEnv) {
+  const globalProcess = (globalThis as unknown as { process?: { env?: Record<string, string> } }).process;
   const connectionString =
     env?.HYPERDRIVE?.connectionString ||
     env?.DATABASE_URL ||
-    (typeof process !== 'undefined' ? process.env?.DATABASE_URL : undefined);
+    globalProcess?.env?.DATABASE_URL;
 
   if (!connectionString) {
     throw new Error(
