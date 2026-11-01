@@ -11,9 +11,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/client';
+import { useColor } from '../design';
 
 export const SpaceSetupScreen: React.FC = () => {
   const { updateSpace, signOut } = useAuth();
+  const placeholderColor = useColor('ink-muted');
+  const onAction = useColor('on-action');
+  const action = useColor('action');
 
   const [spaceName, setSpaceName] = useState('');
   const [inviteCode, setInviteCode] = useState('');
@@ -60,7 +64,7 @@ export const SpaceSetupScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-canvas">
+    <SafeAreaView className="flex-1 bg-bg">
       <ScrollView contentContainerStyle={{ padding: 24 }}>
         {/* Header */}
         <View className="mb-8">
@@ -77,27 +81,27 @@ export const SpaceSetupScreen: React.FC = () => {
             Start a fresh space and generate an invite code for your partner.
           </Text>
 
-          <Text className="text-xs font-semibold text-ink-muted mb-2 tracking-wider">
+          <Text className="text-sm font-semibold text-ink-muted mb-2 tracking-wider">
             SPACE NAME
           </Text>
           <TextInput
             value={spaceName}
             onChangeText={setSpaceName}
             placeholder="e.g. Our Home, Casa"
-            placeholderTextColor="#94A3B8"
-            className="bg-canvas border border-border rounded-xl px-4 py-3 text-ink text-base mb-4"
+            placeholderTextColor={placeholderColor}
+            className="bg-bg border border-border rounded-xl px-4 py-3 text-ink text-base mb-4"
           />
 
           <TouchableOpacity
             onPress={handleCreateSpace}
             disabled={isCreating}
             activeOpacity={0.8}
-            className="bg-primary rounded-xl py-3.5 items-center justify-center"
+            className="bg-action rounded-xl py-3.5 items-center justify-center"
           >
             {isCreating ? (
-              <ActivityIndicator color="#FFFFFF" />
+              <ActivityIndicator color={onAction} />
             ) : (
-              <Text className="text-white font-semibold text-sm">Create &amp; Get Code</Text>
+              <Text className="text-on-action font-semibold text-sm">Create &amp; Get Code</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -105,7 +109,7 @@ export const SpaceSetupScreen: React.FC = () => {
         {/* Divider */}
         <View className="flex-row items-center my-2 mb-6">
           <View className="flex-1 h-px bg-border" />
-          <Text className="mx-4 text-xs font-semibold text-ink-muted">OR</Text>
+          <Text className="mx-4 text-sm font-semibold text-ink-muted">OR</Text>
           <View className="flex-1 h-px bg-border" />
         </View>
 
@@ -116,36 +120,36 @@ export const SpaceSetupScreen: React.FC = () => {
             Enter the 8-character invite code provided by your partner.
           </Text>
 
-          <Text className="text-xs font-semibold text-ink-muted mb-2 tracking-wider">
+          <Text className="text-sm font-semibold text-ink-muted mb-2 tracking-wider">
             INVITE CODE
           </Text>
           <TextInput
             value={inviteCode}
             onChangeText={(text) => setInviteCode(text.toUpperCase())}
             placeholder="e.g. ABC123XY"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={placeholderColor}
             autoCapitalize="characters"
             maxLength={8}
-            className="bg-canvas border border-border rounded-xl px-4 py-3 text-ink text-base font-mono mb-4"
+            className="bg-bg border border-border rounded-xl px-4 py-3 text-ink text-base font-semibold tracking-[2px] mb-4"
           />
 
           <TouchableOpacity
             onPress={handleJoinSpace}
             disabled={isJoining}
             activeOpacity={0.8}
-            className="border border-primary rounded-xl py-3.5 items-center justify-center bg-surface"
+            className="border border-action rounded-xl py-3.5 items-center justify-center bg-surface"
           >
             {isJoining ? (
-              <ActivityIndicator color="#0D4F46" />
+              <ActivityIndicator color={action} />
             ) : (
-              <Text className="text-primary font-semibold text-sm">Join Space</Text>
+              <Text className="text-action font-semibold text-sm">Join Space</Text>
             )}
           </TouchableOpacity>
         </View>
 
         {/* Sign Out Link */}
         <TouchableOpacity onPress={signOut} className="items-center py-2">
-          <Text className="text-xs text-ink-muted">Sign out of this account</Text>
+          <Text className="text-sm text-ink-muted">Sign out of this account</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

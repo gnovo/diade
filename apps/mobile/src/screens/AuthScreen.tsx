@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { User } from '@diade/domain';
 import { useAuth } from '../context/AuthContext';
 import { authClient } from '../auth/authClient';
+import { Button, Logo, ThemeToggle } from '../design';
 
-const APP_CALLBACK_URL = 'diade://';
+// A root-relative callback is resolved by the Expo plugin for the current runtime: diade:// in a
+// standalone build, exp://<dev-server> in Expo Go. A hardcoded diade:// cannot return to Expo Go.
+const APP_CALLBACK_URL = '/';
 
 const toDomainUser = (u: { id: string; email: string; name: string; image?: string | null; createdAt: Date | string }): User => ({
   id: u.id,
@@ -44,36 +47,31 @@ export const AuthScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-canvas" edges={['top', 'bottom']}>
+    <SafeAreaView className="flex-1 bg-bg" edges={['top', 'bottom']}>
       <View className="flex-1 p-6 justify-between">
         <View className="items-center mt-12">
-          <View className="w-20 h-20 items-center justify-center mb-6">
-            <View className="flex-row items-center">
-              <View className="w-9 h-9 rounded-full bg-secondary opacity-90 -mr-2" />
-              <View className="w-9 h-9 rounded-full bg-primary -ml-2" />
-            </View>
-          </View>
-          <Text className="text-3xl font-bold text-ink tracking-tight mb-2">Díade</Text>
-          <Text className="text-base text-ink-muted text-center px-4">Two distinct elements. One shared space.</Text>
+          <Logo variant="stacked" height={112} />
+          <Text className="text-base leading-6 text-ink-muted text-center px-4 mt-6">
+            Two distinct elements. One shared space.
+          </Text>
         </View>
 
-        <View className="bg-surface rounded-2xl p-6 border border-border my-8 gap-4">
-          <TouchableOpacity
+        <View className="bg-surface rounded-lg p-6 border border-border my-8 gap-4">
+          <Button
+            label="Continue with Google"
             onPress={handleGoogleSignIn}
             disabled={isSigningIn}
-            activeOpacity={0.8}
-            accessibilityRole="button"
-            className="bg-primary rounded-xl py-4 items-center justify-center"
-          >
-            {isSigningIn ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <Text className="text-white font-semibold text-base">Continue with Google</Text>
-            )}
-          </TouchableOpacity>
+            loading={isSigningIn}
+            variant="primary"
+            style={{ width: '100%' }}
+          />
         </View>
 
-        <Text className="text-xs text-ink-muted text-center mb-4">
+        <View className="gap-2 mb-2">
+          <ThemeToggle />
+        </View>
+
+        <Text className="text-sm text-ink-muted text-center mb-4">
           Private to the two of you. Sign in with the Google account you were invited with.
         </Text>
       </View>

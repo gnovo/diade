@@ -117,7 +117,7 @@ export const ListsScreen: React.FC = () => {
         </Card>
 
         <Card>
-          <SectionLabel right={<Text className="text-xs text-ink-muted">{open.length} to get</Text>}>Items</SectionLabel>
+          <SectionLabel right={<Text className="text-sm text-ink-muted">{open.length} to get</Text>}>Items</SectionLabel>
           {open.length === 0 ? <EmptyState message="Nothing on this list yet." /> : null}
           {open.map((item, index) => (
             <ItemRow key={item.id} item={item} first={index === 0} onToggle={() => toggleItem(item)} />
@@ -125,7 +125,7 @@ export const ListsScreen: React.FC = () => {
           {done.length > 0 ? (
             <View className="mt-4 pt-4 border-t border-border">
               <View className="flex-row items-center justify-between mb-2">
-                <Text className="text-xs text-ink-muted">{done.length} checked</Text>
+                <Text className="text-sm text-ink-muted">{done.length} checked</Text>
                 <Button label="Clear checked" variant="ghost" small onPress={clearChecked} />
               </View>
               {done.map((item) => (
@@ -159,9 +159,9 @@ export const ListsScreen: React.FC = () => {
           >
             <View>
               <Text className="text-base font-semibold text-ink">{list.name}</Text>
-              <Text className="text-xs text-ink-muted mt-0.5 capitalize">{list.category}</Text>
+              <Text className="text-sm text-ink-muted mt-0.5 capitalize">{list.category}</Text>
             </View>
-            <Text className="text-sm font-medium text-primary">{remaining} to get</Text>
+            <Text className="text-sm font-medium text-action">{remaining} to get</Text>
           </TouchableOpacity>
         );
       })}
@@ -185,7 +185,7 @@ const ItemRow: React.FC<{ item: ListItem; first: boolean; onToggle: () => void }
       <Text className={`flex-1 text-sm ${item.isChecked ? 'text-ink-muted line-through' : 'text-ink font-medium'}`}>
         {item.name}
       </Text>
-      {item.quantity ? <Text className="text-xs text-ink-muted">{item.quantity}</Text> : null}
+      {item.quantity ? <Text className="text-sm text-ink-muted">{item.quantity}</Text> : null}
     </View>
   </View>
 );

@@ -7,7 +7,8 @@ import { useLiveQuery } from '../data/useLiveQuery';
 import { EventForm } from '../components/EventForm';
 import { Alert } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { Button, Card, EmptyState, Pill, ScreenScaffold, SyncBadge } from '../components/ui';
+import { Button, Card, EmptyState, Pill, ScreenScaffold, SectionLabel, SyncBadge } from '../components/ui';
+import { ThemeToggle } from '../design';
 
 const HORIZON_DAYS = 400; // covers a full yearly cycle plus a margin
 
@@ -65,13 +66,13 @@ export const UsScreen: React.FC = () => {
               >
                 <View className="flex-1 mr-3">
                   <Text className="text-base font-semibold text-ink">{item.title}</Text>
-                  <Text className="text-xs text-ink-muted mt-0.5">
+                  <Text className="text-sm text-ink-muted mt-0.5">
                     {formatLongDate(item.startAt)}
                     {item.recurring ? ' · every year' : ''}
                   </Text>
                 </View>
                 <View className="items-end gap-1">
-                  <Text className="text-sm font-semibold text-primary">
+                  <Text className="text-sm font-semibold text-action">
                     {days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days} days`}
                   </Text>
                   <Pill label={item.visibility === 'shared' ? 'Shared' : 'Personal'} tone={item.visibility} />
@@ -83,7 +84,12 @@ export const UsScreen: React.FC = () => {
       </Card>
 
       <Card>
-        <Text className="text-xs font-bold text-ink-muted tracking-wider uppercase mb-2">Account</Text>
+        <SectionLabel>Appearance</SectionLabel>
+        <ThemeToggle />
+      </Card>
+
+      <Card>
+        <Text className="text-sm font-bold text-ink-muted tracking-wider uppercase mb-2">Account</Text>
         <Text className="text-sm text-ink-muted mb-3">Signed in as {user?.email}</Text>
         <Button
           label="Sign out"

@@ -109,7 +109,7 @@ export const TodayScreen: React.FC = () => {
         <Button label={saving ? '…' : 'Save'} small onPress={handleCapture} disabled={saving || !captureText.trim()} />
       </View>
       <View className="flex-row justify-between px-2 mb-6">
-        <Text className="text-xs text-ink-muted">{captureNote ?? (inbox.data.length ? `${inbox.data.length} in your inbox` : ' ')}</Text>
+        <Text className="text-sm text-ink-muted">{captureNote ?? (inbox.data.length ? `${inbox.data.length} in your inbox` : ' ')}</Text>
       </View>
 
       <Card>
@@ -120,8 +120,8 @@ export const TodayScreen: React.FC = () => {
             {index > 0 ? <View className="h-px bg-border my-3" /> : null}
             <View className="flex-row items-center justify-between">
               <View className="flex-1 mr-2">
-                <Text className="text-sm font-semibold text-ink" numberOfLines={1}>{item.title}</Text>
-                <Text className="text-xs text-ink-muted mt-0.5">
+                <Text className="text-base font-semibold text-ink" numberOfLines={1}>{item.title}</Text>
+                <Text className="text-sm text-ink-muted mt-0.5">
                   {formatDayLabel(item.startAt, now)} · {formatAgendaTime(item)}
                 </Text>
               </View>
@@ -153,13 +153,13 @@ export const TodayScreen: React.FC = () => {
         ) : (
           <View className="flex-row flex-wrap gap-2">
             {openGroceries.slice(0, 4).map((item) => (
-              <View key={item.id} className="bg-surface-subtle border border-border px-3 py-1.5 rounded-full">
-                <Text className="text-xs font-medium text-ink">{item.name}</Text>
+              <View key={item.id} className="bg-surface-sunken border border-border px-3 py-1.5 rounded-full">
+                <Text className="text-base font-medium text-ink">{item.name}</Text>
               </View>
             ))}
             {openGroceries.length > 4 ? (
-              <View className="bg-canvas border border-border px-3 py-1.5 rounded-full">
-                <Text className="text-xs text-ink-muted">+{openGroceries.length - 4} more</Text>
+              <View className="bg-bg border border-border px-3 py-1.5 rounded-full">
+                <Text className="text-sm text-ink-muted">+{openGroceries.length - 4} more</Text>
               </View>
             ) : null}
           </View>
@@ -171,8 +171,8 @@ export const TodayScreen: React.FC = () => {
           <SectionLabel>Important dates</SectionLabel>
           {importantDates.map((item, index) => (
             <View key={item.key} className={index > 0 ? 'mt-3' : ''}>
-              <Text className="text-sm font-semibold text-ink">{item.title}</Text>
-              <Text className="text-xs text-ink-muted mt-0.5">{formatDayLabel(item.startAt, now)}</Text>
+              <Text className="text-base font-semibold text-ink">{item.title}</Text>
+              <Text className="text-sm text-ink-muted mt-0.5">{formatDayLabel(item.startAt, now)}</Text>
             </View>
           ))}
         </Card>

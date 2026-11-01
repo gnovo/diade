@@ -67,7 +67,7 @@ export const CalendarScreen: React.FC = () => {
 
       {days.map((group) => (
         <View key={group.day.toISOString()} className="mb-5">
-          <Text className="text-xs font-bold text-ink-muted uppercase tracking-wider mb-2">
+          <Text className="text-sm font-bold text-ink-muted uppercase tracking-wider mb-2">
             {formatDayLabel(group.day, now)}
           </Text>
           <View className="bg-surface rounded-2xl border border-border overflow-hidden">
@@ -81,10 +81,10 @@ export const CalendarScreen: React.FC = () => {
                 className={`px-4 py-3 flex-row items-center justify-between ${index > 0 ? 'border-t border-border' : ''}`}
               >
                 <View className="flex-1 mr-3">
-                  <Text className="text-sm font-semibold text-ink" numberOfLines={1}>
+                  <Text className="text-base font-semibold text-ink" numberOfLines={1}>
                     {item.title}
                   </Text>
-                  <Text className="text-xs text-ink-muted mt-0.5">
+                  <Text className="text-sm text-ink-muted mt-0.5">
                     {formatAgendaTime(item)}
                     {item.recurring ? ' · repeats' : ''}
                     {item.category === 'important_date' ? ' · important' : ''}

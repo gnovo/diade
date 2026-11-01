@@ -121,9 +121,9 @@ export const HomeScreen: React.FC = () => {
         <View className="mt-3">
           <TextField value={dueDate} onChangeText={setDueDate} placeholder="Due (YYYY-MM-DD, optional)" maxLength={10} />
         </View>
-        <Text className="text-xs font-semibold text-ink-muted mt-4 mb-1.5">Who</Text>
+        <Text className="text-sm font-semibold text-ink-muted mt-4 mb-1.5">Who</Text>
         <Segmented<AssigneeChoice> value={assignee} onChange={setAssignee} options={assigneeOptions} />
-        <Text className="text-xs font-semibold text-ink-muted mt-4 mb-1.5">Visibility</Text>
+        <Text className="text-sm font-semibold text-ink-muted mt-4 mb-1.5">Visibility</Text>
         <Segmented<Visibility>
           value={visibility}
           onChange={setVisibility}
@@ -138,7 +138,7 @@ export const HomeScreen: React.FC = () => {
       </Card>
 
       <Card>
-        <SectionLabel right={<Text className="text-xs text-ink-muted">{open.length} open</Text>}>To do</SectionLabel>
+        <SectionLabel right={<Text className="text-sm text-ink-muted">{open.length} open</Text>}>To do</SectionLabel>
         {open.length === 0 ? <EmptyState message="All caught up." /> : null}
         {open.map((task, index) => (
           <View key={task.id}>
@@ -147,14 +147,14 @@ export const HomeScreen: React.FC = () => {
               <Checkbox checked={false} onToggle={() => toggle(task)} label={`Complete ${task.title}`} />
               <View className="flex-1 mr-2" accessibilityHint="Long press to delete">
                 <Text
-                  className="text-sm font-medium text-ink"
+                  className="text-base font-medium text-ink"
                   numberOfLines={2}
                   onLongPress={() => confirmDelete(task)}
                 >
                   {task.title}
                 </Text>
                 {task.dueDate ? (
-                  <Text className="text-xs text-ink-muted mt-0.5">
+                  <Text className="text-sm text-ink-muted mt-0.5">
                     Due {formatDayLabel(new Date(task.dueDate), new Date())}
                   </Text>
                 ) : null}

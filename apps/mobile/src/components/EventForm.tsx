@@ -152,7 +152,7 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event, d
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <SafeAreaView className="flex-1 bg-canvas" edges={['top', 'bottom']}>
+      <SafeAreaView className="flex-1 bg-bg" edges={['top', 'bottom']}>
         <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View className="flex-row items-center justify-between px-5 py-4 border-b border-border bg-surface">
             <Button label="Cancel" variant="ghost" small onPress={onClose} />
@@ -162,35 +162,35 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event, d
 
           <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }} keyboardShouldPersistTaps="handled">
             <View>
-              <Text className="text-xs font-semibold text-ink-muted mb-1.5">Title</Text>
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">Title</Text>
               <TextField value={title} onChangeText={setTitle} placeholder="Anniversary dinner" maxLength={200} />
             </View>
 
             <View>
-              <Text className="text-xs font-semibold text-ink-muted mb-1.5">Date (YYYY-MM-DD)</Text>
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">Date (YYYY-MM-DD)</Text>
               <TextField value={date} onChangeText={setDate} placeholder="2026-11-14" keyboardType="numbers-and-punctuation" />
             </View>
 
             <View className="flex-row items-center justify-between">
-              <Text className="text-sm font-medium text-ink">All day</Text>
+              <Text className="text-base font-medium text-ink">All day</Text>
               <Switch value={isAllDay} onValueChange={setIsAllDay} />
             </View>
 
             {!isAllDay ? (
               <View className="flex-row gap-3">
                 <View className="flex-1">
-                  <Text className="text-xs font-semibold text-ink-muted mb-1.5">Starts (HH:MM)</Text>
+                  <Text className="text-sm font-semibold text-ink-muted mb-1.5">Starts (HH:MM)</Text>
                   <TextField value={startTime} onChangeText={setStartTime} placeholder="19:30" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-xs font-semibold text-ink-muted mb-1.5">Ends (HH:MM)</Text>
+                  <Text className="text-sm font-semibold text-ink-muted mb-1.5">Ends (HH:MM)</Text>
                   <TextField value={endTime} onChangeText={setEndTime} placeholder="21:00" />
                 </View>
               </View>
             ) : null}
 
             <View>
-              <Text className="text-xs font-semibold text-ink-muted mb-1.5">Who sees it</Text>
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">Who sees it</Text>
               <Segmented<Visibility>
                 value={visibility}
                 onChange={setVisibility}
@@ -202,7 +202,7 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event, d
             </View>
 
             <View>
-              <Text className="text-xs font-semibold text-ink-muted mb-1.5">Kind</Text>
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">Kind</Text>
               <Segmented<EventCategory>
                 value={category}
                 onChange={setCategory}
@@ -214,10 +214,10 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event, d
             </View>
 
             <View>
-              <Text className="text-xs font-semibold text-ink-muted mb-1.5">Repeats</Text>
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">Repeats</Text>
               <Segmented<Repeat> value={repeat} onChange={setRepeat} options={REPEAT_OPTIONS} />
               {editing && event?.recurrenceRule ? (
-                <Text className="text-xs text-ink-muted mt-2">Changes apply to the whole series.</Text>
+                <Text className="text-sm text-ink-muted mt-2">Changes apply to the whole series.</Text>
               ) : null}
             </View>
 
