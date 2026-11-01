@@ -13,6 +13,19 @@ export interface AuthEnv {
   BETTER_AUTH_URL?: string;
 }
 
+/**
+ * Díade has exactly two members. Social sign-in (Google) creates a user on first login,
+ * and `disableSignUp` only covers email sign-up, so new user creation is restricted here.
+ */
+export const ALLOWED_EMAILS: readonly string[] = [
+  'gfnovo@gmail.com',
+  'ana.monica.serrao@gmail.com',
+];
+
+export function isAllowedEmail(email: string | null | undefined): boolean {
+  return !!email && ALLOWED_EMAILS.includes(email.trim().toLowerCase());
+}
+
 export function createAuth(db: DbClient, env: AuthEnv) {
   return betterAuth({
     database: drizzleAdapter(db, {
@@ -24,6 +37,18 @@ export function createAuth(db: DbClient, env: AuthEnv) {
         verification: schema.verifications,
       },
     }),
+    databaseHooks: {
+      user: {
+        create: {
+          before: async (user) => {
+            if (!isAllowedEmail(user.email)) {
+              return false; // block creation of any other account
+            }
+            return { data: { ...user, email: user.email.trim().toLowerCase() } };
+          },
+        },
+      },
+    },
     secret: env.BETTER_AUTH_SECRET || 'dev-secret-replace-in-production-must-be-32-chars-long',
     baseURL: env.BETTER_AUTH_URL || 'http://localhost:8787',
     emailAndPassword: {
