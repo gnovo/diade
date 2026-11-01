@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812"
+     font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
+  <!-- Canvas Background -->
+  <rect x="0" y="0" width="375" height="812" fill="#fff" />
+
+  <!-- Status Bar (Mobile 375x44) -->
+  <g transform="translate(24, 16)">
+    <text x="0" y="14" font-size="14" font-weight="600" stroke="none" fill="#000">9:41</text>
+    <rect x="295" y="4" width="24" height="12" rx="3" fill="#fff" />
+    <rect x="297" y="6" width="16" height="8" rx="1" fill="#000" stroke="none" />
+  </g>
+
+  <!-- Navigation Bar -->
+  <g transform="translate(24, 64)">
+    <text x="0" y="24" font-size="20" font-weight="700" stroke="none" fill="#000">Space Setup</text>
+    <text x="0" y="48" font-size="14" stroke="none" fill="#666">Díade is for exactly two people.</text>
+  </g>
+
+  <!-- Option 1: Create a new space -->
+  <g transform="translate(24, 136)">
+    <rect width="327" height="248" rx="8" />
+    <text x="20" y="36" font-size="18" font-weight="600" stroke="none" fill="#000">Create a New Space</text>
+    <text x="20" y="62" font-size="14" stroke="none" fill="#666">Start a fresh space and invite your partner.</text>
+
+    <!-- Space Name Input -->
+    <text x="20" y="104" font-size="12" font-weight="600" stroke="none" fill="#000">SPACE NAME</text>
+    <g transform="translate(20, 116)">
+      <rect width="287" height="44" rx="6" />
+      <text x="12" y="27" font-size="14" stroke="none" fill="#666">e.g. Our Home, Casa</text>
+    </g>
+
+    <!-- Create Button -->
+    <g transform="translate(20, 180)">
+      <rect width="287" height="44" rx="6" fill="#000" />
+      <text x="143" y="27" font-size="14" font-weight="600" text-anchor="middle" stroke="none" fill="#fff">Create &amp; Get Invite Code</text>
+    </g>
+  </g>
+
+  <!-- Section Divider: OR -->
+  <g transform="translate(24, 416)">
+    <line x1="0" y1="12" x2="135" y2="12" stroke="#666" />
+    <text x="163" y="16" font-size="12" font-weight="600" text-anchor="middle" stroke="none" fill="#666">OR</text>
+    <line x1="192" y1="12" x2="327" y2="12" stroke="#666" />
+  </g>
+
+  <!-- Option 2: Join an existing space -->
+  <g transform="translate(24, 456)">
+    <rect width="327" height="236" rx="8" />
+    <text x="20" y="36" font-size="18" font-weight="600" stroke="none" fill="#000">Join Existing Space</text>
+    <text x="20" y="62" font-size="14" stroke="none" fill="#666">Enter the 8-character code sent by your partner.</text>
+
+    <!-- Invite Code Input -->
+    <text x="20" y="104" font-size="12" font-weight="600" stroke="none" fill="#000">INVITE CODE</text>
+    <g transform="translate(20, 116)">
+      <rect width="287" height="44" rx="6" />
+      <text x="12" y="27" font-size="16" font-family="monospace" stroke="none" fill="#666">ABC123XY</text>
+    </g>
+
+    <!-- Join Button (Outlined) -->
+    <g transform="translate(20, 176)">
+      <rect width="287" height="44" rx="6" />
+      <text x="143" y="27" font-size="14" font-weight="600" text-anchor="middle" stroke="none" fill="#000">Join Space</text>
+    </g>
+  </g>
+
+  <!-- Home Indicator -->
+  <rect x="120" y="796" width="135" height="5" rx="2.5" fill="#000" stroke="none" />
+
+  <!-- Annotations Layer -->
+  <g stroke="#d33" stroke-width="1.5" stroke-dasharray="4,4" fill="none">
+    <!-- Callout 1: Create flow -->
+    <rect x="18" y="130" width="339" height="260" rx="10" />
+    <circle cx="18" cy="130" r="10" fill="#d33" stroke="none" />
+    <text x="18" y="134" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#fff">1</text>
+
+    <!-- Callout 2: Join code -->
+    <rect x="18" y="450" width="339" height="248" rx="10" />
+    <circle cx="18" cy="450" r="10" fill="#d33" stroke="none" />
+    <text x="18" y="454" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#fff">2</text>
+  </g>
+</svg>

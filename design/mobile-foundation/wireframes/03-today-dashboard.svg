@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812"
+     font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
+  <!-- Canvas Background -->
+  <rect x="0" y="0" width="375" height="812" fill="#fff" />
+
+  <!-- Status Bar (375x44) -->
+  <g transform="translate(24, 16)">
+    <text x="0" y="14" font-size="14" font-weight="600" stroke="none" fill="#000">9:41</text>
+    <rect x="295" y="4" width="24" height="12" rx="3" fill="#fff" />
+    <rect x="297" y="6" width="16" height="8" rx="1" fill="#000" stroke="none" />
+  </g>
+
+  <!-- Top App Header -->
+  <g transform="translate(24, 60)">
+    <text x="0" y="16" font-size="12" font-weight="600" stroke="none" fill="#666">SUNDAY, 1 NOVEMBER</text>
+    <text x="0" y="42" font-size="24" font-weight="700" stroke="none" fill="#000">Today</text>
+
+    <!-- Partner Presence / Avatar on right -->
+    <g transform="translate(295, 10)">
+      <circle cx="16" cy="16" r="16" fill="#e6e6e6" />
+      <text x="16" y="21" font-size="12" font-weight="600" text-anchor="middle" stroke="none" fill="#000">L</text>
+      <!-- Online / sync dot -->
+      <circle cx="28" cy="28" r="4" fill="#000" stroke="#fff" stroke-width="1.5" />
+    </g>
+  </g>
+
+  <!-- Quick Capture Bar (Capture first, organize later) -->
+  <g transform="translate(24, 128)">
+    <rect width="327" height="44" rx="22" />
+    <circle cx="22" cy="22" r="12" fill="#000" stroke="none" />
+    <line x1="16" y1="22" x2="28" y2="22" stroke="#fff" stroke-width="2" />
+    <line x1="22" y1="16" x2="22" y2="28" stroke="#fff" stroke-width="2" />
+    <text x="44" y="27" font-size="14" stroke="none" fill="#666">Capture an event, task or item…</text>
+  </g>
+
+  <!-- Section 1: Upcoming Today (Events) -->
+  <g transform="translate(24, 192)">
+    <rect width="327" height="136" rx="8" />
+    <g transform="translate(16, 16)">
+      <text x="0" y="14" font-size="12" font-weight="600" stroke="none" fill="#666">UPCOMING EVENT</text>
+      <text x="0" y="38" font-size="16" font-weight="600" stroke="none" fill="#000">Anniversary Dinner</text>
+      <text x="0" y="60" font-size="14" stroke="none" fill="#666">19:30 · Osteria del Sole</text>
+      <!-- Shared badge -->
+      <rect x="0" y="74" width="64" height="20" rx="4" fill="#e6e6e6" />
+      <text x="32" y="88" font-size="11" font-weight="600" text-anchor="middle" stroke="none" fill="#000">Shared</text>
+      <!-- Calendar icon placeholder on right -->
+      <rect x="255" y="10" width="40" height="40" rx="6" fill="#e6e6e6" />
+      <text x="275" y="34" font-size="14" font-weight="700" text-anchor="middle" stroke="none" fill="#000">1</text>
+    </g>
+  </g>
+
+  <!-- Section 2: Tasks Due Soon -->
+  <g transform="translate(24, 344)">
+    <rect width="327" height="168" rx="8" />
+    <g transform="translate(16, 16)">
+      <text x="0" y="14" font-size="12" font-weight="600" stroke="none" fill="#666">TASKS DUE SOON</text>
+
+      <!-- Task Row 1 -->
+      <g transform="translate(0, 32)">
+        <rect width="18" height="18" rx="3" />
+        <text x="28" y="14" font-size="14" stroke="none" fill="#000">Pick up prescription</text>
+        <text x="240" y="14" font-size="12" stroke="none" fill="#666">Gonçalo</text>
+      </g>
+      <line x1="0" y1="62" x2="295" y2="62" stroke="#e6e6e6" />
+
+      <!-- Task Row 2 -->
+      <g transform="translate(0, 74)">
+        <rect width="18" height="18" rx="3" />
+        <text x="28" y="14" font-size="14" stroke="none" fill="#000">Water balcony plants</text>
+        <text x="260" y="14" font-size="12" stroke="none" fill="#666">Both</text>
+      </g>
+      <line x1="0" y1="104" x2="295" y2="104" stroke="#e6e6e6" />
+
+      <!-- Task Row 3 -->
+      <g transform="translate(0, 116)">
+        <rect width="18" height="18" rx="3" fill="#000" />
+        <polyline points="4,9 8,13 14,5" stroke="#fff" fill="none" stroke-width="2" />
+        <text x="28" y="14" font-size="14" stroke="none" fill="#666" text-decoration="line-through">Take out recycling</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Section 3: Shared Shopping List Glance -->
+  <g transform="translate(24, 528)">
+    <rect width="327" height="120" rx="8" />
+    <g transform="translate(16, 16)">
+      <text x="0" y="14" font-size="12" font-weight="600" stroke="none" fill="#666">SHOPPING · GROCERIES</text>
+      <text x="240" y="14" font-size="12" font-weight="600" stroke="none" fill="#000">4 items</text>
+
+      <!-- Chips row -->
+      <g transform="translate(0, 34)">
+        <rect x="0" y="0" width="80" height="28" rx="14" fill="#e6e6e6" />
+        <text x="40" y="18" font-size="12" text-anchor="middle" stroke="none" fill="#000">Oat milk</text>
+
+        <rect x="88" y="0" width="70" height="28" rx="14" fill="#e6e6e6" />
+        <text x="123" y="18" font-size="12" text-anchor="middle" stroke="none" fill="#000">Coffee</text>
+
+        <rect x="166" y="0" width="84" height="28" rx="14" fill="#e6e6e6" />
+        <text x="208" y="18" font-size="12" text-anchor="middle" stroke="none" fill="#000">Avocados</text>
+      </g>
+
+      <text x="0" y="84" font-size="12" stroke="none" fill="#666">+ 1 more item in Groceries</text>
+    </g>
+  </g>
+
+  <!-- Bottom Tab Bar (5 Tabs) -->
+  <g transform="translate(0, 728)">
+    <line x1="0" y1="0" x2="375" y2="0" stroke="#e6e6e6" />
+    <rect width="375" height="84" fill="#fff" />
+
+    <!-- Tab 1: Today (Active) -->
+    <g transform="translate(18, 12)">
+      <rect x="10" y="4" width="20" height="20" rx="4" fill="#000" />
+      <text x="20" y="38" font-size="11" font-weight="700" text-anchor="middle" stroke="none" fill="#000">Today</text>
+    </g>
+
+    <!-- Tab 2: Calendar -->
+    <g transform="translate(90, 12)">
+      <rect x="12" y="4" width="20" height="20" rx="3" fill="#fff" />
+      <line x1="12" y1="10" x2="32" y2="10" />
+      <text x="22" y="38" font-size="11" text-anchor="middle" stroke="none" fill="#666">Calendar</text>
+    </g>
+
+    <!-- Tab 3: Lists -->
+    <g transform="translate(165, 12)">
+      <rect x="12" y="4" width="20" height="20" rx="3" fill="#fff" />
+      <line x1="16" y1="9" x2="28" y2="9" />
+      <line x1="16" y1="14" x2="28" y2="14" />
+      <line x1="16" y1="19" x2="24" y2="19" />
+      <text x="22" y="38" font-size="11" text-anchor="middle" stroke="none" fill="#666">Lists</text>
+    </g>
+
+    <!-- Tab 4: Home -->
+    <g transform="translate(240, 12)">
+      <polygon points="22,4 12,13 15,13 15,24 29,24 29,13 32,13" fill="#fff" />
+      <text x="22" y="38" font-size="11" text-anchor="middle" stroke="none" fill="#666">Home</text>
+    </g>
+
+    <!-- Tab 5: Us -->
+    <g transform="translate(315, 12)">
+      <!-- Dyad mini symbol -->
+      <circle cx="18" cy="14" r="7" fill="#e6e6e6" />
+      <circle cx="26" cy="14" r="7" fill="#000" stroke="none" />
+      <text x="22" y="38" font-size="11" text-anchor="middle" stroke="none" fill="#666">Us</text>
+    </g>
+  </g>
+
+  <!-- Home Indicator -->
+  <rect x="120" y="796" width="135" height="5" rx="2.5" fill="#000" stroke="none" />
+
+  <!-- Annotations Layer -->
+  <g stroke="#d33" stroke-width="1.5" stroke-dasharray="4,4" fill="none">
+    <!-- Callout 1: Quick Capture input -->
+    <rect x="18" y="122" width="339" height="56" rx="26" />
+    <circle cx="18" cy="122" r="10" fill="#d33" stroke="none" />
+    <text x="18" y="126" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#fff">1</text>
+
+    <!-- Callout 2: 5-Tab Navigation -->
+    <rect x="8" y="722" width="359" height="60" rx="8" />
+    <circle cx="8" cy="722" r="10" fill="#d33" stroke="none" />
+    <text x="8" y="726" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#fff">2</text>
+  </g>
+</svg>

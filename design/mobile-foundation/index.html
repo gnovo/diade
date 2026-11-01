@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Díade — Mobile Wireframe Review Viewer</title>
+<style>
+  :root {
+    --bg: #fafaf8;
+    --panel: #ffffff;
+    --ink: #111111;
+    --muted: #666666;
+    --line: #e5e5e0;
+    --accent: #d33;
+    --maxw: 1200px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 15px/1.55 -apple-system, system-ui, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+
+  .shell { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+
+  .toc {
+    position: sticky; top: 0; align-self: start;
+    height: 100vh; overflow: auto;
+    padding: 24px 16px 24px 24px;
+    border-right: 1px solid var(--line);
+    background: var(--panel);
+    font-size: 13px;
+    z-index: 20;
+  }
+  .toc h1 { font-size: 14px; margin: 0 0 4px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+  .toc h2 { font-size: 12px; margin: 24px 0 6px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .toc a { display: block; text-decoration: none; padding: 6px 8px; margin-left: -8px; border-radius: 4px; color: var(--ink); }
+  .toc a:hover { background: var(--bg); }
+  .toc .num { display: inline-block; width: 22px; color: var(--muted); }
+
+  main { padding: 48px 56px 96px; max-width: 1300px; min-width: 0; }
+
+  header.hero { max-width: var(--maxw); margin-bottom: 64px; }
+  header.hero .crumb { color: var(--muted); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+  header.hero h1 { font-size: 36px; line-height: 1.15; margin: 8px 0 16px; }
+  header.hero p { color: var(--muted); max-width: 720px; font-size: 16px; }
+  header.hero .pills { margin-top: 20px; display: flex; gap: 8px; flex-wrap: wrap; }
+  header.hero .pill { font-size: 12px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); color: var(--muted); }
+
+  section { scroll-margin-top: 24px; max-width: var(--maxw); margin-bottom: 96px; }
+  section .lede { color: var(--muted); margin: 0 0 12px; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 700; }
+  section h2 { font-size: 28px; line-height: 1.2; margin: 0 0 8px; }
+  section h2 .step-num { display: inline-block; width: 40px; color: var(--muted); }
+  section .desc { color: var(--muted); margin: 0 0 24px; max-width: 760px; }
+
+  .grid {
+    display: grid; gap: 32px;
+    grid-template-columns: 375px 1fr;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; }
+    .grid { grid-template-columns: 1fr; }
+    main { padding: 24px; }
+  }
+
+  .wire {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    cursor: zoom-in;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .wire:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+  .wire img { display: block; width: 100%; height: auto; }
+
+  .notes-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .notes-card h3 { margin: 0 0 16px; font-size: 16px; font-weight: 700; }
+
+  ol.annotations { list-style: none; padding: 0; margin: 0; }
+  ol.annotations li {
+    display: grid; grid-template-columns: 28px 1fr; gap: 8px;
+    margin-bottom: 16px; font-size: 14px;
+  }
+  ol.annotations .callout-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-size: 11px; font-weight: 700;
+  }
+
+  .callout-box {
+    margin-top: 24px; padding: 16px;
+    background: var(--bg); border-left: 3px solid var(--ink);
+    border-radius: 4px; font-size: 13px;
+  }
+  .callout-box strong { display: block; margin-bottom: 4px; font-size: 13px; }
+
+  /* Lightbox */
+  .lightbox {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    display: none; align-items: center; justify-content: center;
+    padding: 32px; z-index: 1000; cursor: zoom-out;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 8px; background: #fff; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc">
+    <h1>Díade Review</h1>
+    <a href="#hero">Overview</a>
+
+    <h2>Architecture</h2>
+    <a href="#flow"><span class="num">00</span>Flow Map</a>
+
+    <h2>Screens</h2>
+    <a href="#auth"><span class="num">01</span>Welcome &amp; Auth</a>
+    <a href="#space-setup"><span class="num">02</span>Space Onboarding</a>
+    <a href="#today"><span class="num">03</span>Today Dashboard</a>
+  </nav>
+
+  <main>
+    <header class="hero" id="hero">
+      <div class="crumb">Milestone 1 — Mobile Foundation</div>
+      <h1>Mobile Interface Architecture</h1>
+      <p>Low-fidelity architectural wireframes for Díade's initial mobile client using the Paperclip wireframe specification. Establishes the onboarding, access control, and 5-tab core navigation hierarchy before implementation.</p>
+      <div class="pills">
+        <span class="pill">Paperclip Wireframe Standard</span>
+        <span class="pill">3 Mobile Screens (375×812)</span>
+        <span class="pill">1 System Flow Diagram</span>
+        <span class="pill">Click wireframe to zoom</span>
+      </div>
+    </header>
+
+    <!-- Flow Diagram Section -->
+    <section id="flow">
+      <div class="lede">System Architecture</div>
+      <h2>Flow Diagram</h2>
+      <p class="desc">High-level navigation state machine: Unauthenticated &rarr; Auth &rarr; Space Verification &rarr; Main Tab Bar.</p>
+      <div class="wire" onclick="openLightbox('wireframes/flow.svg')">
+        <img src="wireframes/flow.svg" alt="Díade System Flow" />
+      </div>
+    </section>
+
+    <!-- Screen 1: Auth -->
+    <section id="auth">
+      <div class="lede">Screen 01</div>
+      <h2><span class="step-num">01</span>Welcome &amp; Google Sign-In</h2>
+      <p class="desc">The minimal entry point into the app. Sets the tone of "The Dyad" (two distinct elements forming one shared space) and provides frictionless authentication.</p>
+
+      <div class="grid">
+        <div class="wire" onclick="openLightbox('wireframes/01-auth.svg')">
+          <img src="wireframes/01-auth.svg" alt="Welcome and Auth Screen" />
+        </div>
+        <div class="notes-card">
+          <h3>Architectural Notes &amp; Callouts</h3>
+          <ol class="annotations">
+            <li>
+              <span class="callout-num">1</span>
+              <div>
+                <strong>The Dyad Symbol</strong>
+                Two complementary organic forms balanced with an equilibrium node. Communicates intimacy and partnership without dating-app clichés.
+              </div>
+            </li>
+            <li>
+              <span class="callout-num">2</span>
+              <div>
+                <strong>Google Sign-In Trigger</strong>
+                Authenticates via Google OAuth, sidestepping password hashing CPU limits on Cloudflare Workers and pairing with Google Calendar sync.
+              </div>
+            </li>
+          </ol>
+          <div class="callout-box">
+            <strong>Security Rule:</strong>
+            No public registration form. Session tokens are saved into device hardware storage (iOS Keychain / Android Keystore).
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 2: Space Setup -->
+    <section id="space-setup">
+      <div class="lede">Screen 02</div>
+      <h2><span class="step-num">02</span>Space Onboarding</h2>
+      <p class="desc">Displayed when a signed-in user does not belong to a space yet. Implements Option A onboarding with clean division between Space Owner and Invitee.</p>
+
+      <div class="grid">
+        <div class="wire" onclick="openLightbox('wireframes/02-space-setup.svg')">
+          <img src="wireframes/02-space-setup.svg" alt="Space Setup Screen" />
+        </div>
+        <div class="notes-card">
+          <h3>Architectural Notes &amp; Callouts</h3>
+          <ol class="annotations">
+            <li>
+              <span class="callout-num">1</span>
+              <div>
+                <strong>Create Space (Owner)</strong>
+                User 1 enters a name for the space (e.g. "Our Home"), which generates an 8-character cryptographic invite code with a 7-day expiry.
+              </div>
+            </li>
+            <li>
+              <span class="callout-num">2</span>
+              <div>
+                <strong>Join Space (Invitee)</strong>
+                User 2 enters the 8-character invite code. Server checks strict 2-member capacity limit, attaches User 2 as 'member', and invalidates the code.
+              </div>
+            </li>
+          </ol>
+          <div class="callout-box">
+            <strong>Capacity Invariant:</strong>
+            Attempting to join a space that already has 2 members returns <code>SPACE_FULL</code> and rejects the write.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 3: Today Dashboard -->
+    <section id="today">
+      <div class="lede">Screen 03</div>
+      <h2><span class="step-num">03</span>Today Dashboard &amp; 5-Tab Navigation</h2>
+      <p class="desc">The central coordination hub. Balances actionable daily items with the global Quick Capture bar and bottom tab navigation.</p>
+
+      <div class="grid">
+        <div class="wire" onclick="openLightbox('wireframes/03-today-dashboard.svg')">
+          <img src="wireframes/03-today-dashboard.svg" alt="Today Dashboard Screen" />
+        </div>
+        <div class="notes-card">
+          <h3>Architectural Notes &amp; Callouts</h3>
+          <ol class="annotations">
+            <li>
+              <span class="callout-num">1</span>
+              <div>
+                <strong>Global Quick Capture Bar</strong>
+                "Capture first, organise later." Tapping opens the instant-capture sheet to log text, links, or tasks directly into local SQLite.
+              </div>
+            </li>
+            <li>
+              <span class="callout-num">2</span>
+              <div>
+                <strong>5-Tab Main Navigation</strong>
+                Persistent bottom tab bar providing access to Today, Calendar, Lists, Home, and Us.
+              </div>
+            </li>
+          </ol>
+          <div class="callout-box">
+            <strong>Offline First:</strong>
+            Checking off a grocery item or task updates the local SQLite store instantaneously, appending an entry to the outbox to sync when online.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Lightbox Modal -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="Enlarged Wireframe" />
+</div>
+
+<script>
+  function openLightbox(src) {
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox').classList.add('open');
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox();
+  });
+</script>
+
+</body>
+</html>
