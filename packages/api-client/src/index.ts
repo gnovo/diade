@@ -87,6 +87,11 @@ export class DiadeApiClient {
       );
     }
 
+    // Díade endpoints wrap payloads as { success: true, data }. Return the payload, so callers
+    // receive e.g. CurrentSpaceResponse directly. Non-wrapped responses (health, Better Auth) pass through.
+    if (isJson && body && typeof body === 'object' && (body as { success?: unknown }).success === true && 'data' in body) {
+      return (body as { data: T }).data;
+    }
     return body as T;
   }
 
