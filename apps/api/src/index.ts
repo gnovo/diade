@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/cloudflare';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
@@ -14,6 +15,7 @@ export interface AppEnv {
     };
     DATABASE_URL?: string;
     ENVIRONMENT?: string;
+    SENTRY_DSN?: string;
     GOOGLE_CLIENT_ID?: string;
     GOOGLE_CLIENT_SECRET?: string;
     BETTER_AUTH_SECRET?: string;
@@ -90,6 +92,7 @@ app.route(
 // Global Error Handler
 app.onError((err, c) => {
   console.error('[API Error]:', err);
+  Sentry.captureException(err);
   return c.json(
     {
       success: false,
@@ -116,4 +119,11 @@ app.notFound((c) => {
   );
 });
 
-export default app;
+export default Sentry.withSentry(
+  (env: AppEnv['Bindings'] | undefined) => ({
+    dsn: env?.SENTRY_DSN,
+    environment: env?.ENVIRONMENT ?? 'development',
+    tracesSampleRate: env?.ENVIRONMENT === 'production' ? 0.1 : 1.0,
+  }),
+  app,
+);
