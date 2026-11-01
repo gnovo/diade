@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { SyncEntityName, MutationOperation } from '@diade/domain';
 
 // --- Identity & Space Schemas ---
 
@@ -45,9 +46,11 @@ export const createTaskSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255),
   notes: z.string().max(2000).nullable().optional(),
   dueDate: z.string().datetime().nullable().optional(),
-  assigneeId: z.string().uuid().nullable().optional(), // null = both members
+  // null = both members. User ids come from Better Auth and are not UUIDs.
+  assigneeId: z.string().min(1).max(64).nullable().optional(),
   visibility: visibilitySchema.default('shared'),
   status: taskStatusSchema.default('todo'),
+  completedAt: z.string().datetime().nullable().optional(),
 });
 
 export const updateTaskSchema = createTaskSchema.partial().extend({
@@ -135,3 +138,84 @@ export const syncPushSchema = z.object({
 export const syncPullQuerySchema = z.object({
   since: z.string().datetime().optional(), // ISO timestamp cursor; omitted on initial full sync
 });
+
+// --- Sync Payload Schemas (per entity and operation) ---
+//
+// INSERT payloads may use create* schemas (defaults apply). UPDATE payloads must
+// not use defaults: a missing field means "unchanged", not "reset to default".
+// The server validates every mutation with these before touching the database.
+
+const isoDateTime = z.string().datetime({ message: 'Must be valid ISO date string' });
+
+const eventUpdatePayload = z.object({
+  title: z.string().min(1).max(200).optional(),
+  description: z.string().max(2000).nullable().optional(),
+  startAt: isoDateTime.optional(),
+  endAt: isoDateTime.optional(),
+  isAllDay: z.boolean().optional(),
+  visibility: visibilitySchema.optional(),
+  recurrenceRule: z.string().max(255).nullable().optional(),
+  category: eventCategorySchema.optional(),
+});
+
+const taskUpdatePayload = z.object({
+  title: z.string().min(1).max(255).optional(),
+  notes: z.string().max(2000).nullable().optional(),
+  dueDate: isoDateTime.nullable().optional(),
+  assigneeId: z.string().min(1).max(64).nullable().optional(),
+  visibility: visibilitySchema.optional(),
+  status: taskStatusSchema.optional(),
+  completedAt: isoDateTime.nullable().optional(),
+});
+
+const listUpdatePayload = z.object({
+  name: z.string().min(1).max(100).optional(),
+  icon: z.string().max(50).nullable().optional(),
+  category: listCategorySchema.optional(),
+});
+
+const listItemUpdatePayload = z.object({
+  name: z.string().min(1).max(200).optional(),
+  quantity: z.string().max(50).nullable().optional(),
+  unit: z.string().max(50).nullable().optional(),
+  notes: z.string().max(500).nullable().optional(),
+  isChecked: z.boolean().optional(),
+});
+
+const captureItemUpdatePayload = z.object({
+  content: z.string().min(1).max(5000).optional(),
+  status: captureStatusSchema.optional(),
+});
+
+export const syncPayloadSchemas = {
+  events: { INSERT: createEventSchema, UPDATE: eventUpdatePayload },
+  tasks: {
+    INSERT: createTaskSchema.extend({ completedAt: isoDateTime.nullable().optional() }),
+    UPDATE: taskUpdatePayload,
+  },
+  lists: { INSERT: createListSchema, UPDATE: listUpdatePayload },
+  list_items: {
+    INSERT: createListItemSchema.extend({ isChecked: z.boolean().optional() }),
+    UPDATE: listItemUpdatePayload,
+  },
+  capture_items: {
+    INSERT: createCaptureItemSchema,
+    UPDATE: captureItemUpdatePayload,
+  },
+} as const;
+
+/** DELETE mutations carry no payload; everything else must match its entity schema. */
+export function parseSyncPayload(
+  entity: SyncEntityName,
+  operation: MutationOperation,
+  payload: Record<string, unknown>,
+): { success: true; data: Record<string, unknown> } | { success: false; message: string } {
+  if (operation === 'DELETE') return { success: true, data: {} };
+  const schema = syncPayloadSchemas[entity][operation === 'INSERT' ? 'INSERT' : 'UPDATE'];
+  const result = schema.safeParse(payload);
+  if (result.success) return { success: true, data: result.data as Record<string, unknown> };
+  return {
+    success: false,
+    message: result.error.issues.map((i) => `${i.path.join('.') || 'payload'}: ${i.message}`).join('; '),
+  };
+}

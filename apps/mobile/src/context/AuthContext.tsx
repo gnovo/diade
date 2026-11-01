@@ -10,10 +10,21 @@ import {
   clearAllSessionData,
 } from '../storage/secureStore';
 import { apiClient } from '../api/client';
+import { resetLocalDb } from '../storage/sqlite';
+
+export interface SpaceMemberSummary {
+  userId: string;
+  displayName: string;
+}
+
+const toMemberSummaries = (
+  members: Array<{ user: { id: string; displayName: string } }>,
+): SpaceMemberSummary[] => members.map((m) => ({ userId: m.user.id, displayName: m.user.displayName }));
 
 interface AuthContextType {
   user: User | null;
   space: Space | null;
+  members: SpaceMemberSummary[];
   isLoading: boolean;
   signInWithToken: (token: string, user: User) => Promise<void>;
   updateSpace: (space: Space) => Promise<void>;
@@ -26,6 +37,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [space, setSpace] = useState<Space | null>(null);
+  const [members, setMembers] = useState<SpaceMemberSummary[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Initialize auth state from SecureStore
@@ -45,6 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const current = await apiClient.getCurrentSpace();
             if (current && current.space) {
               setSpace(current.space);
+              setMembers(toMemberSummaries(current.members));
               await setStoredSpace(current.space);
             }
           } catch {
@@ -71,6 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const current = await apiClient.getCurrentSpace();
       if (current && current.space) {
         setSpace(current.space);
+        setMembers(toMemberSummaries(current.members));
         await setStoredSpace(current.space);
       }
     } catch {
@@ -89,6 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const current = await apiClient.getCurrentSpace();
       if (current && current.space) {
         setSpace(current.space);
+        setMembers(toMemberSummaries(current.members));
         await setStoredSpace(current.space);
       }
     } catch (err) {
@@ -97,9 +112,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
+    // Local data is per member: wipe it so the next sign-in on this device starts clean.
+    try {
+      await resetLocalDb();
+    } catch (err) {
+      console.warn('Could not clear local data on sign-out:', err);
+    }
     await clearAllSessionData();
     setUser(null);
     setSpace(null);
+    setMembers([]);
   };
 
   return (
@@ -107,6 +129,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         user,
         space,
+        members,
         isLoading,
         signInWithToken,
         updateSpace,

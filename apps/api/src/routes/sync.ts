@@ -1,7 +1,13 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { eq, and, gt, or } from 'drizzle-orm';
-import { syncPushSchema, syncPullQuerySchema } from '@diade/validation';
+import { syncPushSchema, syncPullQuerySchema, parseSyncPayload } from '@diade/validation';
+import {
+  canAccessRecord,
+  type ClientMutation,
+  type RejectedMutation,
+  type Visibility,
+} from '@diade/domain';
 import type { DbClient } from '../db';
 import {
   events,
@@ -12,6 +18,272 @@ import {
   syncMutations,
   spaceMembers,
 } from '../db/schema';
+
+type Access = 'ok' | 'not_found' | 'forbidden';
+
+interface ApplyContext {
+  spaceId: string;
+  userId: string;
+  now: Date;
+}
+
+const toDate = (value: unknown): Date => new Date(value as string);
+
+/**
+ * Checks the caller may perform this mutation against the stored row.
+ * Personal events/tasks are writable only by their creator; capture items are
+ * always private to their creator; list items must belong to a list in this space.
+ */
+export async function authorizeMutation(
+  db: DbClient,
+  mutation: ClientMutation,
+  data: Record<string, unknown>,
+  spaceId: string,
+  userId: string,
+): Promise<Access> {
+  const { entity, operation, recordId } = mutation;
+
+  if (operation === 'INSERT') {
+    if (entity === 'list_items') {
+      const [list] = await db
+        .select({ id: lists.id })
+        .from(lists)
+        .where(and(eq(lists.id, data.listId as string), eq(lists.spaceId, spaceId)))
+        .limit(1);
+      return list ? 'ok' : 'forbidden';
+    }
+    return 'ok';
+  }
+
+  switch (entity) {
+    case 'events':
+    case 'tasks': {
+      const table = entity === 'events' ? events : tasks;
+      const [row] = await db
+        .select({ visibility: table.visibility, creatorId: table.creatorId })
+        .from(table)
+        .where(and(eq(table.id, recordId), eq(table.spaceId, spaceId)))
+        .limit(1);
+      if (!row) return 'not_found';
+      return canAccessRecord(
+        { visibility: row.visibility as Visibility, creatorId: row.creatorId },
+        userId,
+      )
+        ? 'ok'
+        : 'forbidden';
+    }
+    case 'capture_items': {
+      const [row] = await db
+        .select({ creatorId: captureItems.creatorId })
+        .from(captureItems)
+        .where(and(eq(captureItems.id, recordId), eq(captureItems.spaceId, spaceId)))
+        .limit(1);
+      if (!row) return 'not_found';
+      return row.creatorId === userId ? 'ok' : 'forbidden';
+    }
+    case 'lists': {
+      const [row] = await db
+        .select({ id: lists.id })
+        .from(lists)
+        .where(and(eq(lists.id, recordId), eq(lists.spaceId, spaceId)))
+        .limit(1);
+      return row ? 'ok' : 'not_found';
+    }
+    case 'list_items': {
+      const [item] = await db
+        .select({ listId: listItems.listId })
+        .from(listItems)
+        .where(eq(listItems.id, recordId))
+        .limit(1);
+      if (!item) return 'not_found';
+      const [list] = await db
+        .select({ id: lists.id })
+        .from(lists)
+        .where(and(eq(lists.id, item.listId), eq(lists.spaceId, spaceId)))
+        .limit(1);
+      return list ? 'ok' : 'forbidden';
+    }
+  }
+}
+
+/** Applies a validated, authorised mutation. Records are soft-deleted via deletedAt tombstones. */
+async function applyMutation(
+  db: DbClient,
+  mutation: ClientMutation,
+  data: Record<string, unknown>,
+  ctx: ApplyContext,
+): Promise<void> {
+  const { entity, operation, recordId } = mutation;
+  const { spaceId, userId, now } = ctx;
+  const d = data as Record<string, any>;
+
+  switch (entity) {
+    case 'events': {
+      if (operation === 'INSERT') {
+        await db.insert(events).values({
+          id: recordId,
+          spaceId,
+          creatorId: userId,
+          title: d.title,
+          description: d.description ?? null,
+          startAt: toDate(d.startAt),
+          endAt: toDate(d.endAt),
+          isAllDay: d.isAllDay ?? false,
+          visibility: d.visibility ?? 'shared',
+          recurrenceRule: d.recurrenceRule ?? null,
+          category: d.category ?? 'general',
+          createdAt: now,
+          updatedAt: now,
+        });
+        return;
+      }
+      const where = and(eq(events.id, recordId), eq(events.spaceId, spaceId));
+      if (operation === 'DELETE') {
+        await db.update(events).set({ deletedAt: now, updatedAt: now }).where(where);
+        return;
+      }
+      const changes: Partial<typeof events.$inferInsert> = { updatedAt: now };
+      if (d.title !== undefined) changes.title = d.title;
+      if (d.description !== undefined) changes.description = d.description;
+      if (d.startAt !== undefined) changes.startAt = toDate(d.startAt);
+      if (d.endAt !== undefined) changes.endAt = toDate(d.endAt);
+      if (d.isAllDay !== undefined) changes.isAllDay = d.isAllDay;
+      if (d.visibility !== undefined) changes.visibility = d.visibility;
+      if (d.recurrenceRule !== undefined) changes.recurrenceRule = d.recurrenceRule;
+      if (d.category !== undefined) changes.category = d.category;
+      await db.update(events).set(changes).where(where);
+      return;
+    }
+
+    case 'tasks': {
+      if (operation === 'INSERT') {
+        await db.insert(tasks).values({
+          id: recordId,
+          spaceId,
+          creatorId: userId,
+          assigneeId: d.assigneeId ?? null,
+          title: d.title,
+          notes: d.notes ?? null,
+          dueDate: d.dueDate ? toDate(d.dueDate) : null,
+          status: d.status ?? 'todo',
+          visibility: d.visibility ?? 'shared',
+          completedAt: d.completedAt ? toDate(d.completedAt) : null,
+          createdAt: now,
+          updatedAt: now,
+        });
+        return;
+      }
+      const where = and(eq(tasks.id, recordId), eq(tasks.spaceId, spaceId));
+      if (operation === 'DELETE') {
+        await db.update(tasks).set({ deletedAt: now, updatedAt: now }).where(where);
+        return;
+      }
+      const changes: Partial<typeof tasks.$inferInsert> = { updatedAt: now };
+      if (d.title !== undefined) changes.title = d.title;
+      if (d.notes !== undefined) changes.notes = d.notes;
+      if (d.dueDate !== undefined) changes.dueDate = d.dueDate ? toDate(d.dueDate) : null;
+      if (d.status !== undefined) changes.status = d.status;
+      if (d.assigneeId !== undefined) changes.assigneeId = d.assigneeId;
+      if (d.visibility !== undefined) changes.visibility = d.visibility;
+      if (d.completedAt !== undefined) {
+        changes.completedAt = d.completedAt ? toDate(d.completedAt) : null;
+      }
+      await db.update(tasks).set(changes).where(where);
+      return;
+    }
+
+    case 'lists': {
+      if (operation === 'INSERT') {
+        await db.insert(lists).values({
+          id: recordId,
+          spaceId,
+          creatorId: userId,
+          name: d.name,
+          icon: d.icon ?? null,
+          category: d.category ?? 'groceries',
+          createdAt: now,
+          updatedAt: now,
+        });
+        return;
+      }
+      const where = and(eq(lists.id, recordId), eq(lists.spaceId, spaceId));
+      if (operation === 'DELETE') {
+        await db.update(lists).set({ deletedAt: now, updatedAt: now }).where(where);
+        return;
+      }
+      const changes: Partial<typeof lists.$inferInsert> = { updatedAt: now };
+      if (d.name !== undefined) changes.name = d.name;
+      if (d.icon !== undefined) changes.icon = d.icon;
+      if (d.category !== undefined) changes.category = d.category;
+      await db.update(lists).set(changes).where(where);
+      return;
+    }
+
+    case 'list_items': {
+      if (operation === 'INSERT') {
+        const isChecked = Boolean(d.isChecked);
+        await db.insert(listItems).values({
+          id: recordId,
+          listId: d.listId,
+          name: d.name,
+          quantity: d.quantity ?? null,
+          unit: d.unit ?? null,
+          notes: d.notes ?? null,
+          isChecked,
+          checkedBy: isChecked ? userId : null,
+          checkedAt: isChecked ? now : null,
+          createdAt: now,
+          updatedAt: now,
+        });
+        return;
+      }
+      const where = eq(listItems.id, recordId);
+      if (operation === 'DELETE') {
+        await db.update(listItems).set({ deletedAt: now, updatedAt: now }).where(where);
+        return;
+      }
+      const changes: Partial<typeof listItems.$inferInsert> = { updatedAt: now };
+      if (d.name !== undefined) changes.name = d.name;
+      if (d.quantity !== undefined) changes.quantity = d.quantity;
+      if (d.unit !== undefined) changes.unit = d.unit;
+      if (d.notes !== undefined) changes.notes = d.notes;
+      if (d.isChecked !== undefined) {
+        changes.isChecked = Boolean(d.isChecked);
+        changes.checkedBy = d.isChecked ? userId : null;
+        changes.checkedAt = d.isChecked ? now : null;
+      }
+      await db.update(listItems).set(changes).where(where);
+      return;
+    }
+
+    case 'capture_items': {
+      if (operation === 'INSERT') {
+        await db.insert(captureItems).values({
+          id: recordId,
+          spaceId,
+          creatorId: userId,
+          content: d.content,
+          captureType: d.captureType ?? 'text',
+          status: d.status ?? 'inbox',
+          createdAt: now,
+          updatedAt: now,
+        });
+        return;
+      }
+      const where = and(eq(captureItems.id, recordId), eq(captureItems.spaceId, spaceId));
+      if (operation === 'DELETE') {
+        await db.update(captureItems).set({ deletedAt: now, updatedAt: now }).where(where);
+        return;
+      }
+      const changes: Partial<typeof captureItems.$inferInsert> = { updatedAt: now };
+      if (d.content !== undefined) changes.content = d.content;
+      if (d.status !== undefined) changes.status = d.status;
+      await db.update(captureItems).set(changes).where(where);
+      return;
+    }
+  }
+}
+
 
 export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) => any) {
   const router = new Hono<{
@@ -61,6 +333,12 @@ export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) 
   });
 
   // POST /api/sync/push - Process Outbox Mutations
+  //
+  // Each mutation is: (1) de-duplicated by its client id, (2) validated against its
+  // entity schema, (3) authorised against the stored row, then (4) applied. A mutation
+  // that can never succeed is reported in `rejectedMutations` so the client drops it;
+  // transient database failures are reported the same way so one bad row cannot block
+  // the whole outbox, and the client's own retry policy decides what to do next.
   router.post('/push', zValidator('json', syncPushSchema), async (c) => {
     const db = getDb(c);
     const user = c.get('user');
@@ -68,10 +346,11 @@ export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) 
     const { mutations } = c.req.valid('json');
 
     const appliedMutationIds: string[] = [];
+    const rejectedMutations: RejectedMutation[] = [];
     const now = new Date();
 
     for (const mutation of mutations) {
-      // 1. Idempotency Check: Skip already processed mutations
+      // 1. Idempotency: a mutation we already recorded is a successful no-op
       const [existing] = await db
         .select()
         .from(syncMutations)
@@ -83,211 +362,40 @@ export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) 
         continue;
       }
 
-      const { entity, operation, recordId, payload } = mutation;
-
-      // 2. Execute Mutation per Entity
-      switch (entity) {
-        case 'events': {
-          if (operation === 'INSERT') {
-            await db.insert(events).values({
-              id: recordId,
-              spaceId,
-              creatorId: user.id,
-              title: payload.title as string,
-              description: (payload.description as string) || null,
-              startAt: new Date(payload.startAt as string),
-              endAt: new Date(payload.endAt as string),
-              isAllDay: Boolean(payload.isAllDay),
-              visibility: (payload.visibility as string) || 'shared',
-              recurrenceRule: (payload.recurrenceRule as string) || null,
-              category: (payload.category as string) || 'general',
-              createdAt: now,
-              updatedAt: now,
-            });
-          } else if (operation === 'UPDATE') {
-            await db
-              .update(events)
-              .set({
-                ...(payload.title ? { title: payload.title as string } : {}),
-                ...(payload.description !== undefined
-                  ? { description: payload.description as string }
-                  : {}),
-                ...(payload.startAt ? { startAt: new Date(payload.startAt as string) } : {}),
-                ...(payload.endAt ? { endAt: new Date(payload.endAt as string) } : {}),
-                ...(payload.isAllDay !== undefined
-                  ? { isAllDay: Boolean(payload.isAllDay) }
-                  : {}),
-                ...(payload.visibility
-                  ? { visibility: payload.visibility as string }
-                  : {}),
-                updatedAt: now,
-              })
-              .where(and(eq(events.id, recordId), eq(events.spaceId, spaceId)));
-          } else if (operation === 'DELETE') {
-            await db
-              .update(events)
-              .set({ deletedAt: now, updatedAt: now })
-              .where(and(eq(events.id, recordId), eq(events.spaceId, spaceId)));
-          }
-          break;
-        }
-
-        case 'tasks': {
-          if (operation === 'INSERT') {
-            await db.insert(tasks).values({
-              id: recordId,
-              spaceId,
-              creatorId: user.id,
-              assigneeId: (payload.assigneeId as string) || null,
-              title: payload.title as string,
-              notes: (payload.notes as string) || null,
-              dueDate: payload.dueDate ? new Date(payload.dueDate as string) : null,
-              status: (payload.status as string) || 'todo',
-              visibility: (payload.visibility as string) || 'shared',
-              completedAt: payload.completedAt ? new Date(payload.completedAt as string) : null,
-              createdAt: now,
-              updatedAt: now,
-            });
-          } else if (operation === 'UPDATE') {
-            await db
-              .update(tasks)
-              .set({
-                ...(payload.title ? { title: payload.title as string } : {}),
-                ...(payload.notes !== undefined ? { notes: payload.notes as string } : {}),
-                ...(payload.dueDate !== undefined
-                  ? { dueDate: payload.dueDate ? new Date(payload.dueDate as string) : null }
-                  : {}),
-                ...(payload.status ? { status: payload.status as string } : {}),
-                ...(payload.assigneeId !== undefined
-                  ? { assigneeId: payload.assigneeId as string }
-                  : {}),
-                ...(payload.visibility ? { visibility: payload.visibility as string } : {}),
-                ...(payload.completedAt !== undefined
-                  ? {
-                      completedAt: payload.completedAt
-                        ? new Date(payload.completedAt as string)
-                        : null,
-                    }
-                  : {}),
-                updatedAt: now,
-              })
-              .where(and(eq(tasks.id, recordId), eq(tasks.spaceId, spaceId)));
-          } else if (operation === 'DELETE') {
-            await db
-              .update(tasks)
-              .set({ deletedAt: now, updatedAt: now })
-              .where(and(eq(tasks.id, recordId), eq(tasks.spaceId, spaceId)));
-          }
-          break;
-        }
-
-        case 'lists': {
-          if (operation === 'INSERT') {
-            await db.insert(lists).values({
-              id: recordId,
-              spaceId,
-              creatorId: user.id,
-              name: payload.name as string,
-              icon: (payload.icon as string) || null,
-              category: (payload.category as string) || 'groceries',
-              createdAt: now,
-              updatedAt: now,
-            });
-          } else if (operation === 'UPDATE') {
-            await db
-              .update(lists)
-              .set({
-                ...(payload.name ? { name: payload.name as string } : {}),
-                ...(payload.icon !== undefined ? { icon: payload.icon as string } : {}),
-                ...(payload.category ? { category: payload.category as string } : {}),
-                updatedAt: now,
-              })
-              .where(and(eq(lists.id, recordId), eq(lists.spaceId, spaceId)));
-          } else if (operation === 'DELETE') {
-            await db
-              .update(lists)
-              .set({ deletedAt: now, updatedAt: now })
-              .where(and(eq(lists.id, recordId), eq(lists.spaceId, spaceId)));
-          }
-          break;
-        }
-
-        case 'list_items': {
-          if (operation === 'INSERT') {
-            await db.insert(listItems).values({
-              id: recordId,
-              listId: payload.listId as string,
-              name: payload.name as string,
-              quantity: (payload.quantity as string) || null,
-              unit: (payload.unit as string) || null,
-              notes: (payload.notes as string) || null,
-              isChecked: Boolean(payload.isChecked),
-              checkedBy: payload.isChecked ? user.id : null,
-              checkedAt: payload.isChecked ? now : null,
-              createdAt: now,
-              updatedAt: now,
-            });
-          } else if (operation === 'UPDATE') {
-            await db
-              .update(listItems)
-              .set({
-                ...(payload.name ? { name: payload.name as string } : {}),
-                ...(payload.quantity !== undefined
-                  ? { quantity: payload.quantity as string }
-                  : {}),
-                ...(payload.unit !== undefined ? { unit: payload.unit as string } : {}),
-                ...(payload.notes !== undefined ? { notes: payload.notes as string } : {}),
-                ...(payload.isChecked !== undefined
-                  ? {
-                      isChecked: Boolean(payload.isChecked),
-                      checkedBy: payload.isChecked ? user.id : null,
-                      checkedAt: payload.isChecked ? now : null,
-                    }
-                  : {}),
-                updatedAt: now,
-              })
-              .where(eq(listItems.id, recordId));
-          } else if (operation === 'DELETE') {
-            await db
-              .update(listItems)
-              .set({ deletedAt: now, updatedAt: now })
-              .where(eq(listItems.id, recordId));
-          }
-          break;
-        }
-
-        case 'capture_items': {
-          if (operation === 'INSERT') {
-            await db.insert(captureItems).values({
-              id: recordId,
-              spaceId,
-              creatorId: user.id,
-              content: payload.content as string,
-              captureType: (payload.captureType as string) || 'text',
-              status: (payload.status as string) || 'inbox',
-              createdAt: now,
-              updatedAt: now,
-            });
-          } else if (operation === 'UPDATE') {
-            await db
-              .update(captureItems)
-              .set({
-                ...(payload.content ? { content: payload.content as string } : {}),
-                ...(payload.status ? { status: payload.status as string } : {}),
-                updatedAt: now,
-              })
-              .where(and(eq(captureItems.id, recordId), eq(captureItems.spaceId, spaceId)));
-          } else if (operation === 'DELETE') {
-            await db
-              .update(captureItems)
-              .set({ deletedAt: now, updatedAt: now })
-              .where(and(eq(captureItems.id, recordId), eq(captureItems.spaceId, spaceId)));
-          }
-          break;
-        }
+      // 2. Validate the payload for this entity and operation
+      const parsed = parseSyncPayload(mutation.entity, mutation.operation, mutation.payload);
+      if (!parsed.success) {
+        rejectedMutations.push({ id: mutation.id, code: 'INVALID_PAYLOAD', message: parsed.message });
+        continue;
       }
 
-      // 3. Record applied mutation in sync_mutations for idempotency
+      try {
+        // 3. Authorise against the stored row (never trust the client's view of ownership)
+        const access = await authorizeMutation(db, mutation, parsed.data, spaceId, user.id);
+        if (access === 'forbidden') {
+          rejectedMutations.push({
+            id: mutation.id,
+            code: 'FORBIDDEN',
+            message: 'You do not have access to this record',
+          });
+          continue;
+        }
+
+        // 4. Apply. A missing record means it was already deleted elsewhere: converge silently.
+        if (access === 'ok') {
+          await applyMutation(db, mutation, parsed.data, { spaceId, userId: user.id, now });
+        }
+      } catch (err) {
+        console.error('[sync] mutation failed', mutation.id, mutation.entity, mutation.operation, err);
+        rejectedMutations.push({
+          id: mutation.id,
+          code: 'APPLY_FAILED',
+          message: 'The server could not apply this change',
+        });
+        continue;
+      }
+
+      // 5. Record for idempotency
       await db.insert(syncMutations).values({
         id: mutation.id,
         spaceId,
@@ -307,6 +415,7 @@ export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) 
       data: {
         processedCount: appliedMutationIds.length,
         appliedMutationIds,
+        rejectedMutations,
         serverTimestamp: now.toISOString(),
       },
     });

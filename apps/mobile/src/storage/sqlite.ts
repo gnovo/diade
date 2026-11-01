@@ -2,10 +2,30 @@ import * as SQLite from 'expo-sqlite';
 import type { ClientMutation } from '@diade/domain';
 
 let dbInstance: SQLite.SQLiteDatabase | null = null;
+let openPromise: Promise<SQLite.SQLiteDatabase> | null = null;
+
+export const LOCAL_TABLES = [
+  'local_events',
+  'local_tasks',
+  'local_lists',
+  'local_list_items',
+  'local_capture_items',
+  'local_outbox',
+  'local_sync_meta',
+] as const;
 
 export async function getLocalDb(): Promise<SQLite.SQLiteDatabase> {
   if (dbInstance) return dbInstance;
+  // Share one in-flight open so concurrent callers do not race on schema creation.
+  // A failed open must not stay cached, or every later call would fail too.
+  openPromise ??= openLocalDb().catch((err) => {
+    openPromise = null;
+    throw err;
+  });
+  return openPromise;
+}
 
+async function openLocalDb(): Promise<SQLite.SQLiteDatabase> {
   dbInstance = await SQLite.openDatabaseAsync('diade.db');
 
   // Initialize SQLite schema
@@ -125,6 +145,7 @@ export async function queueLocalMutation(mutation: ClientMutation): Promise<void
 
 export async function getPendingMutations(): Promise<ClientMutation[]> {
   const db = await getLocalDb();
+  // rowid breaks ties when two writes share a timestamp, keeping INSERT before UPDATE.
   const rows = await db.getAllAsync<{
     id: string;
     entity: string;
@@ -132,7 +153,7 @@ export async function getPendingMutations(): Promise<ClientMutation[]> {
     record_id: string;
     payload: string;
     client_timestamp: number;
-  }>('SELECT * FROM local_outbox ORDER BY client_timestamp ASC');
+  }>('SELECT * FROM local_outbox ORDER BY client_timestamp ASC, rowid ASC');
 
   return rows.map((r) => ({
     id: r.id,
@@ -149,4 +170,38 @@ export async function removeAppliedMutations(ids: string[]): Promise<void> {
   const db = await getLocalDb();
   const placeholders = ids.map(() => '?').join(',');
   await db.runAsync(`DELETE FROM local_outbox WHERE id IN (${placeholders})`, ids);
+}
+
+// --- Sync metadata ---
+
+export async function getSyncMeta(key: string): Promise<string | null> {
+  const db = await getLocalDb();
+  const row = await db.getFirstAsync<{ value: string }>(
+    'SELECT value FROM local_sync_meta WHERE key = ?',
+    [key],
+  );
+  return row?.value ?? null;
+}
+
+export async function setSyncMeta(key: string, value: string): Promise<void> {
+  const db = await getLocalDb();
+  await db.runAsync(
+    'INSERT OR REPLACE INTO local_sync_meta (key, value) VALUES (?, ?)',
+    [key, value],
+  );
+}
+
+// --- Sign-out ---
+
+/**
+ * Deletes every local record, pending change and cursor. Called on sign-out so that
+ * one member's personal data never remains readable on a shared device.
+ */
+export async function resetLocalDb(): Promise<void> {
+  const db = await getLocalDb();
+  await db.withTransactionAsync(async () => {
+    for (const table of LOCAL_TABLES) {
+      await db.runAsync(`DELETE FROM ${table}`);
+    }
+  });
 }

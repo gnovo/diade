@@ -2,6 +2,9 @@
  * Díade Domain Model & Core Types
  */
 
+export * from './recurrence';
+export * from './datetime';
+
 // --- Identity & Space ---
 
 export type SpaceRole = 'owner' | 'member';
@@ -127,9 +130,17 @@ export interface SyncPushPayload {
   mutations: ClientMutation[];
 }
 
+export interface RejectedMutation {
+  id: string;
+  code: 'INVALID_PAYLOAD' | 'FORBIDDEN' | 'APPLY_FAILED';
+  message: string;
+}
+
 export interface SyncPushResult {
   processedCount: number;
   appliedMutationIds: string[];
+  /** Mutations the server will never accept; clients must drop them from the outbox. */
+  rejectedMutations: RejectedMutation[];
   serverTimestamp: string;
 }
 

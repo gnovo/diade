@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from './context/AuthContext';
+import { SyncProvider } from './sync/SyncProvider';
 import { RootNavigator } from './navigation/RootNavigator';
 import { getLocalDb } from './storage/sqlite';
 
@@ -17,8 +18,10 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <AuthProvider>
-        <StatusBar style="dark" />
-        <RootNavigator />
+        <SyncProvider>
+          <StatusBar style="dark" />
+          <RootNavigator />
+        </SyncProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );

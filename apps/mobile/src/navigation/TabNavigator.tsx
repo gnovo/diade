@@ -2,12 +2,10 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
 import { TodayScreen } from '../screens/TodayScreen';
-import {
-  CalendarScreen,
-  ListsScreen,
-  HomeScreen,
-  UsScreen,
-} from '../screens/PlaceholderScreens';
+import { CalendarScreen } from '../screens/CalendarScreen';
+import { ListsScreen } from '../screens/ListsScreen';
+import { HomeScreen } from '../screens/HomeScreen';
+import { UsScreen } from '../screens/UsScreen';
 
 const Tab = createBottomTabNavigator();
 

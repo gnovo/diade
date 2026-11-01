@@ -5,6 +5,7 @@ import {
   createTaskSchema,
   clientMutationSchema,
   syncPushSchema,
+  parseSyncPayload,
 } from './index';
 
 describe('Validation Schemas', () => {
@@ -62,5 +63,28 @@ describe('Validation Schemas', () => {
       mutations: [mutation],
     };
     expect(() => syncPushSchema.parse(batch)).not.toThrow();
+  });
+
+  it('accepts non-UUID Better Auth user ids as task assignees', () => {
+    const result = parseSyncPayload('tasks', 'INSERT', {
+      title: 'Water plants',
+      assigneeId: 'k3Jd9sLq2aXb7mNpQr8tVw1yZc4eHu0f',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('does not inject schema defaults into UPDATE payloads', () => {
+    const result = parseSyncPayload('events', 'UPDATE', { title: 'Renamed' });
+    expect(result).toEqual({ success: true, data: { title: 'Renamed' } });
+  });
+
+  it('rejects malformed payloads with a readable message', () => {
+    const result = parseSyncPayload('events', 'INSERT', { title: '', startAt: 'soon' });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.message).toContain('title');
+  });
+
+  it('ignores payloads for DELETE mutations', () => {
+    expect(parseSyncPayload('lists', 'DELETE', { anything: 1 })).toEqual({ success: true, data: {} });
   });
 });
