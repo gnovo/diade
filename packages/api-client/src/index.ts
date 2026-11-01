@@ -68,9 +68,13 @@ export class DiadeApiClient {
       }
     }
 
+    // Native clients authenticate with the bearer token only. Omitting credentials stops the
+    // platform cookie jar from attaching a session cookie, which Better Auth's origin check
+    // would then reject for requests that carry no Origin header.
     const response = await fetch(url, {
       ...options,
       headers,
+      credentials: 'omit',
     });
 
     const contentType = response.headers.get('content-type');
