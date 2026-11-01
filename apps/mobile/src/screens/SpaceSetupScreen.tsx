@@ -35,15 +35,7 @@ export const SpaceSetupScreen: React.FC = () => {
         `Your invite code is: ${res.space.inviteCode}\nShare this with your partner to connect.`,
       );
     } catch (err: any) {
-      // In offline / mock dev fallback:
-      const fallbackSpace = {
-        id: 'space_dev',
-        name: spaceName.trim(),
-        inviteCode: 'OURHOME1',
-        inviteExpiresAt: null,
-        createdAt: new Date().toISOString(),
-      };
-      await updateSpace(fallbackSpace);
+      Alert.alert('Could not create space', err?.message || 'Check your connection and try again.');
     } finally {
       setIsCreating(false);
     }

@@ -5,6 +5,8 @@ import type { DbClient } from '../db';
 import * as schema from '../db/schema';
 
 export interface AuthEnv {
+  /** Set to "true" only while creating the two accounts; sign-up is closed otherwise. */
+  ALLOW_SIGN_UP?: string;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
   BETTER_AUTH_SECRET?: string;
@@ -24,6 +26,12 @@ export function createAuth(db: DbClient, env: AuthEnv) {
     }),
     secret: env.BETTER_AUTH_SECRET || 'dev-secret-replace-in-production-must-be-32-chars-long',
     baseURL: env.BETTER_AUTH_URL || 'http://localhost:8787',
+    emailAndPassword: {
+      enabled: true,
+      // Díade has exactly two members and no public registration (handover §2).
+      disableSignUp: env.ALLOW_SIGN_UP !== 'true',
+      minPasswordLength: 12,
+    },
     socialProviders: {
       google: {
         clientId: env.GOOGLE_CLIENT_ID || 'dummy-google-client-id',

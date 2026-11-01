@@ -8,6 +8,13 @@
       "when": 1793542982028,
       "tag": "0000_nice_starjammers",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793554470142,
+      "tag": "0001_better_auth_id_token",
+      "breakpoints": true
     }
   ]
 }

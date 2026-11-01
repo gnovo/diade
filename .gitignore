@@ -46,3 +46,6 @@ android/.gradle/
 # Coverage
 coverage/
 .nyc_output/
+
+# Local Worker secrets (wrangler dev)
+.dev.vars

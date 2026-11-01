@@ -14,6 +14,7 @@ export interface AppEnv {
     };
     DATABASE_URL?: string;
     ENVIRONMENT?: string;
+    ALLOW_SIGN_UP?: string;
     GOOGLE_CLIENT_ID?: string;
     GOOGLE_CLIENT_SECRET?: string;
     BETTER_AUTH_SECRET?: string;

@@ -10,6 +10,20 @@ import type {
   SyncPullResult,
 } from '@diade/contracts';
 
+/** The user shape Better Auth returns; the app maps it to the domain User. */
+export interface AuthUserResponse {
+  id: string;
+  email: string;
+  name: string;
+  image: string | null;
+  createdAt: string;
+}
+
+export interface SignInResponse {
+  token: string;
+  user: AuthUserResponse;
+}
+
 export interface ApiClientConfig {
   baseUrl: string;
   getAuthToken?: () => Promise<string | null>;
@@ -80,6 +94,23 @@ export class DiadeApiClient {
 
   async health(): Promise<HealthResponse> {
     return this.request<HealthResponse>('/health');
+  }
+
+  async signInWithEmail(email: string, password: string): Promise<SignInResponse> {
+    return this.request<SignInResponse>('/api/auth/sign-in/email', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+  }
+
+  /** Returns the signed-in user, or null when the stored token is no longer valid. */
+  async getSessionUser(): Promise<AuthUserResponse | null> {
+    const body = await this.request<{ user: AuthUserResponse } | null>('/api/auth/get-session');
+    return body?.user ?? null;
+  }
+
+  async signOutSession(): Promise<void> {
+    await this.request('/api/auth/sign-out', { method: 'POST', body: '{}' });
   }
 
   // --- Space Management ---
