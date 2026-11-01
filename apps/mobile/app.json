@@ -8,7 +8,9 @@
     "userInterfaceStyle": "automatic",
     "scheme": "diade",
     "splash": {
-      "backgroundColor": "#F7FAF9"
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0D4F46"
     },
     "ios": {
       "supportsTablet": false,
@@ -16,6 +18,8 @@
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png",
         "backgroundColor": "#0D4F46"
       },
       "package": "com.diade.app"
@@ -23,7 +27,9 @@
     "plugins": [
       "expo-secure-store",
       "expo-sqlite",
-      "expo-asset"
+      "expo-asset",
+      "expo-font",
+      "./plugins/with-diade-icons"
     ]
   }
 }
