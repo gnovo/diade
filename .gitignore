@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs & caches
+dist/
+build/
+.turbo/
+.next/
+out/
+.wrangler/
+
+# Environment files & secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Mobile & Native
+*.orig.*
+ios/Pods/
+ios/build/
+android/app/build/
+android/.gradle/
+*.keystore
+!debug.keystore
+
+# Coverage
+coverage/
+.nyc_output/
