@@ -1,0 +1,118 @@
+{
+  "colorNames": [
+    "brand-deep",
+    "brand-mint",
+    "brand-mist",
+    "brand-overlap",
+    "logo-ink",
+    "bg",
+    "surface",
+    "surface-sunken",
+    "surface-tint",
+    "border",
+    "border-strong",
+    "ink",
+    "ink-muted",
+    "ink-disabled",
+    "action",
+    "action-hover",
+    "action-pressed",
+    "on-action",
+    "action-soft",
+    "on-action-soft",
+    "link",
+    "focus-ring",
+    "personal-soft",
+    "on-personal",
+    "success",
+    "success-soft",
+    "warning",
+    "warning-soft",
+    "danger",
+    "danger-soft",
+    "info",
+    "info-soft"
+  ],
+  "fontSizes": {
+    "display": {
+      "fontSize": 34,
+      "lineHeight": 40,
+      "letterSpacing": -0.68,
+      "fontWeight": 700,
+      "fontFamily": "PlusJakartaSans_700Bold"
+    },
+    "title-1": {
+      "fontSize": 28,
+      "lineHeight": 34,
+      "letterSpacing": -0.28,
+      "fontWeight": 700,
+      "fontFamily": "PlusJakartaSans_700Bold"
+    },
+    "title-2": {
+      "fontSize": 22,
+      "lineHeight": 28,
+      "letterSpacing": -0.22,
+      "fontWeight": 700,
+      "fontFamily": "PlusJakartaSans_700Bold"
+    },
+    "title-3": {
+      "fontSize": 18,
+      "lineHeight": 24,
+      "letterSpacing": 0,
+      "fontWeight": 600,
+      "fontFamily": "PlusJakartaSans_600SemiBold"
+    },
+    "body": {
+      "fontSize": 16,
+      "lineHeight": 24,
+      "letterSpacing": 0,
+      "fontWeight": 400,
+      "fontFamily": "PlusJakartaSans_400Regular"
+    },
+    "body-strong": {
+      "fontSize": 16,
+      "lineHeight": 24,
+      "letterSpacing": 0,
+      "fontWeight": 600,
+      "fontFamily": "PlusJakartaSans_600SemiBold"
+    },
+    "body-sm": {
+      "fontSize": 14,
+      "lineHeight": 20,
+      "letterSpacing": 0,
+      "fontWeight": 400,
+      "fontFamily": "PlusJakartaSans_400Regular"
+    },
+    "label": {
+      "fontSize": 15,
+      "lineHeight": 20,
+      "letterSpacing": 0,
+      "fontWeight": 600,
+      "fontFamily": "PlusJakartaSans_600SemiBold"
+    },
+    "caption": {
+      "fontSize": 12,
+      "lineHeight": 16,
+      "letterSpacing": 0.12,
+      "fontWeight": 600,
+      "fontFamily": "PlusJakartaSans_600SemiBold"
+    }
+  },
+  "spacing": {
+    "space-1": 4,
+    "space-2": 8,
+    "space-3": 12,
+    "space-4": 16,
+    "space-5": 20,
+    "space-6": 24,
+    "space-8": 32,
+    "space-12": 48
+  },
+  "radius": {
+    "radius-sm": 8,
+    "radius-md": 12,
+    "radius-lg": 16,
+    "radius-xl": 24,
+    "radius-full": 9999
+  }
+}
