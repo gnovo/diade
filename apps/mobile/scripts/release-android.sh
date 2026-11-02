@@ -31,7 +31,7 @@ case "$MODE" in
     # The update only applies to installed builds with the same native fingerprint (runtimeVersion);
     # if native code changed, use `apk` instead.
     echo "Publishing OTA update to channel 'production': $MESSAGE"
-    npx eas-cli@latest update --channel production --platform android --message "$MESSAGE" --non-interactive
+    npx eas-cli@latest update --channel production --environment production --platform android --message "$MESSAGE" --non-interactive
     ;;
   apk)
     if [ -n "$(git status --porcelain)" ]; then
