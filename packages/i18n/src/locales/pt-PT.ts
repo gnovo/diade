@@ -97,11 +97,11 @@ export const ptPT: Shape<Catalog> = {
   },
 
   auth: {
-    tagline: 'Para todos os dias que partilhamos',
+    tagline: 'Para todos os dias que partilhamos.',
     welcome: 'Bem-vindo',
     signInPrompt: 'Inicie sessão para abrir o vosso espaço partilhado.',
     signInWithGoogle: 'Iniciar sessão com o Google',
-    justForTwo: 'Apenas para vocês os dois',
+    justForTwo: 'Apenas para vocês os dois.',
     useInvitedAccount: 'Use a conta Google com que foi convidado.',
     couldNotSignIn: 'Não foi possível iniciar sessão',
     googleNotCompleted: 'O início de sessão com o Google não foi concluído.',

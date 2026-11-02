@@ -98,11 +98,11 @@ export const en = {
   },
 
   auth: {
-    tagline: 'For all the days we share',
+    tagline: 'For all the days we share.',
     welcome: 'Welcome',
     signInPrompt: 'Sign in to open your shared space.',
     signInWithGoogle: 'Sign in with Google',
-    justForTwo: 'Just for the two of you',
+    justForTwo: 'Just for the two of you.',
     useInvitedAccount: 'Use the Google account you were invited with.',
     couldNotSignIn: 'Could not sign in',
     googleNotCompleted: 'Google sign-in was not completed.',
