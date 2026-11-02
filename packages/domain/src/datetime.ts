@@ -1,13 +1,11 @@
 /**
  * Local date/time helpers for the forms and agenda views. All calendar arithmetic is
  * done in the device's local time zone; ISO strings are used only for storage.
+ * Display formatting is locale-specific and lives in `@diade/i18n`.
  */
 
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 const TIME_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)$/;
-
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /** Combines a YYYY-MM-DD date and HH:MM time into a local Date, or null if either is malformed. */
 export function parseLocalDateTime(dateValue: string, timeValue: string): Date | null {
@@ -36,18 +34,4 @@ export function toTimeInputValue(date: Date): string {
 
 export function formatTime(date: Date): string {
   return toTimeInputValue(date);
-}
-
-/** "Today", "Tomorrow", or "Mon 3 Nov". */
-export function formatDayLabel(date: Date, now: Date = new Date()): string {
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const startOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const diffDays = Math.round((startOfDate.getTime() - startOfToday.getTime()) / 86_400_000);
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Tomorrow';
-  return `${WEEKDAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()]}`;
-}
-
-export function formatLongDate(date: Date): string {
-  return `${WEEKDAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
 }

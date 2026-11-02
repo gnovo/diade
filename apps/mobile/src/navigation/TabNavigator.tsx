@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { createBottomTabNavigator, type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,6 +26,7 @@ const TAB_BAR_CONTENT_HEIGHT = 56;
 const TAB_BAR_MIN_BOTTOM_PADDING = 8;
 
 export const TabNavigator: React.FC = () => {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   // Read the device's bottom inset (Android gesture bar, iPhone home indicator) so the bar
   // sits above it. A fixed height would ignore the inset.
@@ -66,11 +68,11 @@ export const TabNavigator: React.FC = () => {
         ),
       })}
     >
-      <Tab.Screen name="Today" component={TodayScreen} options={{ tabBarLabel: 'Today' }} />
-      <Tab.Screen name="Calendar" component={CalendarScreen} options={{ tabBarLabel: 'Calendar' }} />
-      <Tab.Screen name="Lists" component={ListsScreen} options={{ tabBarLabel: 'Lists' }} />
-      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Home' }} />
-      <Tab.Screen name="Us" component={UsScreen} options={{ tabBarLabel: 'Us' }} />
+      <Tab.Screen name="Today" component={TodayScreen} options={{ tabBarLabel: t('nav.today') }} />
+      <Tab.Screen name="Calendar" component={CalendarScreen} options={{ tabBarLabel: t('nav.calendar') }} />
+      <Tab.Screen name="Lists" component={ListsScreen} options={{ tabBarLabel: t('nav.lists') }} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: t('nav.home') }} />
+      <Tab.Screen name="Us" component={UsScreen} options={{ tabBarLabel: t('nav.us') }} />
     </Tab.Navigator>
   );
 };

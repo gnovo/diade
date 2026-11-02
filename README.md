@@ -31,6 +31,7 @@ diade/
 │
 ├── packages/
 │   ├── domain/                  # Entities, domain logic, recurrence calculations
+│   ├── i18n/                    # Translation catalogs (en, pt-PT), language detection, date formatting
 │   ├── contracts/               # API endpoints, sync payloads, OpenAPI types
 │   ├── validation/              # Zod validation schemas
 │   ├── api-client/              # Typed REST client

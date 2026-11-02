@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TextInput, ScrollView, Pressable, type TextInputProps } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useSync } from '../sync/SyncProvider';
 import {
@@ -143,6 +144,7 @@ export const EmptyState: React.FC<{ message: string }> = ({ message }) => (
 
 /** Shows whether local changes are saved, waiting, or synced. Never relies on colour alone. */
 export const SyncBadge: React.FC = () => {
+  const { t } = useTranslation();
   const { status, pendingCount } = useSync();
   const state: SyncState =
     status === 'offline'
@@ -154,13 +156,15 @@ export const SyncBadge: React.FC = () => {
           : 'synced';
   const label =
     status === 'syncing'
-      ? 'Syncing…'
+      ? t('sync.syncing')
       : status === 'offline'
-        ? `Offline${pendingCount ? ` · ${pendingCount} saved on this device` : ''}`
+        ? pendingCount
+          ? t('sync.offlineSaved', { count: pendingCount })
+          : t('sync.offline')
         : status === 'error'
-          ? 'Sync problem'
+          ? t('sync.problem')
           : pendingCount > 0
-            ? `${pendingCount} waiting to sync`
-            : 'Synced';
+            ? t('sync.waiting', { count: pendingCount })
+            : t('sync.synced');
   return <SyncStatus state={state} label={label} />;
 };

@@ -1,3 +1,4 @@
+import type { TFunction } from '@diade/i18n';
 import { expandEventOccurrences, type CalendarEvent, type EventCategory, type Visibility } from '@diade/domain';
 
 export interface AgendaItem {
@@ -34,8 +35,8 @@ export function buildAgenda(events: CalendarEvent[], from: Date, to: Date): Agen
   return items.sort((a, b) => a.startAt.getTime() - b.startAt.getTime());
 }
 
-export function formatAgendaTime(item: AgendaItem): string {
-  if (item.isAllDay) return 'All day';
+export function formatAgendaTime(t: TFunction, item: AgendaItem): string {
+  if (item.isAllDay) return t('format.allDay');
   const fmt = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
   return `${fmt(item.startAt)}–${fmt(item.endAt)}`;
 }

@@ -8,6 +8,7 @@ import { AuthProvider } from './context/AuthContext';
 import { SyncProvider } from './sync/SyncProvider';
 import { RootNavigator } from './navigation/RootNavigator';
 import { getLocalDb } from './storage/sqlite';
+import { I18nProvider, useLanguagePreference } from './i18n';
 import { ThemeProvider, useScheme, useThemeColors, useThemePreference } from './design';
 
 // Plus Jakarta Sans static faces (SIL OFL 1.1). Family names match tailwind.config.js and generated.ts.
@@ -39,13 +40,14 @@ function AppShell() {
   );
 }
 
-/** Waits for fonts and the saved appearance, so the first frame already has the right theme. */
+/** Waits for fonts and the saved appearance and language, so the first frame is already right. */
 function Gate() {
   const [fontsLoaded, fontError] = useFonts(fonts);
-  const { ready } = useThemePreference();
+  const { ready: themeReady } = useThemePreference();
+  const { ready: languageReady } = useLanguagePreference();
   const colors = useThemeColors();
 
-  if ((!fontsLoaded && !fontError) || !ready) {
+  if ((!fontsLoaded && !fontError) || !themeReady || !languageReady) {
     // Matches the splash background so there is no flash of a different colour.
     return (
       <View style={{ flex: 1, backgroundColor: colors['brand-deep'], alignItems: 'center', justifyContent: 'center' }}>
@@ -58,8 +60,10 @@ function Gate() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <Gate />
-    </ThemeProvider>
+    <I18nProvider>
+      <ThemeProvider>
+        <Gate />
+      </ThemeProvider>
+    </I18nProvider>
   );
 }

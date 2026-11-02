@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, View, Text, ScrollView, Switch, Alert, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import {
   IMPORTANT_DATE_TYPES,
   parseDateOnly,
@@ -12,8 +13,9 @@ import {
 import { insertRecord, updateRecord, deleteRecord } from '../data/repository';
 import {
   ALERT_OPTIONS,
-  IMPORTANT_DATE_TYPE_META,
+  IMPORTANT_DATE_TYPE_ICONS,
   alertToOption,
+  importantDateTypeLabel,
 } from '../data/importantDateDisplay';
 import { Icon, useColor } from '../design';
 import { Button, Pill, Segmented, TextField, useWriteContext } from './ui';
@@ -33,11 +35,6 @@ type Fields = Pick<
   'title' | 'type' | 'date' | 'countFirstDay' | 'repeat' | 'pinned' | 'alertOffsetDays' | 'notes'
 >;
 
-const REPEAT_OPTIONS: Array<{ value: ImportantDateRepeat; label: string }> = [
-  { value: 'yearly', label: 'Every year' },
-  { value: 'none', label: 'Never' },
-];
-
 const TypeChip: React.FC<{ type: ImportantDateType; selected: boolean; onPress: () => void }> = ({
   type,
   selected,
@@ -45,7 +42,7 @@ const TypeChip: React.FC<{ type: ImportantDateType; selected: boolean; onPress: 
 }) => {
   const onAction = useColor('on-action');
   const ink = useColor('ink');
-  const meta = IMPORTANT_DATE_TYPE_META[type];
+  const { t } = useTranslation();
   return (
     <Pressable
       onPress={onPress}
@@ -55,17 +52,23 @@ const TypeChip: React.FC<{ type: ImportantDateType; selected: boolean; onPress: 
         selected ? 'bg-action border-action' : 'bg-surface border-border-strong'
       }`}
     >
-      <Icon name={meta.icon} size={16} color={selected ? onAction : ink} />
+      <Icon name={IMPORTANT_DATE_TYPE_ICONS[type]} size={16} color={selected ? onAction : ink} />
       <Text className={`text-sm leading-5 font-semibold ${selected ? 'text-on-action' : 'text-ink'}`}>
-        {meta.label}
+        {importantDateTypeLabel(t, type)}
       </Text>
     </Pressable>
   );
 };
 
 export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pinnedItem }) => {
+  const { t } = useTranslation();
   const ctx = useWriteContext();
   const editing = Boolean(item);
+
+  const repeatOptions: Array<{ value: ImportantDateRepeat; label: string }> = [
+    { value: 'yearly', label: t('importantDates.form.everyYear') },
+    { value: 'none', label: t('common.never') },
+  ];
 
   const [title, setTitle] = useState('');
   const [type, setType] = useState<ImportantDateType>('other');
@@ -109,7 +112,7 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
   const chooseType = (next: ImportantDateType) => {
     setType(next);
     if (titleIsSuggested || !title.trim()) {
-      setTitle(next === 'other' ? '' : IMPORTANT_DATE_TYPE_META[next].label);
+      setTitle(next === 'other' ? '' : importantDateTypeLabel(t, next));
       setTitleIsSuggested(true);
     }
   };
@@ -118,11 +121,11 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
     if (!ctx) return;
     const trimmed = title.trim();
     if (!trimmed) {
-      Alert.alert('Add a title', 'Give this special day a name.');
+      Alert.alert(t('importantDates.form.addTitle'), t('importantDates.form.addTitleBody'));
       return;
     }
     if (!parseDateOnly(date)) {
-      Alert.alert('Check the date', 'Pick a valid date.');
+      Alert.alert(t('importantDates.form.checkDate'), t('importantDates.form.checkDateBody'));
       return;
     }
 
@@ -160,7 +163,7 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
       }
       onClose();
     } catch (err) {
-      Alert.alert('Could not save', err instanceof Error ? err.message : 'Please try again.');
+      Alert.alert(t('common.couldNotSave'), err instanceof Error ? err.message : t('common.tryAgain'));
     } finally {
       setSaving(false);
     }
@@ -168,10 +171,10 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
 
   const handleDelete = () => {
     if (!item) return;
-    Alert.alert('Delete this special day?', `"${item.title}" will be removed for both of you.`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('importantDates.form.deleteTitle'), t('importantDates.form.deleteBody', { title: item.title }), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: async () => {
           await deleteRecord('important_dates', item.id);
@@ -188,18 +191,18 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
       <SafeAreaView className="flex-1 bg-bg" edges={['top', 'bottom']}>
         <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View className="flex-row items-center justify-between px-5 py-4 border-b border-border bg-surface">
-            <Button label="Cancel" variant="ghost" small onPress={onClose} />
-            <Text className="text-base font-semibold text-ink">{editing ? 'Edit special day' : 'New special day'}</Text>
-            <Button label="Save" small onPress={handleSave} disabled={saving || !ctx} />
+            <Button label={t('common.cancel')} variant="ghost" small onPress={onClose} />
+            <Text className="text-base font-semibold text-ink">{editing ? t('importantDates.form.editTitle') : t('importantDates.form.newTitle')}</Text>
+            <Button label={t('common.save')} small onPress={handleSave} disabled={saving || !ctx} />
           </View>
 
           <ScrollView contentContainerStyle={{ padding: 20, gap: 20 }} keyboardShouldPersistTaps="handled">
             <View className="items-start">
-              <Pill label="Shared with both of you" tone="shared" />
+              <Pill label={t('common.sharedWithBoth')} tone="shared" />
             </View>
 
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-2">Type</Text>
+              <Text className="text-sm font-semibold text-ink-muted mb-2">{t('importantDates.form.type')}</Text>
               <View className="flex-row flex-wrap gap-2">
                 {IMPORTANT_DATE_TYPES.map((value) => (
                   <TypeChip key={value} type={value} selected={value === type} onPress={() => chooseType(value)} />
@@ -208,75 +211,75 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
             </View>
 
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">Title</Text>
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.title')}</Text>
               <TextField
                 value={title}
                 onChangeText={(value) => {
                   setTitle(value);
                   setTitleIsSuggested(false);
                 }}
-                placeholder="First trip to Porto"
+                placeholder={t('importantDates.form.titlePlaceholder')}
                 maxLength={200}
               />
             </View>
 
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">Date</Text>
-              <DateField label="Date" value={date} onChange={setDate} />
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.date')}</Text>
+              <DateField label={t('importantDates.form.date')} value={date} onChange={setDate} />
             </View>
 
             <View>
               <View className="flex-row items-center justify-between">
-                <Text className="flex-1 mr-3 text-base font-medium text-ink">Count this day as the first day</Text>
+                <Text className="flex-1 mr-3 text-base font-medium text-ink">{t('importantDates.form.countFirstDay')}</Text>
                 <Switch value={countFirstDay} onValueChange={setCountFirstDay} />
               </View>
               <Text className="text-sm leading-5 text-ink-muted mt-1">
-                Day 1 instead of day 0, so the day itself is included in the count.
+                {t('importantDates.form.countFirstDayHint')}
               </Text>
             </View>
 
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">Repeat</Text>
-              <Segmented<ImportantDateRepeat> value={repeat} onChange={setRepeat} options={REPEAT_OPTIONS} />
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.repeat')}</Text>
+              <Segmented<ImportantDateRepeat> value={repeat} onChange={setRepeat} options={repeatOptions} />
             </View>
 
             <View>
               <View className="flex-row items-center justify-between">
-                <Text className="flex-1 mr-3 text-base font-medium text-ink">Feature at the top and on Today</Text>
+                <Text className="flex-1 mr-3 text-base font-medium text-ink">{t('importantDates.form.feature')}</Text>
                 <Switch value={pinned} onValueChange={setPinned} />
               </View>
               {replacing ? (
                 <Text className="text-sm leading-5 text-ink-muted mt-1">
-                  Replaces "{replacing.title}", only one date can be featured.
+                  {t('importantDates.form.replaces', { title: replacing.title })}
                 </Text>
               ) : null}
             </View>
 
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">Alert</Text>
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.alert')}</Text>
               <Segmented<string>
                 value={alert}
                 onChange={setAlert}
-                options={ALERT_OPTIONS.map(({ value, label }) => ({ value, label }))}
+                options={ALERT_OPTIONS.map(({ value, labelKey }) => ({ value, label: t(labelKey) }))}
               />
               <Text className="text-sm leading-5 text-ink-muted mt-2">
-                Reminders aren't sent yet. Your choice is saved with the date for when they are.
+                {t('importantDates.form.alertHint')}
               </Text>
             </View>
 
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">Notes</Text>
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.notes')}</Text>
               <TextField
                 value={notes}
                 onChangeText={setNotes}
-                placeholder="Anything worth remembering"
+                placeholder={t('importantDates.form.notesPlaceholder')}
                 multiline
                 maxLength={2000}
                 style={{ minHeight: 96, textAlignVertical: 'top', paddingTop: 12 }}
               />
             </View>
 
-            {editing ? <Button label="Delete special day" variant="danger" onPress={handleDelete} /> : null}
+            {editing ? <Button label={t('importantDates.form.delete')} variant="danger" onPress={handleDelete} /> : null}
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>

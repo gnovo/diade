@@ -1,15 +1,19 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { addLocalDays, startOfLocalDay, formatDayLabel, isSameLocalDay, type CalendarEvent } from '@diade/domain';
+import { useTranslation } from 'react-i18next';
+import { addLocalDays, startOfLocalDay, isSameLocalDay, type CalendarEvent } from '@diade/domain';
 import { getActiveEvents } from '../data/queries';
 import { buildAgenda, formatAgendaTime, type AgendaItem } from '../data/agenda';
 import { useLiveQuery } from '../data/useLiveQuery';
+import { useFormat } from '../i18n';
 import { EventForm } from '../components/EventForm';
 import { Button, EmptyState, Pill, ScreenScaffold, SyncBadge, Card } from '../components/ui';
 
 const AGENDA_DAYS = 60;
 
 export const CalendarScreen: React.FC = () => {
+  const { t } = useTranslation();
+  const format = useFormat();
   const events = useLiveQuery(getActiveEvents, [] as CalendarEvent[]);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<CalendarEvent | null>(null);
@@ -47,11 +51,11 @@ export const CalendarScreen: React.FC = () => {
 
   return (
     <ScreenScaffold
-      eyebrow="Next 60 days"
-      title="Calendar"
+      eyebrow={t('calendar.eyebrow', { count: AGENDA_DAYS })}
+      title={t('calendar.title')}
       right={
         <View className="items-end gap-2">
-          <Button label="+ Event" small onPress={openNew} />
+          <Button label={t('calendar.newEvent')} small onPress={openNew} />
         </View>
       }
     >
@@ -61,14 +65,14 @@ export const CalendarScreen: React.FC = () => {
 
       {days.length === 0 ? (
         <Card>
-          <EmptyState message="Nothing planned yet. Add something you both want to remember." />
+          <EmptyState message={t('calendar.empty')} />
         </Card>
       ) : null}
 
       {days.map((group) => (
         <View key={group.day.toISOString()} className="mb-5">
           <Text className="text-sm font-bold text-ink-muted uppercase tracking-wider mb-2">
-            {formatDayLabel(group.day, now)}
+            {format.dayLabel(group.day, now)}
           </Text>
           <View className="bg-surface rounded-2xl border border-border overflow-hidden">
             {group.items.map((item, index) => (
@@ -77,7 +81,7 @@ export const CalendarScreen: React.FC = () => {
                 onPress={() => openEvent(item)}
                 activeOpacity={0.7}
                 accessibilityRole="button"
-                accessibilityLabel={`${item.title}, ${formatAgendaTime(item)}`}
+                accessibilityLabel={`${item.title}, ${formatAgendaTime(t, item)}`}
                 className={`px-4 py-3 flex-row items-center justify-between ${index > 0 ? 'border-t border-border' : ''}`}
               >
                 <View className="flex-1 mr-3">
@@ -85,12 +89,12 @@ export const CalendarScreen: React.FC = () => {
                     {item.title}
                   </Text>
                   <Text className="text-sm text-ink-muted mt-0.5">
-                    {formatAgendaTime(item)}
-                    {item.recurring ? ' · repeats' : ''}
-                    {item.category === 'important_date' ? ' · important' : ''}
+                    {formatAgendaTime(t, item)}
+                    {item.recurring ? ` · ${t('calendar.repeats')}` : ''}
+                    {item.category === 'important_date' ? ` · ${t('calendar.important')}` : ''}
                   </Text>
                 </View>
-                <Pill label={item.visibility === 'shared' ? 'Shared' : 'Personal'} tone={item.visibility} />
+                <Pill label={item.visibility === 'shared' ? t('common.shared') : t('common.personal')} tone={item.visibility} />
               </TouchableOpacity>
             ))}
           </View>

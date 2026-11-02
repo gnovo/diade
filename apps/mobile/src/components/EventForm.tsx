@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, View, Text, ScrollView, Switch, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import {
   parseLocalDateTime,
   toDateInputValue,
@@ -12,14 +13,6 @@ import { insertRecord, updateRecord, deleteRecord } from '../data/repository';
 import { Button, Segmented, TextField, useWriteContext } from './ui';
 
 type Repeat = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
-
-const REPEAT_OPTIONS: Array<{ value: Repeat; label: string }> = [
-  { value: 'NONE', label: 'Never' },
-  { value: 'DAILY', label: 'Daily' },
-  { value: 'WEEKLY', label: 'Weekly' },
-  { value: 'MONTHLY', label: 'Monthly' },
-  { value: 'YEARLY', label: 'Yearly' },
-];
 
 interface EventFormProps {
   visible: boolean;
@@ -34,8 +27,17 @@ function repeatFromRule(rule: string | null): Repeat {
 }
 
 export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event }) => {
+  const { t } = useTranslation();
   const ctx = useWriteContext();
   const editing = Boolean(event);
+
+  const repeatOptions: Array<{ value: Repeat; label: string }> = [
+    { value: 'NONE', label: t('common.never') },
+    { value: 'DAILY', label: t('eventForm.daily') },
+    { value: 'WEEKLY', label: t('eventForm.weekly') },
+    { value: 'MONTHLY', label: t('eventForm.monthly') },
+    { value: 'YEARLY', label: t('eventForm.yearly') },
+  ];
 
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
@@ -78,7 +80,7 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event })
     if (!ctx) return;
     const trimmed = title.trim();
     if (!trimmed) {
-      Alert.alert('Add a title', 'Give this event a name.');
+      Alert.alert(t('eventForm.addTitle'), t('eventForm.addTitleBody'));
       return;
     }
 
@@ -87,11 +89,11 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event })
       : parseLocalDateTime(date, startTime);
     const end = isAllDay ? parseLocalDateTime(date, '23:59') : parseLocalDateTime(date, endTime);
     if (!start || !end) {
-      Alert.alert('Check the date and time', 'Use YYYY-MM-DD for the date and HH:MM (24h) for times.');
+      Alert.alert(t('eventForm.checkDateTime'), t('eventForm.checkDateTimeBody'));
       return;
     }
     if (end.getTime() <= start.getTime()) {
-      Alert.alert('Check the times', 'The end time must be after the start time.');
+      Alert.alert(t('eventForm.checkTimes'), t('eventForm.checkTimesBody'));
       return;
     }
 
@@ -113,7 +115,7 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event })
       }
       onClose();
     } catch (err) {
-      Alert.alert('Could not save', err instanceof Error ? err.message : 'Please try again.');
+      Alert.alert(t('common.couldNotSave'), err instanceof Error ? err.message : t('common.tryAgain'));
     } finally {
       setSaving(false);
     }
@@ -121,11 +123,11 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event })
 
   const handleDelete = () => {
     if (!event) return;
-    const seriesNote = event.recurrenceRule ? '\n\nThis removes the whole repeating series.' : '';
-    Alert.alert('Delete this event?', `"${event.title}" will be removed for both of you.${seriesNote}`, [
-      { text: 'Cancel', style: 'cancel' },
+    const seriesNote = event.recurrenceRule ? `\n\n${t('eventForm.deleteSeriesNote')}` : '';
+    Alert.alert(t('eventForm.deleteTitle'), `${t('eventForm.deleteBody', { title: event.title })}${seriesNote}`, [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: async () => {
           await deleteRecord('events', event.id);
@@ -135,69 +137,69 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event })
     ]);
   };
 
-  const heading = editing ? 'Edit event' : 'New event';
+  const heading = editing ? t('eventForm.editEvent') : t('eventForm.newEvent');
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <SafeAreaView className="flex-1 bg-bg" edges={['top', 'bottom']}>
         <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View className="flex-row items-center justify-between px-5 py-4 border-b border-border bg-surface">
-            <Button label="Cancel" variant="ghost" small onPress={onClose} />
+            <Button label={t('common.cancel')} variant="ghost" small onPress={onClose} />
             <Text className="text-base font-semibold text-ink">{heading}</Text>
-            <Button label="Save" small onPress={handleSave} disabled={saving || !ctx} />
+            <Button label={t('common.save')} small onPress={handleSave} disabled={saving || !ctx} />
           </View>
 
           <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }} keyboardShouldPersistTaps="handled">
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">Title</Text>
-              <TextField value={title} onChangeText={setTitle} placeholder="Anniversary dinner" maxLength={200} />
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('eventForm.title')}</Text>
+              <TextField value={title} onChangeText={setTitle} placeholder={t('eventForm.titlePlaceholder')} maxLength={200} />
             </View>
 
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">Date (YYYY-MM-DD)</Text>
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('eventForm.date')}</Text>
               <TextField value={date} onChangeText={setDate} placeholder="2026-11-14" keyboardType="numbers-and-punctuation" />
             </View>
 
             <View className="flex-row items-center justify-between">
-              <Text className="text-base font-medium text-ink">All day</Text>
+              <Text className="text-base font-medium text-ink">{t('eventForm.allDay')}</Text>
               <Switch value={isAllDay} onValueChange={setIsAllDay} />
             </View>
 
             {!isAllDay ? (
               <View className="flex-row gap-3">
                 <View className="flex-1">
-                  <Text className="text-sm font-semibold text-ink-muted mb-1.5">Starts (HH:MM)</Text>
+                  <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('eventForm.starts')}</Text>
                   <TextField value={startTime} onChangeText={setStartTime} placeholder="19:30" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-sm font-semibold text-ink-muted mb-1.5">Ends (HH:MM)</Text>
+                  <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('eventForm.ends')}</Text>
                   <TextField value={endTime} onChangeText={setEndTime} placeholder="21:00" />
                 </View>
               </View>
             ) : null}
 
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">Who sees it</Text>
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('eventForm.whoSees')}</Text>
               <Segmented<Visibility>
                 value={visibility}
                 onChange={setVisibility}
                 options={[
-                  { value: 'shared', label: 'Both of us' },
-                  { value: 'personal', label: 'Only me' },
+                  { value: 'shared', label: t('common.bothOfUs') },
+                  { value: 'personal', label: t('common.onlyMe') },
                 ]}
               />
             </View>
 
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">Repeats</Text>
-              <Segmented<Repeat> value={repeat} onChange={setRepeat} options={REPEAT_OPTIONS} />
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('eventForm.repeats')}</Text>
+              <Segmented<Repeat> value={repeat} onChange={setRepeat} options={repeatOptions} />
               {editing && event?.recurrenceRule ? (
-                <Text className="text-sm text-ink-muted mt-2">Changes apply to the whole series.</Text>
+                <Text className="text-sm text-ink-muted mt-2">{t('eventForm.seriesNote')}</Text>
               ) : null}
             </View>
 
             {editing ? (
-              <Button label="Delete event" variant="danger" onPress={handleDelete} />
+              <Button label={t('eventForm.deleteEvent')} variant="danger" onPress={handleDelete} />
             ) : null}
           </ScrollView>
         </KeyboardAvoidingView>
