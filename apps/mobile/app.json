@@ -22,7 +22,8 @@
         "monochromeImage": "./assets/android-icon-monochrome.png",
         "backgroundColor": "#0D4F46"
       },
-      "package": "com.diade.app"
+      "package": "com.diade.app",
+      "versionCode": 1
     },
     "plugins": [
       "expo-secure-store",
@@ -48,6 +49,16 @@
           }
         }
       ]
-    ]
+    ],
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0,
+      "requestHeaders": {
+        "expo-channel-name": "production"
+      }
+    }
   }
 }
