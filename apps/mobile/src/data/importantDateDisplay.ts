@@ -1,42 +1,44 @@
 /**
  * Display metadata and wording for important dates. Pure (type-only imports), so it can
- * be unit-tested without the app runtime.
+ * be unit-tested without the app runtime. Wording comes from the i18n catalog through `t`.
  */
 import type { ImportantDateStatus, ImportantDateType } from '@diade/domain';
+import type { TFunction } from '@diade/i18n';
 import type { IconName } from '../design/Icon';
 
-export const IMPORTANT_DATE_TYPE_META: Record<ImportantDateType, { label: string; icon: IconName }> = {
-  my_birthday: { label: 'My birthday', icon: 'cake' },
-  partner_birthday: { label: "Partner's birthday", icon: 'cake' },
-  first_day: { label: 'Our first day', icon: 'heart' },
-  first_kiss: { label: 'First kiss', icon: 'heart' },
-  engagement: { label: 'Engagement', icon: 'gem' },
-  wedding: { label: 'Wedding day', icon: 'gem' },
-  expecting_baby: { label: 'Expecting a baby', icon: 'baby' },
-  other: { label: 'Other', icon: 'star' },
+export const IMPORTANT_DATE_TYPE_ICONS: Record<ImportantDateType, IconName> = {
+  my_birthday: 'cake',
+  partner_birthday: 'cake',
+  first_day: 'heart',
+  first_kiss: 'heart',
+  engagement: 'gem',
+  wedding: 'gem',
+  expecting_baby: 'baby',
+  other: 'star',
 };
 
+export const importantDateTypeLabel = (t: TFunction, type: ImportantDateType): string =>
+  t(`importantDates.types.${type}`);
+
 /** Alert choices. `null` is no alert; a number is days before the date (0 = on the day). */
-export const ALERT_OPTIONS: Array<{ value: string; label: string; days: number | null }> = [
-  { value: 'none', label: 'None', days: null },
-  { value: '0', label: 'Day of', days: 0 },
-  { value: '1', label: '1 day', days: 1 },
-  { value: '7', label: '1 week', days: 7 },
-];
+export const ALERT_OPTIONS = [
+  { value: 'none', labelKey: 'importantDates.alertOption.none', days: null },
+  { value: '0', labelKey: 'importantDates.alertOption.dayOf', days: 0 },
+  { value: '1', labelKey: 'importantDates.alertOption.oneDay', days: 1 },
+  { value: '7', labelKey: 'importantDates.alertOption.oneWeek', days: 7 },
+] as const;
 
 export const alertToOption = (days: number | null): string => (days === null ? 'none' : String(days));
 
-export const alertLabel = (days: number | null): string => {
-  if (days === null) return 'None';
-  if (days === 0) return 'On the day';
-  if (days === 7) return '1 week before';
-  return `${days} ${days === 1 ? 'day' : 'days'} before`;
+export const alertLabel = (t: TFunction, days: number | null): string => {
+  if (days === null) return t('importantDates.alertLabel.none');
+  if (days === 0) return t('importantDates.alertLabel.onTheDay');
+  if (days === 7) return t('importantDates.alertLabel.oneWeekBefore');
+  return t('importantDates.alertLabel.daysBefore', { count: days });
 };
 
-export const plural = (count: number, unit: string): string => `${count} ${unit}${count === 1 ? '' : 's'}`;
-
-/** "Today", "94 days left" or "1753 days since". */
-export function statusLabel(status: Pick<ImportantDateStatus, 'kind' | 'days'>): string {
-  if (status.kind === 'today') return 'Today';
-  return `${plural(status.days, 'day')} ${status.kind}`;
+/** "Today", "94 days left" or "1753 days since" (in the current language). */
+export function statusLabel(t: TFunction, status: Pick<ImportantDateStatus, 'kind' | 'days'>): string {
+  if (status.kind === 'today') return t('importantDates.status.today');
+  return t(`importantDates.status.${status.kind}`, { count: status.days });
 }

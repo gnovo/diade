@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import {
   canAccessRecord,
-  formatDayLabel,
   parseLocalDateTime,
   type Task,
   type Visibility,
@@ -11,6 +11,7 @@ import { useAuth } from '../context/AuthContext';
 import { getActiveTasks } from '../data/queries';
 import { insertRecord, updateRecord, deleteRecord } from '../data/repository';
 import { useLiveQuery } from '../data/useLiveQuery';
+import { useFormat } from '../i18n';
 import {
   Button,
   Card,
@@ -29,6 +30,8 @@ import {
 type AssigneeChoice = 'both' | 'me' | 'partner';
 
 export const HomeScreen: React.FC = () => {
+  const { t } = useTranslation();
+  const format = useFormat();
   const { user, members } = useAuth();
   const ctx = useWriteContext();
   const tasks = useLiveQuery(getActiveTasks, [] as Task[]);
@@ -45,8 +48,8 @@ export const HomeScreen: React.FC = () => {
   const done = visible.filter((t) => t.status === 'completed');
 
   const assigneeOptions: SegmentOption<AssigneeChoice>[] = [
-    { value: 'both', label: 'Both' },
-    { value: 'me', label: 'Me' },
+    { value: 'both', label: t('common.both') },
+    { value: 'me', label: t('common.me') },
     ...(partner ? [{ value: 'partner' as const, label: partner.displayName.split(' ')[0] }] : []),
   ];
 
@@ -57,9 +60,9 @@ export const HomeScreen: React.FC = () => {
   };
 
   const assigneeLabel = (task: Task) => {
-    if (task.assigneeId === null) return 'Both';
-    if (task.assigneeId === user?.id) return 'Me';
-    return partner && task.assigneeId === partner.userId ? partner.displayName.split(' ')[0] : 'Partner';
+    if (task.assigneeId === null) return t('common.both');
+    if (task.assigneeId === user?.id) return t('common.me');
+    return partner && task.assigneeId === partner.userId ? partner.displayName.split(' ')[0] : t('common.partner');
   };
 
   const addTask = async () => {
@@ -70,7 +73,7 @@ export const HomeScreen: React.FC = () => {
     if (dueDate.trim()) {
       const parsed = parseLocalDateTime(dueDate, '23:59');
       if (!parsed) {
-        Alert.alert('Check the due date', 'Use YYYY-MM-DD, or leave it empty.');
+        Alert.alert(t('household.checkDueDate'), t('household.dueDateHint'));
         return;
       }
       dueIso = parsed.toISOString();
@@ -87,7 +90,7 @@ export const HomeScreen: React.FC = () => {
       setTitle('');
       setDueDate('');
     } catch (err) {
-      Alert.alert('Could not add task', err instanceof Error ? err.message : 'Please try again.');
+      Alert.alert(t('household.couldNotAdd'), err instanceof Error ? err.message : t('common.tryAgain'));
     }
   };
 
@@ -100,52 +103,52 @@ export const HomeScreen: React.FC = () => {
   };
 
   const confirmDelete = (task: Task) => {
-    Alert.alert('Delete task?', `"${task.title}" will be removed.`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => deleteRecord('tasks', task.id) },
+    Alert.alert(t('household.deleteTitle'), t('household.deleteBody', { title: task.title }), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('common.delete'), style: 'destructive', onPress: () => deleteRecord('tasks', task.id) },
     ]);
   };
 
   return (
-    <ScreenScaffold eyebrow="Shared household" title="Household" right={<SyncBadge />}>
+    <ScreenScaffold eyebrow={t('household.eyebrow')} title={t('household.title')} right={<SyncBadge />}>
       <Card>
-        <SectionLabel>New task</SectionLabel>
+        <SectionLabel>{t('household.newTask')}</SectionLabel>
         <TextField
           value={title}
           onChangeText={setTitle}
           onSubmitEditing={addTask}
-          placeholder="Book the plumber, water the plants…"
+          placeholder={t('household.taskPlaceholder')}
           maxLength={255}
           returnKeyType="done"
         />
         <View className="mt-3">
-          <TextField value={dueDate} onChangeText={setDueDate} placeholder="Due (YYYY-MM-DD, optional)" maxLength={10} />
+          <TextField value={dueDate} onChangeText={setDueDate} placeholder={t('household.duePlaceholder')} maxLength={10} />
         </View>
-        <Text className="text-sm font-semibold text-ink-muted mt-4 mb-1.5">Who</Text>
+        <Text className="text-sm font-semibold text-ink-muted mt-4 mb-1.5">{t('household.who')}</Text>
         <Segmented<AssigneeChoice> value={assignee} onChange={setAssignee} options={assigneeOptions} />
-        <Text className="text-sm font-semibold text-ink-muted mt-4 mb-1.5">Visibility</Text>
+        <Text className="text-sm font-semibold text-ink-muted mt-4 mb-1.5">{t('household.visibility')}</Text>
         <Segmented<Visibility>
           value={visibility}
           onChange={setVisibility}
           options={[
-            { value: 'shared', label: 'Both of us' },
-            { value: 'personal', label: 'Only me' },
+            { value: 'shared', label: t('common.bothOfUs') },
+            { value: 'personal', label: t('common.onlyMe') },
           ]}
         />
         <View className="mt-4">
-          <Button label="Add task" onPress={addTask} disabled={!title.trim()} />
+          <Button label={t('household.addTask')} onPress={addTask} disabled={!title.trim()} />
         </View>
       </Card>
 
       <Card>
-        <SectionLabel right={<Text className="text-sm text-ink-muted">{open.length} open</Text>}>To do</SectionLabel>
-        {open.length === 0 ? <EmptyState message="All caught up." /> : null}
+        <SectionLabel right={<Text className="text-sm text-ink-muted">{t('household.open', { count: open.length })}</Text>}>{t('household.todo')}</SectionLabel>
+        {open.length === 0 ? <EmptyState message={t('household.allCaughtUp')} /> : null}
         {open.map((task, index) => (
           <View key={task.id}>
             {index > 0 ? <View className="h-px bg-border my-3" /> : null}
             <View className="flex-row items-center">
-              <Checkbox checked={false} onToggle={() => toggle(task)} label={`Complete ${task.title}`} />
-              <View className="flex-1 mr-2" accessibilityHint="Long press to delete">
+              <Checkbox checked={false} onToggle={() => toggle(task)} label={t('household.complete', { title: task.title })} />
+              <View className="flex-1 mr-2" accessibilityHint={t('household.longPressToDelete')}>
                 <Text
                   className="text-base font-medium text-ink"
                   numberOfLines={2}
@@ -155,12 +158,12 @@ export const HomeScreen: React.FC = () => {
                 </Text>
                 {task.dueDate ? (
                   <Text className="text-sm text-ink-muted mt-0.5">
-                    Due {formatDayLabel(new Date(task.dueDate), new Date())}
+                    {t('household.due', { day: format.dayLabel(new Date(task.dueDate), new Date()) })}
                   </Text>
                 ) : null}
               </View>
               <View className="flex-row items-center gap-1.5">
-                {task.visibility === 'personal' ? <Pill label="Personal" tone="personal" /> : null}
+                {task.visibility === 'personal' ? <Pill label={t('common.personal')} tone="personal" /> : null}
                 <Pill label={assigneeLabel(task)} />
               </View>
             </View>
@@ -172,17 +175,17 @@ export const HomeScreen: React.FC = () => {
         <Card>
           <SectionLabel
             right={
-              <Button label={showDone ? 'Hide' : `Show (${done.length})`} variant="ghost" small onPress={() => setShowDone((v) => !v)} />
+              <Button label={showDone ? t('common.hide') : t('household.show', { count: done.length })} variant="ghost" small onPress={() => setShowDone((v) => !v)} />
             }
           >
-            Done
+            {t('household.done')}
           </SectionLabel>
           {showDone
             ? done.slice(0, 20).map((task, index) => (
                 <View key={task.id}>
                   {index > 0 ? <View className="h-px bg-border my-3" /> : null}
                   <View className="flex-row items-center">
-                    <Checkbox checked onToggle={() => toggle(task)} label={`Reopen ${task.title}`} />
+                    <Checkbox checked onToggle={() => toggle(task)} label={t('household.reopen', { title: task.title })} />
                     <Text className="flex-1 text-sm text-ink-muted line-through" numberOfLines={1}>
                       {task.title}
                     </Text>

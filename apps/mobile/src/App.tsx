@@ -8,6 +8,7 @@ import { AuthProvider } from './context/AuthContext';
 import { SyncProvider } from './sync/SyncProvider';
 import { RootNavigator } from './navigation/RootNavigator';
 import { getLocalDb } from './storage/sqlite';
+import { I18nProvider } from './i18n';
 import { ThemeProvider, useScheme, useThemeColors, useThemePreference } from './design';
 
 // Plus Jakarta Sans static faces (SIL OFL 1.1). Family names match tailwind.config.js and generated.ts.
@@ -58,8 +59,10 @@ function Gate() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <Gate />
-    </ThemeProvider>
+    <I18nProvider>
+      <ThemeProvider>
+        <Gate />
+      </ThemeProvider>
+    </I18nProvider>
   );
 }

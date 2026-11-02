@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Platform, Pressable, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { sizes } from '@diade/design-tokens';
-import { formatLongDate, parseDateOnly, toDateInputValue } from '@diade/domain';
+import { parseDateOnly, toDateInputValue } from '@diade/domain';
 import { Icon, useScheme } from '../design';
+import { useFormat } from '../i18n';
 
 /**
  * A calendar-day field backed by the platform's native picker: an inline calendar on iOS,
@@ -15,11 +17,13 @@ export const DateField: React.FC<{
   onChange: (value: string) => void;
   label: string;
 }> = ({ value, onChange, label }) => {
+  const { t } = useTranslation();
+  const format = useFormat();
   const scheme = useScheme();
   const [open, setOpen] = useState(false);
 
   const current = parseDateOnly(value) ?? new Date();
-  const display = formatLongDate(current);
+  const display = format.longDate(current);
 
   const handlePress = () => {
     if (Platform.OS === 'android') {
@@ -39,7 +43,7 @@ export const DateField: React.FC<{
         onPress={handlePress}
         accessibilityRole="button"
         accessibilityLabel={`${label}, ${display}`}
-        accessibilityHint={Platform.OS === 'ios' ? 'Shows or hides the calendar' : 'Opens the calendar'}
+        accessibilityHint={Platform.OS === 'ios' ? t('dateField.showHideCalendar') : t('dateField.openCalendar')}
         accessibilityState={{ expanded: Platform.OS === 'ios' ? open : undefined }}
         className="flex-row items-center justify-between bg-surface border border-border-strong rounded-md px-3 min-h-[48px]"
       >

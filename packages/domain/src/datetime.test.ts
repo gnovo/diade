@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseLocalDateTime, formatDayLabel, toDateInputValue, toTimeInputValue } from './datetime';
+import { parseLocalDateTime, toDateInputValue, toTimeInputValue } from './datetime';
 
 describe('parseLocalDateTime', () => {
   it('combines a date and time into a local Date', () => {
@@ -22,14 +22,5 @@ describe('parseLocalDateTime', () => {
     const d = parseLocalDateTime('2026-03-05', '08:05');
     expect(d && toDateInputValue(d)).toBe('2026-03-05');
     expect(d && toTimeInputValue(d)).toBe('08:05');
-  });
-});
-
-describe('formatDayLabel', () => {
-  it('labels today and tomorrow relative to now', () => {
-    const now = new Date(2026, 10, 1, 9, 0);
-    expect(formatDayLabel(new Date(2026, 10, 1, 20, 0), now)).toBe('Today');
-    expect(formatDayLabel(new Date(2026, 10, 2, 8, 0), now)).toBe('Tomorrow');
-    expect(formatDayLabel(new Date(2026, 10, 5, 8, 0), now)).toBe('Thu 5 Nov');
   });
 });

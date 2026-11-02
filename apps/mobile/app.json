@@ -38,7 +38,16 @@
       ],
       "./plugins/with-diade-icons",
       "./plugins/with-diade-release-signing",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-localization",
+        {
+          "supportedLocales": {
+            "ios": ["en", "pt-PT"],
+            "android": ["en", "pt-PT"]
+          }
+        }
+      ]
     ]
   }
 }
