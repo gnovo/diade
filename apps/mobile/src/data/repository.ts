@@ -16,6 +16,7 @@ export const ENTITY_TABLES: Record<SyncEntityName, string> = {
   lists: 'local_lists',
   list_items: 'local_list_items',
   capture_items: 'local_capture_items',
+  important_dates: 'local_important_dates',
 };
 
 export interface WriteContext {
@@ -24,7 +25,13 @@ export interface WriteContext {
 }
 
 /** Entities that carry space_id and creator_id locally (list items do not). */
-const OWNED_ENTITIES = new Set<SyncEntityName>(['events', 'tasks', 'lists', 'capture_items']);
+const OWNED_ENTITIES = new Set<SyncEntityName>([
+  'events',
+  'tasks',
+  'lists',
+  'capture_items',
+  'important_dates',
+]);
 
 async function queueMutation(
   db: Awaited<ReturnType<typeof getLocalDb>>,

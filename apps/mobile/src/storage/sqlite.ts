@@ -10,6 +10,7 @@ export const LOCAL_TABLES = [
   'local_lists',
   'local_list_items',
   'local_capture_items',
+  'local_important_dates',
   'local_outbox',
   'local_sync_meta',
 ] as const;
@@ -100,6 +101,23 @@ async function openLocalDb(): Promise<SQLite.SQLiteDatabase> {
       content TEXT NOT NULL,
       capture_type TEXT NOT NULL DEFAULT 'text',
       status TEXT NOT NULL DEFAULT 'inbox',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS local_important_dates (
+      id TEXT PRIMARY KEY NOT NULL,
+      space_id TEXT NOT NULL,
+      creator_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      type TEXT NOT NULL DEFAULT 'other',
+      notes TEXT,
+      date TEXT NOT NULL,
+      count_first_day INTEGER NOT NULL DEFAULT 0,
+      repeat TEXT NOT NULL DEFAULT 'yearly',
+      pinned INTEGER NOT NULL DEFAULT 0,
+      alert_offset_days INTEGER,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       deleted_at TEXT

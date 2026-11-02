@@ -1,4 +1,4 @@
-import type { CalendarEvent, Task, SharedList, ListItem, CaptureItem } from '@diade/domain';
+import type { CalendarEvent, Task, SharedList, ListItem, CaptureItem, ImportantDate } from '@diade/domain';
 import { getLocalDb } from '../storage/sqlite';
 import { fromRow } from './mapping';
 
@@ -21,6 +21,9 @@ export const getActiveLists = () => selectActive<SharedList>('local_lists', 'cre
 
 export const getActiveListItems = () =>
   selectActive<ListItem>('local_list_items', 'is_checked ASC, created_at ASC');
+
+export const getActiveImportantDates = () =>
+  selectActive<ImportantDate>('local_important_dates', 'date ASC, created_at ASC');
 
 export const getInboxItems = async (): Promise<CaptureItem[]> => {
   const db = await getLocalDb();

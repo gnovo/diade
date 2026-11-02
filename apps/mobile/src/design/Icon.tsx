@@ -1,7 +1,9 @@
 import React from 'react';
 import { SvgXml } from 'react-native-svg';
 import {
+  Baby,
   Bell,
+  Cake,
   Calendar,
   CalendarCheck,
   CalendarPlus,
@@ -10,6 +12,8 @@ import {
   ChevronRight,
   Clock,
   CloudOff,
+  Gem,
+  Heart,
   Image,
   Images,
   Info,
@@ -20,6 +24,7 @@ import {
   Lock,
   MapPin,
   Pencil,
+  Pin,
   Plus,
   Repeat,
   RefreshCw,
@@ -27,6 +32,7 @@ import {
   Settings,
   ShoppingBasket,
   SquareCheck,
+  Star,
   StickyNote,
   Trash,
   TriangleAlert,
@@ -77,6 +83,12 @@ const lucideIcons = {
   monitor: Monitor,
   moon: Moon,
   sun: Sun,
+  cake: Cake,
+  baby: Baby,
+  heart: Heart,
+  gem: Gem,
+  pin: Pin,
+  star: Star,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof lucideIcons | 'memory';
