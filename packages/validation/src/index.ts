@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import type { SyncEntityName, MutationOperation } from '@diade/domain';
+import {
+  IMPORTANT_DATE_REPEATS,
+  IMPORTANT_DATE_TYPES,
+  parseDateOnly,
+  type SyncEntityName,
+  type MutationOperation,
+} from '@diade/domain';
 
 // --- Identity & Space Schemas ---
 
@@ -110,6 +116,42 @@ export const updateCaptureItemSchema = z.object({
   status: captureStatusSchema.optional(),
 });
 
+// --- Important Dates Schemas ---
+//
+// Important dates are always shared between both members, so there is deliberately no
+// visibility field: a client that sends one has it stripped by validation.
+
+export const importantDateTypeSchema = z.enum(IMPORTANT_DATE_TYPES);
+export const importantDateRepeatSchema = z.enum(IMPORTANT_DATE_REPEATS);
+
+/** A real calendar day as `YYYY-MM-DD` (rejects 2026-02-31). */
+export const dateOnlySchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Use the format YYYY-MM-DD')
+  .refine((value) => parseDateOnly(value) !== null, 'Must be a real calendar date');
+
+export const createImportantDateSchema = z.object({
+  title: z.string().trim().min(1, 'Title is required').max(200),
+  type: importantDateTypeSchema.default('other'),
+  notes: z.string().max(2000).nullable().optional(),
+  date: dateOnlySchema,
+  countFirstDay: z.boolean().default(false),
+  repeat: importantDateRepeatSchema.default('yearly'),
+  pinned: z.boolean().default(false),
+  alertOffsetDays: z.number().int().min(0).max(365).nullable().optional(),
+});
+
+export const updateImportantDateSchema = z.object({
+  title: z.string().trim().min(1).max(200).optional(),
+  type: importantDateTypeSchema.optional(),
+  notes: z.string().max(2000).nullable().optional(),
+  date: dateOnlySchema.optional(),
+  countFirstDay: z.boolean().optional(),
+  repeat: importantDateRepeatSchema.optional(),
+  pinned: z.boolean().optional(),
+  alertOffsetDays: z.number().int().min(0).max(365).nullable().optional(),
+});
+
 // --- Sync & Mutation Schemas ---
 
 export const syncEntityNameSchema = z.enum([
@@ -118,6 +160,7 @@ export const syncEntityNameSchema = z.enum([
   'lists',
   'list_items',
   'capture_items',
+  'important_dates',
 ]);
 
 export const mutationOperationSchema = z.enum(['INSERT', 'UPDATE', 'DELETE']);
@@ -202,6 +245,7 @@ export const syncPayloadSchemas = {
     INSERT: createCaptureItemSchema,
     UPDATE: captureItemUpdatePayload,
   },
+  important_dates: { INSERT: createImportantDateSchema, UPDATE: updateImportantDateSchema },
 } as const;
 
 /** DELETE mutations carry no payload; everything else must match its entity schema. */

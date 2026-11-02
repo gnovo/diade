@@ -37,7 +37,8 @@
         }
       ],
       "./plugins/with-diade-icons",
-      "./plugins/with-diade-release-signing"
+      "./plugins/with-diade-release-signing",
+      "@react-native-community/datetimepicker"
     ]
   }
 }

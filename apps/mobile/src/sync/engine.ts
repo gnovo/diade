@@ -163,6 +163,7 @@ const PULL_SECTIONS: Array<[SyncEntityName, keyof SyncPullResult]> = [
   ['lists', 'lists'],
   ['list_items', 'listItems'],
   ['capture_items', 'captureItems'],
+  ['important_dates', 'importantDates'],
 ];
 
 async function applyPull(result: SyncPullResult): Promise<void> {
@@ -185,7 +186,10 @@ async function applyPull(result: SyncPullResult): Promise<void> {
     }
   });
 
-  if (result.events.length + result.tasks.length + result.lists.length + result.listItems.length + result.captureItems.length > 0) {
-    emitDataChanged();
-  }
+  // `importantDates` is absent from responses by an API that predates the entity.
+  const pulled = PULL_SECTIONS.reduce(
+    (total, [, section]) => total + (((result[section] as unknown as Row[] | undefined) ?? []).length),
+    0,
+  );
+  if (pulled > 0) emitDataChanged();
 }

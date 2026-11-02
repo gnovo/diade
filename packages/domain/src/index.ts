@@ -4,6 +4,9 @@
 
 export * from './recurrence';
 export * from './datetime';
+export * from './importantDates';
+
+import type { ImportantDateType, ImportantDateRepeat } from './importantDates';
 
 // --- Identity & Space ---
 
@@ -62,6 +65,26 @@ export interface CalendarEvent extends BaseRecord {
   category: EventCategory;
 }
 
+// --- Important dates ---
+
+/**
+ * A special day for the couple. Always shared between both members, so it has no
+ * visibility field. `date` is a plain `YYYY-MM-DD` calendar day, not an instant.
+ */
+export interface ImportantDate extends BaseRecord {
+  title: string;
+  type: ImportantDateType;
+  notes: string | null;
+  date: string;
+  /** Count the date itself as day 1 rather than day 0. */
+  countFirstDay: boolean;
+  repeat: ImportantDateRepeat;
+  /** The one date featured at the top of the screen and on Today. At most one per space. */
+  pinned: boolean;
+  /** Days before the date to alert on (0 = on the day). Stored only; delivery is not built yet. */
+  alertOffsetDays: number | null;
+}
+
 // --- Tasks & Reminders ---
 
 export type TaskStatus = 'todo' | 'completed';
@@ -114,7 +137,13 @@ export interface CaptureItem extends BaseRecord {
 
 // --- Sync & Mutation Protocol ---
 
-export type SyncEntityName = 'events' | 'tasks' | 'lists' | 'list_items' | 'capture_items';
+export type SyncEntityName =
+  | 'events'
+  | 'tasks'
+  | 'lists'
+  | 'list_items'
+  | 'capture_items'
+  | 'important_dates';
 export type MutationOperation = 'INSERT' | 'UPDATE' | 'DELETE';
 
 export interface ClientMutation {
@@ -151,6 +180,7 @@ export interface SyncPullResult {
   lists: SharedList[];
   listItems: ListItem[];
   captureItems: CaptureItem[];
+  importantDates: ImportantDate[];
 }
 
 // --- Domain Permission Helpers ---

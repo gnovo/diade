@@ -26,3 +26,19 @@ describe('row mapping', () => {
     expect(columns).toEqual(['title']);
   });
 });
+
+describe('important date rows', () => {
+  it('stores the pin and first-day flags as 0/1 and restores them as booleans', () => {
+    const { columns, values } = toColumns({ id: 'a', countFirstDay: true, pinned: false, alertOffsetDays: 7 });
+    expect(columns).toEqual(['id', 'count_first_day', 'pinned', 'alert_offset_days']);
+    expect(values).toEqual(['a', 1, 0, 7]);
+
+    expect(fromRow({ id: 'a', count_first_day: 0, pinned: 1, alert_offset_days: null, date: '2020-08-18' })).toEqual({
+      id: 'a',
+      countFirstDay: false,
+      pinned: true,
+      alertOffsetDays: null,
+      date: '2020-08-18',
+    });
+  });
+});

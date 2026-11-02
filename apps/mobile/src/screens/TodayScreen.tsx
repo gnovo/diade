@@ -3,15 +3,18 @@ import { View, Text, Alert } from 'react-native';
 import {
   addLocalDays,
   canAccessRecord,
+  describeImportantDate,
   formatDayLabel,
   formatLongDate,
   isTaskAssignedToUser,
   startOfLocalDay,
   type Task,
   type CalendarEvent,
+  type ImportantDate,
 } from '@diade/domain';
 import { useAuth } from '../context/AuthContext';
-import { getActiveEvents, getActiveTasks, getActiveLists, getActiveListItems, getInboxItems } from '../data/queries';
+import { getActiveEvents, getActiveTasks, getActiveLists, getActiveListItems, getActiveImportantDates, getInboxItems } from '../data/queries';
+import { statusLabel } from '../data/importantDateDisplay';
 import { insertRecord, updateRecord } from '../data/repository';
 import { buildAgenda, formatAgendaTime } from '../data/agenda';
 import { useLiveQuery } from '../data/useLiveQuery';
@@ -30,7 +33,6 @@ export const TodayScreen: React.FC = () => {
 
   const now = new Date();
   const dayStart = startOfLocalDay(now);
-  const lookaheadEnd = addLocalDays(dayStart, LOOKAHEAD_DAYS);
   const tomorrowEnd = addLocalDays(dayStart, 2);
 
   const events = useLiveQuery(getActiveEvents, [] as CalendarEvent[]);
@@ -38,16 +40,21 @@ export const TodayScreen: React.FC = () => {
   const lists = useLiveQuery(getActiveLists, []);
   const listItems = useLiveQuery(getActiveListItems, []);
   const inbox = useLiveQuery(getInboxItems, []);
+  const specialDates = useLiveQuery(getActiveImportantDates, [] as ImportantDate[]);
 
   const upcoming = buildAgenda(events.data.filter((e) => e.category === 'general'), now, tomorrowEnd)
     .filter((item) => item.endAt.getTime() >= now.getTime())
     .slice(0, EVENT_LIMIT);
 
-  const importantDates = buildAgenda(
-    events.data.filter((e) => e.category === 'important_date'),
-    dayStart,
-    lookaheadEnd,
-  ).slice(0, 2);
+  // The featured date always shows; then whatever else lands in the next 30 days.
+  const importantDates = (() => {
+    const described = specialDates.data.map((item) => ({ item, status: describeImportantDate(item, now) }));
+    const featured = described.filter((d) => d.item.pinned);
+    const soon = described
+      .filter((d) => !d.item.pinned && d.status.kind !== 'since' && d.status.days <= LOOKAHEAD_DAYS)
+      .sort((a, b) => a.status.days - b.status.days);
+    return [...featured, ...soon].slice(0, 3);
+  })();
 
   const openTasks = tasks.data
     .filter((t) => t.status === 'todo' && canAccessRecord(t, user?.id ?? '') && isTaskAssignedToUser(t, user?.id ?? ''))
@@ -169,10 +176,10 @@ export const TodayScreen: React.FC = () => {
       {importantDates.length > 0 ? (
         <Card>
           <SectionLabel>Important dates</SectionLabel>
-          {importantDates.map((item, index) => (
-            <View key={item.key} className={index > 0 ? 'mt-3' : ''}>
-              <Text className="text-base font-semibold text-ink">{item.title}</Text>
-              <Text className="text-sm text-ink-muted mt-0.5">{formatDayLabel(item.startAt, now)}</Text>
+          {importantDates.map(({ item, status }, index) => (
+            <View key={item.id} className={`flex-row items-center justify-between ${index > 0 ? 'mt-3' : ''}`}>
+              <Text className="flex-1 mr-3 text-base font-semibold text-ink" numberOfLines={2}>{item.title}</Text>
+              <Text className="text-sm text-ink-muted">{statusLabel(status)}</Text>
             </View>
           ))}
         </Card>

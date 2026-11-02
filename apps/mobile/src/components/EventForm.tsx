@@ -6,7 +6,6 @@ import {
   toDateInputValue,
   toTimeInputValue,
   type CalendarEvent,
-  type EventCategory,
   type Visibility,
 } from '@diade/domain';
 import { insertRecord, updateRecord, deleteRecord } from '../data/repository';
@@ -27,8 +26,6 @@ interface EventFormProps {
   onClose: () => void;
   /** When provided the form edits this event; otherwise it creates one. */
   event?: CalendarEvent | null;
-  /** Preset category for new records, e.g. important dates from the Us tab. */
-  defaultCategory?: EventCategory;
 }
 
 function repeatFromRule(rule: string | null): Repeat {
@@ -36,7 +33,7 @@ function repeatFromRule(rule: string | null): Repeat {
   return match ? (match[1].toUpperCase() as Repeat) : 'NONE';
 }
 
-export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event, defaultCategory = 'general' }) => {
+export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event }) => {
   const ctx = useWriteContext();
   const editing = Boolean(event);
 
@@ -47,7 +44,6 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event, d
   const [isAllDay, setIsAllDay] = useState(false);
   const [visibility, setVisibility] = useState<Visibility>('shared');
   const [repeat, setRepeat] = useState<Repeat>('NONE');
-  const [category, setCategory] = useState<EventCategory>(defaultCategory);
   const [saving, setSaving] = useState(false);
 
   // Reset the form each time it opens so a previous draft never leaks into a new event.
@@ -63,7 +59,6 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event, d
       setIsAllDay(event.isAllDay);
       setVisibility(event.visibility);
       setRepeat(repeatFromRule(event.recurrenceRule));
-      setCategory(event.category);
     } else {
       const next = new Date();
       next.setMinutes(0, 0, 0);
@@ -76,9 +71,8 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event, d
       setIsAllDay(false);
       setVisibility('shared');
       setRepeat('NONE');
-      setCategory(defaultCategory);
     }
-  }, [visible, event, defaultCategory]);
+  }, [visible, event]);
 
   const handleSave = async () => {
     if (!ctx) return;
@@ -107,7 +101,6 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event, d
       endAt: end.toISOString(),
       isAllDay,
       visibility,
-      category,
       recurrenceRule: repeat === 'NONE' ? null : `FREQ=${repeat}`,
     };
 
@@ -142,13 +135,7 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event, d
     ]);
   };
 
-  const heading = editing
-    ? category === 'important_date'
-      ? 'Edit important date'
-      : 'Edit event'
-    : category === 'important_date'
-      ? 'New important date'
-      : 'New event';
+  const heading = editing ? 'Edit event' : 'New event';
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
@@ -197,18 +184,6 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event, d
                 options={[
                   { value: 'shared', label: 'Both of us' },
                   { value: 'personal', label: 'Only me' },
-                ]}
-              />
-            </View>
-
-            <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">Kind</Text>
-              <Segmented<EventCategory>
-                value={category}
-                onChange={setCategory}
-                options={[
-                  { value: 'general', label: 'Event' },
-                  { value: 'important_date', label: 'Important date' },
                 ]}
               />
             </View>

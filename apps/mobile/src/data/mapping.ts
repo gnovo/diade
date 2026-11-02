@@ -4,7 +4,7 @@
  * server record can be stored without per-entity mapping code.
  */
 
-const BOOLEAN_KEYS = new Set(['isAllDay', 'isChecked']);
+const BOOLEAN_KEYS = new Set(['isAllDay', 'isChecked', 'countFirstDay', 'pinned']);
 
 export type Row = Record<string, unknown>;
 

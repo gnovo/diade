@@ -88,3 +88,52 @@ describe('Validation Schemas', () => {
     expect(parseSyncPayload('lists', 'DELETE', { anything: 1 })).toEqual({ success: true, data: {} });
   });
 });
+
+describe('important dates', () => {
+  it('applies defaults on insert: yearly, not pinned, type other', () => {
+    const result = parseSyncPayload('important_dates', 'INSERT', { title: 'First date', date: '2020-08-18' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toMatchObject({
+        title: 'First date',
+        type: 'other',
+        repeat: 'yearly',
+        pinned: false,
+        countFirstDay: false,
+      });
+    }
+  });
+
+  it('does not apply defaults on update, so absent fields stay unchanged', () => {
+    const result = parseSyncPayload('important_dates', 'UPDATE', { title: 'Renamed' });
+    expect(result).toEqual({ success: true, data: { title: 'Renamed' } });
+  });
+
+  it('rejects impossible or malformed dates', () => {
+    expect(parseSyncPayload('important_dates', 'INSERT', { title: 'x', date: '2026-02-31' }).success).toBe(false);
+    expect(parseSyncPayload('important_dates', 'INSERT', { title: 'x', date: '18/08/2020' }).success).toBe(false);
+    expect(parseSyncPayload('important_dates', 'UPDATE', { date: '2020-13-01' }).success).toBe(false);
+  });
+
+  it('rejects unknown types and repeat values', () => {
+    expect(parseSyncPayload('important_dates', 'INSERT', { title: 'x', date: '2020-01-01', type: 'bday' }).success).toBe(false);
+    expect(parseSyncPayload('important_dates', 'INSERT', { title: 'x', date: '2020-01-01', repeat: 'monthly' }).success).toBe(false);
+  });
+
+  it('strips a client-supplied visibility: these dates are always shared', () => {
+    const result = parseSyncPayload('important_dates', 'INSERT', {
+      title: 'x',
+      date: '2020-01-01',
+      visibility: 'personal',
+    });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data).not.toHaveProperty('visibility');
+  });
+
+  it('bounds the alert offset', () => {
+    expect(parseSyncPayload('important_dates', 'UPDATE', { alertOffsetDays: 7 }).success).toBe(true);
+    expect(parseSyncPayload('important_dates', 'UPDATE', { alertOffsetDays: null }).success).toBe(true);
+    expect(parseSyncPayload('important_dates', 'UPDATE', { alertOffsetDays: -1 }).success).toBe(false);
+    expect(parseSyncPayload('important_dates', 'UPDATE', { alertOffsetDays: 1.5 }).success).toBe(false);
+  });
+});
