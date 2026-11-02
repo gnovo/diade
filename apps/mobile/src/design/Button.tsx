@@ -61,7 +61,7 @@ export const Button: React.FC<ButtonProps> = ({
     >
       {loading ? <ActivityIndicator color={iconColor} /> : null}
       {icon && !loading ? <Icon name={icon} size={sizes['icon-md']} color={iconColor} /> : null}
-      <Text className={`text-[15px] leading-5 font-semibold ${label[variant]}`}>{text}</Text>
+      <Text className={`text-[15px] leading-6 font-semibold ${label[variant]}`}>{text}</Text>
       {iconAfter ? <Icon name={iconAfter} size={sizes['icon-md']} color={iconColor} /> : null}
     </Pressable>
   );

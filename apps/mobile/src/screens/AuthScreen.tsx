@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { User } from '@diade/domain';
 import { useAuth } from '../context/AuthContext';
 import { authClient } from '../auth/authClient';
-import { Button, Logo, ThemeToggle } from '../design';
+import { Button, Logo } from '../design';
 
 // A root-relative callback is resolved by the Expo plugin for the current runtime: diade:// in a
 // standalone build, exp://<dev-server> in Expo Go. A hardcoded diade:// cannot return to Expo Go.
@@ -56,9 +56,15 @@ export const AuthScreen: React.FC = () => {
           </Text>
         </View>
 
-        <View className="bg-surface rounded-lg p-6 border border-border my-8 gap-4">
+        <View className="bg-surface rounded-lg p-6 border border-border my-8 gap-5">
+          <View className="gap-1">
+            <Text className="text-xl leading-7 font-bold text-ink text-center">Welcome</Text>
+            <Text className="text-sm leading-5 text-ink-muted text-center">
+              Sign in to open your shared space.
+            </Text>
+          </View>
           <Button
-            label="Continue with Google"
+            label="Sign in with Google"
             onPress={handleGoogleSignIn}
             disabled={isSigningIn}
             loading={isSigningIn}
@@ -67,13 +73,12 @@ export const AuthScreen: React.FC = () => {
           />
         </View>
 
-        <View className="gap-2 mb-2">
-          <ThemeToggle />
+        <View className="mb-4 gap-1">
+          <Text className="text-sm leading-5 text-ink-muted text-center">Díade is just for the two of you.</Text>
+          <Text className="text-sm leading-5 text-ink-muted text-center">
+            Use the Google account you were invited with.
+          </Text>
         </View>
-
-        <Text className="text-sm text-ink-muted text-center mb-4">
-          Private to the two of you. Sign in with the Google account you were invited with.
-        </Text>
       </View>
     </SafeAreaView>
   );
