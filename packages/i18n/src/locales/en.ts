@@ -131,7 +131,7 @@ export const en = {
     joinedBody: 'You have joined "{{name}}".',
     joinError: 'Join Error',
     invalidCode: 'Invalid or expired invite code',
-    signOut: 'Sign out of this account',
+    signOut: 'Sign out of this account.',
   },
 
   today: {
