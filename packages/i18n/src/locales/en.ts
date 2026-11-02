@@ -239,6 +239,13 @@ export const en = {
     signOut: 'Sign out',
     signOutTitle: 'Sign out?',
     signOutBody: 'Local data on this device will be removed. Changes not yet synced will be lost.',
+    invitePartner: 'Invite your partner',
+    inviteExpires: 'Expires {{date}}. Your partner enters it under "Join Existing Space".',
+    inviteExpired: 'The invite code has expired. Create a new one to invite your partner.',
+    inviteNew: 'New invite code',
+    inviteShare: 'Share code',
+    inviteShareMessage: 'Join me on Díade. Invite code: {{code}}',
+    inviteError: 'Could not create invite code',
   },
 
   eventForm: {

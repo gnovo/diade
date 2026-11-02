@@ -239,6 +239,13 @@ export const ptPT: Shape<Catalog> = {
     signOutTitle: 'Terminar sessão?',
     signOutBody:
       'Os dados locais neste dispositivo serão removidos. As alterações ainda não sincronizadas perder-se-ão.',
+    invitePartner: 'Convidar o seu parceiro(a)',
+    inviteExpires: 'Expira a {{date}}. O seu parceiro(a) introduz o código em "Entrar num espaço existente".',
+    inviteExpired: 'O código de convite expirou. Crie um novo para convidar o seu parceiro(a).',
+    inviteNew: 'Novo código de convite',
+    inviteShare: 'Partilhar código',
+    inviteShareMessage: 'Junte-se a mim na Díade. Código de convite: {{code}}',
+    inviteError: 'Não foi possível criar o código de convite',
   },
 
   eventForm: {
