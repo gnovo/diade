@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
-import { eq, and, gt, or } from 'drizzle-orm';
+import { eq, and, gt, or, ne, isNull } from 'drizzle-orm';
 import { syncPushSchema, syncPullQuerySchema, parseSyncPayload } from '@diade/validation';
 import {
   canAccessRecord,
@@ -15,6 +15,7 @@ import {
   lists,
   listItems,
   captureItems,
+  importantDates,
   syncMutations,
   spaceMembers,
 } from '../db/schema';
@@ -86,6 +87,15 @@ export async function authorizeMutation(
         .select({ id: lists.id })
         .from(lists)
         .where(and(eq(lists.id, recordId), eq(lists.spaceId, spaceId)))
+        .limit(1);
+      return row ? 'ok' : 'not_found';
+    }
+    case 'important_dates': {
+      // Always shared: any member of the space may edit, but only within their own space.
+      const [row] = await db
+        .select({ id: importantDates.id })
+        .from(importantDates)
+        .where(and(eq(importantDates.id, recordId), eq(importantDates.spaceId, spaceId)))
         .limit(1);
       return row ? 'ok' : 'not_found';
     }
@@ -253,6 +263,67 @@ async function applyMutation(
         changes.checkedAt = d.isChecked ? now : null;
       }
       await db.update(listItems).set(changes).where(where);
+      return;
+    }
+
+    case 'important_dates': {
+      const where = and(eq(importantDates.id, recordId), eq(importantDates.spaceId, spaceId));
+      if (operation === 'DELETE') {
+        await db.update(importantDates).set({ deletedAt: now, updatedAt: now }).where(where);
+        return;
+      }
+
+      // Only one live date per space may be pinned. Un-pin the others (bumping updatedAt so
+      // every device pulls the change) and write this record in the same transaction.
+      const unpinOthers = (tx: Pick<DbClient, 'update'>) =>
+        tx
+          .update(importantDates)
+          .set({ pinned: false, updatedAt: now })
+          .where(
+            and(
+              eq(importantDates.spaceId, spaceId),
+              eq(importantDates.pinned, true),
+              isNull(importantDates.deletedAt),
+              ne(importantDates.id, recordId),
+            ),
+          );
+
+      if (operation === 'INSERT') {
+        const pinned = d.pinned ?? false;
+        await db.transaction(async (tx) => {
+          if (pinned) await unpinOthers(tx);
+          await tx.insert(importantDates).values({
+            id: recordId,
+            spaceId,
+            creatorId: userId,
+            title: d.title,
+            type: d.type ?? 'other',
+            notes: d.notes ?? null,
+            date: d.date,
+            countFirstDay: d.countFirstDay ?? false,
+            repeat: d.repeat ?? 'yearly',
+            pinned,
+            alertOffsetDays: d.alertOffsetDays ?? null,
+            createdAt: now,
+            updatedAt: now,
+          });
+        });
+        return;
+      }
+
+      const changes: Partial<typeof importantDates.$inferInsert> = { updatedAt: now };
+      if (d.title !== undefined) changes.title = d.title;
+      if (d.type !== undefined) changes.type = d.type;
+      if (d.notes !== undefined) changes.notes = d.notes;
+      if (d.date !== undefined) changes.date = d.date;
+      if (d.countFirstDay !== undefined) changes.countFirstDay = d.countFirstDay;
+      if (d.repeat !== undefined) changes.repeat = d.repeat;
+      if (d.pinned !== undefined) changes.pinned = d.pinned;
+      if (d.alertOffsetDays !== undefined) changes.alertOffsetDays = d.alertOffsetDays;
+      await db.transaction(async (tx) => {
+        if (d.pinned === true) await unpinOthers(tx);
+        await tx.update(importantDates).set(changes).where(where);
+      });
       return;
     }
 
@@ -503,6 +574,17 @@ export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) 
         ),
       );
 
+    // Query important dates (always shared within the space)
+    const importantDateRecords = await db
+      .select()
+      .from(importantDates)
+      .where(
+        and(
+          eq(importantDates.spaceId, spaceId),
+          or(gt(importantDates.updatedAt, sinceDate), gt(importantDates.deletedAt, sinceDate)),
+        ),
+      );
+
     return c.json({
       success: true,
       data: {
@@ -541,6 +623,12 @@ export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) 
           createdAt: c.createdAt.toISOString(),
           updatedAt: c.updatedAt.toISOString(),
           deletedAt: c.deletedAt?.toISOString() || null,
+        })),
+        importantDates: importantDateRecords.map((i) => ({
+          ...i,
+          createdAt: i.createdAt.toISOString(),
+          updatedAt: i.updatedAt.toISOString(),
+          deletedAt: i.deletedAt?.toISOString() || null,
         })),
       },
     });

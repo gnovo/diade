@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import {
   pgTable,
   text,
@@ -5,6 +6,9 @@ import {
   boolean,
   uuid,
   bigint,
+  date,
+  integer,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
 // --- Better Auth Tables ---
@@ -104,6 +108,40 @@ export const events = pgTable('events', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   deletedAt: timestamp('deleted_at'),
 });
+
+/**
+ * Special days for the couple (birthdays, anniversaries, ...). Always shared, so there
+ * is no visibility column. `date` is a plain calendar day (no time zone).
+ */
+export const importantDates = pgTable(
+  'important_dates',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    spaceId: uuid('space_id')
+      .notNull()
+      .references(() => spaces.id, { onDelete: 'cascade' }),
+    creatorId: text('creator_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    type: text('type').notNull().default('other'), // see IMPORTANT_DATE_TYPES in @diade/domain
+    notes: text('notes'),
+    date: date('date', { mode: 'string' }).notNull(),
+    countFirstDay: boolean('count_first_day').notNull().default(false),
+    repeat: text('repeat').notNull().default('yearly'), // 'none' | 'yearly'
+    pinned: boolean('pinned').notNull().default(false),
+    alertOffsetDays: integer('alert_offset_days'), // null = no alert; stored only for now
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+    deletedAt: timestamp('deleted_at'),
+  },
+  (table) => [
+    // At most one live pinned date per space.
+    uniqueIndex('important_dates_one_pinned_per_space')
+      .on(table.spaceId)
+      .where(sql`${table.pinned} AND ${table.deletedAt} IS NULL`),
+  ],
+);
 
 export const tasks = pgTable('tasks', {
   id: uuid('id').primaryKey().defaultRandom(),

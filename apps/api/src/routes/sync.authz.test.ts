@@ -78,3 +78,21 @@ describe('sync mutation authorisation', () => {
     expect(await authorizeMutation(db, mutation('tasks', 'DELETE'), {}, SPACE, ME)).toBe('not_found');
   });
 });
+
+describe('important dates authorisation', () => {
+  it('lets either member edit or delete a date in their space (always shared)', async () => {
+    const db = fakeDb({ important_dates: [{ id: RECORD }] });
+    expect(await authorizeMutation(db, mutation('important_dates', 'UPDATE'), {}, SPACE, ME)).toBe('ok');
+    expect(await authorizeMutation(db, mutation('important_dates', 'DELETE'), {}, SPACE, PARTNER)).toBe('ok');
+  });
+
+  it('reports not_found when the date is not in the caller\'s space', async () => {
+    // The lookup is scoped to the caller's space, so another space's row yields no result.
+    const db = fakeDb({});
+    expect(await authorizeMutation(db, mutation('important_dates', 'UPDATE'), {}, SPACE, ME)).toBe('not_found');
+  });
+
+  it('allows inserts', async () => {
+    expect(await authorizeMutation(fakeDb({}), mutation('important_dates', 'INSERT'), {}, SPACE, ME)).toBe('ok');
+  });
+});
