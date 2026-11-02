@@ -232,6 +232,8 @@ export const en = {
   profile: {
     title: 'Profile',
     close: 'Close profile',
+    language: 'Language',
+    languageSystem: 'System',
     account: 'Account',
     accountNote: 'Signing out removes local data from this device.',
     signOut: 'Sign out',

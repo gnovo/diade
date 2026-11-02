@@ -15,3 +15,18 @@ export function resolveLanguage(tags: ReadonlyArray<string | null | undefined>):
   }
   return DEFAULT_LANGUAGE;
 }
+
+/** What the member chose: follow the device, or force one of the supported languages. */
+export const LANGUAGE_PREFERENCES = ['system', ...SUPPORTED_LANGUAGES] as const;
+export type LanguagePreference = (typeof LANGUAGE_PREFERENCES)[number];
+
+export const isLanguagePreference = (value: unknown): value is LanguagePreference =>
+  LANGUAGE_PREFERENCES.some((preference) => preference === value);
+
+/** The language to show for a preference. `system` resolves from the device's locale tags. */
+export function pickLanguage(
+  preference: LanguagePreference,
+  deviceTags: ReadonlyArray<string | null | undefined>,
+): Language {
+  return preference === 'system' ? resolveLanguage(deviceTags) : preference;
+}

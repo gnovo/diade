@@ -3,8 +3,10 @@ import { Alert, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { space as spacing, sizes } from '@diade/design-tokens';
+import type { LanguagePreference } from '@diade/i18n';
 import { useAuth } from '../context/AuthContext';
-import { Button, Card, SectionLabel } from '../components/ui';
+import { Button, Card, Segmented, SectionLabel } from '../components/ui';
+import { useLanguagePreference } from '../i18n';
 import { Icon, ThemeToggle } from '../design';
 
 export const userInitial = (name?: string | null, email?: string | null) =>
@@ -14,6 +16,7 @@ export const userInitial = (name?: string | null, email?: string | null) =>
 export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> = ({ visible, onClose }) => {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
+  const { preference, setPreference } = useLanguagePreference();
 
   const confirmSignOut = () =>
     Alert.alert(t('profile.signOutTitle'), t('profile.signOutBody'), [
@@ -51,6 +54,20 @@ export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> 
           <Card>
             <SectionLabel>{t('theme.appearance')}</SectionLabel>
             <ThemeToggle />
+          </Card>
+
+          <Card>
+            <SectionLabel>{t('profile.language')}</SectionLabel>
+            <Segmented<LanguagePreference>
+              value={preference}
+              onChange={setPreference}
+              options={[
+                { value: 'system', label: t('profile.languageSystem') },
+                // Language names are shown in their own language so they can always be found.
+                { value: 'en', label: 'English' },
+                { value: 'pt-PT', label: 'Português' },
+              ]}
+            />
           </Card>
 
           <Card>

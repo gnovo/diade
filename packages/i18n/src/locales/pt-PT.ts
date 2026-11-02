@@ -231,6 +231,8 @@ export const ptPT: Shape<Catalog> = {
   profile: {
     title: 'Perfil',
     close: 'Fechar perfil',
+    language: 'Idioma',
+    languageSystem: 'Sistema',
     account: 'Conta',
     accountNote: 'Terminar sessão remove os dados locais deste dispositivo.',
     signOut: 'Terminar sessão',

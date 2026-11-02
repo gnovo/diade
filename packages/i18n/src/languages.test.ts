@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolveLanguage } from './languages';
+import { isLanguagePreference, pickLanguage, resolveLanguage } from './languages';
 
 describe('resolveLanguage', () => {
   it('maps every Portuguese variant to pt-PT', () => {
@@ -23,5 +23,26 @@ describe('resolveLanguage', () => {
     expect(resolveLanguage(['fr-FR', 'de-DE'])).toBe('en');
     expect(resolveLanguage([])).toBe('en');
     expect(resolveLanguage([null, undefined, ''])).toBe('en');
+  });
+});
+
+describe('pickLanguage', () => {
+  it('follows the device when the preference is system', () => {
+    expect(pickLanguage('system', ['pt-BR'])).toBe('pt-PT');
+    expect(pickLanguage('system', ['fr-FR'])).toBe('en');
+  });
+
+  it('uses the chosen language regardless of the device', () => {
+    expect(pickLanguage('en', ['pt-PT'])).toBe('en');
+    expect(pickLanguage('pt-PT', ['en-US'])).toBe('pt-PT');
+  });
+});
+
+describe('isLanguagePreference', () => {
+  it('accepts only known preferences', () => {
+    expect(isLanguagePreference('system')).toBe(true);
+    expect(isLanguagePreference('pt-PT')).toBe(true);
+    expect(isLanguagePreference('fr')).toBe(false);
+    expect(isLanguagePreference(null)).toBe(false);
   });
 });
