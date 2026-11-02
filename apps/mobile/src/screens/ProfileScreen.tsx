@@ -1,9 +1,10 @@
-import React from 'react';
-import { Alert, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Modal, Pressable, ScrollView, Share, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { space as spacing, sizes } from '@diade/design-tokens';
 import type { LanguagePreference } from '@diade/i18n';
+import { apiClient } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { Button, Card, Segmented, SectionLabel } from '../components/ui';
 import { useLanguagePreference } from '../i18n';
@@ -15,8 +16,31 @@ export const userInitial = (name?: string | null, email?: string | null) =>
 /** Profile and preferences, opened from the avatar button on the Us screen. */
 export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> = ({ visible, onClose }) => {
   const { t } = useTranslation();
-  const { user, signOut } = useAuth();
+  const { user, space, members, signOut, updateSpace } = useAuth();
   const { preference, setPreference } = useLanguagePreference();
+  const [generating, setGenerating] = useState(false);
+
+  // The invite is only relevant until the second member has joined.
+  const awaitingPartner = !!space && members.length < 2;
+  const expiresAt = space?.inviteExpiresAt ? new Date(space.inviteExpiresAt) : null;
+  const inviteValid = !!space?.inviteCode && (!expiresAt || expiresAt.getTime() > Date.now());
+
+  const generateInvite = async () => {
+    if (!space) return;
+    try {
+      setGenerating(true);
+      const res = await apiClient.createInviteCode();
+      await updateSpace({ ...space, inviteCode: res.inviteCode, inviteExpiresAt: res.expiresAt });
+    } catch (err: any) {
+      Alert.alert(t('profile.inviteError'), err?.message || t('common.checkConnection'));
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const shareInvite = () => {
+    if (space) Share.share({ message: t('profile.inviteShareMessage', { code: space.inviteCode }) });
+  };
 
   const confirmSignOut = () =>
     Alert.alert(t('profile.signOutTitle'), t('profile.signOutBody'), [
@@ -69,6 +93,37 @@ export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> 
               ]}
             />
           </Card>
+
+          {awaitingPartner ? (
+            <Card>
+              <SectionLabel>{t('profile.invitePartner')}</SectionLabel>
+              {inviteValid && space ? (
+                <>
+                  <Text selectable className="text-3xl leading-10 font-bold text-ink tracking-widest mb-1">
+                    {space.inviteCode}
+                  </Text>
+                  {expiresAt ? (
+                    <Text className="text-sm leading-5 text-ink-muted mb-3">
+                      {t('profile.inviteExpires', { date: expiresAt.toLocaleDateString() })}
+                    </Text>
+                  ) : null}
+                  <Button label={t('profile.inviteShare')} onPress={shareInvite} />
+                  <View className="h-2" />
+                  <Button
+                    label={t('profile.inviteNew')}
+                    variant="ghost"
+                    onPress={generateInvite}
+                    disabled={generating}
+                  />
+                </>
+              ) : (
+                <>
+                  <Text className="text-sm leading-5 text-ink-muted mb-3">{t('profile.inviteExpired')}</Text>
+                  <Button label={t('profile.inviteNew')} onPress={generateInvite} disabled={generating} />
+                </>
+              )}
+            </Card>
+          ) : null}
 
           <Card>
             <SectionLabel>{t('profile.account')}</SectionLabel>
