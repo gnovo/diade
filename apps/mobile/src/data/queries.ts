@@ -31,6 +31,31 @@ export const getActiveLists = () => selectActive<SharedList>('local_lists', 'cre
 export const getActiveListItems = () =>
   selectActive<ListItem>('local_list_items', 'is_checked ASC, created_at ASC');
 
+export interface ItemHistoryRow {
+  category: string;
+  name: string;
+  count: number;
+  lastUsedAt: string;
+}
+
+/**
+ * Every item name ever added, per list category, with how often and when last. Unlike the
+ * other reads this deliberately includes tombstoned rows: clearing checked items is how
+ * most items disappear, and they are exactly what autocomplete should remember.
+ */
+export async function getItemHistory(): Promise<ItemHistoryRow[]> {
+  const db = await getLocalDb();
+  return db.getAllAsync<ItemHistoryRow>(
+    `SELECT l.category AS category,
+            MIN(li.name) AS name,
+            COUNT(*) AS count,
+            MAX(li.created_at) AS lastUsedAt
+       FROM local_list_items li
+       JOIN local_lists l ON l.id = li.list_id
+      GROUP BY l.category, lower(li.name)`,
+  );
+}
+
 export const getActiveImportantDates = () =>
   selectActive<ImportantDate>('local_important_dates', 'date ASC, created_at ASC');
 

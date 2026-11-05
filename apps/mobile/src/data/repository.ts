@@ -5,7 +5,7 @@
  */
 import type { SyncEntityName, MutationOperation } from '@diade/domain';
 import { parseSyncPayload } from '@diade/validation';
-import { getLocalDb } from '../storage/sqlite';
+import { getLocalDb, inTransaction } from '../storage/sqlite';
 import { toColumns, type Row } from './mapping';
 import { newId, nextClientTimestamp } from './ids';
 import { emitDataChanged, emitLocalWrite } from './changes';
@@ -78,7 +78,7 @@ export async function insertRecord(
   };
   const { columns, values } = toColumns(row);
 
-  await db.withTransactionAsync(async () => {
+  await inTransaction(async () => {
     await db.runAsync(
       `INSERT INTO ${ENTITY_TABLES[entity]} (${columns.join(', ')}) VALUES (${columns
         .map(() => '?')
@@ -104,7 +104,7 @@ export async function updateRecord(
   const now = new Date().toISOString();
   const { columns, values } = toColumns({ ...changes, updatedAt: now });
 
-  await db.withTransactionAsync(async () => {
+  await inTransaction(async () => {
     await db.runAsync(
       `UPDATE ${ENTITY_TABLES[entity]} SET ${columns.map((c) => `${c} = ?`).join(', ')} WHERE id = ?`,
       [...(values as (string | number | null)[]), id],
@@ -121,7 +121,7 @@ export async function deleteRecord(entity: SyncEntityName, id: string): Promise<
   const db = await getLocalDb();
   const now = new Date().toISOString();
 
-  await db.withTransactionAsync(async () => {
+  await inTransaction(async () => {
     await db.runAsync(
       `UPDATE ${ENTITY_TABLES[entity]} SET deleted_at = ?, updated_at = ? WHERE id = ?`,
       [now, now, id],

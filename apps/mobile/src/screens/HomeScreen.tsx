@@ -24,7 +24,6 @@ import {
   ScreenScaffold,
   Segmented,
   SectionLabel,
-  SyncBadge,
   TextField,
   useWriteContext,
   type SegmentOption,
@@ -120,7 +119,7 @@ export const HomeScreen: React.FC = () => {
   };
 
   return (
-    <ScreenScaffold eyebrow={t('household.eyebrow')} title={t('household.title')} right={<SyncBadge />}>
+    <ScreenScaffold eyebrow={t('household.eyebrow')} title={t('household.title')}>
       <Card>
         <SectionLabel>{t('household.newTask')}</SectionLabel>
         <TextField

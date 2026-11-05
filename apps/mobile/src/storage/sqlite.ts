@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+import { createSerialQueue } from './serialQueue';
 import type { ClientMutation } from '@diade/domain';
 
 let dbInstance: SQLite.SQLiteDatabase | null = null;
@@ -211,6 +212,28 @@ async function migrateLocalSchema(db: SQLite.SQLiteDatabase): Promise<void> {
   await addColumn('local_external_events', 'highlighted', 'INTEGER NOT NULL DEFAULT 0');
 }
 
+// --- Transactions ---
+
+const enqueueTransaction = createSerialQueue();
+
+/**
+ * Runs `work` in a transaction, one at a time. expo-sqlite shares a single connection and
+ * `withTransactionAsync` is not serialised, so two overlapping transactions (a local write
+ * while the sync engine applies a pull) end each other's with "cannot commit - no transaction
+ * is active". Every write transaction in the app goes through this queue instead. Do not
+ * nest calls: the inner one would wait for the outer one forever.
+ */
+export function inTransaction<T>(work: (db: SQLite.SQLiteDatabase) => Promise<T>): Promise<T> {
+  return enqueueTransaction(async () => {
+    const db = await getLocalDb();
+    let result!: T;
+    await db.withTransactionAsync(async () => {
+      result = await work(db);
+    });
+    return result;
+  });
+}
+
 // --- Outbox Management Helpers ---
 
 export async function queueLocalMutation(mutation: ClientMutation): Promise<void> {
@@ -284,8 +307,7 @@ export async function setSyncMeta(key: string, value: string): Promise<void> {
  * one member's personal data never remains readable on a shared device.
  */
 export async function resetLocalDb(): Promise<void> {
-  const db = await getLocalDb();
-  await db.withTransactionAsync(async () => {
+  await inTransaction(async (db) => {
     for (const table of LOCAL_TABLES) {
       await db.runAsync(`DELETE FROM ${table}`);
     }

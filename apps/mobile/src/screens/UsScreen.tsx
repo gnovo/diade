@@ -17,7 +17,7 @@ import { ImportantDateDetail } from '../components/ImportantDateDetail';
 import { ImportantDateForm } from '../components/ImportantDateForm';
 import { ImportantDateIcon } from '../components/ImportantDateIcon';
 import { useAuth } from '../context/AuthContext';
-import { Card, EmptyState, Pill, ScreenScaffold, SectionLabel, SyncBadge } from '../components/ui';
+import { Card, EmptyState, Pill, ScreenScaffold, SectionLabel } from '../components/ui';
 import { Icon, useColor } from '../design';
 import { ProfileScreen, userInitial } from './ProfileScreen';
 
@@ -63,10 +63,6 @@ export const UsScreen: React.FC = () => {
         </Pressable>
       }
     >
-      <View className="mb-4">
-        <SyncBadge />
-      </View>
-
       {pinned && heroStatus ? (
         <Pressable
           onPress={() => setDetailId(pinned.id)}

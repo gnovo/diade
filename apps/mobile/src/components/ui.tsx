@@ -1,18 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, View, Text, TextInput, ScrollView, Pressable, type TextInputProps } from 'react-native';
+import { Animated, Easing, View, Text, TextInput, ScrollView, Pressable, RefreshControl, type TextInputProps } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useSync } from '../sync/SyncProvider';
 import {
   Badge,
   Button as DSButton,
   Checkbox as DSCheckbox,
-  SyncStatus,
+  Icon,
   useColor,
   useShadow,
   type BadgeTone,
-  type SyncState,
 } from '../design';
 import { space } from '@diade/design-tokens';
 
@@ -27,26 +25,56 @@ export const ScreenScaffold: React.FC<{
   eyebrow?: string;
   title: string;
   right?: React.ReactNode;
+  /** Shows an arrow at the top-left, where Android users expect "back". */
+  onBack?: () => void;
+  backLabel?: string;
+  /** Pull down to sync. On by default. */
+  refreshable?: boolean;
   children: React.ReactNode;
-}> = ({ eyebrow, title, right, children }) => (
-  <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
-    <ScrollView
-      contentContainerStyle={{ paddingHorizontal: space[4], paddingTop: space[4], paddingBottom: space[8] }}
-      keyboardShouldPersistTaps="handled"
-    >
-      <View className="flex-row items-end justify-between mb-6">
-        <View className="flex-1 mr-3">
-          {eyebrow ? (
-            <Text className="text-sm leading-5 text-ink-muted mb-1">{eyebrow}</Text>
+}> = ({ eyebrow, title, right, onBack, backLabel, refreshable = true, children }) => {
+  const { refresh, refreshing } = useSync();
+  const accent = useColor('action');
+  const surface = useColor('surface');
+  return (
+    <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
+      <ScrollView
+        contentContainerStyle={{ paddingHorizontal: space[4], paddingTop: space[4], paddingBottom: space[8] }}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={
+          refreshable ? (
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => void refresh()}
+              tintColor={accent}
+              colors={[accent]}
+              progressBackgroundColor={surface}
+            />
+          ) : undefined
+        }
+      >
+        <View className={`flex-row justify-between mb-6 ${onBack ? 'items-center' : 'items-end'}`}>
+          {onBack ? (
+            <Pressable
+              onPress={onBack}
+              accessibilityRole="button"
+              accessibilityLabel={backLabel}
+              hitSlop={4}
+              className="w-12 h-12 -ml-3 mr-1 rounded-full items-center justify-center active:bg-surface-sunken"
+            >
+              <Icon name="arrow-left" />
+            </Pressable>
           ) : null}
-          <Text className="text-title-1 font-bold text-ink">{title}</Text>
+          <View className="flex-1 mr-3">
+            {eyebrow ? <Text className="text-sm leading-5 text-ink-muted mb-1">{eyebrow}</Text> : null}
+            <Text className="text-title-1 font-bold text-ink">{title}</Text>
+          </View>
+          {right}
         </View>
-        {right}
-      </View>
-      {children}
-    </ScrollView>
-  </SafeAreaView>
-);
+        {children}
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
 
 export const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({
   children,
@@ -180,30 +208,3 @@ export const Pill: React.FC<{ label: string; tone?: 'shared' | 'personal' | 'neu
 export const EmptyState: React.FC<{ message: string }> = ({ message }) => (
   <Text className="text-sm leading-5 text-ink-muted py-2">{message}</Text>
 );
-
-/** Shows whether local changes are saved, waiting, or synced. Never relies on colour alone. */
-export const SyncBadge: React.FC = () => {
-  const { t } = useTranslation();
-  const { status, pendingCount } = useSync();
-  const state: SyncState =
-    status === 'offline'
-      ? 'offline'
-      : status === 'error'
-        ? 'conflict'
-        : status === 'syncing' || pendingCount > 0
-          ? 'pending'
-          : 'synced';
-  const label =
-    status === 'syncing'
-      ? t('sync.syncing')
-      : status === 'offline'
-        ? pendingCount
-          ? t('sync.offlineSaved', { count: pendingCount })
-          : t('sync.offline')
-        : status === 'error'
-          ? t('sync.problem')
-          : pendingCount > 0
-            ? t('sync.waiting', { count: pendingCount })
-            : t('sync.synced');
-  return <SyncStatus state={state} label={label} />;
-};

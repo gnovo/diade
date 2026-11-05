@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/client';
@@ -7,6 +7,9 @@ import { runSync, subscribeSyncState, getSyncState, type SyncState } from './eng
 
 interface SyncContextValue extends SyncState {
   syncNow: () => Promise<void>;
+  /** A user-initiated sync (pull to refresh). `refreshing` is true while it runs. */
+  refresh: () => Promise<void>;
+  refreshing: boolean;
 }
 
 const SyncContext = createContext<SyncContextValue | undefined>(undefined);
@@ -15,6 +18,10 @@ const PUSH_DEBOUNCE_MS = 1_500;
 const FOREGROUND_INTERVAL_MS = 30_000;
 /** Don't ask the server to refresh Google more often than this; its cron covers the rest. */
 const CALENDAR_REFRESH_MIN_MS = 5 * 60_000;
+/** A refresh that finishes instantly reads as a glitch, so the spinner stays at least this long. */
+const MIN_REFRESH_MS = 700;
+/** A pull also asks the server to refresh Google, but not more often than this. */
+const MANUAL_CALENDAR_REFRESH_MIN_MS = 30_000;
 const OFFLINE_RETRY_MS = [5_000, 15_000, 60_000, 300_000];
 
 /**
@@ -24,11 +31,36 @@ const OFFLINE_RETRY_MS = [5_000, 15_000, 60_000, 300_000];
 export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, space } = useAuth();
   const [state, setState] = useState<SyncState>(getSyncState());
+  const [refreshing, setRefreshing] = useState(false);
+  const lastManualCalendarRefresh = useRef(0);
   const active = Boolean(user && space);
 
   const syncNow = useCallback(async () => {
     if (!active) return;
     await runSync();
+  }, [active]);
+
+  const refresh = useCallback(async () => {
+    if (!active) return;
+    setRefreshing(true);
+    const started = Date.now();
+    try {
+      const status = await runSync();
+      // Google events show on Today, so a pull also asks the server for fresh ones (best effort).
+      if (status === 'idle' && Date.now() - lastManualCalendarRefresh.current > MANUAL_CALENDAR_REFRESH_MIN_MS) {
+        lastManualCalendarRefresh.current = Date.now();
+        try {
+          const result = await apiClient.syncCalendars();
+          if (result.synced > 0) await runSync();
+        } catch {
+          // Not connected or offline: the regular sync above already did its job.
+        }
+      }
+    } finally {
+      const remaining = MIN_REFRESH_MS - (Date.now() - started);
+      if (remaining > 0) await new Promise((resolve) => setTimeout(resolve, remaining));
+      setRefreshing(false);
+    }
   }, [active]);
 
   useEffect(() => subscribeSyncState(setState), []);
@@ -90,7 +122,10 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [active]);
 
-  const value = useMemo<SyncContextValue>(() => ({ ...state, syncNow }), [state, syncNow]);
+  const value = useMemo<SyncContextValue>(
+    () => ({ ...state, syncNow, refresh, refreshing }),
+    [state, syncNow, refresh, refreshing],
+  );
 
   return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>;
 };
