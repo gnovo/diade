@@ -104,6 +104,7 @@ export const en = {
     problem: 'Sync problem',
     waiting: '{{count}} waiting to sync',
     tapToRetry: 'Tap to retry',
+    retry: 'Retry',
   },
 
   theme: {

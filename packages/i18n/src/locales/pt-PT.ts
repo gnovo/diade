@@ -103,6 +103,7 @@ export const ptPT: Shape<Catalog> = {
     problem: 'Problema de sincronização',
     waiting: '{{count}} a aguardar sincronização',
     tapToRetry: 'Toque para tentar novamente',
+    retry: 'Tentar novamente',
   },
 
   theme: {
