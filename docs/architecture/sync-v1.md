@@ -1,7 +1,7 @@
 # Sync v1 (Milestone 2)
 
 Status: implemented for events, tasks, lists, list items and quick-capture items.
-Not yet covered: Google Calendar sync (Milestone 3), attachments, push notifications.
+Not yet covered: attachments, push notifications. Google Calendar sync is specified in calendar-sync-v1.md.
 
 ## Shape
 

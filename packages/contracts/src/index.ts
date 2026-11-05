@@ -1,4 +1,6 @@
 import type {
+  ExternalCalendar,
+  ExternalVisibility,
   User,
   Space,
   SpaceMember,
@@ -65,4 +67,36 @@ export type { SyncPushPayload, SyncPushResult, SyncPullResult };
 
 export interface SyncPullParams {
   since?: string; // ISO 8601 string
+}
+
+// --- Google Calendar Contracts (see docs/architecture/calendar-sync-v1.md) ---
+
+export interface CalendarConnectionResponse {
+  /** The member has granted calendar access and a refresh token is stored. */
+  connected: boolean;
+  /** The grant was revoked or expired; the member must reconnect. */
+  needsReauth: boolean;
+  /** The member has confirmed the calendar picker at least once. */
+  confirmed: boolean;
+  calendars: ExternalCalendar[];
+}
+
+export interface UpdateCalendarRequest {
+  syncEnabled?: boolean;
+  visibility?: ExternalVisibility;
+}
+
+export interface ConfirmCalendarsRequest {
+  calendars: Array<{ id: string; syncEnabled: boolean; visibility: ExternalVisibility }>;
+}
+
+export interface UpdateExternalEventRequest {
+  visibilityOverride?: 'busy_only' | 'private' | null;
+  highlighted?: boolean;
+}
+
+export interface CalendarSyncResponse {
+  synced: number;
+  skipped: number;
+  errors: Array<{ calendarId: string; error?: string }>;
 }

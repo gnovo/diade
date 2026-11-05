@@ -5,8 +5,10 @@
 export * from './recurrence';
 export * from './datetime';
 export * from './importantDates';
+export * from './externalCalendar';
 
 import type { ImportantDateType, ImportantDateRepeat } from './importantDates';
+import type { ExternalCalendar, ExternalEvent } from './externalCalendar';
 
 // --- Identity & Space ---
 
@@ -63,6 +65,8 @@ export interface CalendarEvent extends BaseRecord {
   visibility: Visibility;
   recurrenceRule: string | null; // iCal RRULE format
   category: EventCategory;
+  /** Starred: featured on the Today screen. */
+  highlighted: boolean;
 }
 
 // --- Important dates ---
@@ -88,6 +92,8 @@ export interface ImportantDate extends BaseRecord {
 // --- Tasks & Reminders ---
 
 export type TaskStatus = 'todo' | 'completed';
+export const TASK_PRIORITIES = ['normal', 'important'] as const;
+export type TaskPriority = (typeof TASK_PRIORITIES)[number];
 
 export interface Task extends BaseRecord {
   assigneeId: string | null; // null represents assigned to 'both'
@@ -95,6 +101,7 @@ export interface Task extends BaseRecord {
   notes: string | null;
   dueDate: string | null; // ISO 8601
   status: TaskStatus;
+  priority: TaskPriority;
   visibility: Visibility;
   completedAt: string | null;
 }
@@ -181,6 +188,9 @@ export interface SyncPullResult {
   listItems: ListItem[];
   captureItems: CaptureItem[];
   importantDates: ImportantDate[];
+  /** Absent from an API that predates Google Calendar sync. */
+  externalCalendars?: ExternalCalendar[];
+  externalEvents?: ExternalEvent[];
 }
 
 // --- Domain Permission Helpers ---

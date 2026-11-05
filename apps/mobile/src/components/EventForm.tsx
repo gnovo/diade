@@ -46,6 +46,7 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event })
   const [isAllDay, setIsAllDay] = useState(false);
   const [visibility, setVisibility] = useState<Visibility>('shared');
   const [repeat, setRepeat] = useState<Repeat>('NONE');
+  const [highlighted, setHighlighted] = useState(false);
   const [saving, setSaving] = useState(false);
 
   // Reset the form each time it opens so a previous draft never leaks into a new event.
@@ -61,6 +62,7 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event })
       setIsAllDay(event.isAllDay);
       setVisibility(event.visibility);
       setRepeat(repeatFromRule(event.recurrenceRule));
+      setHighlighted(event.highlighted);
     } else {
       const next = new Date();
       next.setMinutes(0, 0, 0);
@@ -73,6 +75,7 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event })
       setIsAllDay(false);
       setVisibility('shared');
       setRepeat('NONE');
+      setHighlighted(false);
     }
   }, [visible, event]);
 
@@ -104,6 +107,7 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event })
       isAllDay,
       visibility,
       recurrenceRule: repeat === 'NONE' ? null : `FREQ=${repeat}`,
+      highlighted,
     };
 
     try {
@@ -177,6 +181,11 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event })
                 </View>
               </View>
             ) : null}
+
+            <View className="flex-row items-center justify-between">
+              <Text className="text-base font-medium text-ink">{t('eventForm.highlight')}</Text>
+              <Switch value={highlighted} onValueChange={setHighlighted} />
+            </View>
 
             <View>
               <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('eventForm.whoSees')}</Text>

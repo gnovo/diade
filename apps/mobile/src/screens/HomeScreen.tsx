@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, Alert } from 'react-native';
+import { View, Text, Alert, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
   canAccessRecord,
   parseLocalDateTime,
   type Task,
+  type TaskPriority,
   type Visibility,
 } from '@diade/domain';
+import { sizes } from '@diade/design-tokens';
 import { useAuth } from '../context/AuthContext';
 import { getActiveTasks } from '../data/queries';
 import { insertRecord, updateRecord, deleteRecord } from '../data/repository';
 import { useLiveQuery } from '../data/useLiveQuery';
 import { useFormat } from '../i18n';
+import { Icon, useColor } from '../design';
 import {
   Button,
   Card,
@@ -35,16 +38,21 @@ export const HomeScreen: React.FC = () => {
   const { user, members } = useAuth();
   const ctx = useWriteContext();
   const tasks = useLiveQuery(getActiveTasks, [] as Task[]);
+  const starMuted = useColor('ink-muted');
 
   const partner = members.find((m) => m.userId !== user?.id) ?? null;
   const [title, setTitle] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [assignee, setAssignee] = useState<AssigneeChoice>('both');
   const [visibility, setVisibility] = useState<Visibility>('shared');
+  const [priority, setPriority] = useState<TaskPriority>('normal');
   const [showDone, setShowDone] = useState(false);
 
   const visible = tasks.data.filter((t) => canAccessRecord(t, user?.id ?? ''));
-  const open = visible.filter((t) => t.status !== 'completed');
+  // Important tasks first, then by due date as loaded.
+  const open = visible
+    .filter((t) => t.status !== 'completed')
+    .sort((a, b) => Number(b.priority === 'important') - Number(a.priority === 'important'));
   const done = visible.filter((t) => t.status === 'completed');
 
   const assigneeOptions: SegmentOption<AssigneeChoice>[] = [
@@ -85,10 +93,12 @@ export const HomeScreen: React.FC = () => {
         dueDate: dueIso,
         assigneeId: assigneeIdFor(assignee),
         visibility,
+        priority,
         status: 'todo',
       });
       setTitle('');
       setDueDate('');
+      setPriority('normal');
     } catch (err) {
       Alert.alert(t('household.couldNotAdd'), err instanceof Error ? err.message : t('common.tryAgain'));
     }
@@ -126,6 +136,15 @@ export const HomeScreen: React.FC = () => {
         </View>
         <Text className="text-sm font-semibold text-ink-muted mt-4 mb-1.5">{t('household.who')}</Text>
         <Segmented<AssigneeChoice> value={assignee} onChange={setAssignee} options={assigneeOptions} />
+        <Text className="text-sm font-semibold text-ink-muted mt-4 mb-1.5">{t('household.priority')}</Text>
+        <Segmented<TaskPriority>
+          value={priority}
+          onChange={setPriority}
+          options={[
+            { value: 'normal', label: t('household.priorityNormal') },
+            { value: 'important', label: t('household.priorityImportant') },
+          ]}
+        />
         <Text className="text-sm font-semibold text-ink-muted mt-4 mb-1.5">{t('household.visibility')}</Text>
         <Segmented<Visibility>
           value={visibility}
@@ -162,7 +181,22 @@ export const HomeScreen: React.FC = () => {
                   </Text>
                 ) : null}
               </View>
+              <Pressable
+                onPress={() => updateRecord('tasks', task.id, { priority: task.priority === 'important' ? 'normal' : 'important' })}
+                accessibilityRole="button"
+                accessibilityState={{ selected: task.priority === 'important' }}
+                accessibilityLabel={t(task.priority === 'important' ? 'household.unmarkImportant' : 'household.markImportant', { title: task.title })}
+                hitSlop={8}
+                className="w-11 h-11 items-center justify-center"
+              >
+                <Icon
+                  name="star"
+                  size={sizes['icon-md']}
+                  color={task.priority === 'important' ? undefined : starMuted}
+                />
+              </Pressable>
               <View className="flex-row items-center gap-1.5">
+                {task.priority === 'important' ? <Pill label={t('household.important')} /> : null}
                 {task.visibility === 'personal' ? <Pill label={t('common.personal')} tone="personal" /> : null}
                 <Pill label={assigneeLabel(task)} />
               </View>

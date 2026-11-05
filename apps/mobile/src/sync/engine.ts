@@ -166,6 +166,12 @@ const PULL_SECTIONS: Array<[SyncEntityName, keyof SyncPullResult]> = [
   ['important_dates', 'importantDates'],
 ];
 
+/** Server-owned mirrors: stored as received, with no pending local changes to overlay. */
+const EXTERNAL_SECTIONS: Array<['local_external_calendars' | 'local_external_events', 'externalCalendars' | 'externalEvents']> = [
+  ['local_external_calendars', 'externalCalendars'],
+  ['local_external_events', 'externalEvents'],
+];
+
 async function applyPull(result: SyncPullResult): Promise<void> {
   const overlays = buildOverlays(await getPendingMutations());
   const db = await getLocalDb();
@@ -184,11 +190,20 @@ async function applyPull(result: SyncPullResult): Promise<void> {
         );
       }
     }
+    for (const [table, section] of EXTERNAL_SECTIONS) {
+      for (const serverRow of (result[section] as unknown as Row[] | undefined) ?? []) {
+        const { columns, values } = toColumns(serverRow);
+        await db.runAsync(
+          `INSERT OR REPLACE INTO ${table} (${columns.join(', ')}) VALUES (${columns.map(() => '?').join(', ')})`,
+          values as (string | number | null)[],
+        );
+      }
+    }
   });
 
   // `importantDates` is absent from responses by an API that predates the entity.
-  const pulled = PULL_SECTIONS.reduce(
-    (total, [, section]) => total + (((result[section] as unknown as Row[] | undefined) ?? []).length),
+  const pulled = [...PULL_SECTIONS.map(([, section]) => section), ...EXTERNAL_SECTIONS.map(([, section]) => section)].reduce(
+    (total, section) => total + (((result[section] as unknown as Row[] | undefined) ?? []).length),
     0,
   );
   if (pulled > 0) emitDataChanged();

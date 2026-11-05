@@ -9,6 +9,7 @@ import {
   CalendarPlus,
   Camera,
   Check,
+  ChevronLeft,
   ChevronRight,
   Clock,
   CloudOff,
@@ -31,6 +32,7 @@ import {
   Search,
   Settings,
   ShoppingBasket,
+  SlidersHorizontal,
   SquareCheck,
   Star,
   StickyNote,
@@ -60,6 +62,7 @@ const lucideIcons = {
   x: X,
   lock: Lock,
   'refresh-cw': RefreshCw,
+  'chevron-left': ChevronLeft,
   'chevron-right': ChevronRight,
   'calendar-plus': CalendarPlus,
   'calendar-check': CalendarCheck,
@@ -89,6 +92,7 @@ const lucideIcons = {
   gem: Gem,
   pin: Pin,
   star: Star,
+  'sliders-horizontal': SlidersHorizontal,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof lucideIcons | 'memory';
@@ -101,6 +105,8 @@ export interface IconProps {
   /** Accessible name. Omit for decorative icons that sit next to a visible label. */
   title?: string;
   strokeWidth?: number;
+  /** Fill colour for the glyph's shape (e.g. a filled star). Omit for an outline. */
+  fill?: string;
 }
 
 export const Icon: React.FC<IconProps> = ({
@@ -109,6 +115,7 @@ export const Icon: React.FC<IconProps> = ({
   color,
   title,
   strokeWidth = 2,
+  fill,
 }) => {
   const ink = useColor('ink');
   const tint = color ?? ink;
@@ -124,5 +131,5 @@ export const Icon: React.FC<IconProps> = ({
   }
 
   const Component = lucideIcons[name];
-  return <Component size={size} color={tint} strokeWidth={strokeWidth} {...a11y} />;
+  return <Component size={size} color={tint} strokeWidth={strokeWidth} fill={fill ?? 'none'} {...a11y} />;
 };

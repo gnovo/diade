@@ -6,6 +6,9 @@ import {
   clientMutationSchema,
   syncPushSchema,
   parseSyncPayload,
+  updateExternalCalendarSchema,
+  updateExternalEventSchema,
+  confirmExternalCalendarsSchema,
 } from './index';
 
 describe('Validation Schemas', () => {
@@ -135,5 +138,41 @@ describe('important dates', () => {
     expect(parseSyncPayload('important_dates', 'UPDATE', { alertOffsetDays: null }).success).toBe(true);
     expect(parseSyncPayload('important_dates', 'UPDATE', { alertOffsetDays: -1 }).success).toBe(false);
     expect(parseSyncPayload('important_dates', 'UPDATE', { alertOffsetDays: 1.5 }).success).toBe(false);
+  });
+});
+
+describe('task priority', () => {
+  it('defaults to normal on insert and leaves it unchanged on update', () => {
+    const insert = parseSyncPayload('tasks', 'INSERT', { title: 'Pay rent' });
+    expect(insert.success && insert.data.priority).toBe('normal');
+    const update = parseSyncPayload('tasks', 'UPDATE', { title: 'Pay rent' });
+    expect(update.success && 'priority' in update.data).toBe(false);
+  });
+
+  it('accepts important and rejects anything else', () => {
+    expect(parseSyncPayload('tasks', 'UPDATE', { priority: 'important' }).success).toBe(true);
+    expect(parseSyncPayload('tasks', 'UPDATE', { priority: 'urgent' }).success).toBe(false);
+  });
+});
+
+describe('calendar settings schemas', () => {
+  it('requires a change when updating a calendar', () => {
+    expect(updateExternalCalendarSchema.safeParse({}).success).toBe(false);
+    expect(updateExternalCalendarSchema.safeParse({ visibility: 'busy_only' }).success).toBe(true);
+    expect(updateExternalCalendarSchema.safeParse({ syncEnabled: false }).success).toBe(true);
+    expect(updateExternalCalendarSchema.safeParse({ visibility: 'everyone' }).success).toBe(false);
+  });
+
+  it('only allows an event override that narrows, or clears it', () => {
+    expect(updateExternalEventSchema.safeParse({ visibilityOverride: null }).success).toBe(true);
+    expect(updateExternalEventSchema.safeParse({ visibilityOverride: 'private' }).success).toBe(true);
+    // "shared" is not an override: it would widen, so clearing (null) is the only way back.
+    expect(updateExternalEventSchema.safeParse({ visibilityOverride: 'shared' }).success).toBe(false);
+  });
+
+  it('validates the picker payload', () => {
+    const id = '11111111-1111-4111-8111-111111111111';
+    expect(confirmExternalCalendarsSchema.safeParse({ calendars: [{ id, syncEnabled: true, visibility: 'shared' }] }).success).toBe(true);
+    expect(confirmExternalCalendarsSchema.safeParse({ calendars: [{ id: 'nope', syncEnabled: true, visibility: 'shared' }] }).success).toBe(false);
   });
 });

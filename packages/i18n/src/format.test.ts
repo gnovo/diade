@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createI18n } from './i18n';
-import { formatDayLabel, formatLongDate } from './format';
+import { formatDayLabel, formatLongDate, formatMonthYear } from './format';
 
 const now = new Date(2026, 10, 1, 9, 0); // Sun 1 Nov 2026
 
@@ -25,5 +25,13 @@ describe('formatLongDate', () => {
     const date = new Date(2026, 10, 14);
     expect(formatLongDate(createI18n('en').t, date)).toBe('Sat 14 Nov 2026');
     expect(formatLongDate(createI18n('pt-PT').t, date)).toBe('sáb, 14 de nov de 2026');
+  });
+});
+
+describe('formatMonthYear', () => {
+  it('names the month in both languages, capitalised', () => {
+    const date = new Date(2026, 10, 14);
+    expect(formatMonthYear(createI18n('en').t, date)).toBe('November 2026');
+    expect(formatMonthYear(createI18n('pt-PT').t, date)).toBe('Novembro de 2026');
   });
 });

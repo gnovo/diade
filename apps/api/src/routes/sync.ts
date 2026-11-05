@@ -9,6 +9,7 @@ import {
   type Visibility,
 } from '@diade/domain';
 import type { DbClient } from '../db';
+import { buildExternalPull } from '../calendar/pull';
 import {
   events,
   tasks,
@@ -142,6 +143,7 @@ async function applyMutation(
           visibility: d.visibility ?? 'shared',
           recurrenceRule: d.recurrenceRule ?? null,
           category: d.category ?? 'general',
+          highlighted: d.highlighted ?? false,
           createdAt: now,
           updatedAt: now,
         });
@@ -161,6 +163,7 @@ async function applyMutation(
       if (d.visibility !== undefined) changes.visibility = d.visibility;
       if (d.recurrenceRule !== undefined) changes.recurrenceRule = d.recurrenceRule;
       if (d.category !== undefined) changes.category = d.category;
+      if (d.highlighted !== undefined) changes.highlighted = d.highlighted;
       await db.update(events).set(changes).where(where);
       return;
     }
@@ -176,6 +179,7 @@ async function applyMutation(
           notes: d.notes ?? null,
           dueDate: d.dueDate ? toDate(d.dueDate) : null,
           status: d.status ?? 'todo',
+          priority: d.priority ?? 'normal',
           visibility: d.visibility ?? 'shared',
           completedAt: d.completedAt ? toDate(d.completedAt) : null,
           createdAt: now,
@@ -193,6 +197,7 @@ async function applyMutation(
       if (d.notes !== undefined) changes.notes = d.notes;
       if (d.dueDate !== undefined) changes.dueDate = d.dueDate ? toDate(d.dueDate) : null;
       if (d.status !== undefined) changes.status = d.status;
+      if (d.priority !== undefined) changes.priority = d.priority;
       if (d.assigneeId !== undefined) changes.assigneeId = d.assigneeId;
       if (d.visibility !== undefined) changes.visibility = d.visibility;
       if (d.completedAt !== undefined) {
@@ -585,10 +590,15 @@ export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) 
         ),
       );
 
+    // Google Calendar events and calendars: own in full, partner's redacted on the server.
+    const external = await buildExternalPull(db, { since: sinceDate, spaceId, viewerId: user.id });
+
     return c.json({
       success: true,
       data: {
         cursor: now.toISOString(),
+        externalCalendars: external.externalCalendars,
+        externalEvents: external.externalEvents,
         events: eventRecords.map((e) => ({
           ...e,
           startAt: e.startAt.toISOString(),

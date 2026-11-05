@@ -12,6 +12,7 @@ export interface AgendaItem {
   visibility: Visibility;
   category: EventCategory;
   recurring: boolean;
+  highlighted: boolean;
 }
 
 /** Flattens events (including recurring series) into occurrences inside [from, to], soonest first. */
@@ -29,6 +30,7 @@ export function buildAgenda(events: CalendarEvent[], from: Date, to: Date): Agen
         visibility: event.visibility,
         category: event.category,
         recurring: Boolean(event.recurrenceRule),
+        highlighted: event.highlighted,
       });
     }
   }

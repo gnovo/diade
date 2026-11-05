@@ -61,10 +61,17 @@ export function createAuth(db: DbClient, env: AuthEnv) {
     // Expo Go returns to exp://<dev-server>. The plugin only trusts that under NODE_ENV=development,
     // which Workers do not set, so trust it explicitly outside production.
     trustedOrigins: [APP_SCHEME, ...(env.ENVIRONMENT === 'production' ? [] : [EXPO_GO_SCHEME])],
+    // Google OAuth tokens (including the refresh token used for Calendar sync) are encrypted
+    // at rest with BETTER_AUTH_SECRET. calendar/tokens.ts decrypts them the same way.
+    account: { encryptOAuthTokens: true },
     socialProviders: {
       google: {
         clientId: env.GOOGLE_CLIENT_ID || 'dummy-google-client-id',
         clientSecret: env.GOOGLE_CLIENT_SECRET || 'dummy-google-client-secret',
+        // Sign-in asks for identity only. Calendar access is requested later, when the member
+        // opts in: the app links the account again with the calendar scopes plus
+        // `access_type=offline` and `prompt=consent`, which is what makes Google issue a
+        // refresh token (see apps/mobile/src/calendar/connect.ts).
       },
     },
     plugins: [

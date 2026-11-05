@@ -5,23 +5,40 @@ import {
   addLocalDays,
   canAccessRecord,
   describeImportantDate,
+  externalEventTitle,
+  formatTime,
   isTaskAssignedToUser,
   startOfLocalDay,
   type Task,
   type CalendarEvent,
+  type ExternalCalendar,
+  type ExternalEvent,
   type ImportantDate,
 } from '@diade/domain';
+import { sizes } from '@diade/design-tokens';
 import { useAuth } from '../context/AuthContext';
-import { getActiveEvents, getActiveTasks, getActiveLists, getActiveListItems, getActiveImportantDates, getInboxItems } from '../data/queries';
+import {
+  getActiveEvents,
+  getActiveTasks,
+  getActiveLists,
+  getActiveListItems,
+  getActiveImportantDates,
+  getExternalCalendars,
+  getExternalEvents,
+  getInboxItems,
+} from '../data/queries';
+import { buildUnifiedAgenda, pickHighlights, type AgendaEntry } from '../data/unifiedAgenda';
+import { Icon, useColor } from '../design';
 import { statusLabel } from '../data/importantDateDisplay';
 import { insertRecord, updateRecord } from '../data/repository';
-import { buildAgenda, formatAgendaTime } from '../data/agenda';
+import { formatAgendaTime } from '../data/agenda';
 import { useLiveQuery } from '../data/useLiveQuery';
 import { useFormat } from '../i18n';
 import { Button, Card, Checkbox, EmptyState, Pill, ScreenScaffold, SectionLabel, SyncBadge, TextField, useWriteContext } from '../components/ui';
 
 const TODAY_TASK_LIMIT = 5;
 const EVENT_LIMIT = 4;
+const HIGHLIGHT_LIMIT = 5;
 const LOOKAHEAD_DAYS = 30;
 
 export const TodayScreen: React.FC = () => {
@@ -34,19 +51,55 @@ export const TodayScreen: React.FC = () => {
   const [captureNote, setCaptureNote] = useState<string | null>(null);
 
   const now = new Date();
+  const starColor = useColor('warning');
   const dayStart = startOfLocalDay(now);
   const tomorrowEnd = addLocalDays(dayStart, 2);
 
   const events = useLiveQuery(getActiveEvents, [] as CalendarEvent[]);
+  const externalEvents = useLiveQuery(getExternalEvents, [] as ExternalEvent[]);
+  const externalCalendars = useLiveQuery(getExternalCalendars, [] as ExternalCalendar[]);
   const tasks = useLiveQuery(getActiveTasks, [] as Task[]);
   const lists = useLiveQuery(getActiveLists, []);
   const listItems = useLiveQuery(getActiveListItems, []);
   const inbox = useLiveQuery(getInboxItems, []);
   const specialDates = useLiveQuery(getActiveImportantDates, [] as ImportantDate[]);
 
-  const upcoming = buildAgenda(events.data.filter((e) => e.category === 'general'), now, tomorrowEnd)
-    .filter((item) => item.endAt.getTime() >= now.getTime())
+  // Díade events and Google events for today and tomorrow. Tasks and special days have their own cards.
+  const upcoming = buildUnifiedAgenda({
+    events: events.data.filter((e) => e.category === 'general'),
+    externalEvents: externalEvents.data,
+    externalCalendars: externalCalendars.data,
+    tasks: [],
+    importantDates: [],
+    userId: user?.id ?? '',
+    from: dayStart,
+    to: tomorrowEnd,
+  })
+    .days.flatMap((d) => d.entries)
+    .filter((entry) => {
+      // Skip what has already finished today. All-day items stay for the whole day.
+      if (entry.kind === 'event') return entry.item.endAt.getTime() >= now.getTime();
+      if (entry.kind === 'external') return entry.isAllDay || entry.endAt!.getTime() >= now.getTime();
+      return false;
+    })
     .slice(0, EVENT_LIMIT);
+
+  // Starred events ahead, wherever they fall in the next couple of months. The Calendar screen's
+  // calendar filters do not apply: a star is a deliberate choice.
+  const highlights = pickHighlights(
+    buildUnifiedAgenda({
+      events: events.data.filter((e) => e.category === 'general'),
+      externalEvents: externalEvents.data,
+      externalCalendars: externalCalendars.data,
+      tasks: [],
+      importantDates: [],
+      userId: user?.id ?? '',
+      from: dayStart,
+      to: new Date(dayStart.getFullYear(), dayStart.getMonth() + 2, dayStart.getDate()),
+    }),
+    now,
+    HIGHLIGHT_LIMIT,
+  );
 
   // The featured date always shows; then whatever else lands in the next 30 days.
   const importantDates = (() => {
@@ -58,9 +111,21 @@ export const TodayScreen: React.FC = () => {
     return [...featured, ...soon].slice(0, 3);
   })();
 
-  const openTasks = tasks.data
-    .filter((t) => t.status === 'todo' && canAccessRecord(t, user?.id ?? '') && isTaskAssignedToUser(t, user?.id ?? ''))
-    .slice(0, TODAY_TASK_LIMIT);
+  const myOpenTasks = tasks.data.filter(
+    (t) => t.status === 'todo' && canAccessRecord(t, user?.id ?? '') && isTaskAssignedToUser(t, user?.id ?? ''),
+  );
+  const isOverdue = (task: Task) => !!task.dueDate && startOfLocalDay(new Date(task.dueDate)).getTime() < dayStart.getTime();
+
+  // Overdue and important tasks stay on top until they are done, so they cannot slip by.
+  const needsAttention = myOpenTasks
+    .filter((t) => isOverdue(t) || t.priority === 'important')
+    .sort(
+      (a, b) =>
+        Number(isOverdue(b)) - Number(isOverdue(a)) ||
+        (a.dueDate ? new Date(a.dueDate).getTime() : Infinity) - (b.dueDate ? new Date(b.dueDate).getTime() : Infinity),
+    );
+  const attentionIds = new Set(needsAttention.map((t) => t.id));
+  const openTasks = myOpenTasks.filter((t) => !attentionIds.has(t.id)).slice(0, TODAY_TASK_LIMIT);
 
   const groceryListIds = new Set(lists.data.filter((l) => l.category === 'groceries').map((l) => l.id));
   const openGroceries = listItems.data.filter((i) => groceryListIds.has(i.listId) && !i.isChecked);
@@ -94,6 +159,31 @@ export const TodayScreen: React.FC = () => {
     }
   };
 
+  /** Title, time, and pill for an event entry. */
+  const rowOf = (entry: AgendaEntry) =>
+            entry.kind === 'event'
+      ? {
+          title: entry.item.title,
+          when: `${format.dayLabel(entry.item.startAt, now)} · ${formatAgendaTime(t, entry.item)}`,
+          pill: (
+            <Pill
+              label={entry.item.visibility === 'shared' ? t('common.shared') : t('common.personal')}
+              tone={entry.item.visibility}
+            />
+          ),
+          muted: false,
+        }
+      : entry.kind === 'external'
+        ? {
+            title: externalEventTitle(entry.event, { busy: t('calendar.busy'), untitled: t('calendar.untitled') }),
+            when: `${format.dayLabel(entry.day, now)} · ${
+              entry.isAllDay ? t('format.allDay') : `${formatTime(entry.startAt!)}–${formatTime(entry.endAt!)}`
+            }`,
+            pill: <Pill label={entry.mine ? t('calendar.mine') : partnerName(entry.event.userId)} />,
+            muted: entry.event.redacted,
+          }
+        : null;
+
   return (
     <ScreenScaffold
       eyebrow={format.longDate(now)}
@@ -121,24 +211,86 @@ export const TodayScreen: React.FC = () => {
         <Text className="text-sm text-ink-muted">{captureNote ?? (inbox.data.length ? t('today.inInbox', { count: inbox.data.length }) : ' ')}</Text>
       </View>
 
+      {highlights.length > 0 ? (
+        <Card>
+          <SectionLabel>{t('today.highlights')}</SectionLabel>
+          {highlights.map((entry, index) => {
+            const row = rowOf(entry);
+            if (!row) return null;
+            return (
+              <View key={entry.key}>
+                {index > 0 ? <View className="h-px bg-border my-3" /> : null}
+                <View className="flex-row items-center justify-between">
+                  <View className="mr-2">
+                    <Icon name="star" size={sizes['icon-sm']} color={starColor} fill={starColor} />
+                  </View>
+                  <View className="flex-1 mr-2">
+                    <Text className={`text-base font-semibold ${row.muted ? 'text-ink-muted' : 'text-ink'}`} numberOfLines={1}>
+                      {row.title}
+                    </Text>
+                    <Text className="text-sm text-ink-muted mt-0.5">{row.when}</Text>
+                  </View>
+                  {row.pill}
+                </View>
+              </View>
+            );
+          })}
+        </Card>
+      ) : null}
+
       <Card>
         <SectionLabel>{t('today.comingUp')}</SectionLabel>
         {upcoming.length === 0 ? <EmptyState message={t('today.nothingComingUp')} /> : null}
-        {upcoming.map((item, index) => (
-          <View key={item.key}>
-            {index > 0 ? <View className="h-px bg-border my-3" /> : null}
-            <View className="flex-row items-center justify-between">
-              <View className="flex-1 mr-2">
-                <Text className="text-base font-semibold text-ink" numberOfLines={1}>{item.title}</Text>
-                <Text className="text-sm text-ink-muted mt-0.5">
-                  {format.dayLabel(item.startAt, now)} · {formatAgendaTime(t, item)}
-                </Text>
+        {upcoming.map((entry, index) => {
+          const row = rowOf(entry);
+          if (!row) return null;
+          return (
+            <View key={entry.key}>
+              {index > 0 ? <View className="h-px bg-border my-3" /> : null}
+              <View className="flex-row items-center justify-between">
+                <View className="flex-1 mr-2">
+                  <Text className={`text-base font-semibold ${row.muted ? 'text-ink-muted' : 'text-ink'}`} numberOfLines={1}>
+                    {row.title}
+                  </Text>
+                  <Text className="text-sm text-ink-muted mt-0.5">{row.when}</Text>
+                </View>
+                {row.pill}
               </View>
-              <Pill label={item.visibility === 'shared' ? t('common.shared') : t('common.personal')} tone={item.visibility} />
             </View>
-          </View>
-        ))}
+          );
+        })}
       </Card>
+
+      {needsAttention.length > 0 ? (
+        <Card className="border-border-strong">
+          <SectionLabel>{t('today.needsAttention')}</SectionLabel>
+          {needsAttention.slice(0, TODAY_TASK_LIMIT).map((task, index) => (
+            <View key={task.id}>
+              {index > 0 ? <View className="h-px bg-border my-3" /> : null}
+              <View className="flex-row items-center">
+                <Checkbox checked={false} onToggle={() => toggleTask(task)} label={t('today.complete', { title: task.title })} />
+                <View className="flex-1 mr-2">
+                  <Text className="text-sm font-medium text-ink" numberOfLines={1}>{task.title}</Text>
+                  {isOverdue(task) ? (
+                    <Text className="text-xs text-ink-muted">
+                      {t('today.overdue')} · {t('household.due', { day: format.dayLabel(new Date(task.dueDate!), now) })}
+                    </Text>
+                  ) : null}
+                </View>
+                {task.priority === 'important' ? (
+                  <View className="mr-2">
+                    <Icon name="star" size={sizes['icon-sm']} title={t('today.importantTask')} />
+                  </View>
+                ) : null}
+                <Pill label={partnerName(task.assigneeId)} />
+              </View>
+            </View>
+          ))}
+          {needsAttention.length > TODAY_TASK_LIMIT ? (
+            <Text className="text-sm text-ink-muted mt-3">{t('today.more', { count: needsAttention.length - TODAY_TASK_LIMIT })}</Text>
+          ) : null}
+        </Card>
+      ) : null}
 
       <Card>
         <SectionLabel>{t('today.tasksDueSoon')}</SectionLabel>

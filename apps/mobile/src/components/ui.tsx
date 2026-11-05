@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TextInput, ScrollView, Pressable, type TextInputProps } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Easing, View, Text, TextInput, ScrollView, Pressable, type TextInputProps } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
@@ -106,8 +106,47 @@ export function Segmented<T extends string>({
   value: T;
   onChange: (value: T) => void;
 }) {
+  const PADDING = 4;
+  const [width, setWidth] = useState(0);
+  const index = Math.max(0, options.findIndex((option) => option.value === value));
+  const position = useRef(new Animated.Value(index)).current;
+  const placed = useRef(false);
+  const segmentWidth = width > 0 ? (width - PADDING * 2) / options.length : 0;
+
+  // The highlight glides to the chosen segment. It jumps there the first time, so it does not slide in on mount.
+  useEffect(() => {
+    if (segmentWidth === 0) return;
+    if (!placed.current) {
+      position.setValue(index);
+      placed.current = true;
+      return;
+    }
+    Animated.timing(position, {
+      toValue: index,
+      duration: 260,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [index, position, segmentWidth]);
+
   return (
-    <View className="flex-row bg-surface-sunken rounded-md p-1">
+    <View
+      className="flex-row bg-surface-sunken rounded-md p-1"
+      onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+    >
+      {segmentWidth > 0 ? (
+        <Animated.View
+          pointerEvents="none"
+          className="absolute bg-action rounded-sm"
+          style={{
+            top: PADDING,
+            bottom: PADDING,
+            left: PADDING,
+            width: segmentWidth,
+            transform: [{ translateX: Animated.multiply(position, segmentWidth) }],
+          }}
+        />
+      ) : null}
       {options.map((option) => {
         const selected = option.value === value;
         return (
@@ -116,7 +155,7 @@ export function Segmented<T extends string>({
             onPress={() => onChange(option.value)}
             accessibilityRole="button"
             accessibilityState={{ selected }}
-            className={`flex-1 min-h-[40px] rounded-sm items-center justify-center ${selected ? 'bg-action' : ''}`}
+            className="flex-1 min-h-[40px] rounded-sm items-center justify-center"
           >
             <Text className={`text-sm leading-5 font-semibold ${selected ? 'text-on-action' : 'text-ink-muted'}`}>
               {option.label}

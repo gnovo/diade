@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import sqliteSource from '../storage/sqlite.ts?raw';
+import type { ExternalCalendar, ExternalEvent, Task } from '@diade/domain';
 import { toColumns, fromRow, toColumn, toKey } from './mapping';
 
 describe('row mapping', () => {
@@ -40,5 +42,56 @@ describe('important date rows', () => {
       alertOffsetDays: null,
       date: '2020-08-18',
     });
+  });
+});
+
+describe('Google Calendar rows', () => {
+  // Every field the server sends must have a local column, or pulling would fail on the device.
+  const columnsOf = (table: string): Set<string> => {
+    const body = new RegExp(`CREATE TABLE IF NOT EXISTS ${table} \\(([\\s\\S]*?)\\n    \\);`).exec(sqliteSource)?.[1] ?? '';
+    return new Set(
+      body
+        .split('\n')
+        .map((line) => line.trim().split(/\s+/)[0]!)
+        .filter((name) => /^[a-z_]+$/.test(name) && name !== 'primary'),
+    );
+  };
+
+  const event: ExternalEvent = {
+    id: 'e', calendarId: 'c', userId: 'u', googleEventId: 'g', icalUid: null, title: null, description: null,
+    location: null, startAt: null, endAt: null, startDate: null, endDate: null, isAllDay: false,
+    status: 'confirmed', transparency: 'opaque', myResponse: null, googleVisibility: null,
+    visibilityOverride: null, htmlLink: null, isRecurringInstance: false, highlighted: false, effectiveVisibility: 'shared',
+    redacted: false, createdAt: 'x', updatedAt: 'x', deletedAt: null,
+  };
+  const calendar: ExternalCalendar = {
+    id: 'c', userId: 'u', name: null, color: null, timeZone: null, accessRole: null, syncEnabled: true,
+    visibility: 'shared', lastSyncedAt: null, lastError: null, createdAt: 'x', updatedAt: 'x', deletedAt: null,
+  };
+  const task: Task = {
+    id: 't', spaceId: 's', creatorId: 'u', assigneeId: null, title: 'x', notes: null, dueDate: null,
+    status: 'todo', priority: 'normal', visibility: 'shared', completedAt: null, createdAt: 'x',
+    updatedAt: 'x', deletedAt: null,
+  };
+
+  it.each([
+    ['local_external_events', event],
+    ['local_external_calendars', calendar],
+    ['local_tasks', task],
+  ])('%s has a column for every field the server sends', (table, record) => {
+    const known = columnsOf(table);
+    expect(known.size).toBeGreaterThan(5);
+    const { columns } = toColumns(record as unknown as Record<string, unknown>);
+    expect(columns.filter((c) => !known.has(c))).toEqual([]);
+  });
+
+  it('stores booleans as 0/1 and reads them back', () => {
+    const { columns, values } = toColumns({ redacted: true, syncEnabled: false, isRecurringInstance: true });
+    expect(Object.fromEntries(columns.map((c, i) => [c, values[i]]))).toEqual({
+      redacted: 1,
+      sync_enabled: 0,
+      is_recurring_instance: 1,
+    });
+    expect(fromRow({ redacted: 1, sync_enabled: 0 })).toEqual({ redacted: true, syncEnabled: false });
   });
 });

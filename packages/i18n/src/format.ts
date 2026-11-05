@@ -17,6 +17,13 @@ export function formatDayLabel(t: TFunction, date: Date, now: Date = new Date())
   });
 }
 
+/** "November 2026" / "Novembro de 2026". */
+export function formatMonthYear(t: TFunction, date: Date): string {
+  const month = t(`format.monthLong.${MONTHS[date.getMonth()]}`);
+  const label = t('format.monthYear', { month, year: date.getFullYear() });
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
 /** "Mon 3 Nov 2026" / "seg, 3 de nov de 2026". */
 export function formatLongDate(t: TFunction, date: Date): string {
   return t('format.longDate', {

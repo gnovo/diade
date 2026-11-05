@@ -9,6 +9,7 @@ import {
   date,
   integer,
   uniqueIndex,
+  index,
 } from 'drizzle-orm/pg-core';
 
 // --- Better Auth Tables ---
@@ -104,6 +105,8 @@ export const events = pgTable('events', {
   visibility: text('visibility').notNull().default('shared'), // 'shared' | 'personal'
   recurrenceRule: text('recurrence_rule'),
   category: text('category').notNull().default('general'), // 'general' | 'important_date'
+  /** Starred: featured in the Highlights section of the Today screen, for both members. */
+  highlighted: boolean('highlighted').notNull().default(false),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   deletedAt: timestamp('deleted_at'),
@@ -156,6 +159,7 @@ export const tasks = pgTable('tasks', {
   notes: text('notes'),
   dueDate: timestamp('due_date'),
   status: text('status').notNull().default('todo'), // 'todo' | 'completed'
+  priority: text('priority').notNull().default('normal'), // 'normal' | 'important'
   visibility: text('visibility').notNull().default('shared'),
   completedAt: timestamp('completed_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -211,6 +215,85 @@ export const captureItems = pgTable('capture_items', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   deletedAt: timestamp('deleted_at'),
 });
+
+// --- Google Calendar sync (read-only) ---
+// Server-owned: written only by the calendar sync engine, never through the sync outbox.
+// See docs/architecture/calendar-sync-v1.md.
+
+export const externalCalendars = pgTable(
+  'external_calendars',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    accountId: text('account_id')
+      .notNull()
+      .references(() => accounts.id, { onDelete: 'cascade' }),
+    googleCalendarId: text('google_calendar_id').notNull(),
+    name: text('name').notNull(),
+    color: text('color'),
+    timeZone: text('time_zone'),
+    accessRole: text('access_role'), // 'owner' | 'writer' | 'reader' | 'freeBusyReader'
+    syncEnabled: boolean('sync_enabled').notNull().default(true),
+    visibility: text('visibility').notNull().default('shared'), // 'shared' | 'busy_only' | 'private'
+    // Until the member confirms the calendar picker nothing syncs and nothing is shared.
+    confirmedAt: timestamp('confirmed_at'),
+    syncToken: text('sync_token'),
+    windowStart: timestamp('window_start'),
+    windowEnd: timestamp('window_end'),
+    lastSyncedAt: timestamp('last_synced_at'),
+    lastFullSyncAt: timestamp('last_full_sync_at'),
+    lastError: text('last_error'),
+    lockUntil: timestamp('lock_until'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+    deletedAt: timestamp('deleted_at'),
+  },
+  (table) => [
+    uniqueIndex('external_calendars_account_google_id').on(table.accountId, table.googleCalendarId),
+    index('external_calendars_user').on(table.userId),
+  ],
+);
+
+export const externalEvents = pgTable(
+  'external_events',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    calendarId: uuid('calendar_id')
+      .notNull()
+      .references(() => externalCalendars.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    googleEventId: text('google_event_id').notNull(),
+    icalUid: text('ical_uid'),
+    title: text('title'),
+    description: text('description'),
+    location: text('location'),
+    startAt: timestamp('start_at'),
+    endAt: timestamp('end_at'),
+    startDate: date('start_date', { mode: 'string' }),
+    endDate: date('end_date', { mode: 'string' }), // inclusive
+    isAllDay: boolean('is_all_day').notNull().default(false),
+    status: text('status').notNull().default('confirmed'), // 'confirmed' | 'tentative'
+    transparency: text('transparency').notNull().default('opaque'), // 'opaque' | 'transparent'
+    myResponse: text('my_response'),
+    googleVisibility: text('google_visibility'),
+    visibilityOverride: text('visibility_override'), // null | 'busy_only' | 'private'
+    /** Starred by the owner. Reaches the partner only while the event is shared in full. */
+    highlighted: boolean('highlighted').notNull().default(false),
+    htmlLink: text('html_link'),
+    isRecurringInstance: boolean('is_recurring_instance').notNull().default(false),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+    deletedAt: timestamp('deleted_at'),
+  },
+  (table) => [
+    uniqueIndex('external_events_calendar_google_id').on(table.calendarId, table.googleEventId),
+    index('external_events_user_updated').on(table.userId, table.updatedAt),
+  ],
+);
 
 // --- Idempotency & Sync Tracking ---
 
