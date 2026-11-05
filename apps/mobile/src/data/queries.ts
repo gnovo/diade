@@ -29,7 +29,11 @@ export const getActiveTasks = () => selectActive<Task>('local_tasks', 'due_date 
 export const getActiveLists = () => selectActive<SharedList>('local_lists', 'created_at ASC');
 
 export const getActiveListItems = () =>
-  selectActive<ListItem>('local_list_items', 'is_checked ASC, created_at ASC');
+  selectActive<ListItem>(
+    'local_list_items',
+    // Manually ordered items first, in order; never-ordered items follow in the order they were added.
+    'is_checked ASC, position IS NULL, position ASC, created_at ASC',
+  );
 
 export interface ItemHistoryRow {
   category: string;

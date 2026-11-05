@@ -91,6 +91,7 @@ async function openLocalDb(): Promise<SQLite.SQLiteDatabase> {
       quantity TEXT,
       unit TEXT,
       notes TEXT,
+      position REAL,
       is_checked INTEGER NOT NULL DEFAULT 0,
       checked_by TEXT,
       checked_at TEXT,
@@ -210,6 +211,7 @@ async function migrateLocalSchema(db: SQLite.SQLiteDatabase): Promise<void> {
   await addColumn('local_tasks', 'priority', `TEXT NOT NULL DEFAULT 'normal'`);
   await addColumn('local_events', 'highlighted', 'INTEGER NOT NULL DEFAULT 0');
   await addColumn('local_external_events', 'highlighted', 'INTEGER NOT NULL DEFAULT 0');
+  await addColumn('local_list_items', 'position', 'REAL');
 }
 
 // --- Transactions ---

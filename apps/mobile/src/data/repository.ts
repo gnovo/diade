@@ -116,6 +116,33 @@ export async function updateRecord(
   emitLocalWrite();
 }
 
+/**
+ * Applies several partial updates in one transaction, so a reader (or the sync engine) never sees
+ * a half-applied set, and the UI re-reads once. Used when a reorder renumbers several items.
+ */
+export async function updateRecords(
+  entity: SyncEntityName,
+  updates: Array<{ id: string; changes: Row }>,
+): Promise<void> {
+  if (updates.length === 0) return;
+  const prepared = updates.map(({ id, changes }) => ({ id, changes: validatePayload(entity, 'UPDATE', changes) }));
+  const now = new Date().toISOString();
+
+  await inTransaction(async (db) => {
+    for (const { id, changes } of prepared) {
+      const { columns, values } = toColumns({ ...changes, updatedAt: now });
+      await db.runAsync(
+        `UPDATE ${ENTITY_TABLES[entity]} SET ${columns.map((c) => `${c} = ?`).join(', ')} WHERE id = ?`,
+        [...(values as (string | number | null)[]), id],
+      );
+      await queueMutation(db, entity, 'UPDATE', id, changes);
+    }
+  });
+
+  emitDataChanged();
+  emitLocalWrite();
+}
+
 /** Soft-deletes locally (tombstone) and queues a DELETE so the deletion propagates. */
 export async function deleteRecord(entity: SyncEntityName, id: string): Promise<void> {
   const db = await getLocalDb();

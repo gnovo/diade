@@ -30,8 +30,10 @@ export const ScreenScaffold: React.FC<{
   backLabel?: string;
   /** Pull down to sync. On by default. */
   refreshable?: boolean;
+  /** Turn off while something inside is being dragged, so the page does not scroll under it. */
+  scrollEnabled?: boolean;
   children: React.ReactNode;
-}> = ({ eyebrow, title, right, onBack, backLabel, refreshable = true, children }) => {
+}> = ({ eyebrow, title, right, onBack, backLabel, refreshable = true, scrollEnabled = true, children }) => {
   const { refresh, refreshing } = useSync();
   const accent = useColor('action');
   const surface = useColor('surface');
@@ -40,16 +42,18 @@ export const ScreenScaffold: React.FC<{
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: space[4], paddingTop: space[4], paddingBottom: space[8] }}
         keyboardShouldPersistTaps="handled"
+        scrollEnabled={scrollEnabled}
+        // Always mounted and switched with `enabled`: adding or removing a refreshControl changes how
+        // the ScrollView wraps its content, which would remount everything inside it mid-gesture.
         refreshControl={
-          refreshable ? (
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={() => void refresh()}
-              tintColor={accent}
-              colors={[accent]}
-              progressBackgroundColor={surface}
-            />
-          ) : undefined
+          <RefreshControl
+            enabled={refreshable}
+            refreshing={refreshing}
+            onRefresh={() => void refresh()}
+            tintColor={accent}
+            colors={[accent]}
+            progressBackgroundColor={surface}
+          />
         }
       >
         <View className={`flex-row justify-between mb-6 ${onBack ? 'items-center' : 'items-end'}`}>

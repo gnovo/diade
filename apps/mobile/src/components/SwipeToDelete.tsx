@@ -12,8 +12,10 @@ const OFFSCREEN = 420;
 export const SwipeToDelete: React.FC<{
   onDelete: () => void;
   deleteLabel: string;
+  /** More screen-reader actions on the row, e.g. "move up". */
+  extraActions?: Array<{ name: string; label: string; onAction: () => void }>;
   children: React.ReactNode;
-}> = ({ onDelete, deleteLabel, children }) => {
+}> = ({ onDelete, deleteLabel, extraActions = [], children }) => {
   const x = useRef(new Animated.Value(0)).current;
   const onDeleteRef = useRef(onDelete);
   onDeleteRef.current = onDelete;
@@ -41,9 +43,14 @@ export const SwipeToDelete: React.FC<{
 
   return (
     <View
-      accessibilityActions={[{ name: 'delete', label: deleteLabel }]}
+      accessibilityActions={[
+        { name: 'delete', label: deleteLabel },
+        ...extraActions.map(({ name, label }) => ({ name, label })),
+      ]}
       onAccessibilityAction={(e) => {
-        if (e.nativeEvent.actionName === 'delete') onDelete();
+        const name = e.nativeEvent.actionName;
+        if (name === 'delete') onDelete();
+        else extraActions.find((action) => action.name === name)?.onAction();
       }}
     >
       <View className="absolute inset-0 bg-danger-soft rounded-md items-end justify-center pr-4">

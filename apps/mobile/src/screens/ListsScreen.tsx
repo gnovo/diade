@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { TFunction } from '@diade/i18n';
 import { listIconFor, type ListItem, type SharedList } from '@diade/domain';
 import { getActiveLists, getActiveListItems, getItemHistory, type ItemHistoryRow } from '../data/queries';
-import { insertRecord, updateRecord, deleteRecord } from '../data/repository';
+import { insertRecord, updateRecord, updateRecords, deleteRecord } from '../data/repository';
 import { useLiveQuery } from '../data/useLiveQuery';
 import {
   Button,
@@ -18,6 +18,7 @@ import {
 } from '../components/ui';
 import { NewListSheet, type NewListRequest } from '../components/NewListSheet';
 import { ItemSuggestions } from '../components/ItemSuggestions';
+import { SortableList } from '../components/SortableList';
 import { SwipeToDelete } from '../components/SwipeToDelete';
 import { UndoToast } from '../components/UndoToast';
 import { Icon, useColor } from '../design';
@@ -25,6 +26,7 @@ import { dictionaryFor } from '../lists/dictionary';
 import { formatQuantity, parseQuantity } from '../lists/parseQuantity';
 import { capitalizeFirst, normalizeText } from '../lists/normalize';
 import { suggest, type HistoryEntry, type Suggestion } from '../lists/suggest';
+import { moveItem } from '../lists/reorder';
 import { useUndoableDelete } from '../lists/useUndoableDelete';
 
 const categoryLabel = (t: TFunction, category: SharedList['category']): string => t(`lists.category.${category}`);
@@ -46,6 +48,7 @@ export const ListsScreen: React.FC = () => {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [newItemText, setNewItemText] = useState('');
   const [quantityDismissed, setQuantityDismissed] = useState(false);
+  const [dragging, setDragging] = useState(false);
 
   const undoable = useUndoableDelete(async (ids) => {
     for (const id of ids) await deleteRecord('list_items', id);
@@ -122,6 +125,14 @@ export const ListsScreen: React.FC = () => {
     }
   };
 
+  /** Saves a new order for the unchecked items. `open` is the order currently on screen. */
+  const reorderOpen = (open: ListItem[], from: number, to: number) => {
+    const updates = moveItem(open, from, to).map(({ id, position }) => ({ id, changes: { position } }));
+    updateRecords('list_items', updates).catch((err) =>
+      Alert.alert(t('lists.couldNotReorder'), err instanceof Error ? err.message : t('common.tryAgain')),
+    );
+  };
+
   const toggleItem = (item: ListItem) => updateRecord('list_items', item.id, { isChecked: !item.isChecked });
 
   const removeItem = (item: ListItem) => undoable.schedule([item.id], t('lists.itemRemoved', { name: item.name }));
@@ -180,7 +191,13 @@ export const ListsScreen: React.FC = () => {
 
     return (
       <View className="flex-1">
-        <ScreenScaffold title={openList.name} onBack={closeList} backLabel={t('common.back')}>
+        <ScreenScaffold
+          title={openList.name}
+          onBack={closeList}
+          backLabel={t('common.back')}
+          scrollEnabled={!dragging}
+          refreshable={!dragging}
+        >
           <Card>
             <TextField
               value={newItemText}
@@ -219,9 +236,22 @@ export const ListsScreen: React.FC = () => {
               {t('lists.items')}
             </SectionLabel>
             {open.length === 0 ? <EmptyState message={t('lists.emptyItems')} /> : null}
-            {open.map((item, index) => (
-              <ItemRow key={item.id} item={item} first={index === 0} onToggle={() => toggleItem(item)} onDelete={() => removeItem(item)} />
-            ))}
+            <SortableList
+              items={open}
+              onReorder={(from, to) => reorderOpen(open, from, to)}
+              onDragChange={setDragging}
+              renderItem={(item, index, handle) => (
+                <ItemRow
+                  item={item}
+                  first={index === 0}
+                  onToggle={() => toggleItem(item)}
+                  onDelete={() => removeItem(item)}
+                  handle={handle}
+                  onMoveUp={index > 0 ? () => reorderOpen(open, index, index - 1) : undefined}
+                  onMoveDown={index < open.length - 1 ? () => reorderOpen(open, index, index + 1) : undefined}
+                />
+              )}
+            />
             {done.length > 0 ? (
               <View className="mt-4 pt-4 border-t border-border">
                 <View className="flex-row items-center justify-between mb-2">
@@ -309,24 +339,36 @@ const AddListButton: React.FC<{ label: string; onPress: () => void }> = ({ label
   );
 };
 
-const ItemRow: React.FC<{ item: ListItem; first: boolean; onToggle: () => void; onDelete: () => void }> = ({
-  item,
-  first,
-  onToggle,
-  onDelete,
-}) => {
+const ItemRow: React.FC<{
+  item: ListItem;
+  first: boolean;
+  onToggle: () => void;
+  onDelete: () => void;
+  /** The drag grip, for items that can be reordered. */
+  handle?: React.ReactNode;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+}> = ({ item, first, onToggle, onDelete, handle, onMoveUp, onMoveDown }) => {
   const { t } = useTranslation();
   const quantity = formatQuantity(item.quantity, item.unit);
   return (
     <View>
       {first ? null : <View className="h-px bg-border my-1" />}
-      <SwipeToDelete onDelete={onDelete} deleteLabel={t('lists.deleteItem', { name: item.name })}>
+      <SwipeToDelete
+        onDelete={onDelete}
+        deleteLabel={t('lists.deleteItem', { name: item.name })}
+        extraActions={[
+          ...(onMoveUp ? [{ name: 'moveUp', label: t('lists.moveUp'), onAction: onMoveUp }] : []),
+          ...(onMoveDown ? [{ name: 'moveDown', label: t('lists.moveDown'), onAction: onMoveDown }] : []),
+        ]}
+      >
         <View className="flex-row items-center">
           <Checkbox checked={item.isChecked} onToggle={onToggle} label={t(item.isChecked ? 'lists.uncheck' : 'lists.check', { name: item.name })} />
           <Text className={`flex-1 text-sm ${item.isChecked ? 'text-ink-muted line-through' : 'text-ink font-medium'}`}>
             {item.name}
           </Text>
           {quantity ? <Text className="text-sm text-ink-muted">{quantity}</Text> : null}
+          {handle}
         </View>
       </SwipeToDelete>
     </View>
