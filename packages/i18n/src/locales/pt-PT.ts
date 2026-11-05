@@ -98,12 +98,12 @@ export const ptPT: Shape<Catalog> = {
     offline: 'Sem ligação',
     conflict: 'Conflito',
     syncing: 'A sincronizar…',
-    offlineSaved_one: 'Sem ligação · {{count}} guardado neste dispositivo',
-    offlineSaved_other: 'Sem ligação · {{count}} guardados neste dispositivo',
+    offlineSaved_one: 'Sem ligação · {{count}} guardado',
+    offlineSaved_other: 'Sem ligação · {{count}} guardados',
     problem: 'Problema de sincronização',
     waiting: '{{count}} a aguardar sincronização',
     tapToRetry: 'Toque para tentar novamente',
-    retry: 'Tentar novamente',
+    retry: 'Tentar',
   },
 
   theme: {

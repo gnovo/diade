@@ -118,10 +118,13 @@ export const SyncOverlay: React.FC = () => {
   );
 
   return (
-    <View pointerEvents="box-none" style={{ position: 'absolute', top: insets.top + 8, left: 0, right: 0, alignItems: 'center' }}>
+    <View pointerEvents="box-none" style={{ position: 'absolute', top: insets.top + 4, left: 0, right: 0, alignItems: 'center' }}>
       <Animated.View
         accessibilityLiveRegion="polite"
         style={{
+          // Never wider than this, so a long label cannot stretch across the header and cover its
+          // title, back arrow or action button.
+          maxWidth: '78%',
           opacity: progress,
           transform: [
             { translateY: progress.interpolate({ inputRange: [0, 1], outputRange: [-12, 0] }) },

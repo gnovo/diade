@@ -56,7 +56,9 @@ export const SyncStatus: React.FC<{
       <Spinner active={spinning}>
         <Icon name={s.icon} size={sizes['icon-sm']} />
       </Spinner>
-      <Text className={`text-xs leading-4 font-medium ${s.text}`}>{label ?? t(`sync.${s.word}`)}</Text>
+      <Text numberOfLines={1} className={`shrink text-xs leading-4 font-medium ${s.text}`}>
+        {label ?? t(`sync.${s.word}`)}
+      </Text>
       {actionLabel ? (
         <Text className={`text-xs leading-4 font-semibold underline ${s.text}`}>{actionLabel}</Text>
       ) : null}
