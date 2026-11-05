@@ -13,5 +13,5 @@ export {
   type LanguagePreference,
 } from './languages';
 export { createI18n, resources } from './i18n';
-export { formatDayLabel, formatLongDate } from './format';
+export { formatDayLabel, formatLongDate, formatMonthYear } from './format';
 export type { TFunction, i18n as I18n } from 'i18next';

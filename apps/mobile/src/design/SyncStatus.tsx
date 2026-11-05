@@ -18,7 +18,11 @@ export const SyncStatus: React.FC<{ state: SyncState; label?: string }> = ({ sta
   const { t } = useTranslation();
   const s = states[state];
   return (
-    <View className={`flex-row items-center gap-1.5 rounded-full px-3 py-1.5 ${s.container}`}>
+    <View
+      className={`flex-row items-center gap-1.5 rounded-full px-3 py-1.5 ${s.container}`}
+      // Size to the icon and text even inside a column that would stretch it.
+      style={{ alignSelf: 'flex-start' }}
+    >
       <Icon name={s.icon} size={sizes['icon-sm']} />
       <Text className={`text-xs leading-4 font-medium ${s.text}`}>{label ?? t(`sync.${s.word}`)}</Text>
     </View>

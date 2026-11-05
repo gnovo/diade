@@ -7,6 +7,8 @@ import { createDb, type DbClient } from './db';
 import { createAuth, type AuthInstance } from './auth';
 import { createSpacesRouter } from './routes/spaces';
 import { createSyncRouter } from './routes/sync';
+import { createCalendarRouter } from './routes/calendar';
+import { syncDueCalendars } from './calendar/service';
 
 export interface AppEnv {
   Bindings: {
@@ -35,7 +37,7 @@ app.use(
   '*',
   cors({
     origin: (origin) => origin || '*',
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
     exposeHeaders: ['Content-Length'],
     maxAge: 600,
@@ -89,6 +91,16 @@ app.route(
   ),
 );
 
+// Google Calendar connection and settings
+app.route(
+  '/api/calendar',
+  createCalendarRouter(
+    (c) => c.get('db'),
+    (c) => c.get('auth'),
+    (c) => c.env || {},
+  ),
+);
+
 // Global Error Handler
 app.onError((err, c) => {
   console.error('[API Error]:', err);
@@ -119,11 +131,21 @@ app.notFound((c) => {
   );
 });
 
+// Cron (wrangler.jsonc `triggers.crons`): keeps every member's Google calendars fresh.
+async function scheduled(_controller: ScheduledController, env: AppEnv['Bindings']): Promise<void> {
+  const outcomes = await syncDueCalendars({ db: createDb(env), env });
+  const errors = outcomes.filter((o) => o.status === 'error').length;
+  console.log(`[calendar] cron synced ${outcomes.length} calendar(s), ${errors} error(s)`);
+}
+
+// Hono's app already exposes `fetch`; attaching `scheduled` keeps `app.request` usable in tests.
+const worker = Object.assign(app, { scheduled });
+
 export default Sentry.withSentry(
   (env: AppEnv['Bindings'] | undefined) => ({
     dsn: env?.SENTRY_DSN,
     environment: env?.ENVIRONMENT ?? 'development',
     tracesSampleRate: env?.ENVIRONMENT === 'production' ? 0.1 : 1.0,
   }),
-  app,
+  worker,
 );

@@ -8,6 +8,9 @@
     "ENVIRONMENT": "production",
     "BETTER_AUTH_URL": "https://diade-api.diade.workers.dev"
   },
+  "triggers": {
+    "crons": ["*/15 * * * *"]
+  },
   "upload_source_maps": true,
   "workers_dev": true,
   "preview_urls": false,

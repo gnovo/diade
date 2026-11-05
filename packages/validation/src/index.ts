@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import {
+  EXTERNAL_VISIBILITIES,
+  TASK_PRIORITIES,
   IMPORTANT_DATE_REPEATS,
   IMPORTANT_DATE_TYPES,
   parseDateOnly,
@@ -38,6 +40,7 @@ export const createEventSchema = z.object({
   visibility: visibilitySchema.default('shared'),
   recurrenceRule: z.string().max(255).nullable().optional(),
   category: eventCategorySchema.default('general'),
+  highlighted: z.boolean().default(false),
 });
 
 export const updateEventSchema = createEventSchema.partial().extend({
@@ -47,6 +50,7 @@ export const updateEventSchema = createEventSchema.partial().extend({
 // --- Tasks & Reminders Schemas ---
 
 export const taskStatusSchema = z.enum(['todo', 'completed']);
+export const taskPrioritySchema = z.enum(TASK_PRIORITIES);
 
 export const createTaskSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255),
@@ -56,6 +60,7 @@ export const createTaskSchema = z.object({
   assigneeId: z.string().min(1).max(64).nullable().optional(),
   visibility: visibilitySchema.default('shared'),
   status: taskStatusSchema.default('todo'),
+  priority: taskPrioritySchema.default('normal'),
   completedAt: z.string().datetime().nullable().optional(),
 });
 
@@ -152,6 +157,38 @@ export const updateImportantDateSchema = z.object({
   alertOffsetDays: z.number().int().min(0).max(365).nullable().optional(),
 });
 
+// --- Google Calendar sync (REST, not the outbox) ---
+
+export const externalVisibilitySchema = z.enum(EXTERNAL_VISIBILITIES);
+
+export const updateExternalCalendarSchema = z
+  .object({
+    syncEnabled: z.boolean().optional(),
+    visibility: externalVisibilitySchema.optional(),
+  })
+  .refine((v) => v.syncEnabled !== undefined || v.visibility !== undefined, 'Nothing to update');
+
+export const updateExternalEventSchema = z
+  .object({
+    /** `null` clears the override. An override may only narrow the calendar's visibility. */
+    visibilityOverride: z.enum(['busy_only', 'private']).nullable().optional(),
+    /** Star the event so it is featured on the Today screen. */
+    highlighted: z.boolean().optional(),
+  })
+  .refine((v) => v.visibilityOverride !== undefined || v.highlighted !== undefined, 'Nothing to update');
+
+export const confirmExternalCalendarsSchema = z.object({
+  calendars: z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        syncEnabled: z.boolean(),
+        visibility: externalVisibilitySchema,
+      }),
+    )
+    .max(200),
+});
+
 // --- Sync & Mutation Schemas ---
 
 export const syncEntityNameSchema = z.enum([
@@ -199,6 +236,7 @@ const eventUpdatePayload = z.object({
   visibility: visibilitySchema.optional(),
   recurrenceRule: z.string().max(255).nullable().optional(),
   category: eventCategorySchema.optional(),
+  highlighted: z.boolean().optional(),
 });
 
 const taskUpdatePayload = z.object({
@@ -208,6 +246,7 @@ const taskUpdatePayload = z.object({
   assigneeId: z.string().min(1).max(64).nullable().optional(),
   visibility: visibilitySchema.optional(),
   status: taskStatusSchema.optional(),
+  priority: taskPrioritySchema.optional(),
   completedAt: isoDateTime.nullable().optional(),
 });
 

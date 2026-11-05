@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { AppState } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { apiClient } from '../api/client';
 import { onLocalWrite } from '../data/changes';
 import { runSync, subscribeSyncState, getSyncState, type SyncState } from './engine';
 
@@ -12,6 +13,8 @@ const SyncContext = createContext<SyncContextValue | undefined>(undefined);
 
 const PUSH_DEBOUNCE_MS = 1_500;
 const FOREGROUND_INTERVAL_MS = 30_000;
+/** Don't ask the server to refresh Google more often than this; its cron covers the rest. */
+const CALENDAR_REFRESH_MIN_MS = 5 * 60_000;
 const OFFLINE_RETRY_MS = [5_000, 15_000, 60_000, 300_000];
 
 /**
@@ -37,6 +40,20 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let debounceTimer: ReturnType<typeof setTimeout> | undefined;
     let retryAttempt = 0;
     let disposed = false;
+    let lastCalendarRefresh = 0;
+
+    // Asks the server to pull fresh events from Google, then pulls them down. Best effort:
+    // it does nothing when Google Calendar is not connected, and a failure never blocks sync.
+    const refreshCalendars = async () => {
+      if (Date.now() - lastCalendarRefresh < CALENDAR_REFRESH_MIN_MS) return;
+      lastCalendarRefresh = Date.now();
+      try {
+        const result = await apiClient.syncCalendars();
+        if (!disposed && result.synced > 0) await runSync();
+      } catch {
+        // Offline, signed out, or not connected: the next foreground will try again.
+      }
+    };
 
     const sync = async () => {
       if (disposed) return;
@@ -52,11 +69,11 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    sync();
+    sync().then(refreshCalendars);
 
     const interval = setInterval(sync, FOREGROUND_INTERVAL_MS);
     const appSub = AppState.addEventListener('change', (next) => {
-      if (next === 'active') sync();
+      if (next === 'active') sync().then(refreshCalendars);
     });
     const unsubscribeWrites = onLocalWrite(() => {
       clearTimeout(debounceTimer);

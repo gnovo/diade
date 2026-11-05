@@ -1,105 +1,413 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ScrollView,
+  Text,
+  View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  type ScrollViewInstance,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { addLocalDays, startOfLocalDay, isSameLocalDay, type CalendarEvent } from '@diade/domain';
-import { getActiveEvents } from '../data/queries';
-import { buildAgenda, formatAgendaTime, type AgendaItem } from '../data/agenda';
+import {
+  addLocalDays,
+  isSameLocalDay,
+  startOfLocalDay,
+  type CalendarEvent,
+  type ExternalCalendar,
+  type ExternalEvent,
+  type ImportantDate,
+  type Task,
+} from '@diade/domain';
+import { useAuth } from '../context/AuthContext';
+import {
+  getActiveEvents,
+  getActiveImportantDates,
+  getActiveTasks,
+  getExternalCalendars,
+  getExternalEvents,
+} from '../data/queries';
+import { updateRecord } from '../data/repository';
+import { buildUnifiedAgenda, type AgendaEntry, type GoogleScope } from '../data/unifiedAgenda';
 import { useLiveQuery } from '../data/useLiveQuery';
+import { useCalendarPrefs } from '../calendar/prefs';
+import { useNeedsCalendarSetup } from '../calendar/useCalendarSetup';
 import { useFormat } from '../i18n';
+import { AgendaRow } from '../components/AgendaRow';
 import { EventForm } from '../components/EventForm';
-import { Button, EmptyState, Pill, ScreenScaffold, SyncBadge, Card } from '../components/ui';
+import { ExternalEventDetail } from '../components/ExternalEventDetail';
+import { Button, Card, EmptyState, SyncBadge } from '../components/ui';
+import { CalendarHeader } from '../components/CalendarHeader';
+import { MonthView } from '../components/MonthView';
+import { TimeGrid } from '../components/TimeGrid';
+import { ViewTransition } from '../components/ViewTransition';
+import { weekDays } from '../calendar/timeGrid';
+import { CALENDAR_VIEWS, type CalendarView } from '../calendar/prefs';
+import { dayKey, firstOfMonth, isSameMonth, monthGridStart, shiftMonth } from '../calendar/monthGrid';
+import { space } from '@diade/design-tokens';
+import { CalendarFiltersSheet, hasActiveFilters } from '../components/CalendarFiltersSheet';
+import { CalendarSettingsScreen } from './CalendarSettingsScreen';
 
 const AGENDA_DAYS = 60;
+const SCROLLED_PX = 240; // past this, "today" is worth offering in the schedule
+// Agenda shows this many days at once, then fills in the rest in chunks. Mounting all 60 days
+// in one go made the switch to Agenda take about three times as long as any other view.
+const AGENDA_FIRST_CHUNK = 5;
+const AGENDA_CHUNK = 8;
 
 export const CalendarScreen: React.FC = () => {
   const { t } = useTranslation();
   const format = useFormat();
+  const { user, members } = useAuth();
   const events = useLiveQuery(getActiveEvents, [] as CalendarEvent[]);
+  const externalEvents = useLiveQuery(getExternalEvents, [] as ExternalEvent[]);
+  const externalCalendars = useLiveQuery(getExternalCalendars, [] as ExternalCalendar[]);
+  const tasks = useLiveQuery(getActiveTasks, [] as Task[]);
+  const specialDates = useLiveQuery(getActiveImportantDates, [] as ImportantDate[]);
+  const prefs = useCalendarPrefs();
+
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<CalendarEvent | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [detail, setDetail] = useState<Extract<AgendaEntry, { kind: 'external' }> | null>(null);
 
   const now = new Date();
-  const from = startOfLocalDay(now);
-  const to = addLocalDays(from, AGENDA_DAYS);
+  const today = startOfLocalDay(now);
+  const userId = user?.id ?? '';
 
-  const days = useMemo(() => {
-    const agenda = buildAgenda(events.data, from, to);
-    const groups: Array<{ day: Date; items: AgendaItem[] }> = [];
-    for (const item of agenda) {
-      const last = groups[groups.length - 1];
-      if (last && isSameLocalDay(last.day, item.startAt)) {
-        last.items.push(item);
-      } else {
-        groups.push({ day: startOfLocalDay(item.startAt), items: [item] });
-      }
-    }
-    return groups;
-    // from/to are recomputed each render; the data array is the real dependency.
+  // Month view: the month on show and the day picked in it. Schedule: the month at the top of the screen.
+  const [month, setMonth] = useState(() => firstOfMonth(new Date()));
+  const [selectedDay, setSelectedDay] = useState(() => startOfLocalDay(new Date()));
+  const [scheduleMonth, setScheduleMonth] = useState(() => firstOfMonth(new Date()));
+  const [scrolled, setScrolled] = useState(false);
+  const [agendaShown, setAgendaShown] = useState(AGENDA_FIRST_CHUNK);
+  const scrollRef = useRef<ScrollViewInstance>(null);
+  const groupY = useRef(new Map<string, number>());
+
+  const agendaInput = {
+    events: events.data,
+    externalEvents: externalEvents.data,
+    externalCalendars: externalCalendars.data,
+    tasks: tasks.data,
+    importantDates: specialDates.data,
+    userId,
+    googleScope: prefs.googleScope,
+    hiddenCalendarIds: prefs.hiddenCalendarIds,
+  };
+
+  const agenda = useMemo(
+    () => buildUnifiedAgenda({ ...agendaInput, from: today, to: addLocalDays(today, AGENDA_DAYS) }),
+    // `today` changes only at midnight; the data and the filters are the real dependencies.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [events.data]);
+    [
+      events.data,
+      externalEvents.data,
+      externalCalendars.data,
+      tasks.data,
+      specialDates.data,
+      userId,
+      prefs.googleScope,
+      prefs.hiddenCalendarIds,
+      today.getTime(),
+    ],
+  );
 
-  const openEvent = (item: AgendaItem) => {
-    const source = events.data.find((e) => e.id === item.eventId) ?? null;
-    setEditing(source);
+  const isMonth = prefs.view === 'month';
+  const isTime = prefs.view === 'day' || prefs.view === 'week';
+  const timeDays = useMemo(
+    () => (prefs.view === 'week' ? weekDays(selectedDay) : [selectedDay]),
+    [prefs.view, selectedDay],
+  );
+
+  // What the month grid or the day/week columns need, by day. Schedule builds its own list above.
+  const entriesByDay = useMemo(() => {
+    const map = new Map<string, AgendaEntry[]>();
+    let from: Date;
+    let days: number;
+    if (isMonth) {
+      from = monthGridStart(month);
+      days = 42;
+    } else if (isTime) {
+      from = timeDays[0]!;
+      days = timeDays.length;
+    } else {
+      return map;
+    }
+    const built = buildUnifiedAgenda({ ...agendaInput, from, to: addLocalDays(from, days), today });
+    for (const group of built.days) map.set(dayKey(group.day), group.entries);
+    return map;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    prefs.view,
+    month,
+    timeDays,
+    events.data,
+    externalEvents.data,
+    externalCalendars.data,
+    tasks.data,
+    specialDates.data,
+    userId,
+    prefs.googleScope,
+    prefs.hiddenCalendarIds,
+    today.getTime(),
+  ]);
+
+  const partnerFirstName = members.find((m) => m.userId !== userId)?.displayName.split(' ')[0] ?? t('common.partner');
+  const partnerName = (id: string | null) => {
+    if (id === null) return t('common.both');
+    if (id === userId) return t('common.me');
+    return partnerFirstName;
+  };
+
+  const openEvent = (eventId: string) => {
+    setEditing(events.data.find((e) => e.id === eventId) ?? null);
     setFormOpen(true);
   };
 
-  const openNew = () => {
-    setEditing(null);
-    setFormOpen(true);
+  const toggleTask = (task: Task) => {
+    const completing = task.status !== 'completed';
+    return updateRecord('tasks', task.id, {
+      status: completing ? 'completed' : 'todo',
+      completedAt: completing ? new Date().toISOString() : null,
+    });
   };
+
+  const connected = externalCalendars.data.length > 0;
+  const needsSetup = useNeedsCalendarSetup(connected, settingsOpen);
+  const filtersActive = hasActiveFilters(prefs.googleScope, prefs.hiddenCalendarIds, externalCalendars.data);
+
+  const scopeOptions: Array<{ value: GoogleScope; label: string }> = [
+    { value: 'both', label: t('calendar.scopeBoth') },
+    { value: 'me', label: t('common.me') },
+    { value: 'partner', label: partnerFirstName },
+  ];
+
+  // Bring the rest of the agenda in after the transition has had its frames, a chunk at a time.
+  useEffect(() => {
+    if (prefs.view !== 'schedule') {
+      setAgendaShown(AGENDA_FIRST_CHUNK);
+      return undefined;
+    }
+    if (agendaShown >= agenda.days.length) return undefined;
+    const timer = setTimeout(
+      () => setAgendaShown((n) => n + AGENDA_CHUNK),
+      agendaShown === AGENDA_FIRST_CHUNK ? 380 : 50,
+    );
+    return () => clearTimeout(timer);
+  }, [prefs.view, agendaShown, agenda.days.length]);
+
+  const empty = agenda.days.length === 0 && agenda.overdue.length === 0;
+  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const y = e.nativeEvent.contentOffset.y;
+    setScrolled(y > SCROLLED_PX);
+    // The title follows the day at the top of the screen, like Android's schedule view.
+    let top: Date | null = null;
+    for (const group of agenda.days) {
+      const offset = groupY.current.get(dayKey(group.day));
+      if (offset !== undefined && offset <= y + 8) top = group.day;
+    }
+    const next = firstOfMonth(top ?? now);
+    setScheduleMonth((current) => (isSameMonth(current, next) ? current : next));
+  };
+
+  // Which way new content slides in from, for the transition: set just before the state that causes it.
+  const direction = useRef<-1 | 0 | 1>(0);
+
+  const goToday = () => {
+    direction.current = 0;
+    if (isMonth) {
+      setMonth(firstOfMonth(now));
+      setSelectedDay(today);
+    } else if (isTime) {
+      setSelectedDay(today);
+    } else {
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+    }
+  };
+
+  /** Previous or next month, week or day, depending on the view. */
+  const shift = (delta: -1 | 1) => {
+    direction.current = delta;
+    if (prefs.view === 'week') {
+      setSelectedDay(addLocalDays(selectedDay, 7 * delta));
+    } else if (prefs.view === 'day') {
+      setSelectedDay(addLocalDays(selectedDay, delta));
+    } else {
+      const next = shiftMonth(month, delta);
+      setMonth(next);
+      setSelectedDay(isSameMonth(next, now) ? today : next);
+    }
+  };
+
+  const changeView = (next: CalendarView) => {
+    const step = CALENDAR_VIEWS.indexOf(next) - CALENDAR_VIEWS.indexOf(prefs.view);
+    direction.current = step === 0 ? 0 : step > 0 ? 1 : -1;
+    if (next === 'month') setMonth(firstOfMonth(selectedDay));
+    prefs.setView(next);
+  };
+
+  const showToday =
+    prefs.view === 'month'
+      ? !isSameMonth(month, now) || !isSameLocalDay(selectedDay, now)
+      : prefs.view === 'schedule'
+        ? scrolled
+        : !timeDays.some((d) => isSameLocalDay(d, now));
+
+  const navLabels: Record<CalendarView, [string, string]> = {
+    schedule: ['', ''],
+    day: [t('calendar.prevDay'), t('calendar.nextDay')],
+    week: [t('calendar.prevWeek'), t('calendar.nextWeek')],
+    month: [t('calendar.prevMonth'), t('calendar.nextMonth')],
+  };
+  const titleDate =
+    prefs.view === 'month' ? month : prefs.view === 'schedule' ? scheduleMonth : timeDays[Math.min(3, timeDays.length - 1)]!;
+  const periodKey = prefs.view === 'schedule' ? '' : dayKey(prefs.view === 'month' ? month : timeDays[0]!);
+
+  const topBlock = (compact: boolean) => (
+    <>
+        <View className={compact ? 'mb-2' : 'mb-4'}>
+          <SyncBadge />
+        </View>
+
+        {!connected ? (
+          <Card>
+            <Text className="text-base font-semibold text-ink mb-1">{t('googleCalendar.introTitle')}</Text>
+            <Text className="text-sm leading-5 text-ink-muted mb-3">{t('googleCalendar.manageNote')}</Text>
+            <Button label={t('googleCalendar.open')} variant="ghost" onPress={() => setSettingsOpen(true)} />
+          </Card>
+        ) : needsSetup ? (
+          <Card>
+            <Text className="text-base font-semibold text-ink mb-1">{t('calendar.setupTitle')}</Text>
+            <Text className="text-sm leading-5 text-ink-muted mb-3">{t('calendar.setupBody')}</Text>
+            <Button label={t('calendar.setupAction')} onPress={() => setSettingsOpen(true)} />
+          </Card>
+        ) : null}
+
+    </>
+  );
 
   return (
-    <ScreenScaffold
-      eyebrow={t('calendar.eyebrow', { count: AGENDA_DAYS })}
-      title={t('calendar.title')}
-      right={
-        <View className="items-end gap-2">
-          <Button label={t('calendar.newEvent')} small onPress={openNew} />
-        </View>
-      }
-    >
-      <View className="mb-4">
-        <SyncBadge />
-      </View>
-
-      {days.length === 0 ? (
-        <Card>
-          <EmptyState message={t('calendar.empty')} />
-        </Card>
-      ) : null}
-
-      {days.map((group) => (
-        <View key={group.day.toISOString()} className="mb-5">
-          <Text className="text-sm font-bold text-ink-muted uppercase tracking-wider mb-2">
-            {format.dayLabel(group.day, now)}
-          </Text>
-          <View className="bg-surface rounded-2xl border border-border overflow-hidden">
-            {group.items.map((item, index) => (
-              <TouchableOpacity
-                key={item.key}
-                onPress={() => openEvent(item)}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel={`${item.title}, ${formatAgendaTime(t, item)}`}
-                className={`px-4 py-3 flex-row items-center justify-between ${index > 0 ? 'border-t border-border' : ''}`}
-              >
-                <View className="flex-1 mr-3">
-                  <Text className="text-base font-semibold text-ink" numberOfLines={1}>
-                    {item.title}
-                  </Text>
-                  <Text className="text-sm text-ink-muted mt-0.5">
-                    {formatAgendaTime(t, item)}
-                    {item.recurring ? ` · ${t('calendar.repeats')}` : ''}
-                    {item.category === 'important_date' ? ` · ${t('calendar.important')}` : ''}
-                  </Text>
-                </View>
-                <Pill label={item.visibility === 'shared' ? t('common.shared') : t('common.personal')} tone={item.visibility} />
-              </TouchableOpacity>
-            ))}
+    <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
+      <CalendarHeader
+        title={format.monthYear(titleDate)}
+        view={prefs.view}
+        onViewChange={changeView}
+        showNav={prefs.view !== 'schedule'}
+        prevLabel={navLabels[prefs.view][0]}
+        nextLabel={navLabels[prefs.view][1]}
+        onPrev={() => shift(-1)}
+        onNext={() => shift(1)}
+        showToday={showToday}
+        onToday={goToday}
+        showFilters={connected && !needsSetup}
+        filtersActive={filtersActive}
+        onOpenFilters={() => setFiltersOpen(true)}
+      />
+      <ViewTransition transitionKey={`${prefs.view}:${periodKey}`} direction={direction.current} style={{ flex: 1 }}>
+        {isTime ? (
+          <View className="flex-1">
+            <View className="px-4 pt-1">{topBlock(true)}</View>
+            <TimeGrid
+              days={timeDays}
+              entriesByDay={entriesByDay}
+              now={now}
+              onSwipe={shift}
+              onOpenDay={(day) => {
+                setSelectedDay(day);
+                changeView('day');
+              }}
+              onOpenEvent={openEvent}
+              onOpenExternal={setDetail}
+            />
           </View>
-        </View>
-      ))}
+        ) : (
+          <ScrollView
+            ref={scrollRef}
+            onScroll={isMonth ? undefined : onScroll}
+            scrollEventThrottle={32}
+            contentContainerStyle={{ paddingHorizontal: space[4], paddingTop: space[2], paddingBottom: space[8] }}
+            keyboardShouldPersistTaps="handled"
+          >
+            {topBlock(false)}
+
+            {isMonth ? (
+              <MonthView
+                month={month}
+                selectedDay={selectedDay}
+                now={now}
+                entriesByDay={entriesByDay}
+                onSelectDay={(day) => {
+                  setSelectedDay(day);
+                  if (!isSameMonth(day, month)) setMonth(firstOfMonth(day));
+                }}
+                onShiftMonth={shift}
+                onOpenEvent={openEvent}
+                onOpenExternal={setDetail}
+                onToggleTask={toggleTask}
+                partnerName={partnerName}
+              />
+            ) : (
+              <>
+                {agenda.overdue.length > 0 ? (
+                  <View className="mb-5">
+                    <Text className="text-sm font-bold text-ink uppercase tracking-wider mb-2">{t('calendar.overdue')}</Text>
+                    <View className="bg-surface rounded-2xl border border-border-strong overflow-hidden">
+                      {agenda.overdue.map((task, index) => (
+                        <View key={task.id} className={index > 0 ? 'border-t border-border' : ''}>
+                          <AgendaRow
+                            entry={{ kind: 'task', key: `overdue:${task.id}`, day: startOfLocalDay(new Date(task.dueDate!)), task }}
+                            now={now}
+                            onOpenEvent={openEvent}
+                            onOpenExternal={setDetail}
+                            onToggleTask={toggleTask}
+                            partnerName={partnerName}
+                          />
+                          <Text className="px-4 pb-2 -mt-2 text-xs text-ink-muted">
+                            {t('household.due', { day: format.dayLabel(new Date(task.dueDate!), now) })}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                ) : null}
+
+                {empty ? (
+                  <Card>
+                    <EmptyState message={t('calendar.empty')} />
+                  </Card>
+                ) : null}
+
+                {agenda.days.slice(0, agendaShown).map((group) => (
+                  <View
+                    key={group.day.toISOString()}
+                    className="mb-5"
+                    onLayout={(e) => groupY.current.set(dayKey(group.day), e.nativeEvent.layout.y)}
+                  >
+                    <Text className="text-sm font-bold text-ink-muted uppercase tracking-wider mb-2">
+                      {format.dayLabel(group.day, now)}
+                    </Text>
+                    <View className="bg-surface rounded-2xl border border-border overflow-hidden">
+                      {group.entries.map((entry, index) => (
+                        <View key={entry.key} className={index > 0 ? 'border-t border-border' : ''}>
+                          <AgendaRow
+                            entry={entry}
+                            now={now}
+                            onOpenEvent={openEvent}
+                            onOpenExternal={setDetail}
+                            onToggleTask={toggleTask}
+                            partnerName={partnerName}
+                          />
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                ))}
+              </>
+            )}
+          </ScrollView>
+        )}
+      </ViewTransition>
 
       <EventForm
         visible={formOpen}
@@ -109,6 +417,21 @@ export const CalendarScreen: React.FC = () => {
           setEditing(null);
         }}
       />
-    </ScreenScaffold>
+      <ExternalEventDetail entry={detail} onClose={() => setDetail(null)} />
+      <CalendarFiltersSheet
+        visible={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        scope={prefs.googleScope}
+        onScopeChange={prefs.setGoogleScope}
+        scopeOptions={scopeOptions}
+        calendars={externalCalendars.data}
+        hiddenIds={prefs.hiddenCalendarIds}
+        onToggleCalendar={prefs.toggleCalendar}
+        userId={userId}
+        partnerName={partnerFirstName}
+        onManage={() => setSettingsOpen(true)}
+      />
+      <CalendarSettingsScreen visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
+    </SafeAreaView>
   );
 };

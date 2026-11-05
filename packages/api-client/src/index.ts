@@ -8,6 +8,11 @@ import type {
   SyncPushPayload,
   SyncPushResult,
   SyncPullResult,
+  CalendarConnectionResponse,
+  CalendarSyncResponse,
+  ConfirmCalendarsRequest,
+  UpdateCalendarRequest,
+  UpdateExternalEventRequest,
 } from '@diade/contracts';
 
 /** The user shape Better Auth returns; the app maps it to the domain User. */
@@ -149,5 +154,48 @@ export class DiadeApiClient {
   async syncPull(since?: string): Promise<SyncPullResult> {
     const query = since ? `?since=${encodeURIComponent(since)}` : '';
     return this.request<SyncPullResult>(`/api/sync/pull${query}`);
+  }
+
+  // --- Google Calendar ---
+
+  async getCalendarConnection(): Promise<CalendarConnectionResponse> {
+    return this.request<CalendarConnectionResponse>('/api/calendar/connection');
+  }
+
+  /** Re-reads the member's calendar list from Google (used right after connecting). */
+  async refreshCalendarList(): Promise<CalendarConnectionResponse> {
+    return this.request<CalendarConnectionResponse>('/api/calendar/connection/refresh-calendars', {
+      method: 'POST',
+      body: '{}',
+    });
+  }
+
+  async confirmCalendars(data: ConfirmCalendarsRequest): Promise<{ started: boolean }> {
+    return this.request<{ started: boolean }>('/api/calendar/calendars/confirm', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateCalendar(id: string, data: UpdateCalendarRequest): Promise<Pick<CalendarConnectionResponse, 'calendars'>> {
+    return this.request(`/api/calendar/calendars/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateExternalEvent(id: string, data: UpdateExternalEventRequest): Promise<{ updated: boolean }> {
+    return this.request<{ updated: boolean }>(`/api/calendar/events/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async syncCalendars(): Promise<CalendarSyncResponse> {
+    return this.request<CalendarSyncResponse>('/api/calendar/sync', { method: 'POST', body: '{}' });
+  }
+
+  async disconnectCalendar(): Promise<{ disconnected: boolean }> {
+    return this.request<{ disconnected: boolean }>('/api/calendar/connection', { method: 'DELETE' });
   }
 }

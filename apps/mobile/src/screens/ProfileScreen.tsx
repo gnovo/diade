@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import { Button, Card, Segmented, SectionLabel } from '../components/ui';
 import { useLanguagePreference } from '../i18n';
 import { Icon, ThemeToggle } from '../design';
+import { CalendarSettingsScreen } from './CalendarSettingsScreen';
 
 export const userInitial = (name?: string | null, email?: string | null) =>
   (name?.trim() || email?.trim() || '?').charAt(0).toUpperCase();
@@ -19,6 +20,7 @@ export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> 
   const { user, space, members, signOut, updateSpace } = useAuth();
   const { preference, setPreference } = useLanguagePreference();
   const [generating, setGenerating] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   // The invite is only relevant until the second member has joined.
   const awaitingPartner = !!space && members.length < 2;
@@ -126,6 +128,12 @@ export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> 
           ) : null}
 
           <Card>
+            <SectionLabel>{t('googleCalendar.manage')}</SectionLabel>
+            <Text className="text-sm leading-5 text-ink-muted mb-3">{t('googleCalendar.manageNote')}</Text>
+            <Button label={t('googleCalendar.open')} variant="ghost" onPress={() => setCalendarOpen(true)} />
+          </Card>
+
+          <Card>
             <SectionLabel>{t('profile.account')}</SectionLabel>
             <Text className="text-sm leading-5 text-ink-muted mb-3">
               {t('profile.accountNote')}
@@ -133,6 +141,7 @@ export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> 
             <Button label={t('profile.signOut')} variant="danger" onPress={confirmSignOut} />
           </Card>
         </ScrollView>
+        <CalendarSettingsScreen visible={calendarOpen} onClose={() => setCalendarOpen(false)} />
       </SafeAreaView>
     </Modal>
   );

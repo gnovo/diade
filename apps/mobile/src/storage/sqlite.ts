@@ -11,6 +11,8 @@ export const LOCAL_TABLES = [
   'local_list_items',
   'local_capture_items',
   'local_important_dates',
+  'local_external_calendars',
+  'local_external_events',
   'local_outbox',
   'local_sync_meta',
 ] as const;
@@ -46,6 +48,7 @@ async function openLocalDb(): Promise<SQLite.SQLiteDatabase> {
       visibility TEXT NOT NULL DEFAULT 'shared',
       recurrence_rule TEXT,
       category TEXT NOT NULL DEFAULT 'general',
+      highlighted INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       deleted_at TEXT
@@ -60,6 +63,7 @@ async function openLocalDb(): Promise<SQLite.SQLiteDatabase> {
       notes TEXT,
       due_date TEXT,
       status TEXT NOT NULL DEFAULT 'todo',
+      priority TEXT NOT NULL DEFAULT 'normal',
       visibility TEXT NOT NULL DEFAULT 'shared',
       completed_at TEXT,
       created_at TEXT NOT NULL,
@@ -123,6 +127,52 @@ async function openLocalDb(): Promise<SQLite.SQLiteDatabase> {
       deleted_at TEXT
     );
 
+    -- Google Calendar (read-only mirror of server rows; never written through the outbox)
+    CREATE TABLE IF NOT EXISTS local_external_calendars (
+      id TEXT PRIMARY KEY NOT NULL,
+      user_id TEXT NOT NULL,
+      name TEXT,
+      color TEXT,
+      time_zone TEXT,
+      access_role TEXT,
+      sync_enabled INTEGER NOT NULL DEFAULT 1,
+      visibility TEXT NOT NULL DEFAULT 'shared',
+      last_synced_at TEXT,
+      last_error TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS local_external_events (
+      id TEXT PRIMARY KEY NOT NULL,
+      calendar_id TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      google_event_id TEXT NOT NULL,
+      ical_uid TEXT,
+      title TEXT,
+      description TEXT,
+      location TEXT,
+      start_at TEXT,
+      end_at TEXT,
+      start_date TEXT,
+      end_date TEXT,
+      is_all_day INTEGER NOT NULL DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'confirmed',
+      transparency TEXT NOT NULL DEFAULT 'opaque',
+      my_response TEXT,
+      google_visibility TEXT,
+      visibility_override TEXT,
+      html_link TEXT,
+      is_recurring_instance INTEGER NOT NULL DEFAULT 0,
+      highlighted INTEGER NOT NULL DEFAULT 0,
+      effective_visibility TEXT NOT NULL DEFAULT 'shared',
+      redacted INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT
+    );
+
     -- Mutation Outbox for Offline Writes
     CREATE TABLE IF NOT EXISTS local_outbox (
       id TEXT PRIMARY KEY NOT NULL,
@@ -140,7 +190,25 @@ async function openLocalDb(): Promise<SQLite.SQLiteDatabase> {
     );
   `);
 
+  await migrateLocalSchema(dbInstance);
+
   return dbInstance;
+}
+
+/**
+ * `CREATE TABLE IF NOT EXISTS` does not add columns to a table an older app version created,
+ * so columns added later are checked for and added here.
+ */
+async function migrateLocalSchema(db: SQLite.SQLiteDatabase): Promise<void> {
+  const addColumn = async (table: string, column: string, definition: string) => {
+    const columns = await db.getAllAsync<{ name: string }>(`PRAGMA table_info(${table})`);
+    if (!columns.some((c) => c.name === column)) {
+      await db.execAsync(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+    }
+  };
+  await addColumn('local_tasks', 'priority', `TEXT NOT NULL DEFAULT 'normal'`);
+  await addColumn('local_events', 'highlighted', 'INTEGER NOT NULL DEFAULT 0');
+  await addColumn('local_external_events', 'highlighted', 'INTEGER NOT NULL DEFAULT 0');
 }
 
 // --- Outbox Management Helpers ---
