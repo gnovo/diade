@@ -124,6 +124,8 @@ export interface ListItem {
   quantity: string | null;
   unit: string | null;
   notes: string | null;
+  /** Manual order within the list. Null until the list is first reordered; nulls sort last. */
+  position: number | null;
   isChecked: boolean;
   checkedBy: string | null;
   checkedAt: string | null;
