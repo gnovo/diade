@@ -1,6 +1,7 @@
 import React from 'react';
 import { SvgXml } from 'react-native-svg';
 import {
+  ArrowLeft,
   Baby,
   Bell,
   Cake,
@@ -13,6 +14,7 @@ import {
   ChevronRight,
   Clock,
   CloudOff,
+  Cross,
   Gem,
   Heart,
   Image,
@@ -25,6 +27,7 @@ import {
   Lock,
   MapPin,
   Pencil,
+  Pill,
   Pin,
   Plus,
   Repeat,
@@ -91,6 +94,9 @@ const lucideIcons = {
   heart: Heart,
   gem: Gem,
   pin: Pin,
+  pill: Pill,
+  cross: Cross,
+  'arrow-left': ArrowLeft,
   star: Star,
   'sliders-horizontal': SlidersHorizontal,
 } satisfies Record<string, LucideIcon>;

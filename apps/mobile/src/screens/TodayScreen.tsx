@@ -34,7 +34,7 @@ import { insertRecord, updateRecord } from '../data/repository';
 import { formatAgendaTime } from '../data/agenda';
 import { useLiveQuery } from '../data/useLiveQuery';
 import { useFormat } from '../i18n';
-import { Button, Card, Checkbox, EmptyState, Pill, ScreenScaffold, SectionLabel, SyncBadge, TextField, useWriteContext } from '../components/ui';
+import { Button, Card, Checkbox, EmptyState, Pill, ScreenScaffold, SectionLabel, TextField, useWriteContext } from '../components/ui';
 
 const TODAY_TASK_LIMIT = 5;
 const EVENT_LIMIT = 4;
@@ -188,7 +188,6 @@ export const TodayScreen: React.FC = () => {
     <ScreenScaffold
       eyebrow={format.longDate(now)}
       title={t('today.title')}
-      right={<SyncBadge />}
     >
       {/* Quick capture: text only for now; saved locally first, synced when possible */}
       <View className="bg-surface rounded-full border border-border px-4 py-2 flex-row items-center mb-2">

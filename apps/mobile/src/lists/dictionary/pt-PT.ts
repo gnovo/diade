@@ -1,0 +1,37 @@
+import type { ListCategory } from '@diade/domain';
+
+/** European Portuguese. Curated order: most common first (tie-break and empty-query fallback). */
+export const ptPT: Record<ListCategory, string[]> = {
+  groceries: [
+    'Leite', 'Ovos', 'Pão', 'Manteiga', 'Queijo', 'Iogurte', 'Bananas', 'Maçãs', 'Tomates', 'Cebolas',
+    'Batatas', 'Alho', 'Cenouras', 'Alface', 'Pepino', 'Pimentos', 'Curgete', 'Brócolos', 'Espinafres',
+    'Cogumelos', 'Couve-flor', 'Abóbora', 'Feijão-verde', 'Ervilhas', 'Milho', 'Abacate', 'Limões', 'Laranjas',
+    'Uvas', 'Morangos', 'Mirtilos', 'Pêras', 'Kiwis', 'Melancia', 'Ananás', 'Manga',
+    'Peito de frango', 'Carne picada', 'Bife', 'Costeletas de porco', 'Peru', 'Salsichas', 'Bacon', 'Fiambre',
+    'Salmão', 'Atum', 'Bacalhau', 'Camarão', 'Arroz', 'Massa', 'Esparguete', 'Farinha', 'Açúcar', 'Sal', 'Pimenta',
+    'Azeite', 'Óleo de girassol', 'Vinagre', 'Molho de tomate', 'Tomate pelado', 'Grão-de-bico', 'Lentilhas', 'Feijão',
+    'Aveia', 'Cereais', 'Bolachas', 'Tostas', 'Chocolate', 'Mel', 'Compota', 'Manteiga de amendoim', 'Frutos secos',
+    'Café', 'Chá', 'Sumo de laranja', 'Água', 'Água com gás', 'Refrigerante', 'Cerveja', 'Vinho',
+    'Natas', 'Queijo creme', 'Mozzarella', 'Parmesão', 'Queijo feta', 'Tofu', 'Húmus', 'Pesto',
+    'Fermento em pó', 'Fermento de padeiro', 'Canela', 'Orégãos', 'Colorau', 'Manjericão', 'Salsa', 'Coentros', 'Hortelã', 'Gengibre',
+    'Ervilhas congeladas', 'Pizza congelada', 'Gelado', 'Tortilhas', 'Pão de hambúrguer', 'Pão de forma', 'Preparado para panquecas',
+    'Papel higiénico', 'Rolo de cozinha', 'Detergente da loiça', 'Detergente da roupa', 'Amaciador', 'Sacos do lixo',
+    'Pasta de dentes', 'Champô', 'Gel de banho', 'Desodorizante', 'Comida de gato', 'Comida de cão',
+  ],
+  pharmacy: [
+    'Paracetamol', 'Ibuprofeno', 'Pensos rápidos', 'Desinfetante', 'Termómetro', 'Xarope para a tosse', 'Pastilhas para a garganta',
+    'Spray nasal', 'Anti-histamínicos', 'Protetor solar', 'Creme after-sun', 'Repelente de insetos', 'Vitamina C', 'Vitamina D',
+    'Gotas para os olhos', 'Ligaduras', 'Discos de algodão', 'Protetor labial', 'Creme de mãos', 'Máscaras',
+  ],
+  packing: [
+    'Passaporte', 'Bilhetes', 'Carteira', 'Carregador do telemóvel', 'Powerbank', 'Adaptador', 'Auriculares', 'Escova de dentes',
+    'Pasta de dentes', 'Champô', 'Desodorizante', 'Protetor solar', 'Óculos de sol', 'Fato de banho', 'Toalha', 'Roupa interior', 'Meias',
+    'T-shirts', 'Calças de ganga', 'Casaco', 'Pijama', 'Sapatos', 'Medicação', 'Livro',
+  ],
+  household: [
+    'Lâmpadas', 'Pilhas', 'Esponjas', 'Lixívia', 'Limpa-vidros', 'Limpa-casas de banho', 'Detergente do chão',
+    'Pastilhas para a máquina da loiça', 'Sacos do lixo', 'Papel de alumínio', 'Película aderente', 'Papel vegetal', 'Velas', 'Fósforos',
+    'Fita-cola', 'Parafusos', 'Extensão elétrica', 'Ambientador', 'Esfregona', 'Panos de limpeza',
+  ],
+  other: [],
+};

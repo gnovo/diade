@@ -36,7 +36,7 @@ import { useFormat } from '../i18n';
 import { AgendaRow } from '../components/AgendaRow';
 import { EventForm } from '../components/EventForm';
 import { ExternalEventDetail } from '../components/ExternalEventDetail';
-import { Button, Card, EmptyState, SyncBadge } from '../components/ui';
+import { Button, Card, EmptyState } from '../components/ui';
 import { CalendarHeader } from '../components/CalendarHeader';
 import { MonthView } from '../components/MonthView';
 import { TimeGrid } from '../components/TimeGrid';
@@ -264,12 +264,8 @@ export const CalendarScreen: React.FC = () => {
     prefs.view === 'month' ? month : prefs.view === 'schedule' ? scheduleMonth : timeDays[Math.min(3, timeDays.length - 1)]!;
   const periodKey = prefs.view === 'schedule' ? '' : dayKey(prefs.view === 'month' ? month : timeDays[0]!);
 
-  const topBlock = (compact: boolean) => (
+  const topBlock = () => (
     <>
-        <View className={compact ? 'mb-2' : 'mb-4'}>
-          <SyncBadge />
-        </View>
-
         {!connected ? (
           <Card>
             <Text className="text-base font-semibold text-ink mb-1">{t('googleCalendar.introTitle')}</Text>
@@ -307,7 +303,7 @@ export const CalendarScreen: React.FC = () => {
       <ViewTransition transitionKey={`${prefs.view}:${periodKey}`} direction={direction.current} style={{ flex: 1 }}>
         {isTime ? (
           <View className="flex-1">
-            <View className="px-4 pt-1">{topBlock(true)}</View>
+            <View className="px-4 pt-1">{topBlock()}</View>
             <TimeGrid
               days={timeDays}
               entriesByDay={entriesByDay}
@@ -329,7 +325,7 @@ export const CalendarScreen: React.FC = () => {
             contentContainerStyle={{ paddingHorizontal: space[4], paddingTop: space[2], paddingBottom: space[8] }}
             keyboardShouldPersistTaps="handled"
           >
-            {topBlock(false)}
+            {topBlock()}
 
             {isMonth ? (
               <MonthView

@@ -6,6 +6,7 @@ export * from './recurrence';
 export * from './datetime';
 export * from './importantDates';
 export * from './externalCalendar';
+export * from './listTemplates';
 
 import type { ImportantDateType, ImportantDateRepeat } from './importantDates';
 import type { ExternalCalendar, ExternalEvent } from './externalCalendar';
