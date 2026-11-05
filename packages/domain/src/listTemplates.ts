@@ -1,7 +1,7 @@
 import type { ListCategory } from './index';
 
 /** Icons a template may use; each is a name from the mobile app's icon set. */
-export type ListTemplateIcon = 'shopping-basket' | 'cross' | 'list-checks' | 'house' | 'sticky-note';
+export type ListTemplateIcon = 'shopping-basket' | 'cross' | 'luggage' | 'house' | 'sticky-note';
 
 export type ListTemplateId = 'groceries' | 'pharmacy' | 'packing' | 'household' | 'blank';
 
@@ -32,7 +32,7 @@ export const LIST_TEMPLATES: readonly ListTemplate[] = [
   {
     id: 'packing',
     category: 'packing',
-    icon: 'list-checks',
+    icon: 'luggage',
     starterItems: ['passport', 'chargers', 'toiletries', 'clothes', 'medication', 'sunglasses'],
   },
   {
