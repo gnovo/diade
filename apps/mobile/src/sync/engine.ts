@@ -15,6 +15,7 @@ import { ApiError } from '@diade/api-client';
 import { apiClient } from '../api/client';
 import {
   getLocalDb,
+  inTransaction,
   getPendingMutations,
   removeAppliedMutations,
   getSyncMeta,
@@ -176,7 +177,7 @@ async function applyPull(result: SyncPullResult): Promise<void> {
   const overlays = buildOverlays(await getPendingMutations());
   const db = await getLocalDb();
 
-  await db.withTransactionAsync(async () => {
+  await inTransaction(async () => {
     for (const [entity, section] of PULL_SECTIONS) {
       const rows = (result[section] as unknown as Row[]) ?? [];
       for (const serverRow of rows) {
