@@ -170,6 +170,17 @@ export const en = {
     needsAttention: 'Needs attention',
     overdue: 'Overdue',
     importantTask: 'Important',
+    greetingMorning: 'Good morning',
+    greetingAfternoon: 'Good afternoon',
+    greetingEvening: 'Good evening',
+    openProfile: 'Open profile and preferences',
+    setupLabel: 'Finish setting up',
+    invitePartnerTitle: 'Invite your partner to your space',
+    inviteValidUntil: 'Valid until {{date}}',
+    inviteReady: 'Your invite code is ready',
+    statusClear: 'Nothing planned today',
+    statusCount_one: '{{count}} thing today',
+    statusCount_other: '{{count}} things today',
   },
 
   calendar: {
@@ -417,7 +428,6 @@ export const en = {
   us: {
     eyebrow: 'Us',
     title: 'Important dates',
-    openProfile: 'Open profile and preferences',
     specialDays: 'Our special days',
     addSpecialDay: 'Add a special day',
     empty: 'Add the dates that matter: when you met, moved in, or a birthday.',

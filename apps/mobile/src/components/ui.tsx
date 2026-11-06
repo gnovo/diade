@@ -32,8 +32,10 @@ export const ScreenScaffold: React.FC<{
   refreshable?: boolean;
   /** Turn off while something inside is being dragged, so the page does not scroll under it. */
   scrollEnabled?: boolean;
+  /** Replaces the eyebrow and title block, for screens that open with their own header (Today's greeting). */
+  header?: React.ReactNode;
   children: React.ReactNode;
-}> = ({ eyebrow, title, right, onBack, backLabel, refreshable = true, scrollEnabled = true, children }) => {
+}> = ({ eyebrow, title, right, onBack, backLabel, refreshable = true, scrollEnabled = true, header, children }) => {
   const { refresh, refreshing } = useSync();
   const accent = useColor('action');
   const surface = useColor('surface');
@@ -68,10 +70,12 @@ export const ScreenScaffold: React.FC<{
               <Icon name="arrow-left" />
             </Pressable>
           ) : null}
-          <View className="flex-1 mr-3">
-            {eyebrow ? <Text className="text-sm leading-5 text-ink-muted mb-1">{eyebrow}</Text> : null}
-            <Text className="text-title-1 font-bold text-ink">{title}</Text>
-          </View>
+          {header ?? (
+            <View className="flex-1 mr-3">
+              {eyebrow ? <Text className="text-sm leading-5 text-ink-muted mb-1">{eyebrow}</Text> : null}
+              <Text className="text-title-1 font-bold text-ink">{title}</Text>
+            </View>
+          )}
           {right}
         </View>
         {children}

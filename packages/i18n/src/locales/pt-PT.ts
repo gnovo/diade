@@ -169,6 +169,17 @@ export const ptPT: Shape<Catalog> = {
     needsAttention: 'Precisa de atenção',
     overdue: 'Em atraso',
     importantTask: 'Importante',
+    greetingMorning: 'Bom dia',
+    greetingAfternoon: 'Boa tarde',
+    greetingEvening: 'Boa noite',
+    openProfile: 'Abrir perfil e preferências',
+    setupLabel: 'Concluir a configuração',
+    invitePartnerTitle: 'Convide o seu parceiro(a) para o vosso espaço',
+    inviteValidUntil: 'Válido até {{date}}',
+    inviteReady: 'O código de convite está pronto',
+    statusClear: 'Nada planeado para hoje',
+    statusCount_one: '{{count}} coisa hoje',
+    statusCount_other: '{{count}} coisas hoje',
   },
 
   calendar: {
@@ -417,7 +428,6 @@ export const ptPT: Shape<Catalog> = {
   us: {
     eyebrow: 'Nós',
     title: 'Datas importantes',
-    openProfile: 'Abrir perfil e preferências',
     specialDays: 'Os nossos dias especiais',
     addSpecialDay: 'Adicionar um dia especial',
     empty: 'Adicione as datas que importam: quando se conheceram, foram viver juntos ou um aniversário.',

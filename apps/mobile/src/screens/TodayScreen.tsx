@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Alert } from 'react-native';
+import { View, Text, Alert, Pressable, Share } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
   addLocalDays,
@@ -27,13 +27,15 @@ import {
   getExternalEvents,
   getInboxItems,
 } from '../data/queries';
+import { inviteState } from '../data/invite';
 import { buildUnifiedAgenda, pickHighlights, type AgendaEntry } from '../data/unifiedAgenda';
-import { Icon, useColor } from '../design';
+import { AvatarPair, Icon, useColor } from '../design';
 import { statusLabel } from '../data/importantDateDisplay';
 import { insertRecord, updateRecord } from '../data/repository';
 import { formatAgendaTime } from '../data/agenda';
 import { useLiveQuery } from '../data/useLiveQuery';
 import { useFormat } from '../i18n';
+import { ProfileScreen } from './ProfileScreen';
 import { Button, Card, Checkbox, EmptyState, Pill, ScreenScaffold, SectionLabel, TextField, useWriteContext } from '../components/ui';
 
 const TODAY_TASK_LIMIT = 5;
@@ -44,11 +46,12 @@ const LOOKAHEAD_DAYS = 30;
 export const TodayScreen: React.FC = () => {
   const { t } = useTranslation();
   const format = useFormat();
-  const { user, members } = useAuth();
+  const { user, space, members } = useAuth();
   const ctx = useWriteContext();
   const [captureText, setCaptureText] = useState('');
   const [saving, setSaving] = useState(false);
   const [captureNote, setCaptureNote] = useState<string | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const now = new Date();
   const starColor = useColor('warning');
@@ -127,6 +130,32 @@ export const TodayScreen: React.FC = () => {
   const attentionIds = new Set(needsAttention.map((t) => t.id));
   const openTasks = myOpenTasks.filter((t) => !attentionIds.has(t.id)).slice(0, TODAY_TASK_LIMIT);
 
+  // How much is on today, and the nearest special day, for the greeting's one-line status.
+  const tomorrowStart = addLocalDays(dayStart, 1);
+  const todayCount =
+    needsAttention.length +
+    upcoming.filter((entry) =>
+      entry.kind === 'event' ? entry.item.startAt < tomorrowStart : entry.kind === 'external' ? entry.day < tomorrowStart : false,
+    ).length;
+  const nextSpecial = specialDates.data
+    .map((item) => ({ item, status: describeImportantDate(item, now) }))
+    .filter((d) => d.status.kind !== 'since' && d.status.days <= LOOKAHEAD_DAYS)
+    .sort((a, b) => a.status.days - b.status.days)[0];
+  const statusLine = [
+    todayCount > 0 ? t('today.statusCount', { count: todayCount }) : t('today.statusClear'),
+    nextSpecial ? `${nextSpecial.item.title}: ${statusLabel(t, nextSpecial.status)}` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  const invite = inviteState(space, members.length, now);
+
+  const hour = now.getHours();
+  const greeting = t(hour < 12 ? 'today.greetingMorning' : hour < 18 ? 'today.greetingAfternoon' : 'today.greetingEvening');
+  const firstName = user?.displayName?.trim().split(/\s+/)[0];
+  const partner = members.find((m) => m.userId !== user?.id);
+  const myName = user?.displayName || user?.email || '?';
+
   const groceryListIds = new Set(lists.data.filter((l) => l.category === 'groceries').map((l) => l.id));
   const openGroceries = listItems.data.filter((i) => groceryListIds.has(i.listId) && !i.isChecked);
 
@@ -186,9 +215,55 @@ export const TodayScreen: React.FC = () => {
 
   return (
     <ScreenScaffold
-      eyebrow={format.longDate(now)}
       title={t('today.title')}
+      header={
+        <View className="flex-1">
+          <Text className="text-sm leading-5 text-ink-muted mb-2">{format.longDate(now)}</Text>
+          <Pressable
+            onPress={() => setProfileOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel={t('today.openProfile')}
+            className="flex-row items-center min-h-[48px] active:opacity-70"
+          >
+            <AvatarPair people={[myName, partner ? partner.displayName : null]} size={40} />
+            <View className="flex-1 ml-3">
+              <Text className="text-title-3 font-bold text-ink" numberOfLines={1}>
+                {firstName ? `${greeting}, ${firstName}` : greeting}
+              </Text>
+              <Text className="text-sm leading-5 text-ink-muted" numberOfLines={1}>{statusLine}</Text>
+            </View>
+          </Pressable>
+        </View>
+      }
     >
+      {/* Setup card: only while there is a next step to take, and gone once it is done. */}
+      {invite.kind !== 'none' ? (
+        <Card>
+          <SectionLabel>{t('today.setupLabel')}</SectionLabel>
+          <View className="flex-row items-center">
+            <View className="flex-1 mr-3">
+              <Text className="text-base font-semibold text-ink">{t('today.invitePartnerTitle')}</Text>
+              <Text className="text-sm text-ink-muted mt-0.5">
+                {invite.kind === 'valid' && invite.expiresAt
+                  ? t('today.inviteValidUntil', { date: invite.expiresAt.toLocaleDateString() })
+                  : invite.kind === 'valid'
+                    ? t('today.inviteReady')
+                    : t('profile.inviteExpired')}
+              </Text>
+            </View>
+            <Button
+              small
+              label={invite.kind === 'valid' ? t('profile.inviteShare') : t('profile.inviteNew')}
+              onPress={() =>
+                invite.kind === 'valid'
+                  ? Share.share({ message: t('profile.inviteShareMessage', { code: invite.code }) })
+                  : setProfileOpen(true)
+              }
+            />
+          </View>
+        </Card>
+      ) : null}
+
       {/* Quick capture: text only for now; saved locally first, synced when possible */}
       <View className="bg-surface rounded-full border border-border px-4 py-2 flex-row items-center mb-2">
         <TextField
@@ -337,6 +412,7 @@ export const TodayScreen: React.FC = () => {
           ))}
         </Card>
       ) : null}
+      <ProfileScreen visible={profileOpen} onClose={() => setProfileOpen(false)} />
     </ScreenScaffold>
   );
 };
