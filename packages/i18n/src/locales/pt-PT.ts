@@ -177,9 +177,25 @@ export const ptPT: Shape<Catalog> = {
     inviteValidUntil: 'Válido até {{date}}',
     inviteReady: 'O código de convite está pronto',
     openUs: 'Abrir os nossos dias especiais',
+    partnerTasks_one: '{{count}} tarefa por fazer',
+    partnerTasks_other: '{{count}} tarefas por fazer',
+    partnerEvents_one: '{{count}} evento hoje',
+    partnerEvents_other: '{{count}} eventos hoje',
+    partnerClear: 'Nada para hoje',
+    openPartnerDay: 'Abrir o dia de {{name}}',
     statusClear: 'Nada planeado para hoje',
     statusCount_one: '{{count}} coisa hoje',
     statusCount_other: '{{count}} coisas hoje',
+  },
+
+  partnerDay: {
+    title: 'O dia de {{name}}',
+    close: 'Fechar',
+    note: 'O que pode ver do dia de {{name}}. O que for pessoal fica privado.',
+    comingUp: 'A seguir',
+    tasks: 'Tarefas',
+    noEvents: 'Nada nos próximos dois dias.',
+    noTasks: 'Sem tarefas por fazer.',
   },
 
   calendar: {

@@ -178,9 +178,25 @@ export const en = {
     inviteValidUntil: 'Valid until {{date}}',
     inviteReady: 'Your invite code is ready',
     openUs: 'Open our special days',
+    partnerTasks_one: '{{count}} open task',
+    partnerTasks_other: '{{count}} open tasks',
+    partnerEvents_one: '{{count}} event today',
+    partnerEvents_other: '{{count}} events today',
+    partnerClear: 'Nothing on today',
+    openPartnerDay: 'Open {{name}}\'s day',
     statusClear: 'Nothing planned today',
     statusCount_one: '{{count}} thing today',
     statusCount_other: '{{count}} things today',
+  },
+
+  partnerDay: {
+    title: '{{name}}\'s day',
+    close: 'Close',
+    note: 'What you can see of {{name}}\'s day. Anything personal stays private.',
+    comingUp: 'Coming up',
+    tasks: 'Tasks',
+    noEvents: 'Nothing in the next two days.',
+    noTasks: 'No open tasks.',
   },
 
   calendar: {

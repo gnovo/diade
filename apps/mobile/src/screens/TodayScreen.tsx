@@ -29,6 +29,7 @@ import {
 } from '../data/queries';
 import { inviteState } from '../data/invite';
 import { upcomingSpecialDates, usStrip } from '../data/usStrip';
+import { partnerDay } from '../data/partnerDay';
 import { buildUnifiedAgenda, pickHighlights, type AgendaEntry } from '../data/unifiedAgenda';
 import { AvatarPair, Icon, useColor } from '../design';
 import { statusLabel } from '../data/importantDateDisplay';
@@ -36,7 +37,8 @@ import { insertRecord, updateRecord } from '../data/repository';
 import { formatAgendaTime } from '../data/agenda';
 import { useLiveQuery } from '../data/useLiveQuery';
 import { useFormat } from '../i18n';
-import { ProfileScreen } from './ProfileScreen';
+import { ProfileScreen, userInitial } from './ProfileScreen';
+import { PartnerDayScreen } from './PartnerDayScreen';
 import { Button, Card, Checkbox, EmptyState, Pill, ScreenScaffold, SectionLabel, TextField, useWriteContext } from '../components/ui';
 
 const TODAY_TASK_LIMIT = 5;
@@ -53,6 +55,7 @@ export const TodayScreen: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [captureNote, setCaptureNote] = useState<string | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [partnerOpen, setPartnerOpen] = useState(false);
 
   const now = new Date();
   const starColor = useColor('warning');
@@ -146,6 +149,25 @@ export const TodayScreen: React.FC = () => {
   const greeting = t(hour < 12 ? 'today.greetingMorning' : hour < 18 ? 'today.greetingAfternoon' : 'today.greetingEvening');
   const firstName = user?.displayName?.trim().split(/\s+/)[0];
   const partner = members.find((m) => m.userId !== user?.id);
+  const theirDay = partner
+    ? partnerDay({
+        tasks: tasks.data,
+        externalEvents: externalEvents.data,
+        externalCalendars: externalCalendars.data,
+        userId: user?.id ?? '',
+        partnerId: partner.userId,
+        now,
+      })
+    : null;
+  const theirSummary = theirDay
+    ? [
+        theirDay.tasks.length > 0 ? t('today.partnerTasks', { count: theirDay.tasks.length }) : null,
+        theirDay.eventsToday > 0 ? t('today.partnerEvents', { count: theirDay.eventsToday }) : null,
+      ]
+        .filter(Boolean)
+        .join(' · ') || t('today.partnerClear')
+    : '';
+  const inkMuted = useColor('ink-muted');
   const myName = user?.displayName || user?.email || '?';
 
   const groceryListIds = new Set(lists.data.filter((l) => l.category === 'groceries').map((l) => l.id));
@@ -375,6 +397,29 @@ export const TodayScreen: React.FC = () => {
         </Pressable>
       ) : null}
 
+      {/* The partner's day, read-only. Only once they have joined. */}
+      {partner && theirDay ? (
+        <Pressable
+          onPress={() => setPartnerOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('today.openPartnerDay', { name: partner.displayName.split(' ')[0] })}
+          className="active:opacity-70"
+        >
+          <Card>
+            <View className="flex-row items-center">
+              <View className="w-10 h-10 rounded-full bg-brand-mint items-center justify-center mr-3">
+                <Text className="text-base font-semibold text-brand-deep">{userInitial(partner.displayName)}</Text>
+              </View>
+              <View className="flex-1 mr-2">
+                <Text className="text-base font-semibold text-ink" numberOfLines={1}>{partner.displayName.split(' ')[0]}</Text>
+                <Text className="text-sm text-ink-muted mt-0.5" numberOfLines={1}>{theirSummary}</Text>
+              </View>
+              <Icon name="chevron-right" size={sizes['icon-sm']} color={inkMuted} />
+            </View>
+          </Card>
+        </Pressable>
+      ) : null}
+
       {highlights.length > 0 ? (
         <Card>
           <SectionLabel>{t('today.highlights')}</SectionLabel>
@@ -437,6 +482,15 @@ export const TodayScreen: React.FC = () => {
         )}
       </Card>
       <ProfileScreen visible={profileOpen} onClose={() => setProfileOpen(false)} />
+      {partner && theirDay ? (
+        <PartnerDayScreen
+          visible={partnerOpen}
+          onClose={() => setPartnerOpen(false)}
+          name={partner.displayName}
+          day={theirDay}
+          now={now}
+        />
+      ) : null}
     </ScreenScaffold>
   );
 };
