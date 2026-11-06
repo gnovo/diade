@@ -175,4 +175,19 @@ describe('calendar settings schemas', () => {
     expect(confirmExternalCalendarsSchema.safeParse({ calendars: [{ id, syncEnabled: true, visibility: 'shared' }] }).success).toBe(true);
     expect(confirmExternalCalendarsSchema.safeParse({ calendars: [{ id: 'nope', syncEnabled: true, visibility: 'shared' }] }).success).toBe(false);
   });
+
+  it('accepts a list item position on insert and update, and rejects a non-number', () => {
+    const listId = '5f9f1c9e-6f51-4a29-9d5c-0b6d7a1f2c3d';
+    const insert = parseSyncPayload('list_items', 'INSERT', { listId, name: 'Milk', position: 1500.5 });
+    expect(insert.success).toBe(true);
+    expect(insert.success && (insert.data as { position?: number }).position).toBe(1500.5);
+
+    const update = parseSyncPayload('list_items', 'UPDATE', { position: 2000 });
+    expect(update.success).toBe(true);
+    expect(update.success && (update.data as { position?: number }).position).toBe(2000);
+
+    expect(parseSyncPayload('list_items', 'UPDATE', { position: null }).success).toBe(true);
+    expect(parseSyncPayload('list_items', 'UPDATE', { position: 'first' }).success).toBe(false);
+    expect(parseSyncPayload('list_items', 'UPDATE', { position: Number.POSITIVE_INFINITY }).success).toBe(false);
+  });
 });

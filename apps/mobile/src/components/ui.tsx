@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, View, Text, TextInput, ScrollView, Pressable, RefreshControl, type TextInputProps } from 'react-native';
+import { Animated, Easing, KeyboardAvoidingView, View, Text, TextInput, ScrollView, Pressable, RefreshControl, type TextInputProps } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { useSync } from '../sync/SyncProvider';
@@ -30,26 +30,34 @@ export const ScreenScaffold: React.FC<{
   backLabel?: string;
   /** Pull down to sync. On by default. */
   refreshable?: boolean;
+  /** Turn off while something inside is being dragged, so the page does not scroll under it. */
+  scrollEnabled?: boolean;
+  /** Replaces the eyebrow and title block, for screens that open with their own header (Today's greeting). */
+  header?: React.ReactNode;
+  /** Pinned below the scrolling content, above the tab bar. */
+  footer?: React.ReactNode;
   children: React.ReactNode;
-}> = ({ eyebrow, title, right, onBack, backLabel, refreshable = true, children }) => {
+}> = ({ eyebrow, title, right, onBack, backLabel, refreshable = true, scrollEnabled = true, header, footer, children }) => {
   const { refresh, refreshing } = useSync();
   const accent = useColor('action');
   const surface = useColor('surface');
-  return (
-    <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
+  const body = (
+    <>
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: space[4], paddingTop: space[4], paddingBottom: space[8] }}
         keyboardShouldPersistTaps="handled"
+        scrollEnabled={scrollEnabled}
+        // Always mounted and switched with `enabled`: adding or removing a refreshControl changes how
+        // the ScrollView wraps its content, which would remount everything inside it mid-gesture.
         refreshControl={
-          refreshable ? (
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={() => void refresh()}
-              tintColor={accent}
-              colors={[accent]}
-              progressBackgroundColor={surface}
-            />
-          ) : undefined
+          <RefreshControl
+            enabled={refreshable}
+            refreshing={refreshing}
+            onRefresh={() => void refresh()}
+            tintColor={accent}
+            colors={[accent]}
+            progressBackgroundColor={surface}
+          />
         }
       >
         <View className={`flex-row justify-between mb-6 ${onBack ? 'items-center' : 'items-end'}`}>
@@ -64,14 +72,29 @@ export const ScreenScaffold: React.FC<{
               <Icon name="arrow-left" />
             </Pressable>
           ) : null}
-          <View className="flex-1 mr-3">
-            {eyebrow ? <Text className="text-sm leading-5 text-ink-muted mb-1">{eyebrow}</Text> : null}
-            <Text className="text-title-1 font-bold text-ink">{title}</Text>
-          </View>
+          {header ?? (
+            <View className="flex-1 mr-3">
+              {eyebrow ? <Text className="text-sm leading-5 text-ink-muted mb-1">{eyebrow}</Text> : null}
+              <Text className="text-title-1 font-bold text-ink">{title}</Text>
+            </View>
+          )}
           {right}
         </View>
         {children}
       </ScrollView>
+      {footer}
+    </>
+  );
+  return (
+    <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
+      {/* A pinned footer has to rise above the keyboard itself: Android's adjustResize is ignored edge-to-edge. */}
+      {footer ? (
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+          {body}
+        </KeyboardAvoidingView>
+      ) : (
+        body
+      )}
     </SafeAreaView>
   );
 };

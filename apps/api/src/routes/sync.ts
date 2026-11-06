@@ -244,6 +244,7 @@ async function applyMutation(
           quantity: d.quantity ?? null,
           unit: d.unit ?? null,
           notes: d.notes ?? null,
+          position: d.position ?? null,
           isChecked,
           checkedBy: isChecked ? userId : null,
           checkedAt: isChecked ? now : null,
@@ -262,6 +263,7 @@ async function applyMutation(
       if (d.quantity !== undefined) changes.quantity = d.quantity;
       if (d.unit !== undefined) changes.unit = d.unit;
       if (d.notes !== undefined) changes.notes = d.notes;
+      if (d.position !== undefined) changes.position = d.position;
       if (d.isChecked !== undefined) {
         changes.isChecked = Boolean(d.isChecked);
         changes.checkedBy = d.isChecked ? userId : null;
@@ -551,6 +553,7 @@ export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) 
         quantity: listItems.quantity,
         unit: listItems.unit,
         notes: listItems.notes,
+        position: listItems.position,
         isChecked: listItems.isChecked,
         checkedBy: listItems.checkedBy,
         checkedAt: listItems.checkedAt,

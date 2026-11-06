@@ -16,18 +16,14 @@ import { useFormat } from '../i18n';
 import { ImportantDateDetail } from '../components/ImportantDateDetail';
 import { ImportantDateForm } from '../components/ImportantDateForm';
 import { ImportantDateIcon } from '../components/ImportantDateIcon';
-import { useAuth } from '../context/AuthContext';
 import { Card, EmptyState, Pill, ScreenScaffold, SectionLabel } from '../components/ui';
 import { Icon, useColor } from '../design';
-import { ProfileScreen, userInitial } from './ProfileScreen';
 
 export const UsScreen: React.FC = () => {
   const { t } = useTranslation();
   const format = useFormat();
-  const { user } = useAuth();
   const ink = useColor('ink');
   const inkMuted = useColor('ink-muted');
-  const [profileOpen, setProfileOpen] = useState(false);
   const dates = useLiveQuery(getActiveImportantDates, [] as ImportantDate[]);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -51,17 +47,6 @@ export const UsScreen: React.FC = () => {
     <ScreenScaffold
       eyebrow={t('us.eyebrow')}
       title={t('us.title')}
-      right={
-        <Pressable
-          onPress={() => setProfileOpen(true)}
-          accessibilityRole="button"
-          accessibilityLabel={t('us.openProfile')}
-          hitSlop={6}
-          className="w-9 h-9 rounded-full bg-action items-center justify-center"
-        >
-          <Text className="text-sm leading-5 font-semibold text-on-action">{userInitial(user?.displayName, user?.email)}</Text>
-        </Pressable>
-      }
     >
       {pinned && heroStatus ? (
         <Pressable
@@ -171,7 +156,6 @@ export const UsScreen: React.FC = () => {
         }}
       />
 
-      <ProfileScreen visible={profileOpen} onClose={() => setProfileOpen(false)} />
     </ScreenScaffold>
   );
 };

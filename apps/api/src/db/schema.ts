@@ -8,6 +8,7 @@ import {
   bigint,
   date,
   integer,
+  doublePrecision,
   uniqueIndex,
   index,
 } from 'drizzle-orm/pg-core';
@@ -192,6 +193,8 @@ export const listItems = pgTable('list_items', {
   quantity: text('quantity'),
   unit: text('unit'),
   notes: text('notes'),
+  /** Manual order within the list. Null until the list is first reordered; nulls sort last. */
+  position: doublePrecision('position'),
   isChecked: boolean('is_checked').notNull().default(false),
   checkedBy: text('checked_by').references(() => users.id, { onDelete: 'set null' }),
   checkedAt: timestamp('checked_at'),

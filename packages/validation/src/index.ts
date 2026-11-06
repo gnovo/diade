@@ -94,6 +94,8 @@ export const createListItemSchema = z.object({
   quantity: z.string().max(50).nullable().optional(),
   unit: z.string().max(50).nullable().optional(),
   notes: z.string().max(500).nullable().optional(),
+  /** Manual order within the list; items without one sort after those with one. */
+  position: z.number().finite().nullable().optional(),
 });
 
 export const updateListItemSchema = createListItemSchema.partial().extend({
@@ -261,6 +263,7 @@ const listItemUpdatePayload = z.object({
   quantity: z.string().max(50).nullable().optional(),
   unit: z.string().max(50).nullable().optional(),
   notes: z.string().max(500).nullable().optional(),
+  position: z.number().finite().nullable().optional(),
   isChecked: z.boolean().optional(),
 });
 

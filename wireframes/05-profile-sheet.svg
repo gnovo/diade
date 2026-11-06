@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812"
+     font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
+  <!-- Viewport: mobile 375x812. Sheet over dimmed Today. State: partner not yet joined, Google Calendar connected. Monochrome. -->
+  <rect x="0" y="0" width="375" height="812" fill="#e6e6e6" stroke="none" />
+
+  <!-- Status bar over dimmed backdrop -->
+  <g transform="translate(24, 16)">
+    <text x="0" y="14" font-size="14" font-weight="600" stroke="none" fill="#000">9:41</text>
+    <rect x="295" y="4" width="24" height="12" rx="3" fill="#e6e6e6" />
+    <rect x="297" y="6" width="16" height="8" rx="1" fill="#000" stroke="none" />
+  </g>
+
+  <!-- Sheet (top-rounded, swipe down to dismiss) -->
+  <path d="M0,80 a16,16 0 0 1 16,-16 H359 a16,16 0 0 1 16,16 V812 H0 Z" fill="#fff" />
+  <rect x="168" y="72" width="40" height="8" rx="4" fill="#e6e6e6" stroke="none" />
+
+  <!-- 1. Header -->
+  <text x="24" y="120" font-size="28" font-weight="700" stroke="none" fill="#000">Profile</text>
+  <circle cx="335" cy="104" r="16" />
+  <line x1="329" y1="98" x2="341" y2="110" />
+  <line x1="341" y1="98" x2="329" y2="110" />
+
+  <!-- 2. Identity: avatar, name, email, edit -->
+  <g transform="translate(24, 144)">
+    <circle cx="32" cy="32" r="32" fill="#e6e6e6" />
+    <text x="32" y="42" font-size="28" font-weight="700" text-anchor="middle" stroke="none" fill="#000">G</text>
+    <text x="80" y="28" font-size="20" font-weight="700" stroke="none" fill="#000">Gonçalo Novo</text>
+    <text x="80" y="52" font-size="14" stroke="none" fill="#666">you@example.com</text>
+    <rect x="255" y="16" width="72" height="32" rx="4" />
+    <text x="291" y="37" font-size="14" text-anchor="middle" stroke="none" fill="#000">Edit</text>
+  </g>
+
+  <!-- 3. Us group -->
+  <text x="24" y="240" font-size="12" font-weight="600" stroke="none" fill="#666">US</text>
+  <g transform="translate(24, 252)">
+    <rect width="327" height="112" rx="8" />
+    <!-- Row: invite partner -->
+    <circle cx="32" cy="28" r="16" fill="#fff" stroke-dasharray="4 3" />
+    <line x1="26" y1="28" x2="38" y2="28" />
+    <line x1="32" y1="22" x2="32" y2="34" />
+    <text x="64" y="25" font-size="14" font-weight="600" stroke="none" fill="#000">Invite your partner</text>
+    <text x="64" y="43" font-size="12" stroke="none" fill="#666">K7Q2XM · until 12 Nov</text>
+    <rect x="231" y="12" width="80" height="32" rx="4" fill="#000" />
+    <text x="271" y="33" font-size="14" text-anchor="middle" stroke="none" fill="#fff">Share</text>
+    <line x1="16" y1="56" x2="311" y2="56" stroke="#e6e6e6" />
+    <!-- Row: Google Calendar -->
+    <rect x="16" y="68" width="32" height="32" rx="6" fill="#e6e6e6" stroke="none" />
+    <text x="32" y="89" font-size="14" font-weight="600" text-anchor="middle" stroke="none" fill="#666">G</text>
+    <text x="64" y="89" font-size="14" font-weight="600" stroke="none" fill="#000">Google Calendar</text>
+    <text x="287" y="89" font-size="12" text-anchor="end" stroke="none" fill="#666">Connected</text>
+    <polyline points="303,82 309,88 303,94" fill="none" />
+  </g>
+
+  <!-- 4. You group -->
+  <text x="24" y="388" font-size="12" font-weight="600" stroke="none" fill="#666">YOU</text>
+  <g transform="translate(24, 400)">
+    <rect width="327" height="112" rx="8" />
+    <text x="16" y="33" font-size="14" font-weight="600" stroke="none" fill="#000">Appearance</text>
+    <text x="287" y="33" font-size="12" text-anchor="end" stroke="none" fill="#666">System</text>
+    <polyline points="303,26 309,32 303,38" fill="none" />
+    <line x1="16" y1="56" x2="311" y2="56" stroke="#e6e6e6" />
+    <text x="16" y="89" font-size="14" font-weight="600" stroke="none" fill="#000">Language</text>
+    <text x="287" y="89" font-size="12" text-anchor="end" stroke="none" fill="#666">Português</text>
+    <polyline points="303,82 309,88 303,94" fill="none" />
+  </g>
+
+  <!-- 5. Sign out + version -->
+  <g transform="translate(24, 544)">
+    <rect width="327" height="48" rx="8" />
+    <text x="164" y="29" font-size="14" font-weight="600" text-anchor="middle" stroke="none" fill="#000">Sign out</text>
+  </g>
+  <text x="188" y="624" font-size="12" text-anchor="middle" stroke="none" fill="#666">Díade 1.0.0</text>
+
+  <rect x="120" y="796" width="136" height="8" rx="4" fill="#000" stroke="none" />
+
+  <!-- Annotation layer (red dashed) -->
+  <g stroke="#d33" stroke-width="1.5" stroke-dasharray="4 3" fill="#fff">
+    <circle cx="12" cy="112" r="8" /><text x="12" y="116" font-size="12" text-anchor="middle" stroke="none" fill="#d33" font-weight="600">1</text>
+    <circle cx="12" cy="176" r="8" /><text x="12" y="180" font-size="12" text-anchor="middle" stroke="none" fill="#d33" font-weight="600">2</text>
+    <circle cx="12" cy="308" r="8" /><text x="12" y="312" font-size="12" text-anchor="middle" stroke="none" fill="#d33" font-weight="600">3</text>
+    <circle cx="12" cy="456" r="8" /><text x="12" y="460" font-size="12" text-anchor="middle" stroke="none" fill="#d33" font-weight="600">4</text>
+    <circle cx="12" cy="568" r="8" /><text x="12" y="572" font-size="12" text-anchor="middle" stroke="none" fill="#d33" font-weight="600">5</text>
+  </g>
+</svg>
