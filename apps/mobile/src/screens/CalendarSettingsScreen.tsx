@@ -39,7 +39,7 @@ export const CalendarSettingsScreen: React.FC<{ visible: boolean; onClose: () =>
   const { syncNow } = useSync();
   const [phase, setPhase] = useState<Phase>({ kind: 'loading' });
   const [draft, setDraft] = useState<Draft>({});
-  const [busy, setBusy] = useState<null | 'connect' | 'start' | 'sync' | 'disconnect'>(null);
+  const [busy, setBusy] = useState<null | 'connect' | 'start' | 'sync' | 'refresh' | 'disconnect'>(null);
   const mounted = useRef(true);
 
   useEffect(() => {
@@ -166,6 +166,19 @@ export const CalendarSettingsScreen: React.FC<{ visible: boolean; onClose: () =>
     }
   };
 
+  /** Re-reads the calendar list from Google, e.g. after a calendar was shared with the member. */
+  const refreshList = async () => {
+    try {
+      setBusy('refresh');
+      adopt(await apiClient.refreshCalendarList());
+    } catch (err) {
+      if (isNeedsReauth(err)) await load();
+      else Alert.alert(t('googleCalendar.refreshFailed'), err instanceof Error ? err.message : t('common.tryAgain'));
+    } finally {
+      if (mounted.current) setBusy(null);
+    }
+  };
+
   const syncAll = async () => {
     try {
       setBusy('sync');
@@ -246,6 +259,7 @@ export const CalendarSettingsScreen: React.FC<{ visible: boolean; onClose: () =>
               onStart={startSyncing}
               onChange={changeCalendar}
               onSync={syncAll}
+              onRefresh={refreshList}
               onDisconnect={confirmDisconnect}
             />
           ) : null}
@@ -258,13 +272,14 @@ export const CalendarSettingsScreen: React.FC<{ visible: boolean; onClose: () =>
 const ReadyView: React.FC<{
   connection: CalendarConnectionResponse;
   draft: Draft;
-  busy: null | 'connect' | 'start' | 'sync' | 'disconnect';
+  busy: null | 'connect' | 'start' | 'sync' | 'refresh' | 'disconnect';
   onConnect: () => void;
   onStart: () => void;
   onChange: (calendar: ExternalCalendar, changes: { syncEnabled?: boolean; visibility?: ExternalVisibility }) => void;
   onSync: () => void;
+  onRefresh: () => void;
   onDisconnect: () => void;
-}> = ({ connection, draft, busy, onConnect, onStart, onChange, onSync, onDisconnect }) => {
+}> = ({ connection, draft, busy, onConnect, onStart, onChange, onSync, onRefresh, onDisconnect }) => {
   const { t } = useTranslation();
 
   // Not connected, or the grant is gone: explain and offer to (re)connect.
@@ -320,6 +335,15 @@ const ReadyView: React.FC<{
           onChange={(changes) => onChange(calendar, changes)}
         />
       ))}
+
+      <View className="mb-4">
+        <Button
+          label={busy === 'refresh' ? t('googleCalendar.refreshing') : t('googleCalendar.refreshList')}
+          variant="ghost"
+          onPress={onRefresh}
+          disabled={busy !== null}
+        />
+      </View>
 
       {picking ? (
         <Button
