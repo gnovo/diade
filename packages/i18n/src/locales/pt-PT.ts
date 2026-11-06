@@ -440,17 +440,17 @@ export const ptPT: Shape<Catalog> = {
 
   profile: {
     title: 'Perfil',
+    sectionUs: 'Nós',
+    sectionYou: 'Eu',
+    version: 'Díade {{version}}',
     close: 'Fechar perfil',
     language: 'Idioma',
     languageSystem: 'Sistema',
-    account: 'Conta',
-    accountNote: 'Terminar sessão remove os dados locais deste dispositivo.',
     signOut: 'Terminar sessão',
     signOutTitle: 'Terminar sessão?',
     signOutBody:
       'Os dados locais neste dispositivo serão removidos. As alterações ainda não sincronizadas perder-se-ão.',
     invitePartner: 'Convidar o seu parceiro(a)',
-    inviteExpires: 'Expira a {{date}}. O seu parceiro(a) introduz o código em "Entrar num espaço existente".',
     inviteExpired: 'O código de convite expirou. Crie um novo para convidar o seu parceiro(a).',
     inviteNew: 'Novo código de convite',
     inviteShare: 'Partilhar código',
