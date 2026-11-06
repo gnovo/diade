@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, Alert, Pressable, Share } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import {
   addLocalDays,
   canAccessRecord,
-  describeImportantDate,
   externalEventTitle,
   formatTime,
   isTaskAssignedToUser,
@@ -28,6 +28,7 @@ import {
   getInboxItems,
 } from '../data/queries';
 import { inviteState } from '../data/invite';
+import { upcomingSpecialDates, usStrip } from '../data/usStrip';
 import { buildUnifiedAgenda, pickHighlights, type AgendaEntry } from '../data/unifiedAgenda';
 import { AvatarPair, Icon, useColor } from '../design';
 import { statusLabel } from '../data/importantDateDisplay';
@@ -55,6 +56,8 @@ export const TodayScreen: React.FC = () => {
 
   const now = new Date();
   const starColor = useColor('warning');
+  const onAction = useColor('on-action');
+  const navigation = useNavigation<any>();
   const dayStart = startOfLocalDay(now);
   const tomorrowEnd = addLocalDays(dayStart, 2);
 
@@ -104,16 +107,6 @@ export const TodayScreen: React.FC = () => {
     HIGHLIGHT_LIMIT,
   );
 
-  // The featured date always shows; then whatever else lands in the next 30 days.
-  const importantDates = (() => {
-    const described = specialDates.data.map((item) => ({ item, status: describeImportantDate(item, now) }));
-    const featured = described.filter((d) => d.item.pinned);
-    const soon = described
-      .filter((d) => !d.item.pinned && d.status.kind !== 'since' && d.status.days <= LOOKAHEAD_DAYS)
-      .sort((a, b) => a.status.days - b.status.days);
-    return [...featured, ...soon].slice(0, 3);
-  })();
-
   const myOpenTasks = tasks.data.filter(
     (t) => t.status === 'todo' && canAccessRecord(t, user?.id ?? '') && isTaskAssignedToUser(t, user?.id ?? ''),
   );
@@ -137,10 +130,8 @@ export const TodayScreen: React.FC = () => {
     upcoming.filter((entry) =>
       entry.kind === 'event' ? entry.item.startAt < tomorrowStart : entry.kind === 'external' ? entry.day < tomorrowStart : false,
     ).length;
-  const nextSpecial = specialDates.data
-    .map((item) => ({ item, status: describeImportantDate(item, now) }))
-    .filter((d) => d.status.kind !== 'since' && d.status.days <= LOOKAHEAD_DAYS)
-    .sort((a, b) => a.status.days - b.status.days)[0];
+  const nextSpecial = upcomingSpecialDates(specialDates.data, now, LOOKAHEAD_DAYS)[0];
+  const strip = usStrip(specialDates.data, now, LOOKAHEAD_DAYS);
   const statusLine = [
     todayCount > 0 ? t('today.statusCount', { count: todayCount }) : t('today.statusClear'),
     nextSpecial ? `${nextSpecial.item.title}: ${statusLabel(t, nextSpecial.status)}` : null,
@@ -148,6 +139,7 @@ export const TodayScreen: React.FC = () => {
     .filter(Boolean)
     .join(' · ');
 
+  const inboxNote = inbox.data.length ? t('today.inInbox', { count: inbox.data.length }) : null;
   const invite = inviteState(space, members.length, now);
 
   const hour = now.getHours();
@@ -216,6 +208,35 @@ export const TodayScreen: React.FC = () => {
   return (
     <ScreenScaffold
       title={t('today.title')}
+      footer={
+        <View className="px-4 pt-2 pb-3 bg-bg">
+          {captureNote ?? inboxNote ? (
+            <Text className="text-sm text-ink-muted px-2 mb-2">{captureNote ?? inboxNote}</Text>
+          ) : null}
+          {/* Quick capture: text only for now; saved locally first, synced when possible */}
+          <View className="bg-surface rounded-full border border-border pl-3 pr-2 flex-row items-center min-h-[48px]">
+            <View className="w-6 h-6 rounded-full bg-action items-center justify-center mr-2">
+              <Icon name="plus" size={sizes['icon-sm']} color={onAction} />
+            </View>
+            <TextField
+              value={captureText}
+              onChangeText={(text: string) => {
+                setCaptureText(text);
+                setCaptureNote(null);
+              }}
+              onSubmitEditing={handleCapture}
+              placeholder={t('today.capturePlaceholder')}
+              returnKeyType="done"
+              maxLength={5000}
+              className="flex-1 text-ink text-sm py-1"
+              style={{ borderWidth: 0, backgroundColor: 'transparent', paddingHorizontal: 0 }}
+            />
+            {captureText.trim() ? (
+              <Button label={saving ? '…' : t('common.save')} small onPress={handleCapture} disabled={saving} />
+            ) : null}
+          </View>
+        </View>
+      }
       header={
         <View className="flex-1">
           <Text className="text-sm leading-5 text-ink-muted mb-2">{format.longDate(now)}</Text>
@@ -264,77 +285,6 @@ export const TodayScreen: React.FC = () => {
         </Card>
       ) : null}
 
-      {/* Quick capture: text only for now; saved locally first, synced when possible */}
-      <View className="bg-surface rounded-full border border-border px-4 py-2 flex-row items-center mb-2">
-        <TextField
-          value={captureText}
-          onChangeText={(t: string) => {
-            setCaptureText(t);
-            setCaptureNote(null);
-          }}
-          onSubmitEditing={handleCapture}
-          placeholder={t('today.capturePlaceholder')}
-          returnKeyType="done"
-          maxLength={5000}
-          className="flex-1 text-ink text-sm py-1"
-          style={{ borderWidth: 0, backgroundColor: 'transparent', paddingHorizontal: 0 }}
-        />
-        <Button label={saving ? '…' : t('common.save')} small onPress={handleCapture} disabled={saving || !captureText.trim()} />
-      </View>
-      <View className="flex-row justify-between px-2 mb-6">
-        <Text className="text-sm text-ink-muted">{captureNote ?? (inbox.data.length ? t('today.inInbox', { count: inbox.data.length }) : ' ')}</Text>
-      </View>
-
-      {highlights.length > 0 ? (
-        <Card>
-          <SectionLabel>{t('today.highlights')}</SectionLabel>
-          {highlights.map((entry, index) => {
-            const row = rowOf(entry);
-            if (!row) return null;
-            return (
-              <View key={entry.key}>
-                {index > 0 ? <View className="h-px bg-border my-3" /> : null}
-                <View className="flex-row items-center justify-between">
-                  <View className="mr-2">
-                    <Icon name="star" size={sizes['icon-sm']} color={starColor} fill={starColor} />
-                  </View>
-                  <View className="flex-1 mr-2">
-                    <Text className={`text-base font-semibold ${row.muted ? 'text-ink-muted' : 'text-ink'}`} numberOfLines={1}>
-                      {row.title}
-                    </Text>
-                    <Text className="text-sm text-ink-muted mt-0.5">{row.when}</Text>
-                  </View>
-                  {row.pill}
-                </View>
-              </View>
-            );
-          })}
-        </Card>
-      ) : null}
-
-      <Card>
-        <SectionLabel>{t('today.comingUp')}</SectionLabel>
-        {upcoming.length === 0 ? <EmptyState message={t('today.nothingComingUp')} /> : null}
-        {upcoming.map((entry, index) => {
-          const row = rowOf(entry);
-          if (!row) return null;
-          return (
-            <View key={entry.key}>
-              {index > 0 ? <View className="h-px bg-border my-3" /> : null}
-              <View className="flex-row items-center justify-between">
-                <View className="flex-1 mr-2">
-                  <Text className={`text-base font-semibold ${row.muted ? 'text-ink-muted' : 'text-ink'}`} numberOfLines={1}>
-                    {row.title}
-                  </Text>
-                  <Text className="text-sm text-ink-muted mt-0.5">{row.when}</Text>
-                </View>
-                {row.pill}
-              </View>
-            </View>
-          );
-        })}
-      </Card>
-
       {needsAttention.length > 0 ? (
         <Card className="border-border-strong">
           <SectionLabel>{t('today.needsAttention')}</SectionLabel>
@@ -363,6 +313,92 @@ export const TodayScreen: React.FC = () => {
           {needsAttention.length > TODAY_TASK_LIMIT ? (
             <Text className="text-sm text-ink-muted mt-3">{t('today.more', { count: needsAttention.length - TODAY_TASK_LIMIT })}</Text>
           ) : null}
+        </Card>
+      ) : null}
+
+      <Card>
+        <SectionLabel>{t('today.comingUp')}</SectionLabel>
+        {upcoming.length === 0 ? <EmptyState message={t('today.nothingComingUp')} /> : null}
+        {upcoming.map((entry, index) => {
+          const row = rowOf(entry);
+          if (!row) return null;
+          return (
+            <View key={entry.key}>
+              {index > 0 ? <View className="h-px bg-border my-3" /> : null}
+              <View className="flex-row items-center justify-between">
+                <View className="flex-1 mr-2">
+                  <Text className={`text-base font-semibold ${row.muted ? 'text-ink-muted' : 'text-ink'}`} numberOfLines={1}>
+                    {row.title}
+                  </Text>
+                  <Text className="text-sm text-ink-muted mt-0.5">{row.when}</Text>
+                </View>
+                {row.pill}
+              </View>
+            </View>
+          );
+        })}
+      </Card>
+
+      {/* Us: the running count for the featured day, and the next special day. Opens the Us tab. */}
+      {strip.featured || strip.next ? (
+        <Pressable
+          onPress={() => navigation.navigate('Us')}
+          accessibilityRole="button"
+          accessibilityLabel={t('today.openUs')}
+          className="active:opacity-70"
+        >
+          <Card>
+            <View className="flex-row items-center">
+              {strip.featured ? (
+                <View className="flex-1">
+                  <Text className="text-xs leading-4 font-semibold text-ink-muted tracking-wider uppercase" numberOfLines={1}>
+                    {strip.featured.item.title}
+                  </Text>
+                  <Text className="text-title-3 font-bold text-ink mt-1" numberOfLines={1}>
+                    {strip.featured.days !== null ? t('common.day', { count: strip.featured.days }) : statusLabel(t, strip.featured.status)}
+                  </Text>
+                </View>
+              ) : null}
+              {strip.featured && strip.next ? <View className="w-px self-stretch bg-border mx-4" /> : null}
+              {strip.next ? (
+                <View className="flex-1">
+                  <Text className="text-xs leading-4 font-semibold text-ink-muted tracking-wider uppercase" numberOfLines={1}>
+                    {strip.next.item.title}
+                  </Text>
+                  <Text className="text-title-3 font-bold text-ink mt-1" numberOfLines={1}>
+                    {statusLabel(t, strip.next.status)}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+          </Card>
+        </Pressable>
+      ) : null}
+
+      {highlights.length > 0 ? (
+        <Card>
+          <SectionLabel>{t('today.highlights')}</SectionLabel>
+          {highlights.map((entry, index) => {
+            const row = rowOf(entry);
+            if (!row) return null;
+            return (
+              <View key={entry.key}>
+                {index > 0 ? <View className="h-px bg-border my-3" /> : null}
+                <View className="flex-row items-center justify-between">
+                  <View className="mr-2">
+                    <Icon name="star" size={sizes['icon-sm']} color={starColor} fill={starColor} />
+                  </View>
+                  <View className="flex-1 mr-2">
+                    <Text className={`text-base font-semibold ${row.muted ? 'text-ink-muted' : 'text-ink'}`} numberOfLines={1}>
+                      {row.title}
+                    </Text>
+                    <Text className="text-sm text-ink-muted mt-0.5">{row.when}</Text>
+                  </View>
+                  {row.pill}
+                </View>
+              </View>
+            );
+          })}
         </Card>
       ) : null}
 
@@ -400,18 +436,6 @@ export const TodayScreen: React.FC = () => {
           </View>
         )}
       </Card>
-
-      {importantDates.length > 0 ? (
-        <Card>
-          <SectionLabel>{t('today.importantDates')}</SectionLabel>
-          {importantDates.map(({ item, status }, index) => (
-            <View key={item.id} className={`flex-row items-center justify-between ${index > 0 ? 'mt-3' : ''}`}>
-              <Text className="flex-1 mr-3 text-base font-semibold text-ink" numberOfLines={2}>{item.title}</Text>
-              <Text className="text-sm text-ink-muted">{statusLabel(t, status)}</Text>
-            </View>
-          ))}
-        </Card>
-      ) : null}
       <ProfileScreen visible={profileOpen} onClose={() => setProfileOpen(false)} />
     </ScreenScaffold>
   );

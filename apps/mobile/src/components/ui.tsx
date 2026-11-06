@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, View, Text, TextInput, ScrollView, Pressable, RefreshControl, type TextInputProps } from 'react-native';
+import { Animated, Easing, KeyboardAvoidingView, View, Text, TextInput, ScrollView, Pressable, RefreshControl, type TextInputProps } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { useSync } from '../sync/SyncProvider';
@@ -34,13 +34,15 @@ export const ScreenScaffold: React.FC<{
   scrollEnabled?: boolean;
   /** Replaces the eyebrow and title block, for screens that open with their own header (Today's greeting). */
   header?: React.ReactNode;
+  /** Pinned below the scrolling content, above the tab bar. */
+  footer?: React.ReactNode;
   children: React.ReactNode;
-}> = ({ eyebrow, title, right, onBack, backLabel, refreshable = true, scrollEnabled = true, header, children }) => {
+}> = ({ eyebrow, title, right, onBack, backLabel, refreshable = true, scrollEnabled = true, header, footer, children }) => {
   const { refresh, refreshing } = useSync();
   const accent = useColor('action');
   const surface = useColor('surface');
-  return (
-    <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
+  const body = (
+    <>
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: space[4], paddingTop: space[4], paddingBottom: space[8] }}
         keyboardShouldPersistTaps="handled"
@@ -80,6 +82,19 @@ export const ScreenScaffold: React.FC<{
         </View>
         {children}
       </ScrollView>
+      {footer}
+    </>
+  );
+  return (
+    <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
+      {/* A pinned footer has to rise above the keyboard itself: Android's adjustResize is ignored edge-to-edge. */}
+      {footer ? (
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+          {body}
+        </KeyboardAvoidingView>
+      ) : (
+        body
+      )}
     </SafeAreaView>
   );
 };
