@@ -13,8 +13,13 @@ export function toggleableCalendars(calendars: ExternalCalendar[]): ExternalCale
 }
 
 /** True when something is hidden from the agenda: another person's calendars or a single calendar. */
-export function hasActiveFilters(scope: GoogleScope, hidden: Set<string>, calendars: ExternalCalendar[]): boolean {
-  if (scope !== 'both') return true;
+export function hasActiveFilters(
+  scope: GoogleScope,
+  hidden: Set<string>,
+  calendars: ExternalCalendar[],
+  showOthersDates = true,
+): boolean {
+  if (scope !== 'both' || !showOthersDates) return true;
   return toggleableCalendars(calendars).some((c) => hidden.has(c.id));
 }
 
@@ -62,6 +67,8 @@ export const CalendarFiltersSheet: React.FC<{
   calendars: ExternalCalendar[];
   hiddenIds: Set<string>;
   onToggleCalendar: (id: string) => void;
+  showOthersDates: boolean;
+  onShowOthersDatesChange: (show: boolean) => void;
   userId: string;
   partnerName: string;
   onManage: () => void;
@@ -74,11 +81,16 @@ export const CalendarFiltersSheet: React.FC<{
   calendars,
   hiddenIds,
   onToggleCalendar,
+  showOthersDates,
+  onShowOthersDatesChange,
   userId,
   partnerName,
   onManage,
 }) => {
   const { t } = useTranslation();
+  const actionColor = useColor('action');
+  const trackOff = useColor('border-strong');
+  const hasGoogle = calendars.length > 0;
   const toggleable = toggleableCalendars(calendars);
   const mine = toggleable.filter((c) => c.userId === userId);
   const partners = toggleable.filter((c) => c.userId !== userId);
@@ -100,32 +112,63 @@ export const CalendarFiltersSheet: React.FC<{
 
   return (
     <BottomSheet visible={visible} onClose={onClose} title={t('calendar.filters')}>
-      <Text className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-2">
-        {t('calendar.showEventsFrom')}
-      </Text>
-      <View className="mb-5">
-        <Segmented<GoogleScope> value={scope} onChange={onScopeChange} options={scopeOptions} />
+      {hasGoogle ? (
+        <>
+          <Text className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-2">
+            {t('calendar.showEventsFrom')}
+          </Text>
+          <View className="mb-5">
+            <Segmented<GoogleScope> value={scope} onChange={onScopeChange} options={scopeOptions} />
+          </View>
+
+          {toggleable.length === 0 ? (
+            <Text className="text-sm text-ink-muted mb-4">{t('calendar.noCalendarsToToggle')}</Text>
+          ) : (
+            <>
+              {group(t('calendar.yourCalendars'), mine)}
+              {group(t('calendar.partnerCalendars', { name: partnerName }), partners)}
+            </>
+          )}
+        </>
+      ) : null}
+
+      <View className="mb-4">
+        <Text className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
+          {t('calendar.datesSection')}
+        </Text>
+        <Pressable
+          onPress={() => onShowOthersDatesChange(!showOthersDates)}
+          accessibilityRole="switch"
+          accessibilityState={{ checked: showOthersDates }}
+          accessibilityLabel={t('calendar.showOthersDates')}
+          className="flex-row items-center min-h-[52px]"
+        >
+          <View className="flex-1 mr-3">
+            <Text className="text-base text-ink">{t('calendar.showOthersDates')}</Text>
+            <Text className="text-xs text-ink-muted mt-0.5">{t('calendar.showOthersDatesHint')}</Text>
+          </View>
+          <Switch
+            value={showOthersDates}
+            onValueChange={onShowOthersDatesChange}
+            trackColor={{ false: trackOff, true: actionColor }}
+            accessible={false}
+            importantForAccessibility="no-hide-descendants"
+          />
+        </Pressable>
       </View>
 
-      {toggleable.length === 0 ? (
-        <Text className="text-sm text-ink-muted mb-4">{t('calendar.noCalendarsToToggle')}</Text>
-      ) : (
-        <>
-          {group(t('calendar.yourCalendars'), mine)}
-          {group(t('calendar.partnerCalendars', { name: partnerName }), partners)}
-        </>
-      )}
-
-      <Pressable
-        onPress={() => {
-          onClose();
-          onManage();
-        }}
-        accessibilityRole="button"
-        className="min-h-[48px] justify-center border-t border-border mt-1"
-      >
-        <Text className="text-base font-semibold text-action">{t('calendar.manageCalendars')}</Text>
-      </Pressable>
+      {hasGoogle ? (
+        <Pressable
+          onPress={() => {
+            onClose();
+            onManage();
+          }}
+          accessibilityRole="button"
+          className="min-h-[48px] justify-center border-t border-border mt-1"
+        >
+          <Text className="text-base font-semibold text-action">{t('calendar.manageCalendars')}</Text>
+        </Pressable>
+      ) : null}
     </BottomSheet>
   );
 };

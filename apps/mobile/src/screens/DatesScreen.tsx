@@ -3,39 +3,50 @@ import { View, Text, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { sizes } from '@diade/design-tokens';
 import {
+  IMPORTANT_DATE_GROUPS,
   describeImportantDate,
   elapsedDays,
+  importantDateGroup,
   parseDateOnly,
   sortImportantDates,
   type ImportantDate,
+  type ImportantDateGroup,
 } from '@diade/domain';
 import { getActiveImportantDates } from '../data/queries';
 import { useLiveQuery } from '../data/useLiveQuery';
 import { importantDateTypeLabel, statusLabel } from '../data/importantDateDisplay';
 import { useFormat } from '../i18n';
+import { FilterChips } from '../components/FilterChips';
 import { ImportantDateDetail } from '../components/ImportantDateDetail';
 import { ImportantDateForm } from '../components/ImportantDateForm';
 import { ImportantDateIcon } from '../components/ImportantDateIcon';
-import { Card, EmptyState, Pill, ScreenScaffold, SectionLabel } from '../components/ui';
+import { ImportantDateWizard } from '../components/ImportantDateWizard';
+import { Card, EmptyState, HeaderAddButton, ScreenScaffold, SectionLabel } from '../components/ui';
 import { Icon, useColor } from '../design';
 
-export const UsScreen: React.FC = () => {
+type Filter = 'all' | ImportantDateGroup;
+
+export const DatesScreen: React.FC = () => {
   const { t } = useTranslation();
   const format = useFormat();
-  const ink = useColor('ink');
   const inkMuted = useColor('ink-muted');
   const dates = useLiveQuery(getActiveImportantDates, [] as ImportantDate[]);
+  const [filter, setFilter] = useState<Filter>('all');
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<ImportantDate | null>(null);
 
   const today = new Date();
   const pinned = dates.data.find((d) => d.pinned) ?? null;
-  const sorted = sortImportantDates(dates.data, today);
+  const visible = dates.data.filter((d) => filter === 'all' || importantDateGroup(d.type) === filter);
+  const sorted = sortImportantDates(visible, today);
+  // The featured date leads All, and leads the group it belongs to.
+  const showHero = pinned !== null && (filter === 'all' || importantDateGroup(pinned.type) === filter);
   // Read the open record from live data so edits show immediately and a deletion closes it.
   const detail = detailId ? (dates.data.find((d) => d.id === detailId) ?? null) : null;
 
-  const openForm = (item: ImportantDate | null) => {
+  const openForm = (item: ImportantDate) => {
     setEditing(item);
     setFormOpen(true);
   };
@@ -43,12 +54,19 @@ export const UsScreen: React.FC = () => {
   const heroSince = pinned ? elapsedDays(pinned, today) : null;
   const heroStatus = pinned ? describeImportantDate(pinned, today) : null;
 
+  const filterOptions: Array<{ value: Filter; label: string }> = [
+    { value: 'all', label: t('us.filter.all') },
+    ...IMPORTANT_DATE_GROUPS.map((group) => ({ value: group as Filter, label: t(`us.filter.${group}`) })),
+  ];
+
   return (
     <ScreenScaffold
-      eyebrow={t('us.eyebrow')}
       title={t('us.title')}
+      right={<HeaderAddButton label={t('us.addDate')} onPress={() => setWizardOpen(true)} />}
     >
-      {pinned && heroStatus ? (
+      <FilterChips options={filterOptions} value={filter} onChange={setFilter} label={t('us.filtersLabel')} />
+
+      {showHero && pinned && heroStatus ? (
         <Pressable
           onPress={() => setDetailId(pinned.id)}
           accessibilityRole="button"
@@ -72,32 +90,25 @@ export const UsScreen: React.FC = () => {
       ) : null}
 
       <Card>
-        <SectionLabel>{t('us.specialDays')}</SectionLabel>
-
-        <Pressable
-          onPress={() => openForm(null)}
-          accessibilityRole="button"
-          accessibilityLabel={t('us.addSpecialDay')}
-          className="flex-row items-center min-h-[48px] py-2 active:opacity-70"
-        >
-          <View className="w-10 h-10 rounded-full border border-dashed border-border-strong items-center justify-center mr-3">
-            <Icon name="plus" size={sizes['icon-md']} color={ink} />
-          </View>
-          <Text className="text-base font-semibold text-ink">{t('us.addSpecialDay')}</Text>
-        </Pressable>
+        <SectionLabel>
+          {t('us.groupCount', {
+            label: filterOptions.find((o) => o.value === filter)?.label ?? '',
+            count: sorted.length,
+          })}
+        </SectionLabel>
 
         {sorted.length === 0 ? (
           <View className="mt-2">
-            <EmptyState message={t('us.empty')} />
+            <EmptyState message={filter === 'all' ? t('us.empty') : t('us.emptyFiltered')} />
           </View>
         ) : null}
 
-        {sorted.map((item) => {
+        {sorted.map((item, index) => {
           const status = describeImportantDate(item, today);
           const original = parseDateOnly(item.date);
           return (
             <View key={item.id}>
-              <View className="h-px bg-border my-2" />
+              {index > 0 ? <View className="h-px bg-border my-2" /> : null}
               <Pressable
                 onPress={() => setDetailId(item.id)}
                 accessibilityRole="button"
@@ -134,10 +145,6 @@ export const UsScreen: React.FC = () => {
         })}
       </Card>
 
-      <View className="items-start">
-        <Pill label={t('common.sharedWithBoth')} tone="shared" />
-      </View>
-
       <ImportantDateDetail
         visible={detail !== null}
         item={detail}
@@ -156,6 +163,7 @@ export const UsScreen: React.FC = () => {
         }}
       />
 
+      <ImportantDateWizard visible={wizardOpen} onClose={() => setWizardOpen(false)} pinnedItem={pinned} />
     </ScreenScaffold>
   );
 };

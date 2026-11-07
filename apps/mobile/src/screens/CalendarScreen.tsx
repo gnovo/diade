@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import {
   addLocalDays,
   isSameLocalDay,
+  isThirdPartyDate,
   startOfLocalDay,
   type CalendarEvent,
   type ExternalCalendar,
@@ -93,6 +94,7 @@ export const CalendarScreen: React.FC = () => {
     importantDates: specialDates.data,
     userId,
     googleScope: prefs.googleScope,
+    showOthersDates: prefs.showOthersDates,
     hiddenCalendarIds: prefs.hiddenCalendarIds,
   };
 
@@ -108,6 +110,7 @@ export const CalendarScreen: React.FC = () => {
       specialDates.data,
       userId,
       prefs.googleScope,
+      prefs.showOthersDates,
       prefs.hiddenCalendarIds,
       today.getTime(),
     ],
@@ -149,6 +152,7 @@ export const CalendarScreen: React.FC = () => {
     specialDates.data,
     userId,
     prefs.googleScope,
+    prefs.showOthersDates,
     prefs.hiddenCalendarIds,
     today.getTime(),
   ]);
@@ -175,7 +179,7 @@ export const CalendarScreen: React.FC = () => {
 
   const connected = externalCalendars.data.length > 0;
   const needsSetup = useNeedsCalendarSetup(connected, settingsOpen);
-  const filtersActive = hasActiveFilters(prefs.googleScope, prefs.hiddenCalendarIds, externalCalendars.data);
+  const filtersActive = hasActiveFilters(prefs.googleScope, prefs.hiddenCalendarIds, externalCalendars.data, prefs.showOthersDates);
 
   const scopeOptions: Array<{ value: GoogleScope; label: string }> = [
     { value: 'both', label: t('calendar.scopeBoth') },
@@ -296,7 +300,7 @@ export const CalendarScreen: React.FC = () => {
         onNext={() => shift(1)}
         showToday={showToday}
         onToday={goToday}
-        showFilters={connected && !needsSetup}
+        showFilters={(connected && !needsSetup) || specialDates.data.some((d) => isThirdPartyDate(d.type))}
         filtersActive={filtersActive}
         onOpenFilters={() => setFiltersOpen(true)}
       />
@@ -423,6 +427,8 @@ export const CalendarScreen: React.FC = () => {
         calendars={externalCalendars.data}
         hiddenIds={prefs.hiddenCalendarIds}
         onToggleCalendar={prefs.toggleCalendar}
+        showOthersDates={prefs.showOthersDates}
+        onShowOthersDatesChange={prefs.setShowOthersDates}
         userId={userId}
         partnerName={partnerFirstName}
         onManage={() => setSettingsOpen(true)}

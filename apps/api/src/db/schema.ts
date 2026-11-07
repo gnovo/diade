@@ -130,6 +130,8 @@ export const importantDates = pgTable(
     title: text('title').notNull(),
     type: text('type').notNull().default('other'), // see IMPORTANT_DATE_TYPES in @diade/domain
     notes: text('notes'),
+    /** Who the date is about, for other people's birthdays and anniversaries. */
+    personName: text('person_name'),
     date: date('date', { mode: 'string' }).notNull(),
     countFirstDay: boolean('count_first_day').notNull().default(false),
     repeat: text('repeat').notNull().default('yearly'), // 'none' | 'yearly'

@@ -7,6 +7,7 @@ import {
   addLocalDays,
   anniversaryInYear,
   isSameLocalDay,
+  isThirdPartyDate,
   parseDateOnly,
   startOfLocalDay,
   type CalendarEvent,
@@ -51,6 +52,11 @@ export interface UnifiedAgendaInput {
   from: Date;
   to: Date;
   googleScope?: GoogleScope;
+  /**
+   * Show birthdays and anniversaries of other people (dates with a person's name). Defaults to on.
+   * When on, Google events for the same person on the same day are hidden so nothing shows twice.
+   */
+  showOthersDates?: boolean;
   hiddenCalendarIds?: ReadonlySet<string>;
   /** Open tasks due before this day are reported as overdue. Defaults to `from`. */
   today?: Date;
@@ -117,6 +123,35 @@ export function dedupeExternalEvents(events: ExternalEvent[], userId: string): E
   });
 }
 
+const fold = (text: string): string =>
+  text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+const wordsOf = (text: string): string[] => fold(text).split(/[^a-z0-9]+/).filter(Boolean);
+
+/**
+ * Drops all-day Google events (typically the Birthdays calendar) that repeat a date the
+ * member added for someone else: same day of the year and the person's first name appears
+ * in the event title. Matching on the first name keeps "Marta" and "Marta Silva's birthday"
+ * together, and the day check keeps an unrelated "Marta" meeting out of it.
+ */
+export function dropGoogleDuplicatesOfDates(events: ExternalEvent[], dates: ImportantDate[]): ExternalEvent[] {
+  const people = dates
+    .filter((d) => !d.deletedAt && isThirdPartyDate(d.type) && d.personName)
+    .map((d) => ({ first: wordsOf(d.personName!)[0], monthDay: d.date.slice(5) }))
+    .filter((p): p is { first: string; monthDay: string } => Boolean(p.first));
+  if (people.length === 0) return events;
+
+  return events.filter((event) => {
+    if (!event.isAllDay || !event.startDate || !event.title) return true;
+    const monthDay = event.startDate.slice(5);
+    const words = wordsOf(event.title);
+    return !people.some((p) => p.monthDay === monthDay && words.includes(p.first));
+  });
+}
+
 function importantDateOccurrences(item: ImportantDate, from: Date, to: Date): Date[] {
   const original = parseDateOnly(item.date);
   if (!original) return [];
@@ -146,13 +181,15 @@ export function buildUnifiedAgenda(input: UnifiedAgendaInput): UnifiedAgenda {
 
   // Google events.
   const calendars = new Map(input.externalCalendars.map((c) => [c.id, c]));
+  const showOthers = input.showOthersDates ?? true;
+  const scoped = input.externalEvents.filter((e) => {
+    if (e.deletedAt) return false;
+    if (hidden.has(e.calendarId)) return false;
+    const mine = e.userId === userId;
+    return scope === 'both' || (scope === 'me' ? mine : !mine);
+  });
   const visibleExternal = dedupeExternalEvents(
-    input.externalEvents.filter((e) => {
-      if (e.deletedAt) return false;
-      if (hidden.has(e.calendarId)) return false;
-      const mine = e.userId === userId;
-      return scope === 'both' || (scope === 'me' ? mine : !mine);
-    }),
+    showOthers ? dropGoogleDuplicatesOfDates(scoped, input.importantDates) : scoped,
     userId,
   );
   for (const event of visibleExternal) {
@@ -213,6 +250,7 @@ export function buildUnifiedAgenda(input: UnifiedAgendaInput): UnifiedAgenda {
   // Important dates.
   for (const item of input.importantDates) {
     if (item.deletedAt) continue;
+    if (!showOthers && isThirdPartyDate(item.type)) continue;
     for (const day of importantDateOccurrences(item, from, to)) {
       entries.push({ kind: 'important_date', key: `date:${item.id}:${dayKey(day)}`, day, item });
     }

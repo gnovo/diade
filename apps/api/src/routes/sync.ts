@@ -306,6 +306,7 @@ async function applyMutation(
             title: d.title,
             type: d.type ?? 'other',
             notes: d.notes ?? null,
+            personName: d.personName ?? null,
             date: d.date,
             countFirstDay: d.countFirstDay ?? false,
             repeat: d.repeat ?? 'yearly',
@@ -322,6 +323,7 @@ async function applyMutation(
       if (d.title !== undefined) changes.title = d.title;
       if (d.type !== undefined) changes.type = d.type;
       if (d.notes !== undefined) changes.notes = d.notes;
+      if (d.personName !== undefined) changes.personName = d.personName;
       if (d.date !== undefined) changes.date = d.date;
       if (d.countFirstDay !== undefined) changes.countFirstDay = d.countFirstDay;
       if (d.repeat !== undefined) changes.repeat = d.repeat;

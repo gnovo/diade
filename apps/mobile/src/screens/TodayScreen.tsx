@@ -364,7 +364,7 @@ export const TodayScreen: React.FC = () => {
       {/* Us: the running count for the featured day, and the next special day. Opens the Us tab. */}
       {strip.featured || strip.next ? (
         <Pressable
-          onPress={() => navigation.navigate('Us')}
+          onPress={() => navigation.navigate('Dates')}
           accessibilityRole="button"
           accessibilityLabel={t('today.openUs')}
           className="active:opacity-70"

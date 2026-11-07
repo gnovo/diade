@@ -1,0 +1,142 @@
+<title>Dates Tab Wireframes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: sticky section nav on top, flow overview, then one row per screen: phone wireframe left, numbered notes right. */
+:root{--bg:#fafaf8;--panel:#fff;--ink:#111;--muted:#666;--line:#e5e5e0;--accent:#d33;--wire:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141412;--panel:#1d1d1a;--ink:#f1f1ec;--muted:#a3a39c;--line:#33332f;--accent:#ff6b5e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141412;--panel:#1d1d1a;--ink:#f1f1ec;--muted:#a3a39c;--line:#33332f;--accent:#ff6b5e;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,system-ui,"Segoe UI",sans-serif;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1080px;margin:0 auto;padding-block:32px 96px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:4px;overflow-x:auto;padding:8px 0;margin-bottom:32px;z-index:5}
+nav a{white-space:nowrap;font-size:13px;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:6px}
+nav a:hover{background:var(--panel);color:var(--ink)}
+.crumb{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+h1{font-size:34px;line-height:1.15;margin:8px 0 12px;text-wrap:balance}
+.lede{color:var(--muted);max-width:680px;margin:0 0 20px}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:40px}
+.pill{font-size:12px;border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:4px 10px;border-radius:999px}
+h2{font-size:24px;margin:0 0 4px;text-wrap:balance}
+.sub{color:var(--muted);margin:0 0 20px;max-width:640px}
+section{scroll-margin-top:72px;margin-bottom:72px}
+.flow{background:var(--wire);border:1px solid var(--line);border-radius:8px;overflow-x:auto}
+.flow img{display:block;min-width:900px;width:100%}
+.row{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:32px;align-items:start}
+@media(max-width:760px){.row{grid-template-columns:1fr}.row .wire{max-width:340px}}
+.wire{background:var(--wire);border:1px solid var(--line);border-radius:8px;overflow:hidden;cursor:zoom-in}
+.wire img{display:block;width:100%}
+ol.notes{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+ol.notes li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:12px}
+.n{width:22px;height:22px;border:1.5px solid var(--accent);color:var(--accent);border-radius:50%;font-size:12px;font-weight:700;display:grid;place-items:center}
+.why{margin-top:20px;border:1px dashed var(--accent);border-radius:8px;padding:12px 16px;font-size:14px}
+.why b{color:var(--accent)}
+table{border-collapse:collapse;font-size:14px;min-width:560px}
+.tw{overflow-x:auto}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;overflow:auto;z-index:50;padding:24px;cursor:zoom-out}
+#lb.on{display:block}#lb img{display:block;margin:0 auto;background:#fff;max-width:100%;max-height:none;height:auto;width:min(480px,100%)}
+#lb.wide img{width:min(1464px,100%)}
+</style>
+<div class="wrap">
+<nav>
+<a href="#flow">Flow</a><a href="#list">1 List</a><a href="#type">2 Type</a><a href="#date">3 Date</a><a href="#details">4 Details</a><a href="#third">5 Third-party</a><a href="#filter">6 Filters</a><a href="#types">Type map</a><a href="#open">Open questions</a>
+</nav>
+<header>
+<div class="crumb">Díade mobile · Dates tab</div>
+<h1>Dates tab: add flow and filters</h1>
+<p class="lede">The Us tab becomes Dates. The eyebrow goes, a plus button opens a three-step bottom sheet, and chips filter the list. Third-party birthdays and anniversaries are new types.</p>
+<div class="pills"><span class="pill">6 screens</span><span class="pill">Lo-fi · monochrome</span><span class="pill">Mobile 375×812</span><span class="pill">Tap any wireframe to zoom</span></div>
+</header>
+
+<section id="flow">
+<h2>Flow</h2>
+<p class="sub">Plus, pick a type (advances by itself), pick a date, name it and save. Third-party types swap the title field for a name field.</p>
+<div class="flow" data-zoom="wide"><img src="wireframes/flow.svg" alt="Flow overview of all six screens"></div>
+</section>
+
+<section id="list"><h2>1 · Dates list</h2>
+<p class="sub">Same header pattern as Lists, with filter chips between the header and the content.</p>
+<div class="row"><div class="wire" data-zoom><img src="wireframes/01-dates-list.svg" alt="Dates list"></div>
+<div><ol class="notes">
+<li><span class="n">1</span><span>Plus button in the header's right slot, the same shared component as Lists. The inline "Add a special day" row is removed. The "Us" eyebrow is gone.</span></li>
+<li><span class="n">2</span><span>Filter chips scroll horizontally: All, Couple, Birthdays, Trips, Other. One chip active at a time.</span></li>
+<li><span class="n">3</span><span>The pinned hero card stays, and shows only on All and Couple.</span></li>
+<li><span class="n">4</span><span>Rows now show who the date is for. Third-party rows read "Marta · every year".</span></li>
+<li><span class="n">5</span><span>Tab renamed "Dates" with a calendar-heart icon, matching the screen title.</span></li>
+</ol></div></div></section>
+
+<section id="type"><h2>2 · Wizard step 1: type</h2>
+<p class="sub">A bottom sheet over the dimmed list. Tapping a tile selects it and moves on after about 200ms.</p>
+<div class="row"><div class="wire" data-zoom><img src="wireframes/02-wizard-type.svg" alt="Wizard step 1"></div>
+<div><ol class="notes">
+<li><span class="n">1</span><span>Close button. The back chevron appears from step 2.</span></li>
+<li><span class="n">2</span><span>Three-segment progress bar. Completed steps fill in.</span></li>
+<li><span class="n">3</span><span>Eleven type tiles, ordered couple, birthdays, then trip and other. The highlighted tile shows the instant before auto-advance.</span></li>
+</ol>
+<div class="why"><b>Why:</b> the type sets smart defaults (repeat, day count, pin), so the later steps need far fewer fields than today's single form.</div></div></div></section>
+
+<section id="date"><h2>3 · Wizard step 2: date</h2>
+<p class="sub">A date is not a single tap, so this step has an explicit Continue button.</p>
+<div class="row"><div class="wire" data-zoom><img src="wireframes/03-wizard-date.svg" alt="Wizard step 2"></div>
+<div><ol class="notes">
+<li><span class="n">1</span><span>Back returns to the type step with the selection kept.</span></li>
+<li><span class="n">2</span><span>Wheel picker with a live hint ("1,204 days ago") so mistakes are visible before saving.</span></li>
+<li><span class="n">3</span><span>Continue is always enabled; the date defaults to today.</span></li>
+</ol></div></div></section>
+
+<section id="details"><h2>4 · Wizard step 3: details (couple type)</h2>
+<p class="sub">Title is prefilled from the type. Everything else uses defaults.</p>
+<div class="row"><div class="wire" data-zoom><img src="wireframes/04-wizard-details.svg" alt="Wizard step 3"></div>
+<div><ol class="notes">
+<li><span class="n">1</span><span>Title field, prefilled ("Our first day") and editable.</span></li>
+<li><span class="n">2</span><span>Summary of the date and repeat rule. Edit jumps back to step 2.</span></li>
+<li><span class="n">3</span><span>"More options" is collapsed: repeat, count first day, pin, reminder.</span></li>
+<li><span class="n">4</span><span>Save closes the sheet and the new row appears in the list.</span></li>
+</ol></div></div></section>
+
+<section id="third"><h2>5 · Wizard step 3: third-party type</h2>
+<p class="sub">"Their birthday" and "Other anniversary" ask who it is for and hide couple-only settings.</p>
+<div class="row"><div class="wire" data-zoom><img src="wireframes/05-wizard-third-party.svg" alt="Wizard step 3 third-party"></div>
+<div><ol class="notes">
+<li><span class="n">1</span><span>Name field replaces Title. The title is derived: "Marta's birthday". This needs a new person-name column.</span></li>
+<li><span class="n">2</span><span>Same summary row as the couple variant.</span></li>
+<li><span class="n">3</span><span>More options, shown open.</span></li>
+<li><span class="n">4</span><span>Only repeat and reminder appear. Count first day and Pin are hidden, so these never take the hero or the Today strip.</span></li>
+</ol>
+<div class="why"><b>Calendar overlap:</b> these dates appear in Calendar automatically through the unified agenda. Both partners see them, because the table is shared.</div></div></div></section>
+
+<section id="filter"><h2>6 · Filtered list</h2>
+<p class="sub">Birthdays selected. The hero hides and the section label shows a count.</p>
+<div class="row"><div class="wire" data-zoom><img src="wireframes/06-dates-filtered.svg" alt="Filtered list"></div>
+<div><ol class="notes">
+<li><span class="n">1</span><span>Active chip, filled black.</span></li>
+<li><span class="n">2</span><span>Count label: "Birthdays · 4".</span></li>
+<li><span class="n">3</span><span>Mine, my partner's and other people's birthdays sit together, sorted by next occurrence.</span></li>
+</ol></div></div></section>
+
+<section id="types"><h2>Type and filter map</h2>
+<p class="sub">Types are a text column, so only the person name needs a migration.</p>
+<div class="tw"><table>
+<tr><th>Type</th><th>Filter</th><th>Defaults</th></tr>
+<tr><td>First day, first kiss, engagement, wedding, expecting baby</td><td>Couple</td><td>Yearly, count first day for first day and first kiss, pin allowed</td></tr>
+<tr><td>My birthday, partner's birthday</td><td>Birthdays</td><td>Yearly, no day count</td></tr>
+<tr><td>Their birthday (new)</td><td>Birthdays</td><td>Yearly, needs name, no pin</td></tr>
+<tr><td>Trip (new)</td><td>Trips</td><td>Once, single date</td></tr>
+<tr><td>Other anniversary (new)</td><td>Other</td><td>Yearly, needs name, no pin</td></tr>
+<tr><td>Something else</td><td>Other</td><td>Yearly</td></tr>
+</table></div></section>
+
+<section id="open"><h2>Open questions</h2>
+<ol class="notes">
+<li><span class="n">1</span><span>Should the Today "Us" strip show third-party dates, or only couple dates?</span></li>
+<li><span class="n">2</span><span>Should the Google Birthdays calendar be de-duplicated against these dates?</span></li>
+<li><span class="n">3</span><span>Does the Couple filter also hide third-party rows inside the pinned hero logic? (Assumed yes.)</span></li>
+</ol></section>
+</div>
+<div id="lb"><img alt=""></div>
+<script>
+var lb=document.getElementById('lb'),li=lb.querySelector('img');
+document.querySelectorAll('[data-zoom]').forEach(function(e){e.addEventListener('click',function(){li.src=e.querySelector('img').src;lb.className='on'+(e.dataset.zoom==='wide'?' wide':'')})});
+lb.addEventListener('click',function(){lb.className=''});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')lb.className=''});
+</script>

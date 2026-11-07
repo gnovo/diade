@@ -99,6 +99,22 @@ export const ScreenScaffold: React.FC<{
   );
 };
 
+/** Round "+" for a screen header's right-hand slot (Lists, Dates). */
+export const HeaderAddButton: React.FC<{ label: string; onPress: () => void }> = ({ label, onPress }) => {
+  const onAction = useColor('on-action');
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      hitSlop={4}
+      className="w-12 h-12 rounded-full bg-action items-center justify-center active:opacity-80"
+    >
+      <Icon name="plus" color={onAction} strokeWidth={2.5} />
+    </Pressable>
+  );
+};
+
 export const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({
   children,
   className = '',

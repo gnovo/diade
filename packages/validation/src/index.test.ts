@@ -191,3 +191,20 @@ describe('calendar settings schemas', () => {
     expect(parseSyncPayload('list_items', 'UPDATE', { position: Number.POSITIVE_INFINITY }).success).toBe(false);
   });
 });
+
+describe('dates about other people', () => {
+  it('accepts the new types and a person name', () => {
+    const base = { title: "Marta's birthday", date: '1990-11-12' };
+    for (const type of ['their_birthday', 'trip', 'other_anniversary']) {
+      expect(parseSyncPayload('important_dates', 'INSERT', { ...base, type }).success).toBe(true);
+    }
+    const named = parseSyncPayload('important_dates', 'INSERT', { ...base, type: 'their_birthday', personName: ' Marta ' });
+    expect(named.success && (named.data as { personName?: string }).personName).toBe('Marta');
+  });
+
+  it('allows clearing the name, and rejects an empty one', () => {
+    expect(parseSyncPayload('important_dates', 'UPDATE', { personName: null }).success).toBe(true);
+    expect(parseSyncPayload('important_dates', 'UPDATE', { personName: '   ' }).success).toBe(false);
+  });
+});
+

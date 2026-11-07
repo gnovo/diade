@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import type { CalendarEvent, ExternalCalendar, ExternalEvent, ImportantDate, Task } from '@diade/domain';
-import { buildUnifiedAgenda, dedupeExternalEvents, pickHighlights, type AgendaEntry } from './unifiedAgenda';
+import {
+  buildUnifiedAgenda,
+  dedupeExternalEvents,
+  dropGoogleDuplicatesOfDates,
+  pickHighlights,
+  type AgendaEntry,
+} from './unifiedAgenda';
 
 const ME = 'me';
 const PARTNER = 'partner';
@@ -100,6 +106,7 @@ const date = (over: Partial<ImportantDate> = {}): ImportantDate => ({
   title: 'Anniversary',
   type: 'first_day',
   notes: null,
+  personName: null,
   date: '2020-11-10',
   countFirstDay: false,
   repeat: 'yearly',
@@ -359,5 +366,70 @@ describe('pickHighlights', () => {
       external({ id: `m${i}`, googleEventId: `g${i}`, title: `E${i}`, highlighted: true, startAt: local(11, 11 + i, 9), endAt: local(11, 11 + i, 10) }),
     );
     expect(pickHighlights(build({ externalEvents: many }), NOW, 3)).toHaveLength(3);
+  });
+});
+
+describe("other people's dates on the calendar", () => {
+  const marta = (over: Partial<ImportantDate> = {}) =>
+    date({ id: 'marta', title: "Marta's birthday", type: 'their_birthday', personName: 'Marta', date: '1990-11-12', ...over });
+  const googleBirthday = (over: Partial<ExternalEvent> = {}) =>
+    external({
+      id: 'gb',
+      title: "Marta Silva's birthday",
+      isAllDay: true,
+      startAt: null,
+      endAt: null,
+      startDate: '2026-11-12',
+      endDate: '2026-11-12',
+      ...over,
+    });
+
+  const kinds = (input: Partial<Parameters<typeof buildUnifiedAgenda>[0]>) =>
+    buildUnifiedAgenda({
+      events: [],
+      externalEvents: [],
+      externalCalendars: [calendar()],
+      tasks: [],
+      importantDates: [],
+      userId: ME,
+      from: FROM,
+      to: TO,
+      ...input,
+    })
+      .days.flatMap((d) => d.entries)
+      .map((e) => e.kind);
+
+  it('shows them by default', () => {
+    expect(kinds({ importantDates: [marta()] })).toEqual(['important_date']);
+  });
+
+  it('hides them, and only them, when switched off', () => {
+    const couple = date({ id: 'us', type: 'first_day', date: '2020-11-10' });
+    expect(kinds({ importantDates: [marta(), couple], showOthersDates: false })).toEqual(['important_date']);
+    expect(kinds({ importantDates: [marta()], showOthersDates: false })).toEqual([]);
+  });
+
+  it('hides the Google birthday for the same person on the same day', () => {
+    expect(kinds({ importantDates: [marta()], externalEvents: [googleBirthday()] })).toEqual(['important_date']);
+  });
+
+  it('keeps the Google birthday when the dates are switched off, so it is not lost', () => {
+    expect(kinds({ importantDates: [marta()], externalEvents: [googleBirthday()], showOthersDates: false })).toEqual([
+      'external',
+    ]);
+  });
+
+  it('keeps unrelated Google events', () => {
+    const ev = [
+      googleBirthday({ id: 'other-day', startDate: '2026-11-13', endDate: '2026-11-13' }),
+      googleBirthday({ id: 'other-person', title: "Joana's birthday" }),
+      external({ id: 'meeting', title: 'Lunch with Marta', isAllDay: false }),
+    ];
+    expect(dropGoogleDuplicatesOfDates(ev, [marta()]).map((e) => e.id)).toEqual(['other-day', 'other-person', 'meeting']);
+  });
+
+  it('matches names regardless of accents and case', () => {
+    const joao = marta({ personName: 'João', date: '1988-11-12' });
+    expect(dropGoogleDuplicatesOfDates([googleBirthday({ title: 'ANIVERSÁRIO DE JOAO' })], [joao])).toEqual([]);
   });
 });

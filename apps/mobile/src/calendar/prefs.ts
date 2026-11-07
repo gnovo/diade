@@ -5,6 +5,7 @@ import type { GoogleScope } from '../data/unifiedAgenda';
 const SCOPE_KEY = 'calendar_google_scope';
 const HIDDEN_KEY = 'calendar_hidden_calendars';
 const VIEW_KEY = 'calendar_view';
+const OTHERS_KEY = 'calendar_show_others_dates';
 
 export type CalendarView = 'schedule' | 'day' | 'week' | 'month';
 export const CALENDAR_VIEWS: readonly CalendarView[] = ['schedule', 'day', 'week', 'month'];
@@ -13,6 +14,9 @@ export interface CalendarPrefs {
   googleScope: GoogleScope;
   hiddenCalendarIds: Set<string>;
   view: CalendarView;
+  /** Birthdays and anniversaries of other people. On by default. */
+  showOthersDates: boolean;
+  setShowOthersDates: (show: boolean) => void;
   setView: (view: CalendarView) => void;
   setGoogleScope: (scope: GoogleScope) => void;
   toggleCalendar: (id: string) => void;
@@ -27,19 +31,22 @@ export function useCalendarPrefs(): CalendarPrefs {
   const [googleScope, setScope] = useState<GoogleScope>('both');
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [view, setViewState] = useState<CalendarView>('schedule');
+  const [showOthersDates, setShowOthers] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [scope, ids, savedView] = await Promise.all([
+        const [scope, ids, savedView, others] = await Promise.all([
           getSyncMeta(SCOPE_KEY),
           getSyncMeta(HIDDEN_KEY),
           getSyncMeta(VIEW_KEY),
+          getSyncMeta(OTHERS_KEY),
         ]);
         if (cancelled) return;
         if (scope === 'me' || scope === 'partner' || scope === 'both') setScope(scope);
         if (savedView && (CALENDAR_VIEWS as readonly string[]).includes(savedView)) setViewState(savedView as CalendarView);
+        if (others === 'off') setShowOthers(false);
         if (ids) setHidden(new Set(JSON.parse(ids) as string[]));
       } catch {
         // Defaults are fine if the stored value is missing or unreadable.
@@ -60,6 +67,11 @@ export function useCalendarPrefs(): CalendarPrefs {
     setSyncMeta(VIEW_KEY, next).catch(() => undefined);
   }, []);
 
+  const setShowOthersDates = useCallback((show: boolean) => {
+    setShowOthers(show);
+    setSyncMeta(OTHERS_KEY, show ? 'on' : 'off').catch(() => undefined);
+  }, []);
+
   const toggleCalendar = useCallback((id: string) => {
     setHidden((current) => {
       const next = new Set(current);
@@ -70,5 +82,14 @@ export function useCalendarPrefs(): CalendarPrefs {
     });
   }, []);
 
-  return { googleScope, hiddenCalendarIds: hidden, view, setView, setGoogleScope, toggleCalendar };
+  return {
+    googleScope,
+    hiddenCalendarIds: hidden,
+    view,
+    showOthersDates,
+    setShowOthersDates,
+    setView,
+    setGoogleScope,
+    toggleCalendar,
+  };
 }

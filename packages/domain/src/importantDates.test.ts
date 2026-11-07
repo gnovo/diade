@@ -3,8 +3,14 @@ import {
   anniversaryInYear,
   completedYears,
   daysBetween,
+  IMPORTANT_DATE_GROUPS,
+  IMPORTANT_DATE_TYPES,
+  IMPORTANT_DATE_TYPE_RULES,
   describeImportantDate,
   elapsedDays,
+  importantDateGroup,
+  isCoupleDate,
+  isThirdPartyDate,
   nextOccurrence,
   parseDateOnly,
   sortImportantDates,
@@ -178,5 +184,52 @@ describe('sortImportantDates', () => {
       '2026-10-01',
       '2022-01-15',
     ]);
+  });
+});
+
+describe('important date type rules', () => {
+  it('has rules and a known group for every type', () => {
+    for (const type of IMPORTANT_DATE_TYPES) {
+      expect(IMPORTANT_DATE_TYPE_RULES[type]).toBeDefined();
+      expect(IMPORTANT_DATE_GROUPS).toContain(importantDateGroup(type));
+    }
+  });
+
+  it('lets only trips and "something else" choose how they repeat', () => {
+    const editable = IMPORTANT_DATE_TYPES.filter((t) => IMPORTANT_DATE_TYPE_RULES[t].repeatEditable);
+    expect(editable.sort()).toEqual(['other', 'trip']);
+  });
+
+  it('repeats birthdays and anniversaries every year, and trips once', () => {
+    expect(IMPORTANT_DATE_TYPE_RULES.my_birthday.repeat).toBe('yearly');
+    expect(IMPORTANT_DATE_TYPE_RULES.their_birthday.repeat).toBe('yearly');
+    expect(IMPORTANT_DATE_TYPE_RULES.wedding.repeat).toBe('yearly');
+    expect(IMPORTANT_DATE_TYPE_RULES.trip.repeat).toBe('none');
+  });
+
+  it("asks for a name only for other people's dates, which can never be featured", () => {
+    for (const type of IMPORTANT_DATE_TYPES) {
+      const rules = IMPORTANT_DATE_TYPE_RULES[type];
+      expect(isThirdPartyDate(type)).toBe(rules.needsPersonName);
+      if (rules.needsPersonName) expect(rules.pinnable).toBe(false);
+    }
+    expect(isThirdPartyDate('their_birthday')).toBe(true);
+    expect(isThirdPartyDate('other_anniversary')).toBe(true);
+    expect(isThirdPartyDate('partner_birthday')).toBe(false);
+  });
+
+  it('counts the couple\'s own dates, but not other people\'s or trips', () => {
+    expect(isCoupleDate('first_day')).toBe(true);
+    expect(isCoupleDate('my_birthday')).toBe(true);
+    expect(isCoupleDate('other')).toBe(true);
+    expect(isCoupleDate('their_birthday')).toBe(false);
+    expect(isCoupleDate('trip')).toBe(false);
+  });
+
+  it('groups types the way the filter chips do', () => {
+    expect(importantDateGroup('first_kiss')).toBe('couple');
+    expect(importantDateGroup('their_birthday')).toBe('birthdays');
+    expect(importantDateGroup('trip')).toBe('trips');
+    expect(importantDateGroup('other_anniversary')).toBe('other');
   });
 });

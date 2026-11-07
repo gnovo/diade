@@ -8,7 +8,7 @@ import { CalendarScreen } from '../screens/CalendarScreen';
 import { SyncOverlay } from '../components/SyncOverlay';
 import { ListsScreen } from '../screens/ListsScreen';
 import { HomeScreen } from '../screens/HomeScreen';
-import { UsScreen } from '../screens/UsScreen';
+import { DatesScreen } from '../screens/DatesScreen';
 import { Icon, type IconName, useThemeColors } from '../design';
 import { sizes } from '@diade/design-tokens';
 
@@ -20,7 +20,7 @@ const tabIcons: Record<string, IconName> = {
   Calendar: 'calendar',
   Lists: 'shopping-basket',
   Home: 'house',
-  Us: 'users',
+  Dates: 'calendar-heart',
 };
 
 const TAB_BAR_CONTENT_HEIGHT = 56;
@@ -74,7 +74,7 @@ export const TabNavigator: React.FC = () => {
         <Tab.Screen name="Calendar" component={CalendarScreen} options={{ tabBarLabel: t('nav.calendar') }} />
         <Tab.Screen name="Lists" component={ListsScreen} options={{ tabBarLabel: t('nav.lists') }} />
         <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: t('nav.home') }} />
-        <Tab.Screen name="Us" component={UsScreen} options={{ tabBarLabel: t('nav.us') }} />
+        <Tab.Screen name="Dates" component={DatesScreen} options={{ tabBarLabel: t('nav.dates') }} />
       </Tab.Navigator>
       <SyncOverlay />
     </View>
