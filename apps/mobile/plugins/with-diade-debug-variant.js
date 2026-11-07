@@ -1,3 +1,9 @@
+// NOT REGISTERED in app.json on purpose. Listing any plugin there changes the native fingerprint, and
+// the app's runtimeVersion is that fingerprint, so registering it makes over-the-air updates stop
+// reaching the installed release build. To use it for a local debug build, add
+// "./plugins/with-diade-debug-variant" to expo.plugins temporarily, run `expo prebuild --platform android`,
+// build, and remove the line again before releasing (or publishing an update).
+//
 // Makes every DEBUG build install beside the production app instead of over it.
 //
 // The production APK is signed with the release keystore under com.diade.app. A debug build with the

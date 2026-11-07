@@ -39,7 +39,6 @@
       ],
       "./plugins/with-diade-icons",
       "./plugins/with-diade-release-signing",
-      "./plugins/with-diade-debug-variant",
       "@react-native-community/datetimepicker",
       [
         "expo-localization",
