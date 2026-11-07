@@ -11,6 +11,7 @@ import {
   Card,
   Checkbox,
   EmptyState,
+  HeaderAddButton,
   ScreenScaffold,
   SectionLabel,
   TextField,
@@ -21,7 +22,7 @@ import { ItemSuggestions } from '../components/ItemSuggestions';
 import { SortableList } from '../components/SortableList';
 import { SwipeToDelete } from '../components/SwipeToDelete';
 import { UndoToast } from '../components/UndoToast';
-import { Icon, useColor } from '../design';
+import { Icon } from '../design';
 import { dictionaryFor } from '../lists/dictionary';
 import { formatQuantity, parseQuantity } from '../lists/parseQuantity';
 import { capitalizeFirst, normalizeText } from '../lists/normalize';
@@ -276,7 +277,7 @@ export const ListsScreen: React.FC = () => {
     <>
       <ScreenScaffold
         title={t('lists.title')}
-        right={<AddListButton label={t('lists.newList')} onPress={() => setSheetOpen(true)} />}
+        right={<HeaderAddButton label={t('lists.newList')} onPress={() => setSheetOpen(true)} />}
       >
         {lists.data.length === 0 ? (
           <Card>
@@ -320,22 +321,6 @@ export const ListsScreen: React.FC = () => {
       </ScreenScaffold>
       <NewListSheet visible={sheetOpen} onClose={() => setSheetOpen(false)} onCreate={createList} />
     </>
-  );
-};
-
-/** Round "+" in the header's right-hand slot. */
-const AddListButton: React.FC<{ label: string; onPress: () => void }> = ({ label, onPress }) => {
-  const onAction = useColor('on-action');
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      hitSlop={4}
-      className="w-12 h-12 rounded-full bg-action items-center justify-center active:opacity-80"
-    >
-      <Icon name="plus" color={onAction} strokeWidth={2.5} />
-    </Pressable>
   );
 };
 

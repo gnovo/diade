@@ -15,6 +15,7 @@ const date = (id: string, day: string, over: Partial<ImportantDate> = {}): Impor
   title: id,
   type: 'other',
   notes: null,
+  personName: null,
   date: day,
   countFirstDay: false,
   repeat: 'none',
@@ -74,5 +75,15 @@ describe('usStrip', () => {
     const strip = usStrip([date('anniversary', '2020-11-08', { repeat: 'yearly', pinned: true })], now, 30);
     expect(strip.featured?.item.id).toBe('anniversary');
     expect(strip.next).toBeNull();
+  });
+
+  it("leaves other people's dates and trips out of the strip", () => {
+    const dates = [
+      date('marta', '2026-11-08', { type: 'their_birthday', personName: 'Marta', repeat: 'yearly' }),
+      date('lisbon', '2026-11-09', { type: 'trip' }),
+      date('together', '2026-11-12', { type: 'first_day' }),
+    ];
+    expect(upcomingSpecialDates(dates, now, 30).map((d) => d.item.id)).toEqual(['together']);
+    expect(usStrip(dates, now, 30).next?.item.id).toBe('together');
   });
 });

@@ -119,6 +119,7 @@ async function openLocalDb(): Promise<SQLite.SQLiteDatabase> {
       title TEXT NOT NULL,
       type TEXT NOT NULL DEFAULT 'other',
       notes TEXT,
+      person_name TEXT,
       date TEXT NOT NULL,
       count_first_day INTEGER NOT NULL DEFAULT 0,
       repeat TEXT NOT NULL DEFAULT 'yearly',
@@ -212,6 +213,7 @@ async function migrateLocalSchema(db: SQLite.SQLiteDatabase): Promise<void> {
   await addColumn('local_events', 'highlighted', 'INTEGER NOT NULL DEFAULT 0');
   await addColumn('local_external_events', 'highlighted', 'INTEGER NOT NULL DEFAULT 0');
   await addColumn('local_list_items', 'position', 'REAL');
+  await addColumn('local_important_dates', 'person_name', 'TEXT');
 }
 
 // --- Transactions ---

@@ -80,6 +80,8 @@ export interface ImportantDate extends BaseRecord {
   title: string;
   type: ImportantDateType;
   notes: string | null;
+  /** Who the date is about, for other people's birthdays and anniversaries. Null for the couple's own. */
+  personName: string | null;
   date: string;
   /** Count the date itself as day 1 rather than day 0. */
   countFirstDay: boolean;

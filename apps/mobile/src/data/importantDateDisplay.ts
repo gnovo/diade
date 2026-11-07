@@ -2,7 +2,7 @@
  * Display metadata and wording for important dates. Pure (type-only imports), so it can
  * be unit-tested without the app runtime. Wording comes from the i18n catalog through `t`.
  */
-import type { ImportantDateStatus, ImportantDateType } from '@diade/domain';
+import { IMPORTANT_DATE_TYPE_RULES, type ImportantDateStatus, type ImportantDateType } from '@diade/domain';
 import type { TFunction } from '@diade/i18n';
 import type { IconName } from '../design/Icon';
 
@@ -14,6 +14,9 @@ export const IMPORTANT_DATE_TYPE_ICONS: Record<ImportantDateType, IconName> = {
   engagement: 'gem',
   wedding: 'gem',
   expecting_baby: 'baby',
+  their_birthday: 'cake',
+  trip: 'luggage',
+  other_anniversary: 'users',
   other: 'star',
 };
 
@@ -41,4 +44,21 @@ export const alertLabel = (t: TFunction, days: number | null): string => {
 export function statusLabel(t: TFunction, status: Pick<ImportantDateStatus, 'kind' | 'days'>): string {
   if (status.kind === 'today') return t('importantDates.status.today');
   return t(`importantDates.status.${status.kind}`, { count: status.days });
+}
+
+/**
+ * The title stored with a date. Dates about someone else are named from the person
+ * ("Marta's birthday"), so the list and the Calendar read the same without extra lookups.
+ */
+export function composeTitle(
+  t: TFunction,
+  type: ImportantDateType,
+  fields: { title: string; personName: string },
+): string {
+  if (IMPORTANT_DATE_TYPE_RULES[type].needsPersonName) {
+    return t(`importantDates.derived.${type as 'their_birthday' | 'other_anniversary'}`, {
+      name: fields.personName.trim(),
+    });
+  }
+  return fields.title.trim();
 }

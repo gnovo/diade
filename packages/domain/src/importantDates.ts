@@ -16,10 +16,75 @@ export const IMPORTANT_DATE_TYPES = [
   'engagement',
   'wedding',
   'expecting_baby',
+  'their_birthday',
+  'trip',
+  'other_anniversary',
   'other',
 ] as const;
 
 export type ImportantDateType = (typeof IMPORTANT_DATE_TYPES)[number];
+
+/** The filter chips on the Dates screen. Every type belongs to exactly one group. */
+export const IMPORTANT_DATE_GROUPS = ['couple', 'birthdays', 'trips', 'other'] as const;
+export type ImportantDateGroup = (typeof IMPORTANT_DATE_GROUPS)[number];
+
+/**
+ * What the add flow asks for, and the defaults it applies, for one type. Keeping this in
+ * the domain makes the wizard, the edit form and the tests agree.
+ */
+export interface ImportantDateTypeRules {
+  group: ImportantDateGroup;
+  /** The date repeats on a fixed rule, so the form does not offer a Repeat choice. */
+  repeat: ImportantDateRepeat;
+  /** Only Trip and Something else let the user choose. */
+  repeatEditable: boolean;
+  /** The date is about someone else, so the form asks for their name instead of a title. */
+  needsPersonName: boolean;
+  /** Couple dates can carry a running day count ("1,204 days"). */
+  countFirstDayOption: boolean;
+  countFirstDayDefault: boolean;
+  /** Can be featured at the top of the Dates screen and on Today. */
+  pinnable: boolean;
+}
+
+const couple = (over: Partial<ImportantDateTypeRules> = {}): ImportantDateTypeRules => ({
+  group: 'couple',
+  repeat: 'yearly',
+  repeatEditable: false,
+  needsPersonName: false,
+  countFirstDayOption: false,
+  countFirstDayDefault: false,
+  pinnable: true,
+  ...over,
+});
+
+export const IMPORTANT_DATE_TYPE_RULES: Record<ImportantDateType, ImportantDateTypeRules> = {
+  first_day: couple({ countFirstDayOption: true, countFirstDayDefault: true }),
+  first_kiss: couple({ countFirstDayOption: true, countFirstDayDefault: true }),
+  engagement: couple(),
+  wedding: couple(),
+  expecting_baby: couple({ repeat: 'none' }),
+  my_birthday: couple({ group: 'birthdays' }),
+  partner_birthday: couple({ group: 'birthdays' }),
+  their_birthday: couple({ group: 'birthdays', needsPersonName: true, pinnable: false }),
+  trip: couple({ group: 'trips', repeat: 'none', repeatEditable: true, pinnable: false }),
+  other_anniversary: couple({ group: 'other', needsPersonName: true, pinnable: false }),
+  other: couple({ group: 'other', repeatEditable: true }),
+};
+
+export const importantDateGroup = (type: ImportantDateType): ImportantDateGroup =>
+  IMPORTANT_DATE_TYPE_RULES[type].group;
+
+/**
+ * A date about someone else. These stay out of the Today "Us" strip and are shown on the
+ * Calendar only while the member has switched them on.
+ */
+export const isThirdPartyDate = (type: ImportantDateType): boolean =>
+  IMPORTANT_DATE_TYPE_RULES[type].needsPersonName;
+
+/** Dates about the couple themselves: everything except other people's dates and trips. */
+export const isCoupleDate = (type: ImportantDateType): boolean =>
+  !isThirdPartyDate(type) && type !== 'trip';
 
 export const IMPORTANT_DATE_REPEATS = ['none', 'yearly'] as const;
 export type ImportantDateRepeat = (typeof IMPORTANT_DATE_REPEATS)[number];

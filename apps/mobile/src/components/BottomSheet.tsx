@@ -44,9 +44,11 @@ export const BottomSheet: React.FC<{
   children: React.ReactNode;
   /** Pinned below the scrolling content, so a primary action stays visible above the keyboard. */
   footer?: React.ReactNode;
+  /** The footer brings its own padding (and may animate its own height), so it is not wrapped. */
+  bareFooter?: boolean;
   /** Called once the closing animation has finished and the content is gone. */
   onClosed?: () => void;
-}> = ({ visible, onClose, title, children, footer, onClosed }) => {
+}> = ({ visible, onClose, title, children, footer, bareFooter, onClosed }) => {
   const insets = useSafeAreaInsets();
   const screenH = Dimensions.get('window').height;
   const maxHeight = screenH * MAX_HEIGHT_RATIO;
@@ -97,6 +99,9 @@ export const BottomSheet: React.FC<{
         slideTo(true);
       } else {
         translateY.setValue(screenH);
+        // A sheet closed while the keyboard was up never hears it hide, so drop the old lift.
+        bottomPad.setValue(insets.bottom);
+        setKeyboardHeight(0);
         mountedRef.current = true;
         setMounted(true); // the slide-in starts from onLayout, once the height is known
       }
@@ -220,7 +225,7 @@ export const BottomSheet: React.FC<{
             >
               {children}
             </ScrollView>
-            {footer ? <View className="px-4 pt-2 pb-4">{footer}</View> : null}
+            {footer ? bareFooter ? footer : <View className="px-4 pt-2 pb-4">{footer}</View> : null}
           </Animated.View>
         </Animated.View>
       </View>

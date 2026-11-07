@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import {
   IMPORTANT_DATE_TYPES,
+  IMPORTANT_DATE_TYPE_RULES,
   parseDateOnly,
   toDateInputValue,
   type ImportantDate,
@@ -15,10 +16,11 @@ import {
   ALERT_OPTIONS,
   IMPORTANT_DATE_TYPE_ICONS,
   alertToOption,
+  composeTitle,
   importantDateTypeLabel,
 } from '../data/importantDateDisplay';
 import { Icon, useColor } from '../design';
-import { Button, Pill, Segmented, TextField, useWriteContext } from './ui';
+import { Button, Segmented, TextField, useWriteContext } from './ui';
 import { DateField } from './DateField';
 
 interface Props {
@@ -32,7 +34,7 @@ interface Props {
 
 type Fields = Pick<
   ImportantDate,
-  'title' | 'type' | 'date' | 'countFirstDay' | 'repeat' | 'pinned' | 'alertOffsetDays' | 'notes'
+  'title' | 'type' | 'personName' | 'date' | 'countFirstDay' | 'repeat' | 'pinned' | 'alertOffsetDays' | 'notes'
 >;
 
 const TypeChip: React.FC<{ type: ImportantDateType; selected: boolean; onPress: () => void }> = ({
@@ -72,6 +74,7 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
 
   const [title, setTitle] = useState('');
   const [type, setType] = useState<ImportantDateType>('other');
+  const [personName, setPersonName] = useState('');
   const [date, setDate] = useState('');
   const [countFirstDay, setCountFirstDay] = useState(false);
   const [repeat, setRepeat] = useState<ImportantDateRepeat>('yearly');
@@ -89,6 +92,7 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
     if (item) {
       setTitle(item.title);
       setType(item.type);
+      setPersonName(item.personName ?? '');
       setDate(item.date);
       setCountFirstDay(item.countFirstDay);
       setRepeat(item.repeat);
@@ -99,6 +103,7 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
     } else {
       setTitle('');
       setType('other');
+      setPersonName('');
       setDate(toDateInputValue(new Date()));
       setCountFirstDay(false);
       setRepeat('yearly');
@@ -112,15 +117,18 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
   const chooseType = (next: ImportantDateType) => {
     setType(next);
     if (titleIsSuggested || !title.trim()) {
-      setTitle(next === 'other' ? '' : importantDateTypeLabel(t, next));
+      setTitle(next === 'other' || next === 'trip' ? '' : importantDateTypeLabel(t, next));
       setTitleIsSuggested(true);
     }
+    const nextRules = IMPORTANT_DATE_TYPE_RULES[next];
+    if (!nextRules.repeatEditable) setRepeat(nextRules.repeat);
+    if (!nextRules.pinnable) setPinned(false);
   };
 
   const handleSave = async () => {
     if (!ctx) return;
-    const trimmed = title.trim();
-    if (!trimmed) {
+    const trimmed = composeTitle(t, type, { title, personName });
+    if (!trimmed || (rules.needsPersonName && !personName.trim())) {
       Alert.alert(t('importantDates.form.addTitle'), t('importantDates.form.addTitleBody'));
       return;
     }
@@ -129,13 +137,17 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
       return;
     }
 
+    // Settings the form hides for this type keep an existing date's value (so editing a title never
+    // changes how it repeats) and otherwise take the type's default.
+    const sameType = item?.type === type;
     const next: Fields = {
       title: trimmed,
       type,
+      personName: rules.needsPersonName ? personName.trim() : null,
       date,
-      countFirstDay,
-      repeat,
-      pinned,
+      countFirstDay: rules.countFirstDayOption ? countFirstDay : sameType ? item.countFirstDay : false,
+      repeat: rules.repeatEditable ? repeat : sameType ? item.repeat : rules.repeat,
+      pinned: rules.pinnable ? pinned : false,
       alertOffsetDays: ALERT_OPTIONS.find((o) => o.value === alert)?.days ?? null,
       notes: notes.trim() || null,
     };
@@ -184,6 +196,7 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
     ]);
   };
 
+  const rules = IMPORTANT_DATE_TYPE_RULES[type];
   const replacing = pinned && pinnedItem && pinnedItem.id !== item?.id ? pinnedItem : null;
 
   return (
@@ -197,10 +210,6 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
           </View>
 
           <ScrollView contentContainerStyle={{ padding: 20, gap: 20 }} keyboardShouldPersistTaps="handled">
-            <View className="items-start">
-              <Pill label={t('common.sharedWithBoth')} tone="shared" />
-            </View>
-
             <View>
               <Text className="text-sm font-semibold text-ink-muted mb-2">{t('importantDates.form.type')}</Text>
               <View className="flex-row flex-wrap gap-2">
@@ -210,24 +219,38 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
               </View>
             </View>
 
-            <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.title')}</Text>
-              <TextField
-                value={title}
-                onChangeText={(value) => {
-                  setTitle(value);
-                  setTitleIsSuggested(false);
-                }}
-                placeholder={t('importantDates.form.titlePlaceholder')}
-                maxLength={200}
-              />
-            </View>
+            {rules.needsPersonName ? (
+              <View>
+                <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.personName')}</Text>
+                <TextField
+                  value={personName}
+                  onChangeText={setPersonName}
+                  placeholder={t('importantDates.form.personNamePlaceholder')}
+                  maxLength={120}
+                  autoCapitalize="words"
+                />
+              </View>
+            ) : (
+              <View>
+                <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.title')}</Text>
+                <TextField
+                  value={title}
+                  onChangeText={(value) => {
+                    setTitle(value);
+                    setTitleIsSuggested(false);
+                  }}
+                  placeholder={t('importantDates.form.titlePlaceholder')}
+                  maxLength={200}
+                />
+              </View>
+            )}
 
             <View>
               <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.date')}</Text>
               <DateField label={t('importantDates.form.date')} value={date} onChange={setDate} />
             </View>
 
+            {rules.countFirstDayOption ? (
             <View>
               <View className="flex-row items-center justify-between">
                 <Text className="flex-1 mr-3 text-base font-medium text-ink">{t('importantDates.form.countFirstDay')}</Text>
@@ -237,12 +260,16 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
                 {t('importantDates.form.countFirstDayHint')}
               </Text>
             </View>
+            ) : null}
 
+            {rules.repeatEditable ? (
             <View>
               <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.repeat')}</Text>
               <Segmented<ImportantDateRepeat> value={repeat} onChange={setRepeat} options={repeatOptions} />
             </View>
+            ) : null}
 
+            {rules.pinnable ? (
             <View>
               <View className="flex-row items-center justify-between">
                 <Text className="flex-1 mr-3 text-base font-medium text-ink">{t('importantDates.form.feature')}</Text>
@@ -254,6 +281,7 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
                 </Text>
               ) : null}
             </View>
+            ) : null}
 
             <View>
               <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.alert')}</Text>
