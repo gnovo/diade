@@ -37,7 +37,7 @@ Follow-ups after E, in order. Full detail, process notes and a starting prompt: 
 5. A `.md` file picker / share target (new native module, needs an APK release).
 
 Order for the next round: quick wins (empty Compras, Import chooser), Plano redesign, recipe sections and cooking view, then the
-catalog in three PRs (F, G, H). See [v2-ux-and-catalog.md](v2-ux-and-catalog.md).
+catalog in three PRs (F, G, H; H groups groceries lists by aisle, built, with the classifier in `packages/domain/src/ingredientAisles.ts` and no stored aisle yet). See [v2-ux-and-catalog.md](v2-ux-and-catalog.md).
 
 Dependencies: C needs B. D needs B and C (it reuses the recipe picker and the generator). E needs B
 only, so it can move earlier if wanted. Update this table when a PR merges.

@@ -1,4 +1,10 @@
-import { type ListItem, listIconFor, type Recipe, type SharedList } from '@diade/domain';
+import {
+  groupByAisle,
+  type ListItem,
+  listIconFor,
+  type Recipe,
+  type SharedList,
+} from '@diade/domain';
 import type { TFunction } from '@diade/i18n';
 import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -81,6 +87,8 @@ export const ListsScreen: React.FC = () => {
   const [newItemText, setNewItemText] = useState('');
   const [quantityDismissed, setQuantityDismissed] = useState(false);
   const [dragging, setDragging] = useState(false);
+  // A groceries list reads by aisle unless the member prefers their own order (which is still there, one tap away).
+  const [listView, setListView] = useState<'aisle' | 'manual'>('aisle');
 
   const undoable = useUndoableDelete(async (ids) => {
     for (const id of ids) await deleteRecord('list_items', id);
@@ -286,6 +294,7 @@ export const ListsScreen: React.FC = () => {
     const open = listItems.filter((i) => !i.isChecked);
     const done = listItems.filter((i) => i.isChecked);
     const quantityPill = formatQuantity(parsed.quantity, parsed.unit);
+    const byAisle = openList.category === 'groceries' && listView === 'aisle';
 
     return (
       <View className="flex-1">
@@ -343,25 +352,61 @@ export const ListsScreen: React.FC = () => {
             >
               {t('lists.items')}
             </SectionLabel>
-            {open.length === 0 ? <EmptyState message={t('lists.emptyItems')} /> : null}
-            <SortableList
-              items={open}
-              onReorder={(from, to) => reorderOpen(open, from, to)}
-              onDragChange={setDragging}
-              renderItem={(item, index, handle) => (
-                <ItemRow
-                  item={item}
-                  first={index === 0}
-                  onToggle={() => toggleItem(item)}
-                  onDelete={() => removeItem(item)}
-                  handle={handle}
-                  onMoveUp={index > 0 ? () => reorderOpen(open, index, index - 1) : undefined}
-                  onMoveDown={
-                    index < open.length - 1 ? () => reorderOpen(open, index, index + 1) : undefined
-                  }
+            {openList.category === 'groceries' && open.length > 0 ? (
+              <View className="mb-3">
+                <Segmented
+                  value={listView}
+                  onChange={setListView}
+                  options={[
+                    { value: 'aisle', label: t('lists.view.aisle') },
+                    { value: 'manual', label: t('lists.view.manual') },
+                  ]}
                 />
-              )}
-            />
+              </View>
+            ) : null}
+            {open.length === 0 ? <EmptyState message={t('lists.emptyItems')} /> : null}
+            {byAisle
+              ? groupByAisle(open).map(({ aisle, items: group }, groupIndex) => (
+                  <View key={aisle} className={groupIndex === 0 ? '' : 'mt-3'}>
+                    <SectionLabel
+                      right={<Text className="text-xs text-ink-muted">{group.length}</Text>}
+                    >
+                      {t(`lists.aisle.${aisle}`)}
+                    </SectionLabel>
+                    {group.map((item, index) => (
+                      <ItemRow
+                        key={item.id}
+                        item={item}
+                        first={index === 0}
+                        onToggle={() => toggleItem(item)}
+                        onDelete={() => removeItem(item)}
+                      />
+                    ))}
+                  </View>
+                ))
+              : null}
+            {byAisle ? null : (
+              <SortableList
+                items={open}
+                onReorder={(from, to) => reorderOpen(open, from, to)}
+                onDragChange={setDragging}
+                renderItem={(item, index, handle) => (
+                  <ItemRow
+                    item={item}
+                    first={index === 0}
+                    onToggle={() => toggleItem(item)}
+                    onDelete={() => removeItem(item)}
+                    handle={handle}
+                    onMoveUp={index > 0 ? () => reorderOpen(open, index, index - 1) : undefined}
+                    onMoveDown={
+                      index < open.length - 1
+                        ? () => reorderOpen(open, index, index + 1)
+                        : undefined
+                    }
+                  />
+                )}
+              />
+            )}
             {done.length > 0 ? (
               <View className="mt-4 pt-4 border-t border-border">
                 <View className="flex-row items-center justify-between mb-2">
