@@ -1,6 +1,7 @@
 import {
   buildGroceryList,
   defaultPlanPeriod,
+  findPossibleDuplicates,
   type GroceryRow,
   getListTemplate,
   LIST_TEMPLATES,
@@ -8,6 +9,7 @@ import {
   type MealPlan,
   type MealPlanRecipe,
   type PlanPeriod,
+  type PossibleDuplicate,
   periodChoice,
   type Recipe,
   type SharedList,
@@ -20,6 +22,7 @@ import { Alert, Pressable, Text, View } from 'react-native';
 import { createEmptyList, createPlanList } from '../data/newListActions';
 import {
   amountText,
+  applyMerges,
   canStartFromPlan,
   chosenRows,
   planForPeriod,
@@ -54,6 +57,8 @@ const ADVANCE_MS = 260;
 type Step = 1 | 2 | 3 | 4;
 type PeriodChoice = 'thisWeek' | 'nextWeek' | 'custom';
 
+const pairKey = (pair: PossibleDuplicate) => `${pair.keep.key}+${pair.absorb.key}`;
+
 /** One ingredient of the review: ticked means it goes on the list. */
 const ReviewRow: React.FC<{
   row: GroceryRow;
@@ -84,6 +89,35 @@ const ReviewRow: React.FC<{
           ) : null}
         </Pressable>
         {amount ? <Text className="text-sm text-ink-muted">{amount}</Text> : null}
+      </View>
+    </View>
+  );
+};
+
+/** "Meat ↔ Meet": a suggestion under the review rows. Nothing is merged until the member taps Merge. */
+const DuplicateSuggestion: React.FC<{
+  pair: PossibleDuplicate;
+  onMerge: () => void;
+  onKeepSeparate: () => void;
+}> = ({ pair, onMerge, onKeepSeparate }) => {
+  const { t } = useTranslation();
+  return (
+    <View className="bg-surface-sunken rounded-2xl p-4 mb-3">
+      <SectionLabel>{t('lists.wizard.duplicate.heading')}</SectionLabel>
+      <Text className="text-sm font-semibold text-ink mt-1">
+        {pair.keep.name} ↔ {pair.absorb.name}
+      </Text>
+      <View className="flex-row mt-3">
+        <View className="flex-1 mr-2">
+          <Button label={t('lists.wizard.duplicate.merge')} onPress={onMerge} />
+        </View>
+        <View className="flex-1">
+          <Button
+            variant="outline"
+            label={t('lists.wizard.duplicate.keepSeparate')}
+            onPress={onKeepSeparate}
+          />
+        </View>
       </View>
     </View>
   );
@@ -125,6 +159,9 @@ export const NewListWizard: React.FC<{
   const [touched, setTouched] = useState(false);
   const [unticked, setUnticked] = useState<Set<string>>(new Set());
   const [addedStaples, setAddedStaples] = useState<Set<string>>(new Set());
+  // Duplicates the member confirmed (absorbed row key -> kept row key) and pairs they chose to keep apart.
+  const [merges, setMerges] = useState<Map<string, string>>(new Map());
+  const [separate, setSeparate] = useState<Set<string>>(new Set());
   const [staplesOpen, setStaplesOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -150,6 +187,8 @@ export const NewListWizard: React.FC<{
     setTouched(false);
     setUnticked(new Set());
     setAddedStaples(new Set());
+    setMerges(new Map());
+    setSeparate(new Set());
     setStaplesOpen(false);
     setSaving(false);
   };
@@ -163,9 +202,15 @@ export const NewListWizard: React.FC<{
     () => (path === 'plan' ? buildGroceryList(selection, recipes) : null),
     [path, selection, recipes],
   );
+  // The rows the member sees: the build with the merges they confirmed applied.
+  const reviewRows = useMemo(() => (build ? applyMerges(build.rows, merges) : []), [build, merges]);
+  const suggestions = useMemo(
+    () => findPossibleDuplicates(reviewRows).filter((pair) => !separate.has(pairKey(pair))),
+    [reviewRows, separate],
+  );
   const chosen = useMemo(
-    () => (build ? chosenRows(build.rows, build.staples, unticked, addedStaples) : []),
-    [build, unticked, addedStaples],
+    () => (build ? chosenRows(reviewRows, build.staples, unticked, addedStaples) : []),
+    [build, reviewRows, unticked, addedStaples],
   );
 
   const starterLabel = (id: ListTemplateId, starter: string) =>
@@ -184,6 +229,8 @@ export const NewListWizard: React.FC<{
       setTouched(false);
       setUnticked(new Set());
       setAddedStaples(new Set());
+      setMerges(new Map());
+      setSeparate(new Set());
       setStaplesOpen(false);
       setTemplateId(next);
     }
@@ -217,6 +264,9 @@ export const NewListWizard: React.FC<{
 
   const changeSelection = (next: MealPlanRecipe[]) => {
     setTouched(true);
+    // Rows are rebuilt from the new recipes, so earlier merge decisions no longer apply.
+    setMerges(new Map());
+    setSeparate(new Set());
     setSelection(next);
   };
 
@@ -472,13 +522,13 @@ export const NewListWizard: React.FC<{
         </Text>
         <Text className="text-xs text-ink-muted mt-0.5 mb-3">{t('lists.wizard.reviewHint')}</Text>
 
-        {build.rows.length === 0 ? (
+        {reviewRows.length === 0 ? (
           <Card>
             <EmptyState message={t('lists.wizard.nothingToBuy')} />
           </Card>
         ) : (
           <Card>
-            {build.rows.map((row, index) => (
+            {reviewRows.map((row, index) => (
               <ReviewRow
                 key={row.key}
                 row={row}
@@ -489,6 +539,41 @@ export const NewListWizard: React.FC<{
             ))}
           </Card>
         )}
+
+        {[...merges].map(([from, into]) => {
+          const names = {
+            from: build.rows.find((row) => row.key === from)?.name ?? '',
+            into: build.rows.find((row) => row.key === into)?.name ?? '',
+          };
+          return (
+            <View key={from} className="flex-row items-center justify-between mb-3 px-1">
+              <Text className="flex-1 mr-2 text-xs text-ink-muted">
+                {t('lists.wizard.duplicate.merged', names)}
+              </Text>
+              <Button
+                label={t('lists.wizard.duplicate.undo')}
+                variant="ghost"
+                small
+                onPress={() =>
+                  setMerges((prev) => {
+                    const next = new Map(prev);
+                    next.delete(from);
+                    return next;
+                  })
+                }
+              />
+            </View>
+          );
+        })}
+
+        {suggestions.map((pair) => (
+          <DuplicateSuggestion
+            key={pairKey(pair)}
+            pair={pair}
+            onMerge={() => setMerges((prev) => new Map(prev).set(pair.absorb.key, pair.keep.key))}
+            onKeepSeparate={() => setSeparate((prev) => new Set(prev).add(pairKey(pair)))}
+          />
+        ))}
 
         {build.staples.length > 0 ? (
           <View className="bg-surface-sunken rounded-2xl p-4 mb-4">

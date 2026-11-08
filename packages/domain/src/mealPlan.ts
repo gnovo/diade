@@ -208,6 +208,28 @@ export function buildGroceryList(
   return { rows, staples };
 }
 
+/**
+ * Folds `others` into `row` after the member confirmed they are the same ingredient. The result keeps
+ * `row`'s key and name, sums the quantities (rows are already in the family's base unit) and carries every
+ * contribution, each still under its own key, so a stored item can be matched back to all the rows it came from.
+ * Callers only merge rows of one family.
+ */
+export function mergeGroceryRows(row: GroceryRow, ...others: GroceryRow[]): GroceryRow {
+  const contributions = [row, ...others].flatMap((r) => r.contributions);
+  const amounts = [row, ...others].flatMap((r) => (r.quantity === null ? [] : [r.quantity]));
+  return {
+    ...row,
+    quantity:
+      amounts.length === 0
+        ? null
+        : roundBase(
+            amounts.reduce((sum, n) => sum + n, 0),
+            row.unit,
+          ),
+    contributions,
+  };
+}
+
 // --- Showing a row ---
 
 /**
@@ -296,16 +318,24 @@ export function diffPlanAgainstList(desired: GroceryBuild, items: PlanListItem[]
   const seen = new Set<string>();
 
   for (const item of items) {
-    const key = item.contributions[0]?.key;
+    // An item the member merged at review carries several keys (one per row it absorbed): all of them are
+    // "seen", and its wanted row is those rows merged again, so it is not proposed as new next time.
+    const keys = [...new Set(item.contributions.map((c) => c.key))];
+    const key = keys[0];
     if (!key) continue;
     // A second item for the same row (it should not happen) is left alone, not double counted.
-    if (seen.has(key)) {
+    if (keys.some((k) => seen.has(k))) {
       diff.unchanged.push(item);
       continue;
     }
-    seen.add(key);
+    for (const k of keys) seen.add(k);
 
-    const row = wanted.get(key);
+    const found = keys.flatMap((k) => {
+      const r = wanted.get(k);
+      return r ? [r] : [];
+    });
+    const row =
+      found.length > 1 ? mergeGroceryRows(found[0], ...found.slice(1)) : (found[0] ?? null);
     if (!row) {
       if (item.editedByHand) diff.kept.push({ item, row: null });
       else diff.removed.push(item);

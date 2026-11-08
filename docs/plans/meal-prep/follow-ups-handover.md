@@ -99,6 +99,8 @@ Where it goes: the wizard review step (`NewListWizard.tsx`, `reviewStep`, rows c
 suggestion under the rows, merge sums quantities in the family's base unit. Needs wireframes (screens 05 and 09), both locales, domain tests for the pairing and the merge,
 and a device pass.
 
+**Status (branch `feat/grocery-possible-duplicates`):** done for the wizard review: `findPossibleDuplicates` and `mergeGroceryRows` in the domain, `applyMerges` in `newListFlow.ts`, a suggestion card with Merge, Keep separate and Undo, both locales, wireframe 09. The one-off option was chosen: `diffPlanAgainstList` now treats every contribution key of an item as seen and compares against the merged row, so "Update from plan" does not re-propose an absorbed row (verified on the dev app). **Not done:** suggesting merges for rows the "Update from plan" sheet proposes as new (wireframe 05 unchanged), and remembering a merge for the next list (the alias map, item 3).
+
 ### 3. Ingredient catalog (brainstorm and lock before any code)
 
 The proper root fix for spelling and synonyms: a synced entity of ingredients with aliases, so recipes point at an ingredient instead of holding a free-text name.

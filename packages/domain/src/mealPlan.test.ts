@@ -7,6 +7,7 @@ import {
   groceryAmount,
   ingredientMatchKey,
   isEmptyDiff,
+  mergeGroceryRows,
   missingStaples,
   type PlanListItem,
   periodChoice,
@@ -394,6 +395,93 @@ describe('diffPlanAgainstList', () => {
     expect(diff.changed.map((c) => [c.item.name, c.to])).toEqual([['Salt', '2 tsp']]);
     expect(diff.added.map((r) => r.name)).toEqual(['Rice']);
     expect(missingStaples(bigger, onList).map((r) => r.name)).toEqual(['Pepper']);
+  });
+});
+
+describe('merging confirmed duplicates', () => {
+  const a = recipe('a', 2, [ing('Meat', 500), ing('Rice', 200)]);
+  const b = recipe('b', 2, [ing('Meet', 250), ing('Rice', 100)]);
+  const entries = [
+    { recipeId: 'a', servings: 2 },
+    { recipeId: 'b', servings: 2 },
+  ];
+  const build = () => buildGroceryList(entries, [a, b]);
+  const merged = () => {
+    const [meat, meet] = [find(build().rows, 'Meat')[0], find(build().rows, 'Meet')[0]];
+    return mergeGroceryRows(meat, meet);
+  };
+
+  it('sums the quantities, keeps the first name and key, and carries every contribution', () => {
+    const row = merged();
+    expect(row.name).toBe('Meat');
+    expect(row.key).toBe('meat|mass');
+    expect(row.quantity).toBe(750);
+    expect(row.contributions.map((c) => c.key)).toEqual(['meat|mass', 'meet|mass']);
+  });
+
+  it('keeps null ("to taste") out of the sum, and stays null when nothing has an amount', () => {
+    const t = recipe('t', 1, [ing('Salt', null), ing('Sal', null)]);
+    const [salt, sal] = buildGroceryList([{ recipeId: 't', servings: 1 }], [t]).rows;
+    expect(mergeGroceryRows(salt, sal).quantity).toBeNull();
+    const [meat] = build().rows;
+    expect(mergeGroceryRows(salt, meat).quantity).toBe(500);
+  });
+
+  it('does not re-propose the absorbed row, and finds a merged list unchanged', () => {
+    const row = merged();
+    const items: PlanListItem[] = [
+      {
+        id: 'm',
+        name: row.name,
+        ...groceryAmount(row),
+        isChecked: false,
+        editedByHand: false,
+        contributions: row.contributions,
+      },
+      ...find(build().rows, 'Rice').map((r) => ({
+        id: 'r',
+        name: r.name,
+        ...groceryAmount(r),
+        isChecked: false,
+        editedByHand: false,
+        contributions: r.contributions,
+      })),
+    ];
+    const diff = diffPlanAgainstList(build(), items);
+    expect(diff.added).toEqual([]);
+    expect(isEmptyDiff(diff)).toBe(true);
+  });
+
+  it('scales a merged item as one row when a recipe changes', () => {
+    const row = merged();
+    const item: PlanListItem = {
+      id: 'm',
+      name: row.name,
+      ...groceryAmount(row),
+      isChecked: true,
+      editedByHand: false,
+      contributions: row.contributions,
+    };
+    const more = [{ recipeId: 'a', servings: 4 }, entries[1]];
+    const diff = diffPlanAgainstList(buildGroceryList(more, [a, b]), [item]);
+    expect(diff.changed.map((c) => [c.item.name, c.from, c.to])).toEqual([
+      ['Meat', '750 g', '1.25 kg'],
+    ]);
+    expect(diff.added.map((r) => r.name)).toEqual(['Rice']);
+  });
+
+  it('removes a merged item when none of its recipes are planned any more', () => {
+    const row = merged();
+    const item: PlanListItem = {
+      id: 'm',
+      name: row.name,
+      ...groceryAmount(row),
+      isChecked: false,
+      editedByHand: false,
+      contributions: row.contributions,
+    };
+    const diff = diffPlanAgainstList(buildGroceryList([], [a, b]), [item]);
+    expect(diff.removed).toHaveLength(1);
   });
 });
 

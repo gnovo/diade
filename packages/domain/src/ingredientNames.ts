@@ -4,7 +4,7 @@
  * points out a name that is one typo away from one it uses more.
  */
 
-import { ingredientMatchKey } from './mealPlan';
+import { type GroceryRow, ingredientMatchKey } from './mealPlan';
 import {
   assessIngredientLine,
   formatIngredient,
@@ -92,6 +92,39 @@ export function similarKnownName(name: string, known: KnownName[], ownCount = 0)
     if (!best || candidate.count > best.count) best = candidate;
   }
   return best?.name ?? null;
+}
+
+/** Two grocery rows that may be one ingredient spelled twice. `keep` is the one a merge keeps. */
+export interface PossibleDuplicate {
+  keep: GroceryRow;
+  absorb: GroceryRow;
+}
+
+/**
+ * Pairs of rows, in the same unit family, whose names are a typo of each other ("Meat" and "Meet"). Only a
+ * suggestion: nothing is merged until the member says so. The row fed by more recipes is kept, then the
+ * earlier one. A row is offered in at most one pair, so confirming one never invalidates another.
+ */
+export function findPossibleDuplicates(rows: GroceryRow[]): PossibleDuplicate[] {
+  const used = new Set<string>();
+  const pairs: PossibleDuplicate[] = [];
+  for (let i = 0; i < rows.length; i++) {
+    for (let j = i + 1; j < rows.length; j++) {
+      const a = rows[i];
+      const b = rows[j];
+      if (used.has(a.key) || used.has(b.key) || a.family !== b.family) continue;
+      const nameA = normalizeIngredientName(a.name);
+      const nameB = normalizeIngredientName(b.name);
+      if (!isTypoOf(nameA, nameB) && !isTypoOf(nameB, nameA)) continue;
+      used.add(a.key).add(b.key);
+      pairs.push(
+        b.contributions.length > a.contributions.length
+          ? { keep: b, absorb: a }
+          : { keep: a, absorb: b },
+      );
+    }
+  }
+  return pairs;
 }
 
 /** The name being typed in an ingredient line ("1 kg me" -> "Me"), or null when there is none yet. */

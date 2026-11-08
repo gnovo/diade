@@ -373,6 +373,13 @@ export const en = {
       include: 'Add {{name}} to the list',
       exclude: 'Leave {{name}} off the list',
       nothingToBuy: 'These recipes have no ingredients to buy.',
+      duplicate: {
+        heading: 'Possible duplicate',
+        merge: 'Merge',
+        keepSeparate: 'Keep separate',
+        merged: 'Merged {{from}} into {{into}}',
+        undo: 'Undo',
+      },
     },
     couldNotCreate: 'Could not create list',
     addItemPlaceholder: 'Add an item, e.g. 2 milk',
