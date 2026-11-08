@@ -67,13 +67,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      # Installed directly: the gitleaks-action downloads from a retired release URL that returns 504.
-      - name: Install gitleaks
-        run: |
-          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" | tar -xz gitleaks
-          sudo mv gitleaks /usr/local/bin/
-        env:
-          GITLEAKS_VERSION: 8.24.3
+      # Run from the official container image: the gitleaks-action and the release-asset downloads
+      # both return 504 from GitHub's release CDN.
       - name: Scan commits introduced by this change
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
@@ -81,4 +76,7 @@ jobs:
           else
             range="${{ github.event.before }}..${{ github.sha }}"
           fi
-          gitleaks git --no-banner --redact --log-opts="$range"
+          docker run --rm -v "$PWD:/repo" -w /repo \
+            -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/repo \
+            ghcr.io/gitleaks/gitleaks:v8.24.3 \
+            git --no-banner --redact --log-opts="$range" /repo
