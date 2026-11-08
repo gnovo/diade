@@ -18,11 +18,14 @@ Read [v2-ux-and-catalog.md](v2-ux-and-catalog.md) first; this brief only lists w
 
 ## Why rows are not made on first use
 
-The first version made a row for every ingredient when a recipe was saved or imported, and stamped an `ingredientId` on each line. On the dev backend a save of a
-three-ingredient recipe pushed four mutations (three catalog inserts and the recipe) and the Worker answered 503 `exceededCpu`, with the CPU capped at 10 ms and the
-Worker's other per-request CPU unchanged. A recipe with ten ingredients would push eleven mutations, and an import of several recipes dozens, so the approach does not
-fit the Worker's CPU limit. Rows are now made only when a member acts on an ingredient, which is one or two mutations. (The cause was inferred, not confirmed from
-the Cloudflare side: check the plan and CPU limit of `diade-api-dev` in the dashboard.)
+The first version made a row for every ingredient when a recipe was saved or imported, and stamped an `ingredientId` on each line. That pushed one mutation per ingredient
+(a recipe with ten ingredients would push eleven) for no visible benefit, since nothing reads those rows until a member edits one. Rows are now made only when a member acts on
+an ingredient, which is one or two mutations.
+
+**Correction.** While testing the first version on the dev backend a push was answered 503 `exceededCpu`, and this brief first put that down to the number of mutations. That was
+wrong. The cause was the `postgres` 4.0 bump (Dependabot #26): on the Worker it makes every request that reaches the database burn about 1 s of CPU, with or without the catalog
+(the pre-catalog bundle failed the same way; with `postgres` pinned to 3.4.9 the same requests succeed). It is fixed by pinning `postgres` to 3.x, with a Dependabot ignore for
+the major.
 
 ## Moved to G
 

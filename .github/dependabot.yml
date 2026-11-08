@@ -17,6 +17,10 @@ updates:
         update-types: [version-update:semver-major, version-update:semver-minor]
       - dependency-name: react
         update-types: [version-update:semver-major, version-update:semver-minor]
+      # postgres 4.x makes every request that reaches the database exceed the Worker's CPU limit (about 1 s of CPU per
+      # request on the dev Worker, so sync and sign-in fail with 503). Stay on 3.x until a newer 4.x is tested on dev.
+      - dependency-name: postgres
+        update-types: [version-update:semver-major]
     commit-message:
       prefix: "chore(deps)"
 

@@ -77,7 +77,8 @@ These extend the list above. Full reasoning and the slicing are in [v2-ux-and-ca
     recipe is still edited and read whole) and each line keeps only the name as written. A built-in en/pt-PT dictionary in code
     joins synonyms and plurals for everyone; the household's own aliases and merges live in the synced catalog. **A catalog row is made
     only when a member does something that needs one** (a merge, a rename, a staple default), never on every recipe save: each row is one
-    sync mutation, and a recipe with ten ingredients would push eleven, which exceeded the Worker's CPU limit on the dev backend.
+    sync mutation, so a recipe with ten ingredients would push eleven for no visible benefit. (An earlier version of this note blamed the
+    Worker's CPU limit; that failure was actually the `postgres` 4.0 bump, fixed by pinning 3.x. The decision stands on its own.)
     Brief: [pr-f-ingredient-catalog.md](pr-f-ingredient-catalog.md).
 12. **Staples live on the catalog entry** (a default), and a recipe line may override it. This revises decision 7.
 13. **Recipe lines carry no ingredient id** (revised from "lazy ids"). A line is matched to its ingredient by name, through the resolver, so no backfill and no rewrite of the JSON is needed.
