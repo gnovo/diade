@@ -363,7 +363,7 @@ export const en = {
       empty: 'Empty list',
       emptyHint: 'Add items yourself.',
       mealPlan: 'From a meal plan',
-      mealPlanHint: 'Pick recipes and their ingredients are added for you, in metric.',
+      mealPlanHint: 'Pick recipes and their ingredients are added for you.',
       noRecipesHint: 'Add recipes in the Recipes section to start a list from a meal plan.',
       continue: 'Continue',
       continueRecipes_one: 'Continue · {{count}} recipe',

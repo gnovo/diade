@@ -364,8 +364,7 @@ export const ptPT: Shape<Catalog> = {
       empty: 'Lista vazia',
       emptyHint: 'Adicione os itens à mão.',
       mealPlan: 'A partir de um plano de refeições',
-      mealPlanHint:
-        'Escolha as receitas e os ingredientes são adicionados por si, em unidades métricas.',
+      mealPlanHint: 'Escolha as receitas e os ingredientes são adicionados por si.',
       noRecipesHint:
         'Adicione receitas na secção Receitas para começar uma lista a partir de um plano.',
       continue: 'Continuar',
