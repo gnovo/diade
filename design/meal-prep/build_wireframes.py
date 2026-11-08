@@ -241,7 +241,7 @@ def s01():
 
 
 def s02():
-    s = Svg('02 Recipe sheet (shipped in PR B)')
+    s = Svg('02 Recipe sheet (PR B; import moved to screen 12)')
     ghost(s, recipes_screen)
     sheet(s, 96, 'New recipe', footer='Save')
     s.text(16, 160, 'NAME', 12, fill='#666')
@@ -262,15 +262,10 @@ def s02():
     s.text(16, 552, 'NOTES', 12, fill='#666')
     s.rect(16, 560, 343, 96, 8)
     s.text(28, 584, 'Steps, tips, where it came from…', 14, fill='#666')
-    s.line(16, 677, 160, 677)
-    s.text(W / 2, 681, 'or', 12, 'middle', '#666')
-    s.line(215, 677, 359, 677)
-    button(s, 16, 692, 343, 'Import from markdown', False, 40)
     s.callout(343, 128)
     s.callout(343, 336)
     s.callout(343, 400)
     s.callout(343, 480)
-    s.callout(343, 712)
     s.finish('02-recipe-sheet.svg')
 
 
@@ -366,20 +361,27 @@ def s06():
     s.finish('06-wizard-type.svg')
 
 
+def choice_tile(s, y, title, hint, selected=False, h=72):
+    """A full-width choice: title and one line of help. The selected tile is outlined heavier and filled light."""
+    s.rect(16, y, 343, h, 8, '#e6e6e6' if selected else '#fff', sw=3 if selected else None)
+    s.text(32, y + 30, title, 16, bold=True)
+    s.text(32, y + 52, hint, 12, fill='#666')
+
+
 def s07():
-    s = Svg('07 New list wizard, step 2: name and start (PR D)')
+    s = Svg('07 New list wizard, step 2: name and start (PR D, tiles)')
     ghost(s, wizard_ghost)
     top = 224
     sheet(s, top, 'New list', back='Groceries', step=(2, 4))
     s.text(16, top + 136, 'Name your list', 20, bold=True)
     input_box(s, 16, top + 152, 343, 'Groceries', 48, True)
     s.text(16, top + 232, 'START FROM', 12, fill='#666')
-    segmented(s, top + 248, ['Empty', 'Meal plan'], 1)
-    s.text(16, top + 328, 'Pick recipes and their ingredients are added', 12, fill='#666')
-    s.text(16, top + 346, 'for you, in metric.', 12, fill='#666')
+    choice_tile(s, top + 248, 'Empty list', 'Add items yourself.', False)
+    choice_tile(s, top + 332, 'From a meal plan', 'Pick recipes; their ingredients are added, in metric.', True)
     button(s, 16, 740, 343, 'Continue')
     s.callout(343, top + 88)
-    s.callout(343, top + 272)
+    s.callout(343, top + 284)
+    s.callout(343, top + 368)
     s.callout(343, 764)
     s.finish('07-wizard-name.svg')
 
@@ -491,6 +493,18 @@ def s11():
     s.finish('11-import-review.svg')
 
 
+def s12():
+    s = Svg('12 New recipe: write or import')
+    ghost(s, recipes_screen)
+    top = 456
+    sheet(s, top, 'Add a recipe')
+    choice_tile(s, top + 72, 'Write a recipe', 'Type the ingredients and the steps.', False, 88)
+    choice_tile(s, top + 176, 'Import', 'Paste a recipe from your notes, a chat or a website.', False, 88)
+    s.callout(343, top + 116)
+    s.callout(343, top + 220)
+    s.finish('12-add-recipe.svg')
+
+
 def flow():
     s = Svg('Flow: five PRs, left to right')
     s.add('<rect x="0" y="0" width="375" height="812" fill="#fff" stroke="none"/>')
@@ -523,6 +537,6 @@ def flow():
 
 
 if __name__ == '__main__':
-    for fn in (s01, s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, flow):
+    for fn in (s01, s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, s12, flow):
         fn()
     print('wrote', len(os.listdir(OUT)), 'files to', OUT)

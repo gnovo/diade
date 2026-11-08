@@ -21,7 +21,8 @@ export const LIST_TEMPLATES: readonly ListTemplate[] = [
     id: 'groceries',
     category: 'groceries',
     icon: 'shopping-basket',
-    starterItems: ['milk', 'eggs', 'bread', 'butter', 'fruit', 'vegetables', 'rice', 'pasta'],
+    // Starts empty: the list's frequently-added row and the meal plan are the suggestions.
+    starterItems: [],
   },
   {
     id: 'pharmacy',

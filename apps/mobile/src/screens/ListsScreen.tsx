@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, BackHandler, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { AddRecipeChooser } from '../components/AddRecipeChooser';
 import { ImportRecipesSheet } from '../components/ImportRecipesSheet';
 import { ItemSuggestions } from '../components/ItemSuggestions';
 import { NewListWizard } from '../components/NewListWizard';
@@ -72,6 +73,7 @@ export const ListsScreen: React.FC = () => {
     recipe: null,
   });
   const [importOpen, setImportOpen] = useState(false);
+  const [chooserOpen, setChooserOpen] = useState(false);
   const [openListId, setOpenListId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [newItemText, setNewItemText] = useState('');
@@ -242,11 +244,18 @@ export const ListsScreen: React.FC = () => {
   const recipeSheet = (
     <RecipeForm
       library={recipes.data}
-      onImport={() => setImportOpen(true)}
       visible={recipeForm.open}
       recipe={recipeForm.recipe}
       onClose={() => setRecipeForm((f) => ({ ...f, open: false }))}
       onSaved={(id) => setOpenRecipeId(id)}
+    />
+  );
+  const chooserSheet = (
+    <AddRecipeChooser
+      visible={chooserOpen}
+      onClose={() => setChooserOpen(false)}
+      onWrite={() => setRecipeForm({ open: true, recipe: null })}
+      onImport={() => setImportOpen(true)}
     />
   );
   const importSheet = (
@@ -398,10 +407,7 @@ export const ListsScreen: React.FC = () => {
           section === 'lists' ? (
             <HeaderAddButton label={t('lists.newList')} onPress={() => setSheetOpen(true)} />
           ) : section === 'plan' ? undefined : (
-            <HeaderAddButton
-              label={t('recipes.newRecipe')}
-              onPress={() => setRecipeForm({ open: true, recipe: null })}
-            />
+            <HeaderAddButton label={t('recipes.newRecipe')} onPress={() => setChooserOpen(true)} />
           )
         }
       >
@@ -493,6 +499,7 @@ export const ListsScreen: React.FC = () => {
         }}
       />
       {recipeSheet}
+      {chooserSheet}
       {importSheet}
     </>
   );
