@@ -5,11 +5,9 @@ import { formatDateRange } from '@diade/i18n';
 import {
   buildGroceryList,
   diffPlanAgainstList,
-  groceryAmount,
   isEmptyDiff,
   missingStaples,
   parseDateOnly,
-  type GroceryRow,
   type ListItem,
   type MealPlan,
   type PlanListItem,
@@ -18,6 +16,7 @@ import {
 } from '@diade/domain';
 import { getActiveMealPlans } from '../data/queries';
 import { addStapleToList, applyPlanDiff } from '../data/mealPlanActions';
+import { amountText } from '../data/newListFlow';
 import { useLiveQuery } from '../data/useLiveQuery';
 import { Icon } from '../design';
 import { BottomSheet } from './BottomSheet';
@@ -41,12 +40,6 @@ export function planItemsOf(items: ListItem[]): PlanListItem[] {
       : [],
   );
 }
-
-/** "400 g", "3", or "" for a row that is only "to taste". */
-const amountText = (row: Pick<GroceryRow, 'quantity' | 'unit'>): string => {
-  const { quantity, unit } = groceryAmount(row);
-  return quantity === null ? '' : unit ? `${quantity} ${unit}` : quantity;
-};
 
 const DiffGroup: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <View className="mb-4">

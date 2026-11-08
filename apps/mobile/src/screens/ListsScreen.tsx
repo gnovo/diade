@@ -25,7 +25,7 @@ import {
   TextField,
   useWriteContext,
 } from '../components/ui';
-import { NewListSheet, type NewListRequest } from '../components/NewListSheet';
+import { NewListWizard } from '../components/NewListWizard';
 import { ItemSuggestions } from '../components/ItemSuggestions';
 import { RecipeDetailScreen, RecipesLibrary } from '../components/RecipesView';
 import { RecipeForm } from '../components/RecipeForm';
@@ -94,20 +94,6 @@ export const ListsScreen: React.FC = () => {
     // itemsFor closes over items and hiddenIds, so list them instead of the function.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openList, parsed.name, history.data, items.data, hiddenIds, i18n.language]);
-
-  const createList = async ({ name, template, starterNames }: NewListRequest) => {
-    if (!ctx) return;
-    try {
-      const listId = await insertRecord('lists', ctx, { name, category: template.category, icon: template.icon });
-      for (const starter of starterNames) {
-        await insertRecord('list_items', ctx, { listId, name: starter, quantity: null, isChecked: false });
-      }
-      setSheetOpen(false);
-      setOpenListId(listId);
-    } catch (err) {
-      Alert.alert(t('lists.couldNotCreate'), err instanceof Error ? err.message : t('common.tryAgain'));
-    }
-  };
 
   const resetAdder = () => {
     setNewItemText('');
@@ -431,7 +417,16 @@ export const ListsScreen: React.FC = () => {
           )}
         </Animated.View>
       </ScreenScaffold>
-      <NewListSheet visible={sheetOpen} onClose={() => setSheetOpen(false)} onCreate={createList} />
+      <NewListWizard
+        visible={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        recipes={recipes.data}
+        lists={lists.data}
+        onCreated={(listId) => {
+          setSheetOpen(false);
+          setOpenListId(listId);
+        }}
+      />
       {recipeSheet}
     </>
   );
