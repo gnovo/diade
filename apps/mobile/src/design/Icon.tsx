@@ -41,6 +41,8 @@ import {
   Settings,
   ShoppingBasket,
   SlidersHorizontal,
+  Utensils,
+  Minus,
   SquareCheck,
   Star,
   StickyNote,
@@ -109,6 +111,8 @@ const lucideIcons = {
   'arrow-left': ArrowLeft,
   star: Star,
   'sliders-horizontal': SlidersHorizontal,
+  utensils: Utensils,
+  minus: Minus,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof lucideIcons | 'memory';

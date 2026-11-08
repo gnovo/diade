@@ -17,6 +17,7 @@ export const ENTITY_TABLES: Record<SyncEntityName, string> = {
   list_items: 'local_list_items',
   capture_items: 'local_capture_items',
   important_dates: 'local_important_dates',
+  recipes: 'local_recipes',
 };
 
 export interface WriteContext {
@@ -31,6 +32,7 @@ const OWNED_ENTITIES = new Set<SyncEntityName>([
   'lists',
   'capture_items',
   'important_dates',
+  'recipes',
 ]);
 
 async function queueMutation(

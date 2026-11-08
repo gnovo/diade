@@ -14,11 +14,13 @@ import {
   HeaderAddButton,
   ScreenScaffold,
   SectionLabel,
+  Segmented,
   TextField,
   useWriteContext,
 } from '../components/ui';
 import { NewListSheet, type NewListRequest } from '../components/NewListSheet';
 import { ItemSuggestions } from '../components/ItemSuggestions';
+import { RecipesView } from '../components/RecipesView';
 import { SortableList } from '../components/SortableList';
 import { SwipeToDelete } from '../components/SwipeToDelete';
 import { UndoToast } from '../components/UndoToast';
@@ -45,6 +47,7 @@ export const ListsScreen: React.FC = () => {
   const lists = useLiveQuery(getActiveLists, [] as SharedList[]);
   const items = useLiveQuery(getActiveListItems, [] as ListItem[]);
   const history = useLiveQuery(getItemHistory, [] as ItemHistoryRow[]);
+  const [section, setSection] = useState<'lists' | 'recipes'>('lists');
   const [openListId, setOpenListId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [newItemText, setNewItemText] = useState('');
@@ -184,6 +187,21 @@ export const ListsScreen: React.FC = () => {
     <UndoToast message={undoable.pending.message} actionLabel={t('lists.undo')} onAction={undoable.undo} />
   ) : null;
 
+  const switcher = (
+    <View className="mb-4">
+      <Segmented
+        value={section}
+        onChange={setSection}
+        options={[
+          { value: 'lists', label: t('lists.title') },
+          { value: 'recipes', label: t('recipes.title') },
+        ]}
+      />
+    </View>
+  );
+
+  if (section === 'recipes') return <RecipesView switcher={switcher} />;
+
   if (openList) {
     const listItems = itemsFor(openList.id);
     const open = listItems.filter((i) => !i.isChecked);
@@ -279,6 +297,7 @@ export const ListsScreen: React.FC = () => {
         title={t('lists.title')}
         right={<HeaderAddButton label={t('lists.newList')} onPress={() => setSheetOpen(true)} />}
       >
+        {switcher}
         {lists.data.length === 0 ? (
           <Card>
             <EmptyState message={t('lists.empty')} />

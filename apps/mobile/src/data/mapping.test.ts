@@ -23,6 +23,18 @@ describe('row mapping', () => {
     });
   });
 
+  it('stores ingredients as JSON text and reads them back as an array', () => {
+    const ingredients = [{ id: 'i1', name: 'Salt', quantity: null, unit: 'unit', staple: true }];
+    const { columns, values } = toColumns({ id: 'r', ingredients });
+    expect(columns).toEqual(['id', 'ingredients']);
+    expect(values).toEqual(['r', JSON.stringify(ingredients)]);
+    expect(fromRow({ id: 'r', ingredients: JSON.stringify(ingredients) })).toEqual({ id: 'r', ingredients });
+  });
+
+  it('reads an unreadable ingredients column as an empty array rather than throwing', () => {
+    expect(fromRow({ id: 'r', ingredients: 'not json' })).toEqual({ id: 'r', ingredients: [] });
+  });
+
   it('skips undefined values so partial updates do not overwrite columns', () => {
     const { columns } = toColumns({ title: 'New', notes: undefined });
     expect(columns).toEqual(['title']);

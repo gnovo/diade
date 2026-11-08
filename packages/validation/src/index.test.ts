@@ -208,3 +208,44 @@ describe('dates about other people', () => {
   });
 });
 
+
+describe('recipes sync payloads', () => {
+  const salt = { id: 'i1', name: 'Salt', quantity: 1, unit: 'tsp', staple: true };
+
+  it('defaults servings and ingredients on INSERT', () => {
+    const result = parseSyncPayload('recipes', 'INSERT', { name: 'Carbonara' });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data).toMatchObject({ name: 'Carbonara', servings: 4, ingredients: [] });
+  });
+
+  it('leaves absent fields out of an UPDATE, so they mean "unchanged"', () => {
+    const result = parseSyncPayload('recipes', 'UPDATE', { name: 'Renamed' });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data).toEqual({ name: 'Renamed' });
+  });
+
+  it('accepts ingredients with a null quantity (to taste)', () => {
+    expect(parseSyncPayload('recipes', 'INSERT', { name: 'x', ingredients: [{ ...salt, quantity: null, unit: 'unit' }] }).success).toBe(true);
+  });
+
+  it('rejects an empty name, bad servings, bad units and bad quantities', () => {
+    expect(parseSyncPayload('recipes', 'INSERT', { name: '  ' }).success).toBe(false);
+    expect(parseSyncPayload('recipes', 'INSERT', { name: 'x', servings: 0 }).success).toBe(false);
+    expect(parseSyncPayload('recipes', 'INSERT', { name: 'x', servings: 2.5 }).success).toBe(false);
+    expect(parseSyncPayload('recipes', 'INSERT', { name: 'x', ingredients: [{ ...salt, unit: 'oz' }] }).success).toBe(false);
+    expect(parseSyncPayload('recipes', 'INSERT', { name: 'x', ingredients: [{ ...salt, quantity: -1 }] }).success).toBe(false);
+    expect(parseSyncPayload('recipes', 'INSERT', { name: 'x', ingredients: [{ ...salt, name: '' }] }).success).toBe(false);
+  });
+
+  it('rejects duplicate ingredient ids and more than 100 ingredients', () => {
+    expect(parseSyncPayload('recipes', 'UPDATE', { ingredients: [salt, salt] }).success).toBe(false);
+    const many = Array.from({ length: 101 }, (_, n) => ({ ...salt, id: `i${n}` }));
+    expect(parseSyncPayload('recipes', 'UPDATE', { ingredients: many }).success).toBe(false);
+  });
+
+  it('strips fields it does not know, such as visibility', () => {
+    const result = parseSyncPayload('recipes', 'INSERT', { name: 'x', visibility: 'personal' });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data).not.toHaveProperty('visibility');
+  });
+});

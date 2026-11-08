@@ -137,7 +137,8 @@ export const SectionLabel: React.FC<{ children: React.ReactNode; right?: React.R
   </View>
 );
 
-export const TextField: React.FC<TextInputProps> = (props) => {
+/** `ref` is a plain prop in React 19, so it reaches the TextInput through the spread. */
+export const TextField: React.FC<TextInputProps & { ref?: React.Ref<React.ComponentRef<typeof TextInput>> }> = (props) => {
   const placeholder = useColor('ink-muted');
   const ink = useColor('ink');
   return (

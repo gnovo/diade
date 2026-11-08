@@ -5,6 +5,7 @@ import type {
   ListItem,
   CaptureItem,
   ImportantDate,
+  Recipe,
   ExternalCalendar,
   ExternalEvent,
 } from '@diade/domain';
@@ -82,3 +83,5 @@ export async function getPendingCount(): Promise<number> {
   const row = await db.getFirstAsync<{ n: number }>('SELECT COUNT(*) AS n FROM local_outbox');
   return row?.n ?? 0;
 }
+
+export const getActiveRecipes = () => selectActive<Recipe>('local_recipes', 'name COLLATE NOCASE ASC');

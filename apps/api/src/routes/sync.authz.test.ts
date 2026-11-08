@@ -96,3 +96,19 @@ describe('important dates authorisation', () => {
     expect(await authorizeMutation(fakeDb({}), mutation('important_dates', 'INSERT'), {}, SPACE, ME)).toBe('ok');
   });
 });
+
+describe('recipes authorisation', () => {
+  it('lets either member edit or delete a recipe in their space (always shared)', async () => {
+    const db = fakeDb({ recipes: [{ id: RECORD }] });
+    expect(await authorizeMutation(db, mutation('recipes', 'UPDATE'), {}, SPACE, ME)).toBe('ok');
+    expect(await authorizeMutation(db, mutation('recipes', 'DELETE'), {}, SPACE, PARTNER)).toBe('ok');
+  });
+
+  it("reports not_found when the recipe is not in the caller's space", async () => {
+    expect(await authorizeMutation(fakeDb({}), mutation('recipes', 'UPDATE'), {}, SPACE, ME)).toBe('not_found');
+  });
+
+  it('allows inserts', async () => {
+    expect(await authorizeMutation(fakeDb({}), mutation('recipes', 'INSERT'), {}, SPACE, ME)).toBe('ok');
+  });
+});

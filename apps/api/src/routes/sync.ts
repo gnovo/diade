@@ -17,6 +17,7 @@ import {
   listItems,
   captureItems,
   importantDates,
+  recipes,
   syncMutations,
   spaceMembers,
 } from '../db/schema';
@@ -97,6 +98,15 @@ export async function authorizeMutation(
         .select({ id: importantDates.id })
         .from(importantDates)
         .where(and(eq(importantDates.id, recordId), eq(importantDates.spaceId, spaceId)))
+        .limit(1);
+      return row ? 'ok' : 'not_found';
+    }
+    case 'recipes': {
+      // Always shared: any member may edit, but only within their own space.
+      const [row] = await db
+        .select({ id: recipes.id })
+        .from(recipes)
+        .where(and(eq(recipes.id, recordId), eq(recipes.spaceId, spaceId)))
         .limit(1);
       return row ? 'ok' : 'not_found';
     }
@@ -333,6 +343,35 @@ async function applyMutation(
         if (d.pinned === true) await unpinOthers(tx);
         await tx.update(importantDates).set(changes).where(where);
       });
+      return;
+    }
+
+    case 'recipes': {
+      if (operation === 'INSERT') {
+        await db.insert(recipes).values({
+          id: recordId,
+          spaceId,
+          creatorId: userId,
+          name: d.name,
+          servings: d.servings ?? 4,
+          notes: d.notes ?? null,
+          ingredients: d.ingredients ?? [],
+          createdAt: now,
+          updatedAt: now,
+        });
+        return;
+      }
+      const where = and(eq(recipes.id, recordId), eq(recipes.spaceId, spaceId));
+      if (operation === 'DELETE') {
+        await db.update(recipes).set({ deletedAt: now, updatedAt: now }).where(where);
+        return;
+      }
+      const changes: Partial<typeof recipes.$inferInsert> = { updatedAt: now };
+      if (d.name !== undefined) changes.name = d.name;
+      if (d.servings !== undefined) changes.servings = d.servings;
+      if (d.notes !== undefined) changes.notes = d.notes;
+      if (d.ingredients !== undefined) changes.ingredients = d.ingredients;
+      await db.update(recipes).set(changes).where(where);
       return;
     }
 
@@ -595,6 +634,17 @@ export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) 
         ),
       );
 
+    // Recipes (always shared within the space)
+    const recipeRecords = await db
+      .select()
+      .from(recipes)
+      .where(
+        and(
+          eq(recipes.spaceId, spaceId),
+          or(gt(recipes.updatedAt, sinceDate), gt(recipes.deletedAt, sinceDate)),
+        ),
+      );
+
     // Google Calendar events and calendars: own in full, partner's redacted on the server.
     const external = await buildExternalPull(db, { since: sinceDate, spaceId, viewerId: user.id });
 
@@ -644,6 +694,12 @@ export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) 
           createdAt: i.createdAt.toISOString(),
           updatedAt: i.updatedAt.toISOString(),
           deletedAt: i.deletedAt?.toISOString() || null,
+        })),
+        recipes: recipeRecords.map((r) => ({
+          ...r,
+          createdAt: r.createdAt.toISOString(),
+          updatedAt: r.updatedAt.toISOString(),
+          deletedAt: r.deletedAt?.toISOString() || null,
         })),
       },
     });
