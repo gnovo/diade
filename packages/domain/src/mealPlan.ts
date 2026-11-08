@@ -117,7 +117,8 @@ export interface GroceryBuild {
  * - Group by ingredient and unit family. An ingredient is a name resolved through the household's catalog and
  *   the built-in dictionary, so `aubergine` and `eggplant` are one row; a name nobody knows is matched by
  *   accent, case and plural only. `1 onion` and `200 g onion` stay two rows; we do not guess.
- * - A null quantity ("to taste") joins any row of the same name and adds nothing.
+ * - A null quantity ("to taste") joins a row of the same ingredient in any unit family and adds nothing; it only has a
+ *   row of its own when no recipe gives that ingredient an amount.
  * - A row is a staple only when every ingredient that feeds it is one. Whether an ingredient is one is the household's own
  *   setting for it (its catalog entry) when it has made one, else the flag on the recipe line.
  * - Entries whose recipe no longer exists are skipped.
@@ -172,6 +173,23 @@ export function buildGroceryList(
         });
       }
     }
+  }
+
+  // A line with no amount ("garlic", "to taste") has no unit to group by, so it landed in a row of its own beside the
+  // ingredient's rows with amounts. Fold it into the first of those rows (the ingredient's, in any unit family).
+  const ingredientOf = (key: string) => key.slice(0, key.lastIndexOf('|'));
+  const hasAmount = (row: GroceryRow) => row.contributions.some((c) => c.quantity !== null);
+  const home = new Map<string, string>();
+  for (const [key, group] of groups) {
+    if (hasAmount(group.row) && !home.has(ingredientOf(key))) home.set(ingredientOf(key), key);
+  }
+  for (const [key, group] of [...groups]) {
+    if (hasAmount(group.row)) continue;
+    const target = groups.get(home.get(ingredientOf(key)) ?? '');
+    if (!target) continue;
+    target.row.contributions.push(...group.row.contributions);
+    target.allStaples &&= group.allStaples;
+    groups.delete(key);
   }
 
   const rows: GroceryRow[] = [];
