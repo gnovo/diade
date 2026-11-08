@@ -13,13 +13,13 @@
     "db:studio": "op run --env-file=.dev.vars.tpl -- drizzle-kit studio"
   },
   "dependencies": {
-    "@better-auth/expo": "1.7.17",
+    "@better-auth/expo": "1.7.18",
     "@diade/contracts": "workspace:*",
     "@diade/domain": "workspace:*",
     "@diade/validation": "workspace:*",
     "@hono/zod-validator": "^0.9.1",
-    "@sentry/cloudflare": "^11.10.0",
-    "better-auth": "^1.7.17",
+    "@sentry/cloudflare": "^11.11.0",
+    "better-auth": "^1.7.18",
     "drizzle-orm": "^0.45.4",
     "hono": "^4.7.4",
     "postgres": "^3.4.9"
