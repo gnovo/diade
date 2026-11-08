@@ -38,16 +38,7 @@ import { DateField } from './DateField';
 import { FilterChips } from './FilterChips';
 import { RecipeChoiceList } from './RecipePicker';
 import { FoldingFooter, StepPager, StepProgress } from './StepPager';
-import {
-  Button,
-  Card,
-  Checkbox,
-  EmptyState,
-  SectionLabel,
-  Segmented,
-  TextField,
-  useWriteContext,
-} from './ui';
+import { Button, Card, Checkbox, EmptyState, SectionLabel, TextField, useWriteContext } from './ui';
 
 /** Room for the pinned button: 8 above, 48 high, 16 below. */
 const FOOTER_HEIGHT = 72;
@@ -58,6 +49,28 @@ type Step = 1 | 2 | 3 | 4;
 type PeriodChoice = 'thisWeek' | 'nextWeek' | 'custom';
 
 const pairKey = (pair: PossibleDuplicate) => `${pair.keep.key}+${pair.absorb.key}`;
+
+/** One way to start a list: a full-width tile with a title and a line of help. */
+const StartTile: React.FC<{
+  title: string;
+  hint: string;
+  selected: boolean;
+  disabled?: boolean;
+  onPress: () => void;
+}> = ({ title, hint, selected, disabled, onPress }) => (
+  <Pressable
+    onPress={onPress}
+    disabled={disabled}
+    accessibilityRole="radio"
+    accessibilityState={{ selected, checked: selected, disabled: !!disabled }}
+    className={`min-h-[64px] justify-center rounded-lg border px-4 py-3 ${
+      selected ? 'border-action bg-surface-tint' : 'border-border bg-surface'
+    } ${disabled ? 'opacity-60' : ''}`}
+  >
+    <Text className="text-base font-semibold text-ink">{title}</Text>
+    <Text className="text-sm text-ink-muted mt-0.5">{hint}</Text>
+  </Pressable>
+);
 
 /** One ingredient of the review: ticked means it goes on the list. */
 const ReviewRow: React.FC<{
@@ -391,27 +404,25 @@ export const NewListWizard: React.FC<{
       {templateId && canStartFromPlan(templateId) ? (
         <View className="mt-5">
           <SectionLabel>{t('lists.wizard.startFrom')}</SectionLabel>
-          {recipes.length > 0 ? (
-            <>
-              <Segmented<StartFrom>
-                value={start}
-                onChange={chooseStart}
-                options={[
-                  { value: 'empty', label: t('lists.wizard.empty') },
-                  { value: 'plan', label: t('lists.wizard.mealPlan') },
-                ]}
-              />
-              {start === 'plan' ? (
-                <Text className="text-sm leading-5 text-ink-muted mt-2">
-                  {t('lists.wizard.mealPlanHint')}
-                </Text>
-              ) : null}
-            </>
-          ) : (
-            <Text className="text-sm leading-5 text-ink-muted">
-              {t('lists.wizard.noRecipesHint')}
-            </Text>
-          )}
+          <View accessibilityRole="radiogroup" className="gap-2">
+            <StartTile
+              title={t('lists.wizard.empty')}
+              hint={t('lists.wizard.emptyHint')}
+              selected={start === 'empty'}
+              onPress={() => chooseStart('empty')}
+            />
+            <StartTile
+              title={t('lists.wizard.mealPlan')}
+              hint={
+                recipes.length > 0
+                  ? t('lists.wizard.mealPlanHint')
+                  : t('lists.wizard.noRecipesHint')
+              }
+              selected={start === 'plan'}
+              disabled={recipes.length === 0}
+              onPress={() => chooseStart('plan')}
+            />
+          </View>
         </View>
       ) : null}
 

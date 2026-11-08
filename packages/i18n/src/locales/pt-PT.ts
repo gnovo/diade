@@ -361,8 +361,9 @@ export const ptPT: Shape<Catalog> = {
       typeHeading: 'Que tipo de lista?',
       nameHeading: 'Dê um nome à lista',
       startFrom: 'Começar com',
-      empty: 'Vazia',
-      mealPlan: 'Plano de refeições',
+      empty: 'Lista vazia',
+      emptyHint: 'Adicione os itens à mão.',
+      mealPlan: 'A partir de um plano de refeições',
       mealPlanHint:
         'Escolha as receitas e os ingredientes são adicionados por si, em unidades métricas.',
       noRecipesHint:
@@ -420,16 +421,6 @@ export const ptPT: Shape<Catalog> = {
     template: {
       groceries: {
         name: 'Compras',
-        starter: {
-          milk: 'Leite',
-          eggs: 'Ovos',
-          bread: 'Pão',
-          butter: 'Manteiga',
-          fruit: 'Fruta',
-          vegetables: 'Legumes',
-          rice: 'Arroz',
-          pasta: 'Massa',
-        },
       },
       pharmacy: {
         name: 'Farmácia',
@@ -543,6 +534,13 @@ export const ptPT: Shape<Catalog> = {
   recipes: {
     title: 'Receitas',
     newRecipe: 'Nova receita',
+    add: {
+      title: 'Adicionar uma receita',
+      write: 'Escrever uma receita',
+      writeHint: 'Escreva os ingredientes e os passos.',
+      import: 'Importar',
+      importHint: 'Cole uma receita das suas notas, de uma conversa ou de um site.',
+    },
     empty: 'Ainda sem receitas. Adicione as que cozinha mais vezes.',
     searchPlaceholder: 'Pesquisar receitas',
     noMatches: 'Nenhuma receita corresponde a "{{query}}".',
@@ -560,10 +558,8 @@ export const ptPT: Shape<Catalog> = {
     shareMarkdown: 'Partilhar em markdown',
     shareFailed: 'Não foi possível partilhar',
     import: {
-      or: 'ou',
-      entry: 'Importar de markdown',
       title: 'Importar receitas',
-      pasteLabel: 'Cole o markdown',
+      pasteLabel: 'Cole o texto da receita',
       placeholder:
         '# Esparguete à carbonara\ndoses: 4\n\n## Ingredientes\n- 400 g esparguete\n- 200 g guanciale',
       pasteHint:

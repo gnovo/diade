@@ -360,8 +360,9 @@ export const en = {
       typeHeading: 'What kind of list?',
       nameHeading: 'Name your list',
       startFrom: 'Start from',
-      empty: 'Empty',
-      mealPlan: 'Meal plan',
+      empty: 'Empty list',
+      emptyHint: 'Add items yourself.',
+      mealPlan: 'From a meal plan',
       mealPlanHint: 'Pick recipes and their ingredients are added for you, in metric.',
       noRecipesHint: 'Add recipes in the Recipes section to start a list from a meal plan.',
       continue: 'Continue',
@@ -417,16 +418,6 @@ export const en = {
     template: {
       groceries: {
         name: 'Groceries',
-        starter: {
-          milk: 'Milk',
-          eggs: 'Eggs',
-          bread: 'Bread',
-          butter: 'Butter',
-          fruit: 'Fruit',
-          vegetables: 'Vegetables',
-          rice: 'Rice',
-          pasta: 'Pasta',
-        },
       },
       pharmacy: {
         name: 'Pharmacy',
@@ -538,6 +529,13 @@ export const en = {
   recipes: {
     title: 'Recipes',
     newRecipe: 'New recipe',
+    add: {
+      title: 'Add a recipe',
+      write: 'Write a recipe',
+      writeHint: 'Type the ingredients and the steps.',
+      import: 'Import',
+      importHint: 'Paste a recipe from your notes, a chat or a website.',
+    },
     empty: 'No recipes yet. Add the ones you cook most.',
     searchPlaceholder: 'Search recipes',
     noMatches: 'No recipe matches "{{query}}".',
@@ -554,10 +552,8 @@ export const en = {
     shareMarkdown: 'Share as markdown',
     shareFailed: 'Could not share',
     import: {
-      or: 'or',
-      entry: 'Import from markdown',
       title: 'Import recipes',
-      pasteLabel: 'Paste markdown',
+      pasteLabel: 'Paste the recipe text',
       placeholder:
         '# Spaghetti carbonara\nservings: 4\n\n## Ingredients\n- 400 g spaghetti\n- 200 g guanciale',
       pasteHint:
