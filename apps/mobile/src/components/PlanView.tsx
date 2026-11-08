@@ -237,7 +237,11 @@ export const PlanView: React.FC<{
                 <View className="flex-row items-center">
                   <View className="flex-1 mr-2">
                     <Text className="text-base font-semibold text-ink">{name}</Text>
-                    <Text className="text-sm text-ink-muted mt-0.5">{t('plan.servingsLabel')}</Text>
+                    {recipe ? (
+                      <Text className="text-sm text-ink-muted mt-0.5">
+                        {t('recipes.ingredients', { count: recipe.ingredients.length })}
+                      </Text>
+                    ) : null}
                   </View>
                   <Stepper
                     value={entry.servings}

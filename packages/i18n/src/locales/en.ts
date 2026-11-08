@@ -702,7 +702,6 @@ export const en = {
     recipeGone: 'Deleted recipe',
     lessServings: 'Fewer servings of {{name}}',
     moreServings: 'More servings of {{name}}',
-    servingsLabel: 'servings',
     otherPlans: 'Other plans',
     recipeCount_one: '{{count}} recipe',
     recipeCount_other: '{{count}} recipes',
