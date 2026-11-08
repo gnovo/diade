@@ -23,7 +23,7 @@
         "backgroundColor": "#0D4F46"
       },
       "package": "com.diade.app",
-      "versionCode": 2
+      "versionCode": 3
     },
     "plugins": [
       "expo-secure-store",
