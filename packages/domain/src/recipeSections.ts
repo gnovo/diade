@@ -41,27 +41,46 @@ export function sectionKind(title: string): RecipeSectionKind | null {
   return KINDS.find(([, pattern]) => pattern.test(normalized))?.[0] ?? null;
 }
 
-/** A level-2 heading, with an optional run of backslashes in front (an escaped one). */
-const HEADING = /^(\\*)##[ \t]+(.+?)[ \t]*$/;
+/**
+ * A level-2 heading ("## Title"), with the backslashes in front of it if it was escaped. Plain string work,
+ * not a pattern: a regular expression with two runs of whitespace around a capture backtracks badly on a
+ * long line of spaces and tabs, and this reads text a member pasted.
+ */
+function headingOf(line: string): { slashes: string; title: string } | null {
+  let slashes = 0;
+  while (line[slashes] === '\\') slashes++;
+  if (line.slice(slashes, slashes + 2) !== '##') return null;
+  const rest = line.slice(slashes + 2);
+  if (rest[0] !== ' ' && rest[0] !== '\t') return null;
+  const title = rest.trim();
+  return title ? { slashes: line.slice(0, slashes), title } : null;
+}
+
+/** The title of a level-2 heading that is not escaped, else null. */
+export const levelTwoTitle = (line: string): string | null => {
+  const heading = headingOf(line);
+  return heading && heading.slashes === '' ? heading.title : null;
+};
+
 const LIST_MARKER = /^\s*(?:\d+[.)]|[-*+•])\s+/;
 
 /** Free-text lines that would read as a section heading get one more backslash. */
 const escapeLine = (line: string): string => {
-  const heading = HEADING.exec(line);
-  return heading && sectionKind(heading[2]) ? `\\${line}` : line;
+  const heading = headingOf(line);
+  return heading && sectionKind(heading.title) ? `\\${line}` : line;
 };
 
 const unescapeLine = (line: string): string => {
-  const heading = HEADING.exec(line);
-  return heading?.[1] && sectionKind(heading[2]) ? line.slice(1) : line;
+  const heading = headingOf(line);
+  return heading?.slashes && sectionKind(heading.title) ? line.slice(1) : line;
 };
 
 export function parseRecipeNotes(text: string | null | undefined): RecipeSections {
   const lines: Record<RecipeSectionKind, string[]> = { steps: [], notes: [], source: [] };
   let current: RecipeSectionKind = 'notes';
   for (const line of (text ?? '').replace(/\r\n?/g, '\n').split('\n')) {
-    const heading = HEADING.exec(line);
-    const kind = heading && !heading[1] ? sectionKind(heading[2]) : null;
+    const title = levelTwoTitle(line);
+    const kind = title === null ? null : sectionKind(title);
     if (kind) {
       // A second section of the same kind continues the first, set apart by a blank line.
       if (lines[kind].length > 0) lines[kind].push('');
@@ -77,8 +96,13 @@ export function parseRecipeNotes(text: string | null | undefined): RecipeSection
   };
 }
 
-/** A step is one paragraph: line breaks become spaces. */
-export const cleanStep = (step: string): string => step.replace(/\s*\n\s*/g, ' ').trim();
+/** A step is one paragraph: line breaks become spaces. Split and joined, not matched, so a long run of spaces is cheap. */
+export const cleanStep = (step: string): string =>
+  step
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join(' ');
 
 /** The sections as the text stored in `notes`; null when every section is empty. */
 export function formatRecipeNotes(sections: RecipeSections): string | null {

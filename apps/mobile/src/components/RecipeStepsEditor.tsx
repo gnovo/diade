@@ -1,16 +1,13 @@
-import { MAX_STEP_LENGTH } from '@diade/domain';
+import { cleanStep, MAX_STEP_LENGTH } from '@diade/domain';
 import type React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 import { Icon } from '../design';
 import { Button, Card, SectionLabel, TextField } from './ui';
 
-/** One step as the box holds it: no line breaks, no padding. */
-const cleaned = (text: string): string => text.replace(/\s*\n\s*/g, ' ').trim();
-
 /** The steps with whatever is still in the box applied: added, or written over the step being edited. */
 export function stepsWithDraft(steps: string[], editing: number | null, draft: string): string[] {
-  const text = cleaned(draft);
+  const text = cleanStep(draft);
   if (!text) return steps;
   return editing === null
     ? [...steps, text]
@@ -34,7 +31,7 @@ export const RecipeStepsEditor: React.FC<{
   const setEditing = onEditingChange;
 
   const submit = () => {
-    if (!cleaned(draft)) return;
+    if (!cleanStep(draft)) return;
     onChange(stepsWithDraft(steps, editing, draft));
     onDraftChange('');
     setEditing(null);

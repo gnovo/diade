@@ -103,3 +103,19 @@ describe('round trip', () => {
     expect(normalizeRecipeNotes(once)).toBe(once);
   });
 });
+
+describe('long runs of whitespace', () => {
+  // Pasted text is read by pattern-free code, so these finish at once instead of backtracking.
+  it('reads a heading and a step with a very long run of tabs and spaces', () => {
+    const tabs = '\t'.repeat(200_000);
+    const started = Date.now();
+    expect(parseRecipeNotes(`##${tabs}a`).notes).toBe(`##${tabs}a`.trim());
+    expect(parseRecipeNotes(`## Steps\n1. ${' '.repeat(200_000)}x`).steps).toEqual(['x']);
+    expect(cleanStep(`a${' '.repeat(200_000)}\n${' '.repeat(200_000)}b`)).toBe('a b');
+    expect(Date.now() - started).toBeLessThan(1000);
+  });
+
+  it('still reads a heading with extra whitespace around its title', () => {
+    expect(parseRecipeNotes('##\t Steps \t\n1. Boil.').steps).toEqual(['Boil.']);
+  });
+});

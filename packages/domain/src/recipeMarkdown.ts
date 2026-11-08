@@ -10,6 +10,7 @@ import { type KnownName, knownIngredientNames, similarKnownName } from './ingred
 import { ingredientMatchKey } from './mealPlan';
 import {
   formatRecipeNotes,
+  levelTwoTitle,
   normalizeRecipeNotes,
   parseRecipeNotes,
   sectionKind,
@@ -166,8 +167,8 @@ function parseChunk(chunk: Chunk, newId: () => string): DraftRecipe {
     // After a Notes or Source heading everything is text, as written: no ingredients, labels or fields are
     // read. Only a Steps, Notes or Source heading (level 2) ends it, as in the sections of `recipeSections`.
     if (section === 'verbatim') {
-      const heading = /^##[ \t]+(.+?)[ \t]*$/.exec(line);
-      const kind = heading ? sectionKind(sectionTitle(heading[1])) : null;
+      const title = levelTwoTitle(line);
+      const kind = title === null ? null : sectionKind(sectionTitle(title));
       if (kind) {
         notes.push(line.trim());
         section = kind === 'steps' ? 'other' : 'verbatim';
