@@ -376,6 +376,13 @@ export const ptPT: Shape<Catalog> = {
       include: 'Adicionar {{name}} à lista',
       exclude: 'Deixar {{name}} fora da lista',
       nothingToBuy: 'Estas receitas não têm ingredientes para comprar.',
+      duplicate: {
+        heading: 'Possível duplicado',
+        merge: 'Juntar',
+        keepSeparate: 'Manter separados',
+        merged: '{{from}} juntado a {{into}}',
+        undo: 'Anular',
+      },
     },
     couldNotCreate: 'Não foi possível criar a lista',
     addItemPlaceholder: 'Adicionar um item, p. ex. 2 leites',

@@ -10,6 +10,7 @@ import {
   type ListTemplateId,
   type MealPlan,
   type MealPlanRecipe,
+  mergeGroceryRows,
   type PlanPeriod,
   type SharedList,
 } from '@diade/domain';
@@ -74,6 +75,23 @@ export function chosenRows(
     ...rows.filter((row) => !unticked.has(row.key)),
     ...staples.filter((row) => addedStaples.has(row.key)),
   ];
+}
+
+/**
+ * The review rows once the member has confirmed some merges (`absorbed key -> kept key`): each kept row takes
+ * its absorbed rows' quantities and contributions, and the absorbed rows are gone. Order is the build's.
+ */
+export function applyMerges(rows: GroceryRow[], merges: ReadonlyMap<string, string>): GroceryRow[] {
+  if (merges.size === 0) return rows;
+  const byKey = new Map(rows.map((row) => [row.key, row]));
+  return rows.flatMap((row) => {
+    if (merges.has(row.key)) return [];
+    const absorbed = [...merges].flatMap(([from, into]) => {
+      const other = into === row.key ? byKey.get(from) : undefined;
+      return other ? [other] : [];
+    });
+    return [absorbed.length > 0 ? mergeGroceryRows(row, ...absorbed) : row];
+  });
 }
 
 /** The writes for a list started empty: the list, then the template's starter items the member kept. */

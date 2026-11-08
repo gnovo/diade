@@ -1,5 +1,6 @@
 import {
   buildGroceryList,
+  type GroceryContribution,
   getListTemplate,
   type Recipe,
   type RecipeIngredient,
@@ -9,6 +10,7 @@ import { parseSyncPayload } from '@diade/validation';
 import { describe, expect, it } from 'vitest';
 import {
   amountText,
+  applyMerges,
   canStartFromPlan,
   chosenRows,
   emptyListWrites,
@@ -148,6 +150,44 @@ describe('chosenRows (review rows to items)', () => {
   it('writes nothing for rows left out, so the list has only what is wanted', () => {
     const none = chosenRows(rows, staples, new Set(rows.map((r) => r.key)), new Set());
     expect(none).toEqual([]);
+  });
+});
+
+describe('applyMerges (confirmed duplicates)', () => {
+  const meat = recipe(RECIPE_A, 2, [ing('Meat', 500), ing('Rice', 200)]);
+  const meet = recipe(RECIPE_B, 2, [ing('Meet', 250)]);
+  const { rows } = buildGroceryList(picked, [meat, meet]);
+  const [meatRow, riceRow, meetRow] = rows;
+
+  it('changes nothing without merges', () => {
+    expect(applyMerges(rows, new Map())).toBe(rows);
+  });
+
+  it('folds the absorbed row into the kept one and drops it, keeping the build order', () => {
+    const merged = applyMerges(rows, new Map([[meetRow.key, meatRow.key]]));
+    expect(merged.map((r) => [r.name, r.quantity])).toEqual([
+      ['Meat', 750],
+      ['Rice', 200],
+    ]);
+    expect(merged[0].contributions.map((c) => c.key)).toEqual([meatRow.key, meetRow.key]);
+    expect(merged[1]).toBe(riceRow);
+  });
+
+  it('stores both keys on the item, so "Update from plan" sees both rows as present', () => {
+    const merged = applyMerges(rows, new Map([[meetRow.key, meatRow.key]]));
+    const writes = planListWrites({
+      listId: LIST,
+      planId: PLAN,
+      reuse: null,
+      name: 'Compras',
+      period: week,
+      recipes: picked,
+      rows: merged,
+    });
+    const item = writes.find((w) => w.op === 'insert' && w.entity === 'list_items');
+    const stored =
+      item?.op === 'insert' ? (item.input as { contributions: GroceryContribution[] }) : null;
+    expect(stored?.contributions.map((c) => c.key)).toEqual([meatRow.key, meetRow.key]);
   });
 });
 

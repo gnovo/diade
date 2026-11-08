@@ -410,16 +410,15 @@ def s08():
 
 
 def s09():
-    s = Svg('09 New list wizard, step 4: review (PR D)')
+    s = Svg('09 New list wizard, step 4: review (PR D, duplicates PR G)')
     ghost(s, wizard_ghost)
     top = 96
     sheet(s, top, 'New list', back='Groceries', step=(4, 4), footer='Create list')
     s.text(16, top + 136, 'Review ingredients', 20, bold=True)
     s.text(16, top + 160, '21 to buy · 7 pantry staples left out', 12, fill='#666')
-    card(s, 16, top + 176, 343, 280)
-    for i, (n, src, q, on) in enumerate([('Spaghetti', 'Carbonara', '800 g', True), ('Eggs', 'Carbonara', '6', True),
-                                         ('Chicken thighs', 'Curry', '700 g', True), ('Onions', 'Curry, Lentil soup', '3', False),
-                                         ('Red lentils', 'Lentil soup', '250 g', True)]):
+    card(s, 16, top + 176, 343, 224)
+    for i, (n, src, q, on) in enumerate([('Spaghetti', 'Carbonara', '800 g', True), ('Onions', 'Curry, Lentil soup', '3', False),
+                                         ('Meat', 'Stew', '1 kg', True), ('Meet', 'Chilli', '500 g', True)]):
         y = top + 176 + i * 56
         if i:
             s.line(16, y, 359, y)
@@ -427,13 +426,20 @@ def s09():
         s.text(72, y + 26, n, 14, bold=True, fill='#000' if on else '#666')
         s.text(72, y + 44, src, 12, fill='#666')
         s.text(343, y + 33, q, 14, 'end', '#666')
-    s.rect(16, top + 472, 343, 56, 8, '#e6e6e6')
-    s.text(32, top + 505, 'Pantry staples · 7 left out', 14, bold=True)
-    s.text(343, top + 505, '⌄', 14, 'end')
+    # Possible duplicate: a suggestion under the rows, never applied until the member taps Merge.
+    s.rect(16, top + 412, 343, 92, 8, '#e6e6e6', dash=True)
+    s.text(32, top + 436, 'POSSIBLE DUPLICATE', 11, fill='#666', bold=True)
+    s.text(32, top + 458, 'Meat \u2194 Meet', 14, bold=True)
+    button(s, 32, top + 466, 140, 'Merge', h=30)
+    button(s, 184, top + 466, 160, 'Keep separate', filled=False, h=30)
+    s.rect(16, top + 516, 343, 56, 8, '#e6e6e6')
+    s.text(32, top + 549, 'Pantry staples · 7 left out', 14, bold=True)
+    s.text(343, top + 549, '\u2304', 14, 'end')
     s.callout(343, top + 160)
     s.callout(343, top + 200)
     s.callout(343, top + 340)
-    s.callout(343, top + 500)
+    s.callout(343, top + 458)
+    s.callout(343, top + 544)
     s.finish('09-wizard-review.svg')
 
 

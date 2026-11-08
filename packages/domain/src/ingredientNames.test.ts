@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
   applyNameSuggestion,
+  findPossibleDuplicates,
   type KnownName,
   knownIngredientNames,
   similarKnownName,
   suggestIngredientNames,
 } from './ingredientNames';
+import { buildGroceryList } from './mealPlan';
+import type { Recipe, RecipeUnit } from './recipes';
 
 const recipe = (...names: string[]) => ({
   ingredients: names.map((name, i) => ({
@@ -88,5 +91,68 @@ describe('applyNameSuggestion', () => {
     expect(applyNameSuggestion('2 colheres de sopa de azeit', 'Azeite')).toBe(
       '2 colheres de sopa de Azeite',
     );
+  });
+});
+
+describe('findPossibleDuplicates', () => {
+  const full = (id: string, lines: Array<[string, RecipeUnit]>): Recipe => ({
+    id,
+    spaceId: 's',
+    creatorId: 'u',
+    name: `Recipe ${id}`,
+    servings: 1,
+    notes: null,
+    ingredients: lines.map(([name, unit], i) => ({
+      id: `${id}${i}`,
+      name,
+      quantity: 1,
+      unit,
+      staple: false,
+    })),
+    createdAt: '',
+    updatedAt: '',
+    deletedAt: null,
+  });
+  const rowsOf = (...recipes: Recipe[]) =>
+    buildGroceryList(
+      recipes.map((r) => ({ recipeId: r.id, servings: 1 })),
+      recipes,
+    ).rows;
+
+  it('pairs a typo with the row it is a typo of, same unit family', () => {
+    const pairs = findPossibleDuplicates(
+      rowsOf(full('a', [['Meat', 'kg']]), full('b', [['Meet', 'g']])),
+    );
+    expect(pairs.map((p) => [p.keep.name, p.absorb.name])).toEqual([['Meat', 'Meet']]);
+  });
+
+  it('keeps the row more recipes feed', () => {
+    const pairs = findPossibleDuplicates(
+      rowsOf(full('a', [['Meet', 'kg']]), full('b', [['Meat', 'kg']]), full('c', [['Meat', 'g']])),
+    );
+    expect(pairs.map((p) => [p.keep.name, p.absorb.name])).toEqual([['Meat', 'Meet']]);
+  });
+
+  it('does not pair different unit families, unrelated words or a single row', () => {
+    expect(
+      findPossibleDuplicates(rowsOf(full('a', [['Meat', 'kg']]), full('b', [['Meet', 'unit']]))),
+    ).toEqual([]);
+    expect(
+      findPossibleDuplicates(rowsOf(full('a', [['Beef', 'g']]), full('b', [['Beet', 'g']]))),
+    ).toEqual([]);
+    expect(findPossibleDuplicates(rowsOf(full('a', [['Meat', 'g']])))).toEqual([]);
+  });
+
+  it('offers a row in at most one pair', () => {
+    const pairs = findPossibleDuplicates(
+      rowsOf(
+        full('a', [
+          ['Meat', 'g'],
+          ['Meet', 'g'],
+          ['Meut', 'g'],
+        ]),
+      ),
+    );
+    expect(pairs).toHaveLength(1);
   });
 });
