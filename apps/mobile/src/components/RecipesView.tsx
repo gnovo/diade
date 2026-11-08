@@ -1,5 +1,6 @@
 import {
   formatAmount,
+  formatRecipeMarkdown,
   normalizeIngredientName,
   type Recipe,
   type RecipeIngredient,
@@ -7,7 +8,7 @@ import {
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, BackHandler, Pressable, Text, View } from 'react-native';
+import { Alert, BackHandler, Pressable, Share, Text, View } from 'react-native';
 import { deleteRecord } from '../data/repository';
 import { Icon } from '../design';
 import { decimalFor } from './RecipeForm';
@@ -49,6 +50,18 @@ export const RecipeDetailScreen: React.FC<{
     });
     return () => sub.remove();
   }, [onBack]);
+
+  // The system share sheet carries the text to any app, and has its own Copy action: no clipboard module needed.
+  const share = async () => {
+    try {
+      await Share.share({ message: formatRecipeMarkdown(recipe) });
+    } catch (err) {
+      Alert.alert(
+        t('recipes.shareFailed'),
+        err instanceof Error ? err.message : t('common.tryAgain'),
+      );
+    }
+  };
 
   const confirmDelete = () =>
     Alert.alert(t('recipes.deleteTitle'), t('recipes.deleteBody', { name: recipe.name }), [
@@ -97,6 +110,8 @@ export const RecipeDetailScreen: React.FC<{
         </Card>
       ) : null}
 
+      <Button label={t('recipes.shareMarkdown')} variant="outline" onPress={share} />
+      <View className="h-3" />
       <Button label={t('recipes.deleteRecipe')} variant="danger" onPress={confirmDelete} />
     </ScreenScaffold>
   );
