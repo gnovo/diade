@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Pressable, Switch, Text, View } from 'react-native';
+import { Alert, Pressable, Switch, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
   IMPORTANT_DATE_TYPE_RULES,
@@ -21,7 +21,7 @@ import { useFormat } from '../i18n';
 import { Icon, useColor } from '../design';
 import { BottomSheet } from './BottomSheet';
 import { DateField } from './DateField';
-import { StepPager, STEP_EASING, STEP_MS, useReduceMotion } from './StepPager';
+import { FoldingFooter, StepPager, StepProgress } from './StepPager';
 import { Button, Segmented, TextField, useWriteContext } from './ui';
 
 /** Shown in this order: couple, birthdays, then trips and anything else. */
@@ -43,7 +43,7 @@ const TOTAL_STEPS = 3;
 /** Room for the pinned button: 8 above, 48 high, 16 below. */
 const FOOTER_HEIGHT = 72;
 /** Long enough to see which tile was chosen, short enough to feel automatic. */
-const ADVANCE_MS = 200;
+const ADVANCE_MS = 260;
 
 type Step = 1 | 2 | 3;
 
@@ -105,19 +105,6 @@ export const ImportantDateWizard: React.FC<{
   const [moreOpen, setMoreOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const reduceMotion = useReduceMotion();
-  // 0 = footer folded away (type step), 1 = open. It eases together with the step slide.
-  const footerOpen = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const to = step > 1 ? 1 : 0;
-    if (reduceMotion) {
-      footerOpen.setValue(to);
-      return;
-    }
-    Animated.timing(footerOpen, { toValue: to, duration: STEP_MS, easing: STEP_EASING, useNativeDriver: false }).start();
-  }, [step, reduceMotion, footerOpen]);
-
   useEffect(
     () => () => {
       if (advanceTimer.current) clearTimeout(advanceTimer.current);
@@ -140,7 +127,6 @@ export const ImportantDateWizard: React.FC<{
     setAlert('none');
     setMoreOpen(false);
     setSaving(false);
-    footerOpen.setValue(0);
   };
 
   const rules = type ? IMPORTANT_DATE_TYPE_RULES[type] : null;
@@ -225,11 +211,7 @@ export const ImportantDateWizard: React.FC<{
         )}
         <Text className="text-xs text-ink-muted">{t('importantDates.wizard.step', { step, total: TOTAL_STEPS })}</Text>
       </View>
-      <View className="flex-row gap-2" accessible={false}>
-        {[1, 2, 3].map((n) => (
-          <View key={n} className={`flex-1 h-1 rounded-full ${n <= step ? 'bg-action' : 'bg-surface-sunken'}`} />
-        ))}
-      </View>
+      <StepProgress step={step} total={TOTAL_STEPS} />
     </View>
   );
 
@@ -370,14 +352,7 @@ export const ImportantDateWizard: React.FC<{
   ) : null;
 
   const footer = (
-    <Animated.View
-      style={{
-        height: footerOpen.interpolate({ inputRange: [0, 1], outputRange: [0, FOOTER_HEIGHT] }),
-        opacity: footerOpen,
-        overflow: 'hidden',
-      }}
-      pointerEvents={step > 1 ? 'auto' : 'none'}
-    >
+    <FoldingFooter open={step > 1} height={FOOTER_HEIGHT}>
       <View className="px-4 pt-2 pb-4">
         {step === 3 ? (
           <Button label={t('importantDates.wizard.save')} onPress={handleSave} disabled={!canSave} />
@@ -385,7 +360,7 @@ export const ImportantDateWizard: React.FC<{
           <Button label={t('importantDates.wizard.continue')} onPress={() => setStep(3)} disabled={!original} />
         )}
       </View>
-    </Animated.View>
+    </FoldingFooter>
   );
 
   return (
