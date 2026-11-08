@@ -8,7 +8,11 @@
 #   release-android.sh apk
 #       Native change (new native dependency, SDK bump, permission, app.json native config).
 #       Bumps android.versionCode, builds the signed prod APK and publishes it as a GitHub Release
-#       (tag v<version>-<versionCode>) that Obtainium picks up.
+#       (tag v<version>-<versionCode>) that Obtainium picks up. Main is protected, so this pushes a
+#       chore/release-<tag> branch and a DRAFT release; merge that PR, then run `publish`.
+#
+#   release-android.sh publish <tag>
+#       After the release PR is merged: publishes the draft, tagging the merged commit on main.
 #
 # Requires: eas login (ota), gh auth login (apk), plus everything build-android-prod.sh needs.
 set -euo pipefail
@@ -62,16 +66,35 @@ case "$MODE" in
     OUT="$APP_DIR/android/app/build/outputs/apk/release/diade-${VERSION}-${NEW_CODE}.apk"
     cp "$SRC" "$OUT"
 
+    # main is protected (changes go through a pull request), so the bump goes on a branch and the
+    # release stays a draft, which Obtainium does not see, until that PR is merged.
+    ORIG="$(git rev-parse --abbrev-ref HEAD)"
+    BRANCH="chore/release-${TAG}"
+    git switch -c "$BRANCH"
     git add app.json
     git commit -m "chore(mobile): release ${TAG}"
-    git tag "$TAG"
-    git push origin HEAD "$TAG"
-    gh release create "$TAG" "$OUT" --repo gnovo/diade --title "$TAG" \
+    git push -u origin "$BRANCH"
+    gh release create "$TAG" "$OUT" --repo gnovo/diade --title "$TAG" --draft \
       --notes "${2:-Díade ${VERSION} (build ${NEW_CODE})}"
-    echo "Released $TAG"
+    git switch "$ORIG"
+    echo "Built $TAG as a DRAFT release. Next:"
+    echo "  1. Open and merge a PR from $BRANCH: https://github.com/gnovo/diade/pull/new/$BRANCH"
+    echo "  2. Then run: bash scripts/release-android.sh publish $TAG"
+    ;;
+  publish)
+    TAG="${2:?usage: $0 publish <tag>}"
+    git fetch -q origin main
+    # The tag must point at the merged bump commit, so find it on main (squash merges add " (#N)").
+    COMMIT="$(git log origin/main -50 --format='%H %s' | grep -F "chore(mobile): release ${TAG}" | head -1 | cut -d' ' -f1)"
+    [ -n "$COMMIT" ] || {
+      echo "error: no 'release ${TAG}' commit on origin/main yet. Merge the release PR first." >&2
+      exit 1
+    }
+    gh release edit "$TAG" --repo gnovo/diade --draft=false --target "$COMMIT"
+    echo "Published $TAG; Obtainium will offer it."
     ;;
   *)
-    echo "usage: $0 ota [message] | apk [notes]" >&2
+    echo "usage: $0 ota [message] | apk [notes] | publish <tag>" >&2
     exit 1
     ;;
 esac
