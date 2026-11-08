@@ -84,15 +84,19 @@ export function mapGoogleEvent(event: GoogleEvent): MappedEvent {
     description: event.description ?? null,
     location: event.location ?? null,
     status,
-    transparency: (event.transparency === 'transparent' ? 'transparent' : 'opaque') as ExternalEventTransparency,
+    transparency: (event.transparency === 'transparent'
+      ? 'transparent'
+      : 'opaque') as ExternalEventTransparency,
     myResponse: selfResponse(event),
-    googleVisibility: (GOOGLE_VISIBILITIES.find((v) => v === event.visibility) ?? null) as GoogleEventVisibility | null,
+    googleVisibility: (GOOGLE_VISIBILITIES.find((v) => v === event.visibility) ??
+      null) as GoogleEventVisibility | null,
     htmlLink: event.htmlLink ?? null,
     isRecurringInstance: Boolean(event.recurringEventId),
   };
 
   if (event.start.date && DATE_RE.test(event.start.date)) {
-    const endExclusive = event.end.date && DATE_RE.test(event.end.date) ? event.end.date : event.start.date;
+    const endExclusive =
+      event.end.date && DATE_RE.test(event.end.date) ? event.end.date : event.start.date;
     return {
       kind: 'upsert',
       values: {

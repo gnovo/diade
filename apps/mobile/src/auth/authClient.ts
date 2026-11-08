@@ -1,5 +1,5 @@
-import { createAuthClient } from 'better-auth/client';
 import { expoClient } from '@better-auth/expo/client';
+import { createAuthClient } from 'better-auth/client';
 import * as SecureStore from 'expo-secure-store';
 import { API_BASE_URL } from '../api/client';
 

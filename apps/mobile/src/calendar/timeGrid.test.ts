@@ -1,13 +1,16 @@
-import { describe, it, expect } from 'vitest';
-import { layoutBlocks, minutesIntoDay, weekDays, MIN_BLOCK_MINUTES } from './timeGrid';
+import { describe, expect, it } from 'vitest';
 import { dayKey } from './monthGrid';
+import { layoutBlocks, MIN_BLOCK_MINUTES, minutesIntoDay, weekDays } from './timeGrid';
 
 const b = (id: string, startMin: number, endMin: number) => ({ id, startMin, endMin });
-const byId = (blocks: ReturnType<typeof layoutBlocks>) => Object.fromEntries(blocks.map((p) => [p.id, p]));
+const byId = (blocks: ReturnType<typeof layoutBlocks>) =>
+  Object.fromEntries(blocks.map((p) => [p.id, p]));
 
 describe('layoutBlocks', () => {
   it('gives a lone event the full width', () => {
-    expect(layoutBlocks([b('a', 540, 600)])).toEqual([{ id: 'a', startMin: 540, endMin: 600, column: 0, columns: 1 }]);
+    expect(layoutBlocks([b('a', 540, 600)])).toEqual([
+      { id: 'a', startMin: 540, endMin: 600, column: 0, columns: 1 },
+    ]);
   });
 
   it('keeps back-to-back events in one column', () => {

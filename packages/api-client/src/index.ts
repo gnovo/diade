@@ -1,16 +1,16 @@
 import type {
-  HealthResponse,
-  CurrentSpaceResponse,
-  CreateSpaceRequest,
-  JoinSpaceRequest,
-  InviteCodeResponse,
-  CreateInviteRequest,
-  SyncPushPayload,
-  SyncPushResult,
-  SyncPullResult,
   CalendarConnectionResponse,
   CalendarSyncResponse,
   ConfirmCalendarsRequest,
+  CreateInviteRequest,
+  CreateSpaceRequest,
+  CurrentSpaceResponse,
+  HealthResponse,
+  InviteCodeResponse,
+  JoinSpaceRequest,
+  SyncPullResult,
+  SyncPushPayload,
+  SyncPushResult,
   UpdateCalendarRequest,
   UpdateExternalEventRequest,
 } from '@diade/contracts';
@@ -50,10 +50,7 @@ export class DiadeApiClient {
     this.getAuthToken = config.getAuthToken;
   }
 
-  private async request<T>(
-    path: string,
-    options: RequestInit = {},
-  ): Promise<T> {
+  private async request<T>(path: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
     const headers = new Headers(options.headers);
 
@@ -78,11 +75,13 @@ export class DiadeApiClient {
     });
 
     const contentType = response.headers.get('content-type');
-    const isJson = contentType && contentType.includes('application/json');
+    const isJson = contentType?.includes('application/json');
     const body = isJson ? await response.json() : await response.text();
 
     if (!response.ok) {
-      const errorData = isJson ? (body as any).error : null;
+      const errorData = isJson
+        ? (body as { error?: { message?: string; code?: string; details?: unknown } }).error
+        : null;
       throw new ApiError(
         errorData?.message || response.statusText || 'API request failed',
         response.status,
@@ -93,7 +92,13 @@ export class DiadeApiClient {
 
     // Díade endpoints wrap payloads as { success: true, data }. Return the payload, so callers
     // receive e.g. CurrentSpaceResponse directly. Non-wrapped responses (health, Better Auth) pass through.
-    if (isJson && body && typeof body === 'object' && (body as { success?: unknown }).success === true && 'data' in body) {
+    if (
+      isJson &&
+      body &&
+      typeof body === 'object' &&
+      (body as { success?: unknown }).success === true &&
+      'data' in body
+    ) {
       return (body as { data: T }).data;
     }
     return body as T;
@@ -177,14 +182,20 @@ export class DiadeApiClient {
     });
   }
 
-  async updateCalendar(id: string, data: UpdateCalendarRequest): Promise<Pick<CalendarConnectionResponse, 'calendars'>> {
+  async updateCalendar(
+    id: string,
+    data: UpdateCalendarRequest,
+  ): Promise<Pick<CalendarConnectionResponse, 'calendars'>> {
     return this.request(`/api/calendar/calendars/${encodeURIComponent(id)}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
 
-  async updateExternalEvent(id: string, data: UpdateExternalEventRequest): Promise<{ updated: boolean }> {
+  async updateExternalEvent(
+    id: string,
+    data: UpdateExternalEventRequest,
+  ): Promise<{ updated: boolean }> {
     return this.request<{ updated: boolean }>(`/api/calendar/events/${encodeURIComponent(id)}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
@@ -196,6 +207,8 @@ export class DiadeApiClient {
   }
 
   async disconnectCalendar(): Promise<{ disconnected: boolean }> {
-    return this.request<{ disconnected: boolean }>('/api/calendar/connection', { method: 'DELETE' });
+    return this.request<{ disconnected: boolean }>('/api/calendar/connection', {
+      method: 'DELETE',
+    });
   }
 }

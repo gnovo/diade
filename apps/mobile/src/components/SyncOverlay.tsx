@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, Easing, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
-import { SyncStatus, useShadow, type SyncState } from '../design';
+import { type SyncState, SyncStatus, useShadow } from '../design';
 import { useSync } from '../sync/SyncProvider';
 
 /** A sync that finishes faster than this never shows, so quick syncs do not flicker. */
@@ -10,7 +11,12 @@ const SHOW_DELAY_MS = 350;
 /** After a sync completes, "synced" stays visible this long before the pill fades away. */
 const LINGER_MS = 1400;
 
-function useSyncDisplay(): { state: SyncState; label: string; retry: () => void; refreshing: boolean } {
+function useSyncDisplay(): {
+  state: SyncState;
+  label: string;
+  retry: () => void;
+  refreshing: boolean;
+} {
   const { t } = useTranslation();
   const { status, pendingCount, syncNow, refreshing } = useSync();
   const state: SyncState =
@@ -49,6 +55,7 @@ function usePresence(state: SyncState, label: string, refreshing: boolean) {
 
   // When a pull finishes, confirm it briefly, so the spinner vanishing is not the only signal.
   const wasRefreshing = useRef(false);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only the end of a refresh matters here
   useEffect(() => {
     if (wasRefreshing.current && !refreshing && state === 'synced') {
       setShown({ state: 'synced', label });
@@ -56,7 +63,6 @@ function usePresence(state: SyncState, label: string, refreshing: boolean) {
     }
     wasRefreshing.current = refreshing;
     // Only the end of a refresh matters here.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshing]);
 
   useEffect(() => {
@@ -65,7 +71,8 @@ function usePresence(state: SyncState, label: string, refreshing: boolean) {
       // nothing: the refresh control is showing progress
     } else if (state !== 'synced') {
       setShown({ state, label });
-      if (!present) timer = setTimeout(() => setPresent(true), state === 'pending' ? SHOW_DELAY_MS : 0);
+      if (!present)
+        timer = setTimeout(() => setPresent(true), state === 'pending' ? SHOW_DELAY_MS : 0);
     } else if (present) {
       setShown({ state: 'synced', label });
       timer = setTimeout(() => setPresent(false), LINGER_MS);
@@ -93,13 +100,21 @@ export const SyncOverlay: React.FC = () => {
   useEffect(() => {
     if (present) {
       setMounted(true);
-      Animated.timing(progress, { toValue: 1, duration: 260, easing: Easing.bezier(0.2, 0, 0, 1), useNativeDriver: true }).start();
+      Animated.timing(progress, {
+        toValue: 1,
+        duration: 260,
+        easing: Easing.bezier(0.2, 0, 0, 1),
+        useNativeDriver: true,
+      }).start();
     } else {
-      Animated.timing(progress, { toValue: 0, duration: 180, easing: Easing.bezier(0.3, 0, 0.8, 0.15), useNativeDriver: true }).start(
-        ({ finished }) => {
-          if (finished) setMounted(false);
-        },
-      );
+      Animated.timing(progress, {
+        toValue: 0,
+        duration: 180,
+        easing: Easing.bezier(0.3, 0, 0.8, 0.15),
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished) setMounted(false);
+      });
     }
   }, [present, progress]);
 
@@ -118,7 +133,10 @@ export const SyncOverlay: React.FC = () => {
   );
 
   return (
-    <View pointerEvents="box-none" style={{ position: 'absolute', top: insets.top + 4, left: 0, right: 0, alignItems: 'center' }}>
+    <View
+      pointerEvents="box-none"
+      style={{ position: 'absolute', top: insets.top + 4, left: 0, right: 0, alignItems: 'center' }}
+    >
       <Animated.View
         accessibilityLiveRegion="polite"
         style={{
@@ -133,7 +151,12 @@ export const SyncOverlay: React.FC = () => {
         }}
       >
         {retryable ? (
-          <Pressable onPress={retry} accessibilityRole="button" accessibilityHint={t('sync.tapToRetry')} hitSlop={8}>
+          <Pressable
+            onPress={retry}
+            accessibilityRole="button"
+            accessibilityHint={t('sync.tapToRetry')}
+            hitSlop={8}
+          >
             {pill}
           </Pressable>
         ) : (

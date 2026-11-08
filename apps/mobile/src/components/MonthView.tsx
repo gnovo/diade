@@ -1,11 +1,12 @@
-import React, { useRef } from 'react';
-import { PanResponder, Pressable, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import { isSameLocalDay } from '@diade/domain';
-import type { AgendaEntry } from '../data/unifiedAgenda';
+import type React from 'react';
+import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { PanResponder, Pressable, Text, View } from 'react-native';
 import { dayKey, dayMarkers, isSameMonth, monthGridDays } from '../calendar/monthGrid';
-import { useFormat } from '../i18n';
+import type { AgendaEntry } from '../data/unifiedAgenda';
 import { useColor } from '../design';
+import { useFormat } from '../i18n';
 import { AgendaRow, type AgendaRowHandlers } from './AgendaRow';
 
 const WEEK_STARTS_ON = 1; // Monday
@@ -40,7 +41,8 @@ export const MonthView: React.FC<
   shift.current = onShiftMonth;
   const pan = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 16 && Math.abs(g.dx) > Math.abs(g.dy) * 2,
+      onMoveShouldSetPanResponder: (_, g) =>
+        Math.abs(g.dx) > 16 && Math.abs(g.dx) > Math.abs(g.dy) * 2,
       onPanResponderRelease: (_, g) => {
         if (g.dx <= -SWIPE_DISTANCE) shift.current(1);
         else if (g.dx >= SWIPE_DISTANCE) shift.current(-1);
@@ -50,15 +52,25 @@ export const MonthView: React.FC<
 
   const days = monthGridDays(month, WEEK_STARTS_ON);
   const weeks = Array.from({ length: days.length / 7 }, (_, w) => days.slice(w * 7, w * 7 + 7));
-  const weekdayLabels = Array.from({ length: 7 }, (_, i) => WEEKDAY_KEYS[(WEEK_STARTS_ON + i) % 7]!);
+  const weekdayLabels = Array.from(
+    { length: 7 },
+    (_, i) => WEEKDAY_KEYS[(WEEK_STARTS_ON + i) % 7]!,
+  );
   const selectedEntries = entriesByDay.get(dayKey(selectedDay)) ?? [];
 
   return (
     <View>
       <View {...pan.panHandlers} className="mb-5">
-        <View className="flex-row mb-1" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+        <View
+          className="flex-row mb-1"
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        >
           {weekdayLabels.map((key) => (
-            <Text key={key} className="flex-1 text-center text-xs font-semibold text-ink-muted uppercase">
+            <Text
+              key={key}
+              className="flex-1 text-center text-xs font-semibold text-ink-muted uppercase"
+            >
               {t(`format.weekdayShort.${key}`)}
             </Text>
           ))}
@@ -80,20 +92,35 @@ export const MonthView: React.FC<
                   accessibilityLabel={`${format.longDate(day)}${entries.length ? `, ${t('calendar.itemCount', { count: entries.length })}` : ''}`}
                   className={`flex-1 items-center pt-1.5 pb-1 min-h-[56px] rounded-xl ${selected ? 'bg-surface-sunken' : ''}`}
                 >
-                  <View className={`w-8 h-8 rounded-full items-center justify-center ${today ? 'bg-action' : ''}`}>
+                  <View
+                    className={`w-8 h-8 rounded-full items-center justify-center ${today ? 'bg-action' : ''}`}
+                  >
                     <Text
                       className={`text-sm ${
-                        today ? 'text-on-action font-bold' : inMonth ? 'text-ink font-medium' : 'text-ink-muted opacity-50'
+                        today
+                          ? 'text-on-action font-bold'
+                          : inMonth
+                            ? 'text-ink font-medium'
+                            : 'text-ink-muted opacity-50'
                       }`}
                     >
                       {day.getDate()}
                     </Text>
                   </View>
-                  <View className="flex-row items-center h-2 mt-1" style={{ gap: 3, opacity: inMonth ? 1 : 0.5 }}>
+                  <View
+                    className="flex-row items-center h-2 mt-1"
+                    style={{ gap: 3, opacity: inMonth ? 1 : 0.5 }}
+                  >
                     {markers.colors.map((color) => (
-                      <View key={color} style={{ backgroundColor: color }} className="w-1.5 h-1.5 rounded-full" />
+                      <View
+                        key={color}
+                        style={{ backgroundColor: color }}
+                        className="w-1.5 h-1.5 rounded-full"
+                      />
                     ))}
-                    {markers.extra > 0 ? <Text className="text-[9px] leading-[9px] text-ink-muted">+</Text> : null}
+                    {markers.extra > 0 ? (
+                      <Text className="text-[9px] leading-[9px] text-ink-muted">+</Text>
+                    ) : null}
                   </View>
                 </Pressable>
               );

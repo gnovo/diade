@@ -1,13 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, LayoutChangeEvent, View } from 'react-native';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { AccessibilityInfo, type LayoutChangeEvent, View } from 'react-native';
 import Animated, {
   Easing,
   Extrapolation,
   interpolate,
+  type SharedValue,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  type SharedValue,
 } from 'react-native-reanimated';
 
 /**
@@ -27,7 +28,7 @@ import Animated, {
 export const STEP_EASING = Easing.bezier(0.32, 0.72, 0, 1);
 export const STEP_MS = 460;
 /** Growing or shrinking inside one step (a section opening) is quicker than changing step. */
-export const RESIZE_MS = 260;
+const RESIZE_MS = 260;
 /** The outgoing step travels this fraction of the distance while the incoming one travels all of it. */
 const PARALLAX = 0.3;
 
@@ -48,7 +49,7 @@ function glide(value: SharedValue<number>, to: number, reduceMotion: boolean, ms
 }
 
 /** The step index as an animated number: 0, then 1, then 2, easing between each. */
-export function useStepProgress(index: number): SharedValue<number> {
+function useStepProgress(index: number): SharedValue<number> {
   const reduceMotion = useReduceMotion();
   const progress = useSharedValue(index);
   useEffect(() => {
@@ -66,13 +67,17 @@ export const StepProgress: React.FC<{ step: number; total: number }> = ({ step, 
   return (
     <View className="flex-row gap-2" accessible={false}>
       {Array.from({ length: total }, (_, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: segments are positional and stateless
         <Segment key={i} filled={i < step} reduceMotion={reduceMotion} />
       ))}
     </View>
   );
 };
 
-const Segment: React.FC<{ filled: boolean; reduceMotion: boolean }> = ({ filled, reduceMotion }) => {
+const Segment: React.FC<{ filled: boolean; reduceMotion: boolean }> = ({
+  filled,
+  reduceMotion,
+}) => {
   const fill = useSharedValue(filled ? 1 : 0);
   const [width, setWidth] = useState(0);
   useEffect(() => {
@@ -80,7 +85,10 @@ const Segment: React.FC<{ filled: boolean; reduceMotion: boolean }> = ({ filled,
   }, [filled, reduceMotion, fill]);
   // Scale from the left edge: scaleX pivots on the centre, so shift by half the lost width.
   const style = useAnimatedStyle(() => ({
-    transform: [{ translateX: (-width * (1 - fill.value)) / 2 }, { scaleX: Math.max(fill.value, 0.001) }],
+    transform: [
+      { translateX: (-width * (1 - fill.value)) / 2 },
+      { scaleX: Math.max(fill.value, 0.001) },
+    ],
   }));
   return (
     <View
@@ -128,7 +136,10 @@ export const FoldingFooter: React.FC<{
  * that changes height while in view (a section opening) is eased with a decaying offset.
  * Steps out of view are hidden from touch and screen readers.
  */
-export const StepPager: React.FC<{ index: number; steps: React.ReactNode[] }> = ({ index, steps }) => {
+export const StepPager: React.FC<{ index: number; steps: React.ReactNode[] }> = ({
+  index,
+  steps,
+}) => {
   const count = steps.length;
   const progress = useStepProgress(index);
   const width = useSharedValue(0);
@@ -168,7 +179,9 @@ export const StepPager: React.FC<{ index: number; steps: React.ReactNode[] }> = 
     return { height: base + resize.value };
   });
 
-  const trackStyle = useAnimatedStyle(() => ({ transform: [{ translateX: -progress.value * width.value }] }));
+  const trackStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: -progress.value * width.value }],
+  }));
 
   return (
     <Animated.View
@@ -179,10 +192,14 @@ export const StepPager: React.FC<{ index: number; steps: React.ReactNode[] }> = 
       }}
     >
       <Animated.View
-        style={[{ flexDirection: 'row', alignItems: 'flex-start', width: `${count * 100}%` }, trackStyle]}
+        style={[
+          { flexDirection: 'row', alignItems: 'flex-start', width: `${count * 100}%` },
+          trackStyle,
+        ]}
       >
         {steps.map((step, i) => (
           <PagerStep
+            // biome-ignore lint/suspicious/noArrayIndexKey: steps are positional; the index is their identity
             key={i}
             i={i}
             count={count}

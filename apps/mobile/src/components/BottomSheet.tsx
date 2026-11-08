@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   AccessibilityInfo,
   Animated,
@@ -90,6 +91,7 @@ export const BottomSheet: React.FC<{
     [translateY],
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only `visible` drives this; the rest are stable refs or values read at call time
   useEffect(() => {
     wantOpen.current = visible;
     if (visible) {
@@ -114,7 +116,6 @@ export const BottomSheet: React.FC<{
       });
     }
     // Only `visible` drives this; the rest are stable refs or values read at call time.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   const onSheetLayout = (height: number) => {
@@ -195,7 +196,15 @@ export const BottomSheet: React.FC<{
     <Modal transparent visible animationType="none" onRequestClose={onClose} statusBarTranslucent>
       <View className="flex-1 justify-end">
         <Animated.View
-          style={{ opacity: backdropOpacity, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)' }}
+          style={{
+            opacity: backdropOpacity,
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+          }}
         >
           <Pressable
             style={{ flex: 1 }}
@@ -213,7 +222,11 @@ export const BottomSheet: React.FC<{
             style={{ maxHeight: animatedMaxHeight, paddingBottom: bottomPad }}
             className="bg-surface rounded-t-2xl border-t border-border-strong"
           >
-            <View {...pan.panHandlers} className="items-center pt-3 pb-2" accessibilityRole="header">
+            <View
+              {...pan.panHandlers}
+              className="items-center pt-3 pb-2"
+              accessibilityRole="header"
+            >
               <View className="w-10 h-1 rounded-full bg-border-strong mb-3" />
               <Text className="text-base font-semibold text-ink">{title}</Text>
             </View>

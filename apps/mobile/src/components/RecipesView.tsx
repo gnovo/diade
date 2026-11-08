@@ -1,17 +1,23 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, BackHandler, Pressable, Text, View } from 'react-native';
+import {
+  formatAmount,
+  normalizeIngredientName,
+  type Recipe,
+  type RecipeIngredient,
+} from '@diade/domain';
+import type React from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { formatAmount, normalizeIngredientName, type Recipe, type RecipeIngredient } from '@diade/domain';
+import { Alert, BackHandler, Pressable, Text, View } from 'react-native';
 import { deleteRecord } from '../data/repository';
 import { Icon } from '../design';
-import { Button, Card, EmptyState, ScreenScaffold, SectionLabel, TextField } from './ui';
 import { decimalFor } from './RecipeForm';
+import { Button, Card, EmptyState, ScreenScaffold, SectionLabel, TextField } from './ui';
 
-const IngredientLine: React.FC<{ ingredient: RecipeIngredient; first: boolean; decimal: string }> = ({
-  ingredient,
-  first,
-  decimal,
-}) => {
+const IngredientLine: React.FC<{
+  ingredient: RecipeIngredient;
+  first: boolean;
+  decimal: string;
+}> = ({ ingredient, first, decimal }) => {
   const amount = formatAmount(ingredient.quantity, ingredient.unit, decimal);
   return (
     <View>
@@ -25,11 +31,11 @@ const IngredientLine: React.FC<{ ingredient: RecipeIngredient; first: boolean; d
 };
 
 /** One recipe on its own screen: ingredients (pantry staples set apart), notes, edit and delete. */
-export const RecipeDetailScreen: React.FC<{ recipe: Recipe; onBack: () => void; onEdit: () => void }> = ({
-  recipe,
-  onBack,
-  onEdit,
-}) => {
+export const RecipeDetailScreen: React.FC<{
+  recipe: Recipe;
+  onBack: () => void;
+  onEdit: () => void;
+}> = ({ recipe, onBack, onEdit }) => {
   const { t, i18n } = useTranslation();
   const decimal = decimalFor(i18n.language);
   const fresh = recipe.ingredients.filter((row) => !row.staple);
@@ -67,7 +73,9 @@ export const RecipeDetailScreen: React.FC<{ recipe: Recipe; onBack: () => void; 
     >
       <Card>
         <SectionLabel>{t('recipes.ingredientsHeading')}</SectionLabel>
-        {recipe.ingredients.length === 0 ? <EmptyState message={t('recipes.noIngredients')} /> : null}
+        {recipe.ingredients.length === 0 ? (
+          <EmptyState message={t('recipes.noIngredients')} />
+        ) : null}
         {fresh.map((row, index) => (
           <IngredientLine key={row.id} ingredient={row} first={index === 0} decimal={decimal} />
         ))}

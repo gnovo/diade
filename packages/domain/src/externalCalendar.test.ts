@@ -1,13 +1,13 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-  narrowestVisibility,
-  isNarrowerOrEqual,
-  resolveEffectiveVisibility,
-  redactExternalEvent,
-  redactExternalCalendar,
-  externalEventTitle,
-  type StoredExternalEvent,
   type ExternalCalendar,
+  externalEventTitle,
+  isNarrowerOrEqual,
+  narrowestVisibility,
+  redactExternalCalendar,
+  redactExternalEvent,
+  resolveEffectiveVisibility,
+  type StoredExternalEvent,
 } from './externalCalendar';
 
 const event = (over: Partial<StoredExternalEvent> = {}): StoredExternalEvent => ({
@@ -79,19 +79,27 @@ describe('resolveEffectiveVisibility', () => {
 
   it('uses the calendar level when nothing narrows it', () => {
     expect(resolveEffectiveVisibility(base)).toBe('shared');
-    expect(resolveEffectiveVisibility({ ...base, calendarVisibility: 'busy_only' })).toBe('busy_only');
+    expect(resolveEffectiveVisibility({ ...base, calendarVisibility: 'busy_only' })).toBe(
+      'busy_only',
+    );
   });
 
   it('lets an event override narrow but never widen', () => {
     expect(resolveEffectiveVisibility({ ...base, visibilityOverride: 'private' })).toBe('private');
     expect(
-      resolveEffectiveVisibility({ ...base, calendarVisibility: 'private', visibilityOverride: 'busy_only' }),
+      resolveEffectiveVisibility({
+        ...base,
+        calendarVisibility: 'private',
+        visibilityOverride: 'busy_only',
+      }),
     ).toBe('private');
   });
 
   it("treats Google's private and confidential events as busy-only", () => {
     expect(resolveEffectiveVisibility({ ...base, googleVisibility: 'private' })).toBe('busy_only');
-    expect(resolveEffectiveVisibility({ ...base, googleVisibility: 'confidential' })).toBe('busy_only');
+    expect(resolveEffectiveVisibility({ ...base, googleVisibility: 'confidential' })).toBe(
+      'busy_only',
+    );
   });
 
   it('treats a declined invite as private', () => {
@@ -167,7 +175,11 @@ describe('redactExternalEvent', () => {
   });
 
   it('keeps an existing tombstone date', () => {
-    const out = redactExternalEvent(event({ deletedAt: '2026-11-05T00:00:00.000Z' }), 'private', false);
+    const out = redactExternalEvent(
+      event({ deletedAt: '2026-11-05T00:00:00.000Z' }),
+      'private',
+      false,
+    );
     expect(out.deletedAt).toBe('2026-11-05T00:00:00.000Z');
   });
 });
@@ -190,8 +202,12 @@ describe('redactExternalCalendar', () => {
   });
 
   it('removes a private or disabled calendar from the partner', () => {
-    expect(redactExternalCalendar(calendar({ visibility: 'private' }), false).deletedAt).not.toBeNull();
-    expect(redactExternalCalendar(calendar({ syncEnabled: false }), false).deletedAt).not.toBeNull();
+    expect(
+      redactExternalCalendar(calendar({ visibility: 'private' }), false).deletedAt,
+    ).not.toBeNull();
+    expect(
+      redactExternalCalendar(calendar({ syncEnabled: false }), false).deletedAt,
+    ).not.toBeNull();
   });
 });
 

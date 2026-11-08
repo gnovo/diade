@@ -1,10 +1,16 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { PanResponder, Pressable, ScrollView, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import { externalEventTitle, formatTime, isSameLocalDay } from '@diade/domain';
-import type { AgendaEntry } from '../data/unifiedAgenda';
+import type React from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { PanResponder, Pressable, ScrollView, Text, View } from 'react-native';
 import { dayKey } from '../calendar/monthGrid';
-import { layoutBlocks, minutesIntoDay, MIN_BLOCK_MINUTES, type TimedBlock } from '../calendar/timeGrid';
+import {
+  layoutBlocks,
+  MIN_BLOCK_MINUTES,
+  minutesIntoDay,
+  type TimedBlock,
+} from '../calendar/timeGrid';
+import type { AgendaEntry } from '../data/unifiedAgenda';
 import { Icon, useColor } from '../design';
 import type { AgendaRowHandlers } from './AgendaRow';
 
@@ -18,7 +24,9 @@ const HOURS = Array.from({ length: 24 }, (_, h) => h);
 /** "#RRGGBB" with an alpha, for a tinted block that works on a light and a dark background. */
 function tint(color: string, alpha: number): string {
   if (!/^#[0-9a-f]{6}$/i.test(color)) return color;
-  return `${color}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
+  return `${color}${Math.round(alpha * 255)
+    .toString(16)
+    .padStart(2, '0')}`;
 }
 
 type EventEntry = Extract<AgendaEntry, { kind: 'external' | 'event' }>;
@@ -27,7 +35,8 @@ function timesOf(entry: AgendaEntry): { start: Date; end: Date } | null {
   if (entry.kind === 'external' && !entry.isAllDay && entry.startAt && entry.endAt) {
     return { start: entry.startAt, end: entry.endAt };
   }
-  if (entry.kind === 'event' && !entry.item.isAllDay) return { start: entry.item.startAt, end: entry.item.endAt };
+  if (entry.kind === 'event' && !entry.item.isAllDay)
+    return { start: entry.item.startAt, end: entry.item.endAt };
   return null;
 }
 
@@ -65,7 +74,8 @@ export const TimeGrid: React.FC<
   swipe.current = onSwipe;
   const pan = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 16 && Math.abs(g.dx) > Math.abs(g.dy) * 2,
+      onMoveShouldSetPanResponder: (_, g) =>
+        Math.abs(g.dx) > 16 && Math.abs(g.dx) > Math.abs(g.dy) * 2,
       onPanResponderRelease: (_, g) => {
         if (g.dx <= -SWIPE_DISTANCE) swipe.current(1);
         else if (g.dx >= SWIPE_DISTANCE) swipe.current(-1);
@@ -88,7 +98,10 @@ export const TimeGrid: React.FC<
   const titleOf = (entry: AgendaEntry): string => {
     switch (entry.kind) {
       case 'external':
-        return externalEventTitle(entry.event, { busy: t('calendar.busy'), untitled: t('calendar.untitled') });
+        return externalEventTitle(entry.event, {
+          busy: t('calendar.busy'),
+          untitled: t('calendar.untitled'),
+        });
       case 'event':
         return entry.item.title;
       case 'task':
@@ -113,9 +126,12 @@ export const TimeGrid: React.FC<
           const times = timesOf(entry);
           if (times) {
             byId.set(entry.key, entry as EventEntry);
-            blocks.push({ id: entry.key, startMin: minutesIntoDay(times.start, day), endMin: minutesIntoDay(times.end, day) });
+            blocks.push({
+              id: entry.key,
+              startMin: minutesIntoDay(times.start, day),
+              endMin: minutesIntoDay(times.end, day),
+            });
           } else if (entry.kind === 'task' && entry.task.status === 'completed') {
-            continue;
           } else {
             allDay.push(entry);
           }
@@ -138,15 +154,23 @@ export const TimeGrid: React.FC<
             <Cell
               key={dayKey(day)}
               {...(week && onOpenDay
-                ? { onPress: () => onOpenDay(day), accessibilityRole: 'button' as const, accessibilityLabel: dayKey(day) }
+                ? {
+                    onPress: () => onOpenDay(day),
+                    accessibilityRole: 'button' as const,
+                    accessibilityLabel: dayKey(day),
+                  }
                 : {})}
               className="flex-1 items-center"
             >
               <Text className="text-xs font-semibold text-ink-muted uppercase">
                 {t(`format.weekdayShort.${WEEKDAY_KEYS[day.getDay()]}`)}
               </Text>
-              <View className={`w-8 h-8 mt-0.5 rounded-full items-center justify-center ${isToday ? 'bg-action' : ''}`}>
-                <Text className={`text-base ${isToday ? 'text-on-action font-bold' : 'text-ink font-medium'}`}>
+              <View
+                className={`w-8 h-8 mt-0.5 rounded-full items-center justify-center ${isToday ? 'bg-action' : ''}`}
+              >
+                <Text
+                  className={`text-base ${isToday ? 'text-on-action font-bold' : 'text-ink font-medium'}`}
+                >
                   {day.getDate()}
                 </Text>
               </View>
@@ -179,13 +203,18 @@ export const TimeGrid: React.FC<
                       className="flex-row items-center rounded-md px-1 py-0.5"
                     >
                       {entry.kind === 'task' ? <Icon name="square-check" size={11} /> : null}
-                      <Text className="flex-1 text-[11px] leading-[14px] text-ink font-medium" numberOfLines={1}>
+                      <Text
+                        className="flex-1 text-[11px] leading-[14px] text-ink font-medium"
+                        numberOfLines={1}
+                      >
                         {titleOf(entry)}
                       </Text>
                     </Pressable>
                   );
                 })}
-                {hidden > 0 ? <Text className="text-[10px] text-ink-muted text-center">+{hidden}</Text> : null}
+                {hidden > 0 ? (
+                  <Text className="text-[10px] text-ink-muted text-center">+{hidden}</Text>
+                ) : null}
               </View>
             );
           })}
@@ -209,7 +238,10 @@ export const TimeGrid: React.FC<
             ))}
           </View>
           <View className="flex-1 flex-row">
-            <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}>
+            <View
+              pointerEvents="none"
+              style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+            >
               {HOURS.map((h) => (
                 <View key={h} style={{ height: HOUR_HEIGHT }} className="border-t border-border" />
               ))}
@@ -223,7 +255,9 @@ export const TimeGrid: React.FC<
                     const color = colorOf(entry);
                     const mine = entry.kind !== 'external' || entry.mine;
                     const times = timesOf(entry)!;
-                    const height = Math.max(block.endMin - block.startMin, MIN_BLOCK_MINUTES) * (HOUR_HEIGHT / 60);
+                    const height =
+                      Math.max(block.endMin - block.startMin, MIN_BLOCK_MINUTES) *
+                      (HOUR_HEIGHT / 60);
                     const label = titleOf(entry);
                     return (
                       <Pressable
@@ -261,7 +295,10 @@ export const TimeGrid: React.FC<
                             {label}
                           </Text>
                           {!week && height >= 44 ? (
-                            <Text className="text-[10px] leading-3 text-ink-muted" numberOfLines={1}>
+                            <Text
+                              className="text-[10px] leading-3 text-ink-muted"
+                              numberOfLines={1}
+                            >
                               {formatTime(times.start)}–{formatTime(times.end)}
                             </Text>
                           ) : null}
@@ -282,7 +319,15 @@ export const TimeGrid: React.FC<
                       }}
                     >
                       <View
-                        style={{ position: 'absolute', left: -4, top: -3, width: 8, height: 8, borderRadius: 4, backgroundColor: nowLine }}
+                        style={{
+                          position: 'absolute',
+                          left: -4,
+                          top: -3,
+                          width: 8,
+                          height: 8,
+                          borderRadius: 4,
+                          backgroundColor: nowLine,
+                        }}
                       />
                     </View>
                   ) : null}

@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import { createI18n } from './i18n';
 import { en } from './locales/en';
 import { ptPT } from './locales/pt-PT';
-import { createI18n } from './i18n';
 
 type Tree = { [key: string]: string | Tree };
 
@@ -15,7 +15,8 @@ function flatten(tree: Tree, prefix = ''): Record<string, string> {
   return out;
 }
 
-const placeholders = (text: string) => [...text.matchAll(/\{\{\s*(\w+)\s*\}\}/g)].map((m) => m[1]).sort();
+const placeholders = (text: string) =>
+  [...text.matchAll(/\{\{\s*(\w+)\s*\}\}/g)].map((m) => m[1]).sort();
 
 describe('catalogs', () => {
   const english = flatten(en);
@@ -41,14 +42,14 @@ describe('catalogs', () => {
 describe('createI18n', () => {
   it('translates and switches language', async () => {
     const i18n = createI18n('en');
-    expect(i18n.t('auth.tagline')).toBe('For all the days we share');
+    expect(i18n.t('auth.tagline')).toBe('For all the days we share.');
     await i18n.changeLanguage('pt-PT');
-    expect(i18n.t('auth.tagline')).toBe('Para todos os dias que partilhamos');
+    expect(i18n.t('auth.tagline')).toBe('Para todos os dias que partilhamos.');
   });
 
   it('uses the new tagline copy on the sign-in screen', () => {
-    expect(createI18n('en').t('auth.justForTwo')).toBe('Just for the two of you');
-    expect(createI18n('pt-PT').t('auth.justForTwo')).toBe('Apenas para vocês os dois');
+    expect(createI18n('en').t('auth.justForTwo')).toBe('Just for the two of you.');
+    expect(createI18n('pt-PT').t('auth.justForTwo')).toBe('Apenas para vocês os dois.');
   });
 
   it('pluralises per language (pt-PT treats 0 as plural)', () => {

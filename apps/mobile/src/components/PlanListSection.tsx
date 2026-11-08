@@ -1,29 +1,30 @@
-import React, { useMemo, useState } from 'react';
-import { Alert, Pressable, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { formatDateRange } from '@diade/i18n';
 import {
   buildGroceryList,
   diffPlanAgainstList,
   isEmptyDiff,
-  missingStaples,
-  parseDateOnly,
   type ListItem,
   type MealPlan,
+  missingStaples,
   type PlanListItem,
+  parseDateOnly,
   type Recipe,
   type SharedList,
 } from '@diade/domain';
-import { getActiveMealPlans } from '../data/queries';
+import { formatDateRange } from '@diade/i18n';
+import type React from 'react';
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Alert, Pressable, Text, View } from 'react-native';
 import { addStapleToList, applyPlanDiff } from '../data/mealPlanActions';
 import { amountText } from '../data/newListFlow';
+import { getActiveMealPlans } from '../data/queries';
 import { useLiveQuery } from '../data/useLiveQuery';
 import { Icon } from '../design';
 import { BottomSheet } from './BottomSheet';
 import { Button, Card, SectionLabel, useWriteContext } from './ui';
 
 /** The items that came from the plan: only those carry contributions. */
-export function planItemsOf(items: ListItem[]): PlanListItem[] {
+function planItemsOf(items: ListItem[]): PlanListItem[] {
   return items.flatMap((item) =>
     item.contributions && item.contributions.length > 0
       ? [
@@ -48,7 +49,11 @@ const DiffGroup: React.FC<{ title: string; children: React.ReactNode }> = ({ tit
   </View>
 );
 
-const DiffLine: React.FC<{ name: string; detail?: string; note?: string }> = ({ name, detail, note }) => (
+const DiffLine: React.FC<{ name: string; detail?: string; note?: string }> = ({
+  name,
+  detail,
+  note,
+}) => (
   <View className="flex-row items-center min-h-[44px] py-1">
     <View className="flex-1 mr-2">
       <Text className="text-sm font-medium text-ink">{name}</Text>
@@ -63,11 +68,11 @@ const DiffLine: React.FC<{ name: string; detail?: string; note?: string }> = ({ 
  * (a diff the member confirms, never silent) and the pantry staples the plan left out.
  * `items` are the list's visible items.
  */
-export const PlanListSection: React.FC<{ list: SharedList; items: ListItem[]; recipes: Recipe[] }> = ({
-  list,
-  items,
-  recipes,
-}) => {
+export const PlanListSection: React.FC<{
+  list: SharedList;
+  items: ListItem[];
+  recipes: Recipe[];
+}> = ({ list, items, recipes }) => {
   const { t } = useTranslation();
   const ctx = useWriteContext();
   const plans = useLiveQuery(getActiveMealPlans, [] as MealPlan[]);
@@ -76,9 +81,18 @@ export const PlanListSection: React.FC<{ list: SharedList; items: ListItem[]; re
 
   const plan = plans.data.find((p) => p.id === list.planId) ?? null;
   const planItems = useMemo(() => planItemsOf(items), [items]);
-  const build = useMemo(() => (plan ? buildGroceryList(plan.recipes, recipes) : null), [plan, recipes]);
-  const diff = useMemo(() => (build ? diffPlanAgainstList(build, planItems) : null), [build, planItems]);
-  const staples = useMemo(() => (build ? missingStaples(build, planItems) : []), [build, planItems]);
+  const build = useMemo(
+    () => (plan ? buildGroceryList(plan.recipes, recipes) : null),
+    [plan, recipes],
+  );
+  const diff = useMemo(
+    () => (build ? diffPlanAgainstList(build, planItems) : null),
+    [build, planItems],
+  );
+  const staples = useMemo(
+    () => (build ? missingStaples(build, planItems) : []),
+    [build, planItems],
+  );
 
   if (!plan || !build || !diff) {
     return (
@@ -98,14 +112,20 @@ export const PlanListSection: React.FC<{ list: SharedList; items: ListItem[]; re
       await applyPlanDiff(ctx, list.id, diff);
       setSheetOpen(false);
     } catch (err) {
-      Alert.alert(t('plan.update.couldNotApply'), err instanceof Error ? err.message : t('common.tryAgain'));
+      Alert.alert(
+        t('plan.update.couldNotApply'),
+        err instanceof Error ? err.message : t('common.tryAgain'),
+      );
     }
   };
 
   const addStaple = (index: number) => {
     if (!ctx) return;
     addStapleToList(ctx, list.id, staples[index]).catch((err) =>
-      Alert.alert(t('plan.list.couldNotAdd'), err instanceof Error ? err.message : t('common.tryAgain')),
+      Alert.alert(
+        t('plan.list.couldNotAdd'),
+        err instanceof Error ? err.message : t('common.tryAgain'),
+      ),
     );
   };
 
@@ -114,12 +134,19 @@ export const PlanListSection: React.FC<{ list: SharedList; items: ListItem[]; re
       <Card>
         <View className="flex-row items-center">
           <View className="flex-1 mr-3">
-            <Text className="text-base font-semibold text-ink">{t('plan.list.fromPlan', { range })}</Text>
+            <Text className="text-base font-semibold text-ink">
+              {t('plan.list.fromPlan', { range })}
+            </Text>
             <Text className="text-sm text-ink-muted mt-0.5">
               {t('plan.list.summary', { count: plan.recipes.length, items: planItems.length })}
             </Text>
           </View>
-          <Button label={t('plan.list.update')} variant="ghost" small onPress={() => setSheetOpen(true)} />
+          <Button
+            label={t('plan.list.update')}
+            variant="ghost"
+            small
+            onPress={() => setSheetOpen(true)}
+          />
         </View>
       </Card>
 
@@ -202,7 +229,9 @@ export const PlanListSection: React.FC<{ list: SharedList; items: ListItem[]; re
                     key={item.id}
                     name={item.name}
                     note={
-                      row ? t('plan.update.keepWants', { amount: amountText(row) || '–' }) : t('plan.update.keepGone')
+                      row
+                        ? t('plan.update.keepWants', { amount: amountText(row) || '–' })
+                        : t('plan.update.keepGone')
                     }
                   />
                 ))}

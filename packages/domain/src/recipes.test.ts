@@ -225,7 +225,9 @@ describe('formatAmount', () => {
 
 describe('formatIngredient', () => {
   it('puts the amount before the name, and nothing before a to-taste name', () => {
-    expect(formatIngredient({ name: 'Spaghetti', quantity: 400, unit: 'g' })).toBe('400 g Spaghetti');
+    expect(formatIngredient({ name: 'Spaghetti', quantity: 400, unit: 'g' })).toBe(
+      '400 g Spaghetti',
+    );
     expect(formatIngredient({ name: 'Eggs', quantity: 2, unit: 'unit' })).toBe('2 Eggs');
     expect(formatIngredient({ name: 'Salt', quantity: null, unit: 'unit' })).toBe('Salt');
   });
@@ -265,7 +267,14 @@ describe('isLikelyStaple', () => {
   });
 
   it('does not flag what has to be bought fresh', () => {
-    for (const name of ['Spaghetti', 'Salmon', 'Salted butter', 'Bacalhau salgado', 'Pepper steak', 'Eggs']) {
+    for (const name of [
+      'Spaghetti',
+      'Salmon',
+      'Salted butter',
+      'Bacalhau salgado',
+      'Pepper steak',
+      'Eggs',
+    ]) {
       expect(isLikelyStaple(name), name).toBe(false);
     }
   });

@@ -10,21 +10,27 @@
  * - Rejected mutations are dropped from the outbox and reconciled: a rejected INSERT is
  *   removed locally; a rejected UPDATE/DELETE forces a full re-pull to restore server state.
  */
-import type { ClientMutation, SyncEntityName, SyncPullResult, RejectedMutation } from '@diade/domain';
+
 import { ApiError } from '@diade/api-client';
+import type {
+  ClientMutation,
+  RejectedMutation,
+  SyncEntityName,
+  SyncPullResult,
+} from '@diade/domain';
 import { apiClient } from '../api/client';
+import { emitDataChanged } from '../data/changes';
+import { type Row, toColumns } from '../data/mapping';
+import { getPendingCount } from '../data/queries';
+import { ENTITY_TABLES } from '../data/repository';
 import {
   getLocalDb,
-  inTransaction,
   getPendingMutations,
-  removeAppliedMutations,
   getSyncMeta,
+  inTransaction,
+  removeAppliedMutations,
   setSyncMeta,
 } from '../storage/sqlite';
-import { ENTITY_TABLES } from '../data/repository';
-import { getPendingCount } from '../data/queries';
-import { toColumns, type Row } from '../data/mapping';
-import { emitDataChanged } from '../data/changes';
 
 export type SyncStatus = 'idle' | 'syncing' | 'offline' | 'error';
 
@@ -53,7 +59,7 @@ export function subscribeSyncState(listener: (s: SyncState) => void): () => void
 
 function setState(patch: Partial<SyncState>): void {
   state = { ...state, ...patch };
-  stateListeners.forEach((listener) => listener(state));
+  for (const listener of stateListeners) listener(state);
 }
 
 let inFlight: Promise<SyncStatus> | null = null;
@@ -80,8 +86,7 @@ async function syncOnce(): Promise<SyncStatus> {
   } catch (err) {
     const pendingCount = await getPendingCount().catch(() => state.pendingCount);
     if (err instanceof ApiError) {
-      const message =
-        err.statusCode === 401 ? 'Sign in again to keep syncing' : err.message;
+      const message = err.statusCode === 401 ? 'Sign in again to keep syncing' : err.message;
       setState({ status: 'error', lastError: message, pendingCount });
       return 'error';
     }
@@ -110,7 +115,10 @@ async function flushOutbox(): Promise<void> {
   }
 }
 
-async function reconcileRejected(rejected: RejectedMutation[], batch: ClientMutation[]): Promise<void> {
+async function reconcileRejected(
+  rejected: RejectedMutation[],
+  batch: ClientMutation[],
+): Promise<void> {
   if (rejected.length === 0) return;
   const byId = new Map(batch.map((m) => [m.id, m]));
   const db = await getLocalDb();
@@ -170,7 +178,9 @@ const PULL_SECTIONS: Array<[SyncEntityName, keyof SyncPullResult]> = [
 ];
 
 /** Server-owned mirrors: stored as received, with no pending local changes to overlay. */
-const EXTERNAL_SECTIONS: Array<['local_external_calendars' | 'local_external_events', 'externalCalendars' | 'externalEvents']> = [
+const EXTERNAL_SECTIONS: Array<
+  ['local_external_calendars' | 'local_external_events', 'externalCalendars' | 'externalEvents']
+> = [
   ['local_external_calendars', 'externalCalendars'],
   ['local_external_events', 'externalEvents'],
 ];
@@ -205,8 +215,11 @@ async function applyPull(result: SyncPullResult): Promise<void> {
   });
 
   // `importantDates`, `recipes` and `mealPlans` are absent from responses by an API that predates them.
-  const pulled = [...PULL_SECTIONS.map(([, section]) => section), ...EXTERNAL_SECTIONS.map(([, section]) => section)].reduce(
-    (total, section) => total + (((result[section] as unknown as Row[] | undefined) ?? []).length),
+  const pulled = [
+    ...PULL_SECTIONS.map(([, section]) => section),
+    ...EXTERNAL_SECTIONS.map(([, section]) => section),
+  ].reduce(
+    (total, section) => total + ((result[section] as unknown as Row[] | undefined) ?? []).length,
     0,
   );
   if (pulled > 0) emitDataChanged();

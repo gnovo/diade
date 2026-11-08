@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { canAccessRecord, isTaskAssignedToUser } from './index';
 
 describe('Domain Permission & Assignment Helpers', () => {

@@ -1,14 +1,13 @@
-import React from 'react';
-import { Pressable, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { externalEventTitle, formatTime } from '@diade/domain';
 import { sizes } from '@diade/design-tokens';
+import { describeImportantDate, externalEventTitle, formatTime } from '@diade/domain';
+import type React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Pressable, Text, View } from 'react-native';
 import { formatAgendaTime } from '../data/agenda';
 import { statusLabel } from '../data/importantDateDisplay';
-import { describeImportantDate } from '@diade/domain';
 import type { AgendaEntry } from '../data/unifiedAgenda';
-import { Checkbox, Pill } from './ui';
 import { Icon, useColor } from '../design';
+import { Checkbox, Pill } from './ui';
 
 /** A small filled star before the title of a highlighted event. */
 const StarMark: React.FC = () => {
@@ -61,14 +60,20 @@ export const AgendaRow: React.FC<{ entry: AgendaEntry; now: Date } & AgendaRowHa
               {item.category === 'important_date' ? ` · ${t('calendar.important')}` : ''}
             </Text>
           </View>
-          <Pill label={item.visibility === 'shared' ? t('common.shared') : t('common.personal')} tone={item.visibility} />
+          <Pill
+            label={item.visibility === 'shared' ? t('common.shared') : t('common.personal')}
+            tone={item.visibility}
+          />
         </Pressable>
       );
     }
 
     case 'external': {
       const { event, calendar, mine } = entry;
-      const title = externalEventTitle(event, { busy: t('calendar.busy'), untitled: t('calendar.untitled') });
+      const title = externalEventTitle(event, {
+        busy: t('calendar.busy'),
+        untitled: t('calendar.untitled'),
+      });
       const time = entry.isAllDay
         ? t('format.allDay')
         : `${formatTime(entry.startAt!)}–${formatTime(entry.endAt!)}`;
@@ -145,7 +150,9 @@ export const AgendaRow: React.FC<{ entry: AgendaEntry; now: Date } & AgendaRowHa
               {item.title}
             </Text>
           </View>
-          <Text className="text-sm text-ink-muted">{statusLabel(t, describeImportantDate(item, now))}</Text>
+          <Text className="text-sm text-ink-muted">
+            {statusLabel(t, describeImportantDate(item, now))}
+          </Text>
         </View>
       );
     }

@@ -1,4 +1,5 @@
-import React, { useRef } from 'react';
+import type React from 'react';
+import { useRef } from 'react';
 import { Animated, PanResponder, View } from 'react-native';
 import { Icon, useColor } from '../design';
 
@@ -21,7 +22,8 @@ export const SwipeToDelete: React.FC<{
   onDeleteRef.current = onDelete;
   const danger = useColor('danger');
 
-  const reset = () => Animated.spring(x, { toValue: 0, useNativeDriver: true, bounciness: 0 }).start();
+  const reset = () =>
+    Animated.spring(x, { toValue: 0, useNativeDriver: true, bounciness: 0 }).start();
 
   const pan = useRef(
     PanResponder.create({
@@ -29,10 +31,12 @@ export const SwipeToDelete: React.FC<{
       onPanResponderMove: (_, g) => x.setValue(Math.min(0, g.dx)),
       onPanResponderRelease: (_, g) => {
         if (g.dx < -TRIGGER) {
-          Animated.timing(x, { toValue: -OFFSCREEN, duration: 140, useNativeDriver: true }).start(() => {
-            onDeleteRef.current();
-            x.setValue(0);
-          });
+          Animated.timing(x, { toValue: -OFFSCREEN, duration: 140, useNativeDriver: true }).start(
+            () => {
+              onDeleteRef.current();
+              x.setValue(0);
+            },
+          );
         } else {
           reset();
         }
@@ -56,7 +60,11 @@ export const SwipeToDelete: React.FC<{
       <View className="absolute inset-0 bg-danger-soft rounded-md items-end justify-center pr-4">
         <Icon name="trash-2" color={danger} />
       </View>
-      <Animated.View {...pan.panHandlers} style={{ transform: [{ translateX: x }] }} className="bg-surface">
+      <Animated.View
+        {...pan.panHandlers}
+        style={{ transform: [{ translateX: x }] }}
+        className="bg-surface"
+      >
         {children}
       </Animated.View>
     </View>

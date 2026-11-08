@@ -1,19 +1,20 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Pressable, Text, TextInput, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import {
   DEFAULT_SERVINGS,
-  MAX_SERVINGS,
-  MIN_SERVINGS,
   formatAmount,
   formatIngredient,
   ingredientFromLine,
   isLikelyStaple,
+  MAX_SERVINGS,
+  MIN_SERVINGS,
   type Recipe,
   type RecipeIngredient,
 } from '@diade/domain';
-import { insertRecord, updateRecord } from '../data/repository';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Alert, Pressable, Text, type TextInput, View } from 'react-native';
 import { newId } from '../data/ids';
+import { insertRecord, updateRecord } from '../data/repository';
 import { Icon, useColor } from '../design';
 import { BottomSheet } from './BottomSheet';
 import { Button, Card, SectionLabel, TextField, useWriteContext } from './ui';
@@ -42,7 +43,10 @@ export const Stepper: React.FC<{
       >
         <Icon name="minus" color={atMin ? muted : ink} />
       </Pressable>
-      <Text className="w-12 text-center text-lg font-semibold text-ink" accessibilityLiveRegion="polite">
+      <Text
+        className="w-12 text-center text-lg font-semibold text-ink"
+        accessibilityLiveRegion="polite"
+      >
         {value}
       </Text>
       <Pressable
@@ -72,7 +76,9 @@ const IngredientRow: React.FC<{
   return (
     <View>
       {first ? null : <View className="h-px bg-border" />}
-      <View className={`flex-row items-center min-h-[52px] ${editing ? 'bg-surface-tint -mx-2 px-2 rounded-md' : ''}`}>
+      <View
+        className={`flex-row items-center min-h-[52px] ${editing ? 'bg-surface-tint -mx-2 px-2 rounded-md' : ''}`}
+      >
         <Pressable
           onPress={onEdit}
           accessibilityRole="button"
@@ -88,9 +94,12 @@ const IngredientRow: React.FC<{
           onPress={onToggleStaple}
           accessibilityRole="switch"
           accessibilityState={{ checked: ingredient.staple }}
-          accessibilityLabel={t(ingredient.staple ? 'recipes.form.unmarkStaple' : 'recipes.form.markStaple', {
-            name: ingredient.name,
-          })}
+          accessibilityLabel={t(
+            ingredient.staple ? 'recipes.form.unmarkStaple' : 'recipes.form.markStaple',
+            {
+              name: ingredient.name,
+            },
+          )}
           className={`min-h-[48px] justify-center px-1`}
         >
           <View
@@ -98,7 +107,9 @@ const IngredientRow: React.FC<{
               ingredient.staple ? 'bg-surface-tint border-action' : 'border-border-strong'
             }`}
           >
-            <Text className={`text-xs font-semibold ${ingredient.staple ? 'text-action' : 'text-ink-muted'}`}>
+            <Text
+              className={`text-xs font-semibold ${ingredient.staple ? 'text-action' : 'text-ink-muted'}`}
+            >
               {t('recipes.form.pantry')}
             </Text>
           </View>
@@ -143,6 +154,7 @@ export const RecipeForm: React.FC<{
   const lineRef = useRef<React.ComponentRef<typeof TextInput>>(null);
 
   // Start from the recipe (or a blank one) each time the form opens, so a draft never leaks across.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only `visible` starts a fresh form; the recipe is read at that moment
   useEffect(() => {
     if (!visible) return;
     setName(recipe?.name ?? '');
@@ -153,7 +165,6 @@ export const RecipeForm: React.FC<{
     setEditingId(null);
     setSaving(false);
     // Only `visible` starts a fresh form; the recipe is read at that moment.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   const submitLine = () => {
@@ -191,7 +202,9 @@ export const RecipeForm: React.FC<{
   };
 
   const toggleStaple = (id: string) =>
-    setIngredients((rows) => rows.map((row) => (row.id === id ? { ...row, staple: !row.staple } : row)));
+    setIngredients((rows) =>
+      rows.map((row) => (row.id === id ? { ...row, staple: !row.staple } : row)),
+    );
 
   const canSave = Boolean(ctx) && name.trim().length > 0 && !saving;
 
@@ -202,7 +215,9 @@ export const RecipeForm: React.FC<{
     const pending = ingredientFromLine(editingId ?? newId(), line);
     if (pending) {
       finalIngredients = editingId
-        ? ingredients.map((row) => (row.id === editingId ? { ...pending, staple: row.staple } : row))
+        ? ingredients.map((row) =>
+            row.id === editingId ? { ...pending, staple: row.staple } : row,
+          )
         : [...ingredients, pending];
     }
     const next = {
@@ -230,7 +245,10 @@ export const RecipeForm: React.FC<{
       onSaved?.(id);
       onClose();
     } catch (err) {
-      Alert.alert(t('common.couldNotSave'), err instanceof Error ? err.message : t('common.tryAgain'));
+      Alert.alert(
+        t('common.couldNotSave'),
+        err instanceof Error ? err.message : t('common.tryAgain'),
+      );
     } finally {
       setSaving(false);
     }
@@ -277,7 +295,9 @@ export const RecipeForm: React.FC<{
               setLine(text);
               if (text === '') setEditingId(null);
             }}
-            placeholder={editingId ? t('recipes.form.updateIngredient') : t('recipes.form.addPlaceholder')}
+            placeholder={
+              editingId ? t('recipes.form.updateIngredient') : t('recipes.form.addPlaceholder')
+            }
             maxLength={200}
             onSubmitEditing={submitLine}
             submitBehavior="submit"

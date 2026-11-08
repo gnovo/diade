@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
 import type { ExpoConfig } from 'expo/config';
+import { describe, expect, it } from 'vitest';
+import { applyVariant, DEV_APP_ID, resolveVariant } from '../../app.config';
 import appJson from '../../app.json';
-import { DEV_APP_ID, applyVariant, resolveVariant } from '../../app.config';
 
 const base = appJson.expo as unknown as ExpoConfig;
 

@@ -1,5 +1,5 @@
+import { type ColorToken, colorsDark, colorsLight } from '@diade/design-tokens';
 import { describe, expect, it } from 'vitest';
-import { colorsDark, colorsLight, type ColorToken } from '@diade/design-tokens';
 
 // WCAG 2.1 relative luminance and contrast ratio.
 function luminance(hex: string): number {
@@ -17,9 +17,16 @@ type Pair = { text: ColorToken; ground: ColorToken; min: number; why: string };
 
 // Text pairs must reach 4.5:1 (WCAG 1.4.3). Control and indicator pairs must reach 3:1 (WCAG 1.4.11).
 const textPairs: Pair[] = [
-  ...(['bg', 'surface', 'surface-sunken', 'surface-tint', 'action-soft', 'personal-soft'] as ColorToken[]).map(
-    (ground): Pair => ({ text: 'ink', ground, min: 4.5, why: 'primary text' }),
-  ),
+  ...(
+    [
+      'bg',
+      'surface',
+      'surface-sunken',
+      'surface-tint',
+      'action-soft',
+      'personal-soft',
+    ] as ColorToken[]
+  ).map((ground): Pair => ({ text: 'ink', ground, min: 4.5, why: 'primary text' })),
   ...(['bg', 'surface', 'surface-sunken', 'surface-tint'] as ColorToken[]).map(
     (ground): Pair => ({ text: 'ink-muted', ground, min: 4.5, why: 'secondary text' }),
   ),
@@ -71,7 +78,9 @@ describe.each([
 describe('brand tokens', () => {
   it('keeps the mint wash out of text roles', () => {
     // brand-mint is a fill only on light grounds (handover §5); text on it must be brand-deep.
-    expect(contrast(colorsLight['brand-deep'], colorsLight['brand-mint'])).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(colorsLight['brand-deep'], colorsLight['brand-mint'])).toBeGreaterThanOrEqual(
+      4.5,
+    );
   });
 });
 

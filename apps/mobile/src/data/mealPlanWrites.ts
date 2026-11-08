@@ -2,7 +2,7 @@
  * The writes behind a meal plan: the grocery list a plan generates and the changes "Update from plan"
  * applies. Pure, so they are tested without a database; `mealPlanActions.ts` hands them to `writeBatch`.
  */
-import { getListTemplate, groceryAmount, type GroceryRow, type PlanDiff } from '@diade/domain';
+import { type GroceryRow, getListTemplate, groceryAmount, type PlanDiff } from '@diade/domain';
 import type { BatchWrite } from './repository';
 
 const groceries = getListTemplate('groceries');
@@ -23,7 +23,12 @@ export function itemInput(listId: string, row: GroceryRow, position: number | nu
 }
 
 /** The writes that create a groceries list and one item per row. */
-export function generationWrites(listId: string, planId: string, name: string, rows: GroceryRow[]): BatchWrite[] {
+export function generationWrites(
+  listId: string,
+  planId: string,
+  name: string,
+  rows: GroceryRow[],
+): BatchWrite[] {
   return [
     {
       op: 'insert',
@@ -31,11 +36,13 @@ export function generationWrites(listId: string, planId: string, name: string, r
       id: listId,
       input: { name, category: groceries.category, icon: groceries.icon, planId },
     },
-    ...rows.map((row, index): BatchWrite => ({
-      op: 'insert',
-      entity: 'list_items',
-      input: itemInput(listId, row, index + 1),
-    })),
+    ...rows.map(
+      (row, index): BatchWrite => ({
+        op: 'insert',
+        entity: 'list_items',
+        input: itemInput(listId, row, index + 1),
+      }),
+    ),
   ];
 }
 
@@ -71,7 +78,12 @@ export function diffWrites(listId: string, diff: PlanDiff): BatchWrite[] {
     });
   }
   for (const { item, row } of diff.refreshed) {
-    writes.push({ op: 'update', entity: 'list_items', id: item.id, changes: { contributions: row.contributions } });
+    writes.push({
+      op: 'update',
+      entity: 'list_items',
+      id: item.id,
+      changes: { contributions: row.contributions },
+    });
   }
   return writes;
 }

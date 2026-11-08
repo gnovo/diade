@@ -4,16 +4,7 @@
     "outDir": "./dist",
     "rootDir": ".",
     "jsx": "react-jsx",
-    "types": [
-      "react",
-      "react-native"
-    ]
+    "types": ["react", "react-native"]
   },
-  "include": [
-    "src/**/*",
-    "index.js",
-    "app.config.ts",
-    "app.json",
-    "nativewind-env.d.ts"
-  ]
+  "include": ["src/**/*", "index.js", "app.config.ts", "app.json", "nativewind-env.d.ts"]
 }

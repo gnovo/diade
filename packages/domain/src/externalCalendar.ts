@@ -36,7 +36,10 @@ export function isExternalVisibility(value: unknown): value is ExternalVisibilit
 }
 
 /** True when `candidate` is at least as private as `base` (so it is allowed as an override). */
-export function isNarrowerOrEqual(candidate: ExternalVisibility, base: ExternalVisibility): boolean {
+export function isNarrowerOrEqual(
+  candidate: ExternalVisibility,
+  base: ExternalVisibility,
+): boolean {
   return RANK[candidate] >= RANK[base];
 }
 
@@ -141,7 +144,8 @@ export function redactExternalEvent(
 ): ExternalEvent {
   if (viewerIsOwner) return { ...event, effectiveVisibility: effective, redacted: false };
 
-  const gone = effective === 'private' || (effective === 'busy_only' && event.transparency === 'transparent');
+  const gone =
+    effective === 'private' || (effective === 'busy_only' && event.transparency === 'transparent');
   if (gone) {
     return {
       ...event,
@@ -191,7 +195,10 @@ export function redactExternalEvent(
  * What the partner may know about a calendar. The name is withheld unless the whole
  * calendar is shared, so a calendar called "Therapy" never leaks through busy blocks.
  */
-export function redactExternalCalendar(calendar: ExternalCalendar, viewerIsOwner: boolean): ExternalCalendar {
+export function redactExternalCalendar(
+  calendar: ExternalCalendar,
+  viewerIsOwner: boolean,
+): ExternalCalendar {
   if (viewerIsOwner) return calendar;
   const gone = calendar.visibility === 'private' || !calendar.syncEnabled;
   return {

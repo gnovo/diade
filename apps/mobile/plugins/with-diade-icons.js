@@ -1,8 +1,8 @@
 // Copies the Díade icon set (design system handover, app-icons/) into the generated native
 // projects on every prebuild. The ios/ and android/ folders are generated (Expo CNG), so the
 // assets live in assets/native-icons and are applied here, not edited by hand.
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const { withDangerousMod, withFinalizedMod } = require('expo/config-plugins');
 
 function copyDir(src, dest) {
@@ -21,7 +21,11 @@ module.exports = function withDiadeIcons(config) {
     async (cfg) => {
       const { projectRoot, platformProjectRoot, projectName } = cfg.modRequest;
       const src = path.join(projectRoot, 'assets/native-icons/ios/AppIcon.appiconset');
-      const dest = path.join(platformProjectRoot, projectName, 'Images.xcassets/AppIcon.appiconset');
+      const dest = path.join(
+        platformProjectRoot,
+        projectName,
+        'Images.xcassets/AppIcon.appiconset',
+      );
       fs.rmSync(dest, { recursive: true, force: true });
       copyDir(src, dest);
       return cfg;

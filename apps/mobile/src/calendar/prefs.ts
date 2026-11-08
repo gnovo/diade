@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getSyncMeta, setSyncMeta } from '../storage/sqlite';
 import type { GoogleScope } from '../data/unifiedAgenda';
+import { getSyncMeta, setSyncMeta } from '../storage/sqlite';
 
 const SCOPE_KEY = 'calendar_google_scope';
 const HIDDEN_KEY = 'calendar_hidden_calendars';
@@ -45,7 +45,8 @@ export function useCalendarPrefs(): CalendarPrefs {
         ]);
         if (cancelled) return;
         if (scope === 'me' || scope === 'partner' || scope === 'both') setScope(scope);
-        if (savedView && (CALENDAR_VIEWS as readonly string[]).includes(savedView)) setViewState(savedView as CalendarView);
+        if (savedView && (CALENDAR_VIEWS as readonly string[]).includes(savedView))
+          setViewState(savedView as CalendarView);
         if (others === 'off') setShowOthers(false);
         if (ids) setHidden(new Set(JSON.parse(ids) as string[]));
       } catch {

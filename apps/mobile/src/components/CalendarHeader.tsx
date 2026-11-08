@@ -1,9 +1,9 @@
-import React from 'react';
-import { Pressable, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import { sizes } from '@diade/design-tokens';
-import { Icon, useColor, type IconName } from '../design';
+import type React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Pressable, Text, View } from 'react-native';
 import type { CalendarView } from '../calendar/prefs';
+import { Icon, type IconName, useColor } from '../design';
 import { Segmented } from './ui';
 
 const IconButton: React.FC<{
@@ -70,10 +70,16 @@ export const CalendarHeader: React.FC<{
   return (
     <View className="px-4 pt-4 pb-3 bg-bg">
       <View className="flex-row items-center mb-3">
-        <Text className="flex-1 text-title-2 font-bold text-ink mr-2" numberOfLines={1} accessibilityRole="header">
+        <Text
+          className="flex-1 text-title-2 font-bold text-ink mr-2"
+          numberOfLines={1}
+          accessibilityRole="header"
+        >
           {title}
         </Text>
-        {showToday ? <IconButton icon="calendar" label={t('common.today')} onPress={onToday} /> : null}
+        {showToday ? (
+          <IconButton icon="calendar" label={t('common.today')} onPress={onToday} />
+        ) : null}
         {showNav ? (
           <>
             <IconButton icon="chevron-left" label={prevLabel} onPress={onPrev} />

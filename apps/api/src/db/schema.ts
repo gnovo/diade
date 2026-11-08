@@ -1,18 +1,18 @@
-import { sql } from 'drizzle-orm';
 import type { GroceryContribution, MealPlanRecipe, RecipeIngredient } from '@diade/domain';
+import { sql } from 'drizzle-orm';
 import {
+  bigint,
+  boolean,
+  date,
+  doublePrecision,
+  index,
+  integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
-  boolean,
-  uuid,
-  bigint,
-  date,
-  integer,
-  doublePrecision,
-  jsonb,
   uniqueIndex,
-  index,
+  uuid,
 } from 'drizzle-orm/pg-core';
 
 // --- Better Auth Tables ---

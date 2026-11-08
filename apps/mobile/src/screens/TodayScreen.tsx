@@ -1,45 +1,56 @@
-import React, { useState } from 'react';
-import { View, Text, Alert, Pressable, Share } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { sizes } from '@diade/design-tokens';
 import {
   addLocalDays,
+  type CalendarEvent,
   canAccessRecord,
+  type ExternalCalendar,
+  type ExternalEvent,
   externalEventTitle,
   formatTime,
+  type ImportantDate,
   isTaskAssignedToUser,
   startOfLocalDay,
   type Task,
-  type CalendarEvent,
-  type ExternalCalendar,
-  type ExternalEvent,
-  type ImportantDate,
 } from '@diade/domain';
-import { sizes } from '@diade/design-tokens';
+import { type NavigationProp, type ParamListBase, useNavigation } from '@react-navigation/native';
+import type React from 'react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Alert, Pressable, Share, Text, View } from 'react-native';
+import {
+  Button,
+  Card,
+  Checkbox,
+  EmptyState,
+  Pill,
+  ScreenScaffold,
+  SectionLabel,
+  TextField,
+  useWriteContext,
+} from '../components/ui';
 import { useAuth } from '../context/AuthContext';
+import { formatAgendaTime } from '../data/agenda';
+import { statusLabel } from '../data/importantDateDisplay';
+import { inviteState } from '../data/invite';
+import { partnerDay } from '../data/partnerDay';
 import {
   getActiveEvents,
-  getActiveTasks,
-  getActiveLists,
-  getActiveListItems,
   getActiveImportantDates,
+  getActiveListItems,
+  getActiveLists,
+  getActiveTasks,
   getExternalCalendars,
   getExternalEvents,
   getInboxItems,
 } from '../data/queries';
-import { inviteState } from '../data/invite';
-import { upcomingSpecialDates, usStrip } from '../data/usStrip';
-import { partnerDay } from '../data/partnerDay';
-import { buildUnifiedAgenda, pickHighlights, type AgendaEntry } from '../data/unifiedAgenda';
-import { AvatarPair, Icon, useColor } from '../design';
-import { statusLabel } from '../data/importantDateDisplay';
 import { insertRecord, updateRecord } from '../data/repository';
-import { formatAgendaTime } from '../data/agenda';
+import { type AgendaEntry, buildUnifiedAgenda, pickHighlights } from '../data/unifiedAgenda';
 import { useLiveQuery } from '../data/useLiveQuery';
+import { upcomingSpecialDates, usStrip } from '../data/usStrip';
+import { AvatarPair, Icon, useColor } from '../design';
 import { useFormat } from '../i18n';
-import { ProfileScreen, userInitial } from './ProfileScreen';
 import { PartnerDayScreen } from './PartnerDayScreen';
-import { Button, Card, Checkbox, EmptyState, Pill, ScreenScaffold, SectionLabel, TextField, useWriteContext } from '../components/ui';
+import { ProfileScreen, userInitial } from './ProfileScreen';
 
 const TODAY_TASK_LIMIT = 5;
 const EVENT_LIMIT = 4;
@@ -60,7 +71,7 @@ export const TodayScreen: React.FC = () => {
   const now = new Date();
   const starColor = useColor('warning');
   const onAction = useColor('on-action');
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const dayStart = startOfLocalDay(now);
   const tomorrowEnd = addLocalDays(dayStart, 2);
 
@@ -88,7 +99,8 @@ export const TodayScreen: React.FC = () => {
     .filter((entry) => {
       // Skip what has already finished today. All-day items stay for the whole day.
       if (entry.kind === 'event') return entry.item.endAt.getTime() >= now.getTime();
-      if (entry.kind === 'external') return entry.isAllDay || entry.endAt!.getTime() >= now.getTime();
+      if (entry.kind === 'external')
+        return entry.isAllDay || entry.endAt!.getTime() >= now.getTime();
       return false;
     })
     .slice(0, EVENT_LIMIT);
@@ -111,9 +123,13 @@ export const TodayScreen: React.FC = () => {
   );
 
   const myOpenTasks = tasks.data.filter(
-    (t) => t.status === 'todo' && canAccessRecord(t, user?.id ?? '') && isTaskAssignedToUser(t, user?.id ?? ''),
+    (t) =>
+      t.status === 'todo' &&
+      canAccessRecord(t, user?.id ?? '') &&
+      isTaskAssignedToUser(t, user?.id ?? ''),
   );
-  const isOverdue = (task: Task) => !!task.dueDate && startOfLocalDay(new Date(task.dueDate)).getTime() < dayStart.getTime();
+  const isOverdue = (task: Task) =>
+    !!task.dueDate && startOfLocalDay(new Date(task.dueDate)).getTime() < dayStart.getTime();
 
   // Overdue and important tasks stay on top until they are done, so they cannot slip by.
   const needsAttention = myOpenTasks
@@ -121,7 +137,8 @@ export const TodayScreen: React.FC = () => {
     .sort(
       (a, b) =>
         Number(isOverdue(b)) - Number(isOverdue(a)) ||
-        (a.dueDate ? new Date(a.dueDate).getTime() : Infinity) - (b.dueDate ? new Date(b.dueDate).getTime() : Infinity),
+        (a.dueDate ? new Date(a.dueDate).getTime() : Infinity) -
+          (b.dueDate ? new Date(b.dueDate).getTime() : Infinity),
     );
   const attentionIds = new Set(needsAttention.map((t) => t.id));
   const openTasks = myOpenTasks.filter((t) => !attentionIds.has(t.id)).slice(0, TODAY_TASK_LIMIT);
@@ -131,7 +148,11 @@ export const TodayScreen: React.FC = () => {
   const todayCount =
     needsAttention.length +
     upcoming.filter((entry) =>
-      entry.kind === 'event' ? entry.item.startAt < tomorrowStart : entry.kind === 'external' ? entry.day < tomorrowStart : false,
+      entry.kind === 'event'
+        ? entry.item.startAt < tomorrowStart
+        : entry.kind === 'external'
+          ? entry.day < tomorrowStart
+          : false,
     ).length;
   const nextSpecial = upcomingSpecialDates(specialDates.data, now, LOOKAHEAD_DAYS)[0];
   const strip = usStrip(specialDates.data, now, LOOKAHEAD_DAYS);
@@ -146,7 +167,13 @@ export const TodayScreen: React.FC = () => {
   const invite = inviteState(space, members.length, now);
 
   const hour = now.getHours();
-  const greeting = t(hour < 12 ? 'today.greetingMorning' : hour < 18 ? 'today.greetingAfternoon' : 'today.greetingEvening');
+  const greeting = t(
+    hour < 12
+      ? 'today.greetingMorning'
+      : hour < 18
+        ? 'today.greetingAfternoon'
+        : 'today.greetingEvening',
+  );
   const firstName = user?.displayName?.trim().split(/\s+/)[0];
   const partner = members.find((m) => m.userId !== user?.id);
   const theirDay = partner
@@ -161,7 +188,9 @@ export const TodayScreen: React.FC = () => {
     : null;
   const theirSummary = theirDay
     ? [
-        theirDay.tasks.length > 0 ? t('today.partnerTasks', { count: theirDay.tasks.length }) : null,
+        theirDay.tasks.length > 0
+          ? t('today.partnerTasks', { count: theirDay.tasks.length })
+          : null,
         theirDay.eventsToday > 0 ? t('today.partnerEvents', { count: theirDay.eventsToday }) : null,
       ]
         .filter(Boolean)
@@ -170,7 +199,9 @@ export const TodayScreen: React.FC = () => {
   const inkMuted = useColor('ink-muted');
   const myName = user?.displayName || user?.email || '?';
 
-  const groceryListIds = new Set(lists.data.filter((l) => l.category === 'groceries').map((l) => l.id));
+  const groceryListIds = new Set(
+    lists.data.filter((l) => l.category === 'groceries').map((l) => l.id),
+  );
   const openGroceries = listItems.data.filter((i) => groceryListIds.has(i.listId) && !i.isChecked);
 
   const partnerName = (id: string | null) => {
@@ -196,7 +227,10 @@ export const TodayScreen: React.FC = () => {
       setCaptureText('');
       setCaptureNote(t('today.savedToInbox'));
     } catch (err) {
-      Alert.alert(t('common.couldNotSave'), err instanceof Error ? err.message : t('common.tryAgain'));
+      Alert.alert(
+        t('common.couldNotSave'),
+        err instanceof Error ? err.message : t('common.tryAgain'),
+      );
     } finally {
       setSaving(false);
     }
@@ -204,7 +238,7 @@ export const TodayScreen: React.FC = () => {
 
   /** Title, time, and pill for an event entry. */
   const rowOf = (entry: AgendaEntry) =>
-            entry.kind === 'event'
+    entry.kind === 'event'
       ? {
           title: entry.item.title,
           when: `${format.dayLabel(entry.item.startAt, now)} · ${formatAgendaTime(t, entry.item)}`,
@@ -218,11 +252,18 @@ export const TodayScreen: React.FC = () => {
         }
       : entry.kind === 'external'
         ? {
-            title: externalEventTitle(entry.event, { busy: t('calendar.busy'), untitled: t('calendar.untitled') }),
+            title: externalEventTitle(entry.event, {
+              busy: t('calendar.busy'),
+              untitled: t('calendar.untitled'),
+            }),
             when: `${format.dayLabel(entry.day, now)} · ${
-              entry.isAllDay ? t('format.allDay') : `${formatTime(entry.startAt!)}–${formatTime(entry.endAt!)}`
+              entry.isAllDay
+                ? t('format.allDay')
+                : `${formatTime(entry.startAt!)}–${formatTime(entry.endAt!)}`
             }`,
-            pill: <Pill label={entry.mine ? t('calendar.mine') : partnerName(entry.event.userId)} />,
+            pill: (
+              <Pill label={entry.mine ? t('calendar.mine') : partnerName(entry.event.userId)} />
+            ),
             muted: entry.event.redacted,
           }
         : null;
@@ -232,7 +273,7 @@ export const TodayScreen: React.FC = () => {
       title={t('today.title')}
       footer={
         <View className="px-4 pt-2 pb-3 bg-bg">
-          {captureNote ?? inboxNote ? (
+          {(captureNote ?? inboxNote) ? (
             <Text className="text-sm text-ink-muted px-2 mb-2">{captureNote ?? inboxNote}</Text>
           ) : null}
           {/* Quick capture: text only for now; saved locally first, synced when possible */}
@@ -254,7 +295,12 @@ export const TodayScreen: React.FC = () => {
               style={{ borderWidth: 0, backgroundColor: 'transparent', paddingHorizontal: 0 }}
             />
             {captureText.trim() ? (
-              <Button label={saving ? '…' : t('common.save')} small onPress={handleCapture} disabled={saving} />
+              <Button
+                label={saving ? '…' : t('common.save')}
+                small
+                onPress={handleCapture}
+                disabled={saving}
+              />
             ) : null}
           </View>
         </View>
@@ -273,7 +319,9 @@ export const TodayScreen: React.FC = () => {
               <Text className="text-title-3 font-bold text-ink" numberOfLines={1}>
                 {firstName ? `${greeting}, ${firstName}` : greeting}
               </Text>
-              <Text className="text-sm leading-5 text-ink-muted" numberOfLines={1}>{statusLine}</Text>
+              <Text className="text-sm leading-5 text-ink-muted" numberOfLines={1}>
+                {statusLine}
+              </Text>
             </View>
           </Pressable>
         </View>
@@ -285,7 +333,9 @@ export const TodayScreen: React.FC = () => {
           <SectionLabel>{t('today.setupLabel')}</SectionLabel>
           <View className="flex-row items-center">
             <View className="flex-1 mr-3">
-              <Text className="text-base font-semibold text-ink">{t('today.invitePartnerTitle')}</Text>
+              <Text className="text-base font-semibold text-ink">
+                {t('today.invitePartnerTitle')}
+              </Text>
               <Text className="text-sm text-ink-muted mt-0.5">
                 {invite.kind === 'valid' && invite.expiresAt
                   ? t('today.inviteValidUntil', { date: invite.expiresAt.toLocaleDateString() })
@@ -314,12 +364,19 @@ export const TodayScreen: React.FC = () => {
             <View key={task.id}>
               {index > 0 ? <View className="h-px bg-border my-3" /> : null}
               <View className="flex-row items-center">
-                <Checkbox checked={false} onToggle={() => toggleTask(task)} label={t('today.complete', { title: task.title })} />
+                <Checkbox
+                  checked={false}
+                  onToggle={() => toggleTask(task)}
+                  label={t('today.complete', { title: task.title })}
+                />
                 <View className="flex-1 mr-2">
-                  <Text className="text-sm font-medium text-ink" numberOfLines={1}>{task.title}</Text>
+                  <Text className="text-sm font-medium text-ink" numberOfLines={1}>
+                    {task.title}
+                  </Text>
                   {isOverdue(task) ? (
                     <Text className="text-xs text-ink-muted">
-                      {t('today.overdue')} · {t('household.due', { day: format.dayLabel(new Date(task.dueDate!), now) })}
+                      {t('today.overdue')} ·{' '}
+                      {t('household.due', { day: format.dayLabel(new Date(task.dueDate!), now) })}
                     </Text>
                   ) : null}
                 </View>
@@ -333,7 +390,9 @@ export const TodayScreen: React.FC = () => {
             </View>
           ))}
           {needsAttention.length > TODAY_TASK_LIMIT ? (
-            <Text className="text-sm text-ink-muted mt-3">{t('today.more', { count: needsAttention.length - TODAY_TASK_LIMIT })}</Text>
+            <Text className="text-sm text-ink-muted mt-3">
+              {t('today.more', { count: needsAttention.length - TODAY_TASK_LIMIT })}
+            </Text>
           ) : null}
         </Card>
       ) : null}
@@ -349,7 +408,10 @@ export const TodayScreen: React.FC = () => {
               {index > 0 ? <View className="h-px bg-border my-3" /> : null}
               <View className="flex-row items-center justify-between">
                 <View className="flex-1 mr-2">
-                  <Text className={`text-base font-semibold ${row.muted ? 'text-ink-muted' : 'text-ink'}`} numberOfLines={1}>
+                  <Text
+                    className={`text-base font-semibold ${row.muted ? 'text-ink-muted' : 'text-ink'}`}
+                    numberOfLines={1}
+                  >
                     {row.title}
                   </Text>
                   <Text className="text-sm text-ink-muted mt-0.5">{row.when}</Text>
@@ -373,18 +435,28 @@ export const TodayScreen: React.FC = () => {
             <View className="flex-row items-center">
               {strip.featured ? (
                 <View className="flex-1">
-                  <Text className="text-xs leading-4 font-semibold text-ink-muted tracking-wider uppercase" numberOfLines={1}>
+                  <Text
+                    className="text-xs leading-4 font-semibold text-ink-muted tracking-wider uppercase"
+                    numberOfLines={1}
+                  >
                     {strip.featured.item.title}
                   </Text>
                   <Text className="text-title-3 font-bold text-ink mt-1" numberOfLines={1}>
-                    {strip.featured.days !== null ? t('common.day', { count: strip.featured.days }) : statusLabel(t, strip.featured.status)}
+                    {strip.featured.days !== null
+                      ? t('common.day', { count: strip.featured.days })
+                      : statusLabel(t, strip.featured.status)}
                   </Text>
                 </View>
               ) : null}
-              {strip.featured && strip.next ? <View className="w-px self-stretch bg-border mx-4" /> : null}
+              {strip.featured && strip.next ? (
+                <View className="w-px self-stretch bg-border mx-4" />
+              ) : null}
               {strip.next ? (
                 <View className="flex-1">
-                  <Text className="text-xs leading-4 font-semibold text-ink-muted tracking-wider uppercase" numberOfLines={1}>
+                  <Text
+                    className="text-xs leading-4 font-semibold text-ink-muted tracking-wider uppercase"
+                    numberOfLines={1}
+                  >
                     {strip.next.item.title}
                   </Text>
                   <Text className="text-title-3 font-bold text-ink mt-1" numberOfLines={1}>
@@ -402,17 +474,25 @@ export const TodayScreen: React.FC = () => {
         <Pressable
           onPress={() => setPartnerOpen(true)}
           accessibilityRole="button"
-          accessibilityLabel={t('today.openPartnerDay', { name: partner.displayName.split(' ')[0] })}
+          accessibilityLabel={t('today.openPartnerDay', {
+            name: partner.displayName.split(' ')[0],
+          })}
           className="active:opacity-70"
         >
           <Card>
             <View className="flex-row items-center">
               <View className="w-10 h-10 rounded-full bg-brand-mint items-center justify-center mr-3">
-                <Text className="text-base font-semibold text-brand-deep">{userInitial(partner.displayName)}</Text>
+                <Text className="text-base font-semibold text-brand-deep">
+                  {userInitial(partner.displayName)}
+                </Text>
               </View>
               <View className="flex-1 mr-2">
-                <Text className="text-base font-semibold text-ink" numberOfLines={1}>{partner.displayName.split(' ')[0]}</Text>
-                <Text className="text-sm text-ink-muted mt-0.5" numberOfLines={1}>{theirSummary}</Text>
+                <Text className="text-base font-semibold text-ink" numberOfLines={1}>
+                  {partner.displayName.split(' ')[0]}
+                </Text>
+                <Text className="text-sm text-ink-muted mt-0.5" numberOfLines={1}>
+                  {theirSummary}
+                </Text>
               </View>
               <Icon name="chevron-right" size={sizes['icon-sm']} color={inkMuted} />
             </View>
@@ -434,7 +514,10 @@ export const TodayScreen: React.FC = () => {
                     <Icon name="star" size={sizes['icon-sm']} color={starColor} fill={starColor} />
                   </View>
                   <View className="flex-1 mr-2">
-                    <Text className={`text-base font-semibold ${row.muted ? 'text-ink-muted' : 'text-ink'}`} numberOfLines={1}>
+                    <Text
+                      className={`text-base font-semibold ${row.muted ? 'text-ink-muted' : 'text-ink'}`}
+                      numberOfLines={1}
+                    >
                       {row.title}
                     </Text>
                     <Text className="text-sm text-ink-muted mt-0.5">{row.when}</Text>
@@ -454,8 +537,14 @@ export const TodayScreen: React.FC = () => {
           <View key={task.id}>
             {index > 0 ? <View className="h-px bg-border my-3" /> : null}
             <View className="flex-row items-center">
-              <Checkbox checked={false} onToggle={() => toggleTask(task)} label={t('today.complete', { title: task.title })} />
-              <Text className="flex-1 text-sm font-medium text-ink mr-2" numberOfLines={1}>{task.title}</Text>
+              <Checkbox
+                checked={false}
+                onToggle={() => toggleTask(task)}
+                label={t('today.complete', { title: task.title })}
+              />
+              <Text className="flex-1 text-sm font-medium text-ink mr-2" numberOfLines={1}>
+                {task.title}
+              </Text>
               <Pill label={partnerName(task.assigneeId)} />
             </View>
           </View>
@@ -469,13 +558,18 @@ export const TodayScreen: React.FC = () => {
         ) : (
           <View className="flex-row flex-wrap gap-2">
             {openGroceries.slice(0, 4).map((item) => (
-              <View key={item.id} className="bg-surface-sunken border border-border px-3 py-1.5 rounded-full">
+              <View
+                key={item.id}
+                className="bg-surface-sunken border border-border px-3 py-1.5 rounded-full"
+              >
                 <Text className="text-base font-medium text-ink">{item.name}</Text>
               </View>
             ))}
             {openGroceries.length > 4 ? (
               <View className="bg-bg border border-border px-3 py-1.5 rounded-full">
-                <Text className="text-sm text-ink-muted">{t('today.more', { count: openGroceries.length - 4 })}</Text>
+                <Text className="text-sm text-ink-muted">
+                  {t('today.more', { count: openGroceries.length - 4 })}
+                </Text>
               </View>
             ) : null}
           </View>

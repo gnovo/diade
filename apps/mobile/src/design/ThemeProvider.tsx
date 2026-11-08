@@ -1,5 +1,6 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import type React from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useColorScheme } from 'react-native-css-interop';
 
 export type ThemePreference = 'system' | 'light' | 'dark';
@@ -57,7 +58,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     [setColorScheme],
   );
 
-  const value = useMemo(() => ({ preference, setPreference, ready }), [preference, setPreference, ready]);
+  const value = useMemo(
+    () => ({ preference, setPreference, ready }),
+    [preference, setPreference, ready],
+  );
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };
 

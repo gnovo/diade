@@ -56,7 +56,14 @@ function parseUntil(value: string): Date | null {
   if (!match) return null;
   const [, year, month, day, hour = '23', minute = '59', second = '59'] = match;
   return new Date(
-    Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second)),
+    Date.UTC(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      Number(hour),
+      Number(minute),
+      Number(second),
+    ),
   );
 }
 

@@ -1,7 +1,7 @@
-import React from 'react';
+import { sizes, space as spacing } from '@diade/design-tokens';
+import type React from 'react';
 import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { space as spacing, sizes } from '@diade/design-tokens';
 import { Icon } from '../design';
 
 /**
@@ -15,14 +15,35 @@ export const Sheet: React.FC<{
   closeLabel: string;
   children: React.ReactNode;
 }> = ({ visible, onClose, title, closeLabel, children }) => (
-  <Modal visible={visible} animationType="slide" transparent statusBarTranslucent onRequestClose={onClose}>
+  <Modal
+    visible={visible}
+    animationType="slide"
+    transparent
+    statusBarTranslucent
+    onRequestClose={onClose}
+  >
     <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}>
       {/* Tapping the dimmed screen above the sheet closes it. */}
-      <Pressable className="flex-1" onPress={onClose} accessible={false} importantForAccessibility="no" />
-      <View className="bg-bg" style={{ height: '90%', borderTopLeftRadius: 24, borderTopRightRadius: 24, overflow: 'hidden' }}>
+      <Pressable
+        className="flex-1"
+        onPress={onClose}
+        accessible={false}
+        importantForAccessibility="no"
+      />
+      <View
+        className="bg-bg"
+        style={{
+          height: '90%',
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
+          overflow: 'hidden',
+        }}
+      >
         <SafeAreaView className="flex-1" edges={['bottom']}>
           <View className="flex-row items-center justify-between px-4 pt-4 pb-2">
-            <Text className="flex-1 mr-3 text-title-1 font-bold text-ink" numberOfLines={1}>{title}</Text>
+            <Text className="flex-1 mr-3 text-title-1 font-bold text-ink" numberOfLines={1}>
+              {title}
+            </Text>
             <Pressable
               onPress={onClose}
               accessibilityRole="button"
@@ -34,7 +55,11 @@ export const Sheet: React.FC<{
             </Pressable>
           </View>
           <ScrollView
-            contentContainerStyle={{ paddingHorizontal: spacing[4], paddingTop: spacing[4], paddingBottom: spacing[8] }}
+            contentContainerStyle={{
+              paddingHorizontal: spacing[4],
+              paddingTop: spacing[4],
+              paddingBottom: spacing[8],
+            }}
           >
             {children}
           </ScrollView>

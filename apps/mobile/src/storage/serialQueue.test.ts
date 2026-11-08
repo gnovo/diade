@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { createSerialQueue } from './serialQueue';
 
 const tick = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -18,7 +18,11 @@ describe('createSerialQueue', () => {
       running--;
       return name;
     };
-    const results = await Promise.all([enqueue(task('a', 15)), enqueue(task('b', 1)), enqueue(task('c', 5))]);
+    const results = await Promise.all([
+      enqueue(task('a', 15)),
+      enqueue(task('b', 1)),
+      enqueue(task('c', 5)),
+    ]);
     expect(results).toEqual(['a', 'b', 'c']);
     expect(maxRunning).toBe(1);
     expect(log).toEqual(['start a', 'end a', 'start b', 'end b', 'start c', 'end c']);

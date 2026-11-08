@@ -12,14 +12,14 @@
 import {
   addLocalDays,
   canAccessRecord,
-  startOfLocalDay,
   type ExternalCalendar,
   type ExternalEvent,
+  startOfLocalDay,
   type Task,
 } from '@diade/domain';
-import { buildUnifiedAgenda, type AgendaEntry } from './unifiedAgenda';
+import { type AgendaEntry, buildUnifiedAgenda } from './unifiedAgenda';
 
-export type PartnerEventEntry = Extract<AgendaEntry, { kind: 'external' }>;
+type PartnerEventEntry = Extract<AgendaEntry, { kind: 'external' }>;
 
 export interface PartnerDay {
   /** Their open tasks: overdue first, then by due date, undated last. */
@@ -39,7 +39,14 @@ export interface PartnerDayInput {
   now: Date;
 }
 
-export function partnerDay({ tasks, externalEvents, externalCalendars, userId, partnerId, now }: PartnerDayInput): PartnerDay {
+export function partnerDay({
+  tasks,
+  externalEvents,
+  externalCalendars,
+  userId,
+  partnerId,
+  now,
+}: PartnerDayInput): PartnerDay {
   const dayStart = startOfLocalDay(now);
   const tomorrowStart = addLocalDays(dayStart, 1);
 
@@ -72,5 +79,9 @@ export function partnerDay({ tasks, externalEvents, externalCalendars, userId, p
       return entry.isAllDay || entry.endAt!.getTime() >= now.getTime();
     });
 
-  return { tasks: mine, events, eventsToday: events.filter((e) => e.day.getTime() < tomorrowStart.getTime()).length };
+  return {
+    tasks: mine,
+    events,
+    eventsToday: events.filter((e) => e.day.getTime() < tomorrowStart.getTime()).length,
+  };
 }

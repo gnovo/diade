@@ -1,11 +1,20 @@
-import { describe, it, expect } from 'vitest';
-import { dayKey, dayMarkers, firstOfMonth, isSameMonth, monthGridDays, monthGridStart, shiftMonth } from './monthGrid';
+import { describe, expect, it } from 'vitest';
 import type { AgendaEntry } from '../data/unifiedAgenda';
+import {
+  dayKey,
+  dayMarkers,
+  firstOfMonth,
+  isSameMonth,
+  monthGridDays,
+  monthGridStart,
+  shiftMonth,
+} from './monthGrid';
 
 const palette = { event: '#event', task: '#task', date: '#date', neutral: '#neutral' };
 const ext = (color: string | null): AgendaEntry =>
   ({ kind: 'external', calendar: color === null ? null : { color } }) as unknown as AgendaEntry;
-const task = (status: string): AgendaEntry => ({ kind: 'task', task: { status } }) as unknown as AgendaEntry;
+const task = (status: string): AgendaEntry =>
+  ({ kind: 'task', task: { status } }) as unknown as AgendaEntry;
 
 describe('monthGridStart', () => {
   // 1 Nov 2026 is a Sunday.

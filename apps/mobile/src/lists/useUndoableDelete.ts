@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-export const UNDO_WINDOW_MS = 5000;
+const UNDO_WINDOW_MS = 5000;
 
 export interface PendingDelete {
   ids: string[];
@@ -13,17 +13,20 @@ export interface PendingDelete {
  * record. Starting another delete commits the previous one straight away, and leaving the
  * screen flushes it. If the app dies inside the window the items simply stay.
  */
-export function useUndoableDelete(commit: (ids: string[]) => Promise<void> | void, delayMs = UNDO_WINDOW_MS) {
+export function useUndoableDelete(
+  commit: (ids: string[]) => Promise<void> | void,
+  delayMs = UNDO_WINDOW_MS,
+) {
   const [pending, setPending] = useState<PendingDelete | null>(null);
   const pendingRef = useRef<PendingDelete | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const commitRef = useRef(commit);
   commitRef.current = commit;
 
-  const clearTimer = () => {
+  const clearTimer = useCallback(() => {
     if (timer.current) clearTimeout(timer.current);
     timer.current = null;
-  };
+  }, []);
 
   const flush = useCallback(() => {
     clearTimer();
@@ -31,7 +34,7 @@ export function useUndoableDelete(commit: (ids: string[]) => Promise<void> | voi
     pendingRef.current = null;
     setPending(null);
     if (current) void commitRef.current(current.ids);
-  }, []);
+  }, [clearTimer]);
 
   const schedule = useCallback(
     (ids: string[], message: string) => {
@@ -49,7 +52,7 @@ export function useUndoableDelete(commit: (ids: string[]) => Promise<void> | voi
     clearTimer();
     pendingRef.current = null;
     setPending(null);
-  }, []);
+  }, [clearTimer]);
 
   useEffect(() => flush, [flush]);
 

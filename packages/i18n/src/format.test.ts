@@ -1,6 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import {
+  formatCompactRange,
+  formatDateRange,
+  formatDayLabel,
+  formatLongDate,
+  formatMonthYear,
+} from './format';
 import { createI18n } from './i18n';
-import { formatCompactRange, formatDateRange, formatDayLabel, formatLongDate, formatMonthYear } from './format';
 
 const now = new Date(2026, 10, 1, 9, 0); // Sun 1 Nov 2026
 
@@ -47,9 +53,13 @@ describe('formatDateRange', () => {
 
   it('writes both months when it crosses one, and never says "Today"', () => {
     const { t } = createI18n('en');
-    expect(formatDateRange(t, new Date(2026, 10, 30), new Date(2026, 11, 6))).toBe('Mon 30 Nov to Sun 6 Dec');
+    expect(formatDateRange(t, new Date(2026, 10, 30), new Date(2026, 11, 6))).toBe(
+      'Mon 30 Nov to Sun 6 Dec',
+    );
     // A period that starts today must still read as dates.
-    expect(formatDateRange(t, new Date(), new Date(Date.now() + 6 * 86_400_000))).not.toMatch(/Today|Tomorrow/);
+    expect(formatDateRange(t, new Date(), new Date(Date.now() + 6 * 86_400_000))).not.toMatch(
+      /Today|Tomorrow/,
+    );
   });
 });
 
@@ -57,7 +67,11 @@ describe('formatCompactRange', () => {
   it('is short enough for a list name', () => {
     const { t } = createI18n('en');
     expect(formatCompactRange(t, new Date(2026, 10, 9), new Date(2026, 10, 15))).toBe('9–15 Nov');
-    expect(formatCompactRange(t, new Date(2026, 10, 30), new Date(2026, 11, 6))).toBe('30 Nov – 6 Dec');
-    expect(formatCompactRange(createI18n('pt-PT').t, new Date(2026, 10, 9), new Date(2026, 10, 15))).toBe('9–15 nov');
+    expect(formatCompactRange(t, new Date(2026, 10, 30), new Date(2026, 11, 6))).toBe(
+      '30 Nov – 6 Dec',
+    );
+    expect(
+      formatCompactRange(createI18n('pt-PT').t, new Date(2026, 10, 9), new Date(2026, 10, 15)),
+    ).toBe('9–15 nov');
   });
 });

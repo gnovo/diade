@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
-import { View, Text, Alert, Pressable } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { sizes } from '@diade/design-tokens';
 import {
   canAccessRecord,
   parseLocalDateTime,
@@ -8,13 +6,10 @@ import {
   type TaskPriority,
   type Visibility,
 } from '@diade/domain';
-import { sizes } from '@diade/design-tokens';
-import { useAuth } from '../context/AuthContext';
-import { getActiveTasks } from '../data/queries';
-import { insertRecord, updateRecord, deleteRecord } from '../data/repository';
-import { useLiveQuery } from '../data/useLiveQuery';
-import { useFormat } from '../i18n';
-import { Icon, useColor } from '../design';
+import type React from 'react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Alert, Pressable, Text, View } from 'react-native';
 import {
   Button,
   Card,
@@ -22,12 +17,18 @@ import {
   EmptyState,
   Pill,
   ScreenScaffold,
-  Segmented,
   SectionLabel,
+  Segmented,
+  type SegmentOption,
   TextField,
   useWriteContext,
-  type SegmentOption,
 } from '../components/ui';
+import { useAuth } from '../context/AuthContext';
+import { getActiveTasks } from '../data/queries';
+import { deleteRecord, insertRecord, updateRecord } from '../data/repository';
+import { useLiveQuery } from '../data/useLiveQuery';
+import { Icon, useColor } from '../design';
+import { useFormat } from '../i18n';
 
 type AssigneeChoice = 'both' | 'me' | 'partner';
 
@@ -69,7 +70,9 @@ export const HomeScreen: React.FC = () => {
   const assigneeLabel = (task: Task) => {
     if (task.assigneeId === null) return t('common.both');
     if (task.assigneeId === user?.id) return t('common.me');
-    return partner && task.assigneeId === partner.userId ? partner.displayName.split(' ')[0] : t('common.partner');
+    return partner && task.assigneeId === partner.userId
+      ? partner.displayName.split(' ')[0]
+      : t('common.partner');
   };
 
   const addTask = async () => {
@@ -99,7 +102,10 @@ export const HomeScreen: React.FC = () => {
       setDueDate('');
       setPriority('normal');
     } catch (err) {
-      Alert.alert(t('household.couldNotAdd'), err instanceof Error ? err.message : t('common.tryAgain'));
+      Alert.alert(
+        t('household.couldNotAdd'),
+        err instanceof Error ? err.message : t('common.tryAgain'),
+      );
     }
   };
 
@@ -114,7 +120,11 @@ export const HomeScreen: React.FC = () => {
   const confirmDelete = (task: Task) => {
     Alert.alert(t('household.deleteTitle'), t('household.deleteBody', { title: task.title }), [
       { text: t('common.cancel'), style: 'cancel' },
-      { text: t('common.delete'), style: 'destructive', onPress: () => deleteRecord('tasks', task.id) },
+      {
+        text: t('common.delete'),
+        style: 'destructive',
+        onPress: () => deleteRecord('tasks', task.id),
+      },
     ]);
   };
 
@@ -131,11 +141,24 @@ export const HomeScreen: React.FC = () => {
           returnKeyType="done"
         />
         <View className="mt-3">
-          <TextField value={dueDate} onChangeText={setDueDate} placeholder={t('household.duePlaceholder')} maxLength={10} />
+          <TextField
+            value={dueDate}
+            onChangeText={setDueDate}
+            placeholder={t('household.duePlaceholder')}
+            maxLength={10}
+          />
         </View>
-        <Text className="text-sm font-semibold text-ink-muted mt-4 mb-1.5">{t('household.who')}</Text>
-        <Segmented<AssigneeChoice> value={assignee} onChange={setAssignee} options={assigneeOptions} />
-        <Text className="text-sm font-semibold text-ink-muted mt-4 mb-1.5">{t('household.priority')}</Text>
+        <Text className="text-sm font-semibold text-ink-muted mt-4 mb-1.5">
+          {t('household.who')}
+        </Text>
+        <Segmented<AssigneeChoice>
+          value={assignee}
+          onChange={setAssignee}
+          options={assigneeOptions}
+        />
+        <Text className="text-sm font-semibold text-ink-muted mt-4 mb-1.5">
+          {t('household.priority')}
+        </Text>
         <Segmented<TaskPriority>
           value={priority}
           onChange={setPriority}
@@ -144,7 +167,9 @@ export const HomeScreen: React.FC = () => {
             { value: 'important', label: t('household.priorityImportant') },
           ]}
         />
-        <Text className="text-sm font-semibold text-ink-muted mt-4 mb-1.5">{t('household.visibility')}</Text>
+        <Text className="text-sm font-semibold text-ink-muted mt-4 mb-1.5">
+          {t('household.visibility')}
+        </Text>
         <Segmented<Visibility>
           value={visibility}
           onChange={setVisibility}
@@ -159,13 +184,25 @@ export const HomeScreen: React.FC = () => {
       </Card>
 
       <Card>
-        <SectionLabel right={<Text className="text-sm text-ink-muted">{t('household.open', { count: open.length })}</Text>}>{t('household.todo')}</SectionLabel>
+        <SectionLabel
+          right={
+            <Text className="text-sm text-ink-muted">
+              {t('household.open', { count: open.length })}
+            </Text>
+          }
+        >
+          {t('household.todo')}
+        </SectionLabel>
         {open.length === 0 ? <EmptyState message={t('household.allCaughtUp')} /> : null}
         {open.map((task, index) => (
           <View key={task.id}>
             {index > 0 ? <View className="h-px bg-border my-3" /> : null}
             <View className="flex-row items-center">
-              <Checkbox checked={false} onToggle={() => toggle(task)} label={t('household.complete', { title: task.title })} />
+              <Checkbox
+                checked={false}
+                onToggle={() => toggle(task)}
+                label={t('household.complete', { title: task.title })}
+              />
               <View className="flex-1 mr-2" accessibilityHint={t('household.longPressToDelete')}>
                 <Text
                   className="text-base font-medium text-ink"
@@ -176,15 +213,26 @@ export const HomeScreen: React.FC = () => {
                 </Text>
                 {task.dueDate ? (
                   <Text className="text-sm text-ink-muted mt-0.5">
-                    {t('household.due', { day: format.dayLabel(new Date(task.dueDate), new Date()) })}
+                    {t('household.due', {
+                      day: format.dayLabel(new Date(task.dueDate), new Date()),
+                    })}
                   </Text>
                 ) : null}
               </View>
               <Pressable
-                onPress={() => updateRecord('tasks', task.id, { priority: task.priority === 'important' ? 'normal' : 'important' })}
+                onPress={() =>
+                  updateRecord('tasks', task.id, {
+                    priority: task.priority === 'important' ? 'normal' : 'important',
+                  })
+                }
                 accessibilityRole="button"
                 accessibilityState={{ selected: task.priority === 'important' }}
-                accessibilityLabel={t(task.priority === 'important' ? 'household.unmarkImportant' : 'household.markImportant', { title: task.title })}
+                accessibilityLabel={t(
+                  task.priority === 'important'
+                    ? 'household.unmarkImportant'
+                    : 'household.markImportant',
+                  { title: task.title },
+                )}
                 hitSlop={8}
                 className="w-11 h-11 items-center justify-center"
               >
@@ -196,7 +244,9 @@ export const HomeScreen: React.FC = () => {
               </Pressable>
               <View className="flex-row items-center gap-1.5">
                 {task.priority === 'important' ? <Pill label={t('household.important')} /> : null}
-                {task.visibility === 'personal' ? <Pill label={t('common.personal')} tone="personal" /> : null}
+                {task.visibility === 'personal' ? (
+                  <Pill label={t('common.personal')} tone="personal" />
+                ) : null}
                 <Pill label={assigneeLabel(task)} />
               </View>
             </View>
@@ -208,7 +258,12 @@ export const HomeScreen: React.FC = () => {
         <Card>
           <SectionLabel
             right={
-              <Button label={showDone ? t('common.hide') : t('household.show', { count: done.length })} variant="ghost" small onPress={() => setShowDone((v) => !v)} />
+              <Button
+                label={showDone ? t('common.hide') : t('household.show', { count: done.length })}
+                variant="ghost"
+                small
+                onPress={() => setShowDone((v) => !v)}
+              />
             }
           >
             {t('household.done')}
@@ -218,7 +273,11 @@ export const HomeScreen: React.FC = () => {
                 <View key={task.id}>
                   {index > 0 ? <View className="h-px bg-border my-3" /> : null}
                   <View className="flex-row items-center">
-                    <Checkbox checked onToggle={() => toggle(task)} label={t('household.reopen', { title: task.title })} />
+                    <Checkbox
+                      checked
+                      onToggle={() => toggle(task)}
+                      label={t('household.reopen', { title: task.title })}
+                    />
                     <Text className="flex-1 text-sm text-ink-muted line-through" numberOfLines={1}>
                       {task.title}
                     </Text>

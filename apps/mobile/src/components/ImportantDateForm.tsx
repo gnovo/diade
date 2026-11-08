@@ -1,27 +1,38 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, View, Text, ScrollView, Switch, Alert, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
 import {
-  IMPORTANT_DATE_TYPES,
   IMPORTANT_DATE_TYPE_RULES,
-  parseDateOnly,
-  toDateInputValue,
+  IMPORTANT_DATE_TYPES,
   type ImportantDate,
   type ImportantDateRepeat,
   type ImportantDateType,
+  parseDateOnly,
+  toDateInputValue,
 } from '@diade/domain';
-import { insertRecord, updateRecord, deleteRecord } from '../data/repository';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   ALERT_OPTIONS,
-  IMPORTANT_DATE_TYPE_ICONS,
   alertToOption,
   composeTitle,
+  IMPORTANT_DATE_TYPE_ICONS,
   importantDateTypeLabel,
 } from '../data/importantDateDisplay';
+import { deleteRecord, insertRecord, updateRecord } from '../data/repository';
 import { Icon, useColor } from '../design';
-import { Button, Segmented, TextField, useWriteContext } from './ui';
 import { DateField } from './DateField';
+import { Button, Segmented, TextField, useWriteContext } from './ui';
 
 interface Props {
   visible: boolean;
@@ -34,7 +45,15 @@ interface Props {
 
 type Fields = Pick<
   ImportantDate,
-  'title' | 'type' | 'personName' | 'date' | 'countFirstDay' | 'repeat' | 'pinned' | 'alertOffsetDays' | 'notes'
+  | 'title'
+  | 'type'
+  | 'personName'
+  | 'date'
+  | 'countFirstDay'
+  | 'repeat'
+  | 'pinned'
+  | 'alertOffsetDays'
+  | 'notes'
 >;
 
 const TypeChip: React.FC<{ type: ImportantDateType; selected: boolean; onPress: () => void }> = ({
@@ -55,7 +74,9 @@ const TypeChip: React.FC<{ type: ImportantDateType; selected: boolean; onPress: 
       }`}
     >
       <Icon name={IMPORTANT_DATE_TYPE_ICONS[type]} size={16} color={selected ? onAction : ink} />
-      <Text className={`text-sm leading-5 font-semibold ${selected ? 'text-on-action' : 'text-ink'}`}>
+      <Text
+        className={`text-sm leading-5 font-semibold ${selected ? 'text-on-action' : 'text-ink'}`}
+      >
         {importantDateTypeLabel(t, type)}
       </Text>
     </Pressable>
@@ -145,7 +166,11 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
       type,
       personName: rules.needsPersonName ? personName.trim() : null,
       date,
-      countFirstDay: rules.countFirstDayOption ? countFirstDay : sameType ? item.countFirstDay : false,
+      countFirstDay: rules.countFirstDayOption
+        ? countFirstDay
+        : sameType
+          ? item.countFirstDay
+          : false,
       repeat: rules.repeatEditable ? repeat : sameType ? item.repeat : rules.repeat,
       pinned: rules.pinnable ? pinned : false,
       alertOffsetDays: ALERT_OPTIONS.find((o) => o.value === alert)?.days ?? null,
@@ -162,7 +187,9 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
 
       if (item) {
         // Send only what changed so a partner's concurrent edit to another field survives.
-        const changes = (Object.keys(next) as Array<keyof Fields>).filter((key) => next[key] !== item[key]);
+        const changes = (Object.keys(next) as Array<keyof Fields>).filter(
+          (key) => next[key] !== item[key],
+        );
         if (changes.length > 0) {
           await updateRecord(
             'important_dates',
@@ -175,7 +202,10 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
       }
       onClose();
     } catch (err) {
-      Alert.alert(t('common.couldNotSave'), err instanceof Error ? err.message : t('common.tryAgain'));
+      Alert.alert(
+        t('common.couldNotSave'),
+        err instanceof Error ? err.message : t('common.tryAgain'),
+      );
     } finally {
       setSaving(false);
     }
@@ -183,45 +213,71 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
 
   const handleDelete = () => {
     if (!item) return;
-    Alert.alert(t('importantDates.form.deleteTitle'), t('importantDates.form.deleteBody', { title: item.title }), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: async () => {
-          await deleteRecord('important_dates', item.id);
-          onClose();
+    Alert.alert(
+      t('importantDates.form.deleteTitle'),
+      t('importantDates.form.deleteBody', { title: item.title }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            await deleteRecord('important_dates', item.id);
+            onClose();
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   const rules = IMPORTANT_DATE_TYPE_RULES[type];
   const replacing = pinned && pinnedItem && pinnedItem.id !== item?.id ? pinnedItem : null;
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
       <SafeAreaView className="flex-1 bg-bg" edges={['top', 'bottom']}>
-        <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <KeyboardAvoidingView
+          className="flex-1"
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
           <View className="flex-row items-center justify-between px-5 py-4 border-b border-border bg-surface">
             <Button label={t('common.cancel')} variant="ghost" small onPress={onClose} />
-            <Text className="text-base font-semibold text-ink">{editing ? t('importantDates.form.editTitle') : t('importantDates.form.newTitle')}</Text>
+            <Text className="text-base font-semibold text-ink">
+              {editing ? t('importantDates.form.editTitle') : t('importantDates.form.newTitle')}
+            </Text>
             <Button label={t('common.save')} small onPress={handleSave} disabled={saving || !ctx} />
           </View>
 
-          <ScrollView contentContainerStyle={{ padding: 20, gap: 20 }} keyboardShouldPersistTaps="handled">
+          <ScrollView
+            contentContainerStyle={{ padding: 20, gap: 20 }}
+            keyboardShouldPersistTaps="handled"
+          >
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-2">{t('importantDates.form.type')}</Text>
+              <Text className="text-sm font-semibold text-ink-muted mb-2">
+                {t('importantDates.form.type')}
+              </Text>
               <View className="flex-row flex-wrap gap-2">
                 {IMPORTANT_DATE_TYPES.map((value) => (
-                  <TypeChip key={value} type={value} selected={value === type} onPress={() => chooseType(value)} />
+                  <TypeChip
+                    key={value}
+                    type={value}
+                    selected={value === type}
+                    onPress={() => chooseType(value)}
+                  />
                 ))}
               </View>
             </View>
 
             {rules.needsPersonName ? (
               <View>
-                <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.personName')}</Text>
+                <Text className="text-sm font-semibold text-ink-muted mb-1.5">
+                  {t('importantDates.form.personName')}
+                </Text>
                 <TextField
                   value={personName}
                   onChangeText={setPersonName}
@@ -232,7 +288,9 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
               </View>
             ) : (
               <View>
-                <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.title')}</Text>
+                <Text className="text-sm font-semibold text-ink-muted mb-1.5">
+                  {t('importantDates.form.title')}
+                </Text>
                 <TextField
                   value={title}
                   onChangeText={(value) => {
@@ -246,49 +304,66 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
             )}
 
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.date')}</Text>
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">
+                {t('importantDates.form.date')}
+              </Text>
               <DateField label={t('importantDates.form.date')} value={date} onChange={setDate} />
             </View>
 
             {rules.countFirstDayOption ? (
-            <View>
-              <View className="flex-row items-center justify-between">
-                <Text className="flex-1 mr-3 text-base font-medium text-ink">{t('importantDates.form.countFirstDay')}</Text>
-                <Switch value={countFirstDay} onValueChange={setCountFirstDay} />
+              <View>
+                <View className="flex-row items-center justify-between">
+                  <Text className="flex-1 mr-3 text-base font-medium text-ink">
+                    {t('importantDates.form.countFirstDay')}
+                  </Text>
+                  <Switch value={countFirstDay} onValueChange={setCountFirstDay} />
+                </View>
+                <Text className="text-sm leading-5 text-ink-muted mt-1">
+                  {t('importantDates.form.countFirstDayHint')}
+                </Text>
               </View>
-              <Text className="text-sm leading-5 text-ink-muted mt-1">
-                {t('importantDates.form.countFirstDayHint')}
-              </Text>
-            </View>
             ) : null}
 
             {rules.repeatEditable ? (
-            <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.repeat')}</Text>
-              <Segmented<ImportantDateRepeat> value={repeat} onChange={setRepeat} options={repeatOptions} />
-            </View>
+              <View>
+                <Text className="text-sm font-semibold text-ink-muted mb-1.5">
+                  {t('importantDates.form.repeat')}
+                </Text>
+                <Segmented<ImportantDateRepeat>
+                  value={repeat}
+                  onChange={setRepeat}
+                  options={repeatOptions}
+                />
+              </View>
             ) : null}
 
             {rules.pinnable ? (
-            <View>
-              <View className="flex-row items-center justify-between">
-                <Text className="flex-1 mr-3 text-base font-medium text-ink">{t('importantDates.form.feature')}</Text>
-                <Switch value={pinned} onValueChange={setPinned} />
+              <View>
+                <View className="flex-row items-center justify-between">
+                  <Text className="flex-1 mr-3 text-base font-medium text-ink">
+                    {t('importantDates.form.feature')}
+                  </Text>
+                  <Switch value={pinned} onValueChange={setPinned} />
+                </View>
+                {replacing ? (
+                  <Text className="text-sm leading-5 text-ink-muted mt-1">
+                    {t('importantDates.form.replaces', { title: replacing.title })}
+                  </Text>
+                ) : null}
               </View>
-              {replacing ? (
-                <Text className="text-sm leading-5 text-ink-muted mt-1">
-                  {t('importantDates.form.replaces', { title: replacing.title })}
-                </Text>
-              ) : null}
-            </View>
             ) : null}
 
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.alert')}</Text>
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">
+                {t('importantDates.form.alert')}
+              </Text>
               <Segmented<string>
                 value={alert}
                 onChange={setAlert}
-                options={ALERT_OPTIONS.map(({ value, labelKey }) => ({ value, label: t(labelKey) }))}
+                options={ALERT_OPTIONS.map(({ value, labelKey }) => ({
+                  value,
+                  label: t(labelKey),
+                }))}
               />
               <Text className="text-sm leading-5 text-ink-muted mt-2">
                 {t('importantDates.form.alertHint')}
@@ -296,7 +371,9 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
             </View>
 
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.notes')}</Text>
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">
+                {t('importantDates.form.notes')}
+              </Text>
               <TextField
                 value={notes}
                 onChangeText={setNotes}
@@ -307,7 +384,13 @@ export const ImportantDateForm: React.FC<Props> = ({ visible, onClose, item, pin
               />
             </View>
 
-            {editing ? <Button label={t('importantDates.form.delete')} variant="danger" onPress={handleDelete} /> : null}
+            {editing ? (
+              <Button
+                label={t('importantDates.form.delete')}
+                variant="danger"
+                onPress={handleDelete}
+              />
+            ) : null}
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>

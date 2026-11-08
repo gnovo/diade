@@ -1,24 +1,25 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Pressable, Switch, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import {
-  IMPORTANT_DATE_TYPE_RULES,
   daysBetween,
-  parseDateOnly,
-  toDateInputValue,
+  IMPORTANT_DATE_TYPE_RULES,
   type ImportantDate,
   type ImportantDateRepeat,
   type ImportantDateType,
+  parseDateOnly,
+  toDateInputValue,
 } from '@diade/domain';
-import { insertRecord, updateRecord } from '../data/repository';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Alert, Pressable, Switch, Text, View } from 'react-native';
 import {
   ALERT_OPTIONS,
-  IMPORTANT_DATE_TYPE_ICONS,
   composeTitle,
+  IMPORTANT_DATE_TYPE_ICONS,
   importantDateTypeLabel,
 } from '../data/importantDateDisplay';
-import { useFormat } from '../i18n';
+import { insertRecord, updateRecord } from '../data/repository';
 import { Icon, useColor } from '../design';
+import { useFormat } from '../i18n';
 import { BottomSheet } from './BottomSheet';
 import { DateField } from './DateField';
 import { FoldingFooter, StepPager, StepProgress } from './StepPager';
@@ -62,7 +63,9 @@ const TypeTile: React.FC<{ type: ImportantDateType; selected: boolean; onPress: 
       accessibilityState={{ selected }}
       style={{ width: '48.5%' }}
       className={`flex-row items-center gap-2 min-h-[52px] px-3 rounded-lg border ${
-        selected ? 'bg-action border-action' : 'bg-surface border-border-strong active:bg-surface-sunken'
+        selected
+          ? 'bg-action border-action'
+          : 'bg-surface border-border-strong active:bg-surface-sunken'
       }`}
     >
       <Icon name={IMPORTANT_DATE_TYPE_ICONS[type]} size={18} color={selected ? onAction : ink} />
@@ -140,7 +143,11 @@ export const ImportantDateWizard: React.FC<{
     setPinned(false);
     setPersonName('');
     // A named type suggests its own title; trips and "something else" start empty.
-    setTitle(next === 'trip' || next === 'other' || nextRules.needsPersonName ? '' : importantDateTypeLabel(t, next));
+    setTitle(
+      next === 'trip' || next === 'other' || nextRules.needsPersonName
+        ? ''
+        : importantDateTypeLabel(t, next),
+    );
     advanceTimer.current = setTimeout(() => {
       advanceTimer.current = null;
       setStep(2);
@@ -183,12 +190,16 @@ export const ImportantDateWizard: React.FC<{
     try {
       setSaving(true);
       // Only one date can be featured: un-pin the current one first so this device never shows two.
-      if (fields.pinned && pinnedItem) await updateRecord('important_dates', pinnedItem.id, { pinned: false });
+      if (fields.pinned && pinnedItem)
+        await updateRecord('important_dates', pinnedItem.id, { pinned: false });
       await insertRecord('important_dates', ctx, fields);
       onClose();
     } catch (err) {
       setSaving(false);
-      Alert.alert(t('common.couldNotSave'), err instanceof Error ? err.message : t('common.tryAgain'));
+      Alert.alert(
+        t('common.couldNotSave'),
+        err instanceof Error ? err.message : t('common.tryAgain'),
+      );
     }
   };
 
@@ -204,12 +215,16 @@ export const ImportantDateWizard: React.FC<{
             className="flex-row items-center -ml-1 active:opacity-70"
           >
             <Icon name="chevron-left" size={20} color={ink} />
-            <Text className="text-sm font-semibold text-ink">{type ? importantDateTypeLabel(t, type) : ''}</Text>
+            <Text className="text-sm font-semibold text-ink">
+              {type ? importantDateTypeLabel(t, type) : ''}
+            </Text>
           </Pressable>
         ) : (
           <View />
         )}
-        <Text className="text-xs text-ink-muted">{t('importantDates.wizard.step', { step, total: TOTAL_STEPS })}</Text>
+        <Text className="text-xs text-ink-muted">
+          {t('importantDates.wizard.step', { step, total: TOTAL_STEPS })}
+        </Text>
       </View>
       <StepProgress step={step} total={TOTAL_STEPS} />
     </View>
@@ -219,10 +234,17 @@ export const ImportantDateWizard: React.FC<{
 
   const typeStep = (
     <>
-      <Text className="text-title-2 font-bold text-ink mb-4">{t('importantDates.wizard.typeHeading')}</Text>
+      <Text className="text-title-2 font-bold text-ink mb-4">
+        {t('importantDates.wizard.typeHeading')}
+      </Text>
       <View className="flex-row flex-wrap gap-2" accessibilityRole="radiogroup">
         {WIZARD_TYPES.map((value) => (
-          <TypeTile key={value} type={value} selected={value === type} onPress={() => chooseType(value)} />
+          <TypeTile
+            key={value}
+            type={value}
+            selected={value === type}
+            onPress={() => chooseType(value)}
+          />
         ))}
       </View>
     </>
@@ -230,21 +252,31 @@ export const ImportantDateWizard: React.FC<{
 
   const dateStep = (
     <>
-      <Text className="text-title-2 font-bold text-ink mb-4">{t('importantDates.wizard.dateHeading')}</Text>
+      <Text className="text-title-2 font-bold text-ink mb-4">
+        {t('importantDates.wizard.dateHeading')}
+      </Text>
       <DateField label={t('importantDates.form.date')} value={date} onChange={setDate} />
-      {dateHint ? <Text className="text-sm text-ink-muted mt-3 text-center">{dateHint}</Text> : null}
+      {dateHint ? (
+        <Text className="text-sm text-ink-muted mt-3 text-center">{dateHint}</Text>
+      ) : null}
     </>
   );
 
   const detailsStep = rules ? (
     <>
       <Text className="text-title-2 font-bold text-ink mb-4">
-        {t(rules.needsPersonName ? 'importantDates.wizard.whoHeading' : 'importantDates.wizard.nameItHeading')}
+        {t(
+          rules.needsPersonName
+            ? 'importantDates.wizard.whoHeading'
+            : 'importantDates.wizard.nameItHeading',
+        )}
       </Text>
 
       {rules.needsPersonName ? (
         <View className="mb-4">
-          <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.wizard.nameLabel')}</Text>
+          <Text className="text-sm font-semibold text-ink-muted mb-1.5">
+            {t('importantDates.wizard.nameLabel')}
+          </Text>
           <TextField
             value={personName}
             onChangeText={setPersonName}
@@ -255,13 +287,17 @@ export const ImportantDateWizard: React.FC<{
           />
           {personName.trim() && type ? (
             <Text className="text-sm text-ink-muted mt-1.5">
-              {t('importantDates.wizard.shownAs', { title: composeTitle(t, type, { title, personName }) })}
+              {t('importantDates.wizard.shownAs', {
+                title: composeTitle(t, type, { title, personName }),
+              })}
             </Text>
           ) : null}
         </View>
       ) : (
         <View className="mb-4">
-          <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.wizard.titleLabel')}</Text>
+          <Text className="text-sm font-semibold text-ink-muted mb-1.5">
+            {t('importantDates.wizard.titleLabel')}
+          </Text>
           <TextField
             value={title}
             onChangeText={setTitle}
@@ -280,9 +316,13 @@ export const ImportantDateWizard: React.FC<{
       >
         <Text className="flex-1 text-base text-ink mr-3">
           {original ? format.longDate(original) : date}
-          {(rules.repeatEditable ? repeat : rules.repeat) === 'yearly' ? ` · ${t('us.everyYear')}` : ''}
+          {(rules.repeatEditable ? repeat : rules.repeat) === 'yearly'
+            ? ` · ${t('us.everyYear')}`
+            : ''}
         </Text>
-        <Text className="text-sm font-semibold text-action">{t('importantDates.wizard.editDate')}</Text>
+        <Text className="text-sm font-semibold text-action">
+          {t('importantDates.wizard.editDate')}
+        </Text>
       </Pressable>
 
       <Pressable
@@ -292,9 +332,13 @@ export const ImportantDateWizard: React.FC<{
         className="flex-row items-center justify-between min-h-[56px] px-4 rounded-lg border border-border bg-surface active:opacity-70"
       >
         <View className="flex-1 mr-3">
-          <Text className="text-base font-semibold text-ink">{t('importantDates.wizard.moreOptions')}</Text>
+          <Text className="text-base font-semibold text-ink">
+            {t('importantDates.wizard.moreOptions')}
+          </Text>
           {!moreOpen ? (
-            <Text className="text-xs text-ink-muted mt-0.5">{t('importantDates.wizard.moreOptionsHint')}</Text>
+            <Text className="text-xs text-ink-muted mt-0.5">
+              {t('importantDates.wizard.moreOptionsHint')}
+            </Text>
           ) : null}
         </View>
         <Icon name={moreOpen ? 'chevron-up' : 'chevron-down'} size={20} color={inkMuted} />
@@ -304,7 +348,9 @@ export const ImportantDateWizard: React.FC<{
         <View className="mt-4 gap-5">
           {rules.repeatEditable ? (
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.repeat')}</Text>
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">
+                {t('importantDates.form.repeat')}
+              </Text>
               <Segmented<ImportantDateRepeat>
                 value={repeat}
                 onChange={setRepeat}
@@ -318,7 +364,9 @@ export const ImportantDateWizard: React.FC<{
 
           {rules.countFirstDayOption ? (
             <View className="flex-row items-center justify-between">
-              <Text className="flex-1 mr-3 text-base font-medium text-ink">{t('importantDates.form.countFirstDay')}</Text>
+              <Text className="flex-1 mr-3 text-base font-medium text-ink">
+                {t('importantDates.form.countFirstDay')}
+              </Text>
               <Switch value={countFirstDay} onValueChange={setCountFirstDay} />
             </View>
           ) : null}
@@ -326,7 +374,9 @@ export const ImportantDateWizard: React.FC<{
           {rules.pinnable ? (
             <View>
               <View className="flex-row items-center justify-between">
-                <Text className="flex-1 mr-3 text-base font-medium text-ink">{t('importantDates.form.feature')}</Text>
+                <Text className="flex-1 mr-3 text-base font-medium text-ink">
+                  {t('importantDates.form.feature')}
+                </Text>
                 <Switch value={pinned} onValueChange={setPinned} />
               </View>
               {replacing ? (
@@ -338,13 +388,17 @@ export const ImportantDateWizard: React.FC<{
           ) : null}
 
           <View>
-            <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('importantDates.form.alert')}</Text>
+            <Text className="text-sm font-semibold text-ink-muted mb-1.5">
+              {t('importantDates.form.alert')}
+            </Text>
             <Segmented<string>
               value={alert}
               onChange={setAlert}
               options={ALERT_OPTIONS.map(({ value, labelKey }) => ({ value, label: t(labelKey) }))}
             />
-            <Text className="text-sm leading-5 text-ink-muted mt-2">{t('importantDates.form.alertHint')}</Text>
+            <Text className="text-sm leading-5 text-ink-muted mt-2">
+              {t('importantDates.form.alertHint')}
+            </Text>
           </View>
         </View>
       ) : null}
@@ -355,9 +409,17 @@ export const ImportantDateWizard: React.FC<{
     <FoldingFooter open={step > 1} height={FOOTER_HEIGHT}>
       <View className="px-4 pt-2 pb-4">
         {step === 3 ? (
-          <Button label={t('importantDates.wizard.save')} onPress={handleSave} disabled={!canSave} />
+          <Button
+            label={t('importantDates.wizard.save')}
+            onPress={handleSave}
+            disabled={!canSave}
+          />
         ) : (
-          <Button label={t('importantDates.wizard.continue')} onPress={() => setStep(3)} disabled={!original} />
+          <Button
+            label={t('importantDates.wizard.continue')}
+            onPress={() => setStep(3)}
+            disabled={!original}
+          />
         )}
       </View>
     </FoldingFooter>

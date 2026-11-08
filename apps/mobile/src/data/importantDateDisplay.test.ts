@@ -1,9 +1,9 @@
-import { describe, it, expect } from 'vitest';
 import { IMPORTANT_DATE_TYPES } from '@diade/domain';
 import { createI18n, SUPPORTED_LANGUAGES } from '@diade/i18n';
+import { describe, expect, it } from 'vitest';
 import {
-  IMPORTANT_DATE_TYPE_ICONS,
   alertLabel,
+  IMPORTANT_DATE_TYPE_ICONS,
   importantDateTypeLabel,
   statusLabel,
 } from './importantDateDisplay';
@@ -13,7 +13,9 @@ describe('important date display', () => {
     for (const language of SUPPORTED_LANGUAGES) {
       const { t } = createI18n(language);
       for (const type of IMPORTANT_DATE_TYPES) {
-        expect(importantDateTypeLabel(t, type), `${language}/${type}`).not.toMatch(/^importantDates\./);
+        expect(importantDateTypeLabel(t, type), `${language}/${type}`).not.toMatch(
+          /^importantDates\./,
+        );
       }
     }
     for (const type of IMPORTANT_DATE_TYPES) {

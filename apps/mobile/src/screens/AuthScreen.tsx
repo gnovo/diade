@@ -1,17 +1,24 @@
-import React, { useState } from 'react';
-import { View, Text, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
 import type { User } from '@diade/domain';
-import { useAuth } from '../context/AuthContext';
+import type React from 'react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Alert, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { authClient } from '../auth/authClient';
+import { useAuth } from '../context/AuthContext';
 import { Button, Logo } from '../design';
 
 // A root-relative callback is resolved by the Expo plugin for the current runtime: diade:// in a
 // standalone build, exp://<dev-server> in Expo Go. A hardcoded diade:// cannot return to Expo Go.
 const APP_CALLBACK_URL = '/';
 
-const toDomainUser = (u: { id: string; email: string; name: string; image?: string | null; createdAt: Date | string }): User => ({
+const toDomainUser = (u: {
+  id: string;
+  email: string;
+  name: string;
+  image?: string | null;
+  createdAt: Date | string;
+}): User => ({
   id: u.id,
   email: u.email,
   displayName: u.name,
@@ -28,7 +35,10 @@ export const AuthScreen: React.FC = () => {
     try {
       setIsSigningIn(true);
       // Opens Google in the browser; the Expo plugin stores the session when the browser returns.
-      const result = await authClient.signIn.social({ provider: 'google', callbackURL: APP_CALLBACK_URL });
+      const result = await authClient.signIn.social({
+        provider: 'google',
+        callbackURL: APP_CALLBACK_URL,
+      });
       if (result.error) {
         Alert.alert(t('auth.couldNotSignIn'), result.error.message || t('auth.googleNotCompleted'));
         return;
@@ -41,7 +51,8 @@ export const AuthScreen: React.FC = () => {
       }
       await signInWithToken(data.session.token, toDomainUser(data.user));
     } catch (err) {
-      const message = err instanceof Error && err.message ? err.message : t('common.checkConnection');
+      const message =
+        err instanceof Error && err.message ? err.message : t('common.checkConnection');
       Alert.alert(t('auth.couldNotSignIn'), message);
     } finally {
       setIsSigningIn(false);
@@ -60,7 +71,9 @@ export const AuthScreen: React.FC = () => {
 
         <View className="bg-surface rounded-lg p-6 border border-border my-8 gap-5">
           <View className="gap-1">
-            <Text className="text-xl leading-7 font-bold text-ink text-center">{t('auth.welcome')}</Text>
+            <Text className="text-xl leading-7 font-bold text-ink text-center">
+              {t('auth.welcome')}
+            </Text>
             <Text className="text-sm leading-5 text-ink-muted text-center">
               {t('auth.signInPrompt')}
             </Text>
@@ -76,7 +89,9 @@ export const AuthScreen: React.FC = () => {
         </View>
 
         <View className="mb-4 gap-1">
-          <Text className="text-sm leading-5 text-ink-muted text-center">{t('auth.justForTwo')}</Text>
+          <Text className="text-sm leading-5 text-ink-muted text-center">
+            {t('auth.justForTwo')}
+          </Text>
           <Text className="text-sm leading-5 text-ink-muted text-center">
             {t('auth.useInvitedAccount')}
           </Text>

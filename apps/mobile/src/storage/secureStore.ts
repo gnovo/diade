@@ -1,5 +1,5 @@
+import type { Space, User } from '@diade/domain';
 import * as SecureStore from 'expo-secure-store';
-import type { User, Space } from '@diade/domain';
 
 const KEYS = {
   SESSION_TOKEN: 'diade_session_token',
@@ -21,14 +21,6 @@ export async function setSessionToken(token: string): Promise<void> {
     await SecureStore.setItemAsync(KEYS.SESSION_TOKEN, token);
   } catch (error) {
     console.error('Failed to save session token to SecureStore:', error);
-  }
-}
-
-export async function clearSessionToken(): Promise<void> {
-  try {
-    await SecureStore.deleteItemAsync(KEYS.SESSION_TOKEN);
-  } catch (error) {
-    console.error('Failed to delete session token from SecureStore:', error);
   }
 }
 

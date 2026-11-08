@@ -1,11 +1,11 @@
-import React from 'react';
-import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import type React from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useThemeColors } from '../design';
 import { AuthScreen } from '../screens/AuthScreen';
 import { SpaceSetupScreen } from '../screens/SpaceSetupScreen';
 import { TabNavigator } from './TabNavigator';
-import { useThemeColors } from '../design';
 
 export const RootNavigator: React.FC = () => {
   const { user, space, isLoading } = useAuth();
@@ -21,13 +21,7 @@ export const RootNavigator: React.FC = () => {
 
   return (
     <NavigationContainer>
-      {!user ? (
-        <AuthScreen />
-      ) : !space ? (
-        <SpaceSetupScreen />
-      ) : (
-        <TabNavigator />
-      )}
+      {!user ? <AuthScreen /> : !space ? <SpaceSetupScreen /> : <TabNavigator />}
     </NavigationContainer>
   );
 };

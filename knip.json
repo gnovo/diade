@@ -1,0 +1,28 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ignoreDependencies": ["@neon/env", "@babel/plugin-transform-react-jsx"],
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.mjs", "neon.ts"]
+    },
+    "apps/api": {
+      "entry": ["scripts/*.mjs", "src/**/*.test.ts"]
+    },
+    "apps/mobile": {
+      "entry": ["metro.config.js", "plugins/*", "src/**/*.test.{ts,tsx}"],
+      "metro": false
+    },
+    "packages/domain": {
+      "entry": ["src/**/*.test.ts"]
+    },
+    "packages/i18n": {
+      "entry": ["src/**/*.test.ts"]
+    },
+    "packages/validation": {
+      "entry": ["src/**/*.test.ts"]
+    }
+  },
+  "ignoreIssues": {
+    "apps/mobile/src/design/**": ["exports", "types"]
+  }
+}

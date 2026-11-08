@@ -3,12 +3,12 @@
  * outbox inside one transaction, so the UI updates immediately and the change survives
  * an app restart before it has synced.
  */
-import type { SyncEntityName, MutationOperation } from '@diade/domain';
+import type { MutationOperation, SyncEntityName } from '@diade/domain';
 import { parseSyncPayload } from '@diade/validation';
 import { getLocalDb, inTransaction } from '../storage/sqlite';
-import { toColumns, type Row } from './mapping';
-import { newId, nextClientTimestamp } from './ids';
 import { emitDataChanged, emitLocalWrite } from './changes';
+import { newId, nextClientTimestamp } from './ids';
+import { type Row, toColumns } from './mapping';
 
 export const ENTITY_TABLES: Record<SyncEntityName, string> = {
   events: 'local_events',
@@ -98,11 +98,7 @@ export async function insertRecord(
 }
 
 /** Applies a partial update locally and queues an UPDATE carrying only the changed fields. */
-export async function updateRecord(
-  entity: SyncEntityName,
-  id: string,
-  input: Row,
-): Promise<void> {
+export async function updateRecord(entity: SyncEntityName, id: string, input: Row): Promise<void> {
   const changes = validatePayload(entity, 'UPDATE', input);
   const db = await getLocalDb();
   const now = new Date().toISOString();
@@ -129,7 +125,10 @@ export async function updateRecords(
   updates: Array<{ id: string; changes: Row }>,
 ): Promise<void> {
   if (updates.length === 0) return;
-  const prepared = updates.map(({ id, changes }) => ({ id, changes: validatePayload(entity, 'UPDATE', changes) }));
+  const prepared = updates.map(({ id, changes }) => ({
+    id,
+    changes: validatePayload(entity, 'UPDATE', changes),
+  }));
   const now = new Date().toISOString();
 
   await inTransaction(async (db) => {
@@ -183,7 +182,8 @@ export async function writeBatch(ctx: WriteContext, writes: BatchWrite[]): Promi
       const fields = validatePayload(write.entity, 'INSERT', write.input);
       return { ...write, id: write.id ?? newId(), fields };
     }
-    if (write.op === 'update') return { ...write, fields: validatePayload(write.entity, 'UPDATE', write.changes) };
+    if (write.op === 'update')
+      return { ...write, fields: validatePayload(write.entity, 'UPDATE', write.changes) };
     return write;
   });
 
@@ -193,7 +193,9 @@ export async function writeBatch(ctx: WriteContext, writes: BatchWrite[]): Promi
       if (write.op === 'insert') {
         const { columns, values } = toColumns({
           id: write.id,
-          ...(OWNED_ENTITIES.has(write.entity) ? { spaceId: ctx.spaceId, creatorId: ctx.userId } : {}),
+          ...(OWNED_ENTITIES.has(write.entity)
+            ? { spaceId: ctx.spaceId, creatorId: ctx.userId }
+            : {}),
           ...write.fields,
           createdAt: now,
           updatedAt: now,
@@ -212,7 +214,11 @@ export async function writeBatch(ctx: WriteContext, writes: BatchWrite[]): Promi
         );
         await queueMutation(db, write.entity, 'UPDATE', write.id, write.fields);
       } else {
-        await db.runAsync(`UPDATE ${table} SET deleted_at = ?, updated_at = ? WHERE id = ?`, [now, now, write.id]);
+        await db.runAsync(`UPDATE ${table} SET deleted_at = ?, updated_at = ? WHERE id = ?`, [
+          now,
+          now,
+          write.id,
+        ]);
         await queueMutation(db, write.entity, 'DELETE', write.id, {});
       }
     }

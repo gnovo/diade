@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
 import type { ImportantDate } from '@diade/domain';
+import { describe, expect, it } from 'vitest';
 import { upcomingSpecialDates, usStrip } from './usStrip';
 
 // Local-time constructor keeps these tests independent of the machine's timezone.
@@ -40,7 +40,11 @@ describe('upcomingSpecialDates', () => {
   });
 
   it('includes a yearly date by its next occurrence', () => {
-    const list = upcomingSpecialDates([date('birthday', '1990-11-09', { repeat: 'yearly' })], now, 30);
+    const list = upcomingSpecialDates(
+      [date('birthday', '1990-11-09', { repeat: 'yearly' })],
+      now,
+      30,
+    );
     expect(list.map((d) => [d.item.id, d.status.days])).toEqual([['birthday', 3]]);
   });
 });
@@ -58,13 +62,21 @@ describe('usStrip', () => {
   });
 
   it('has no running count for a featured date that is ahead or today', () => {
-    expect(usStrip([date('wedding', '2027-01-01', { pinned: true })], now, 30).featured?.days).toBeNull();
-    expect(usStrip([date('today', '2026-11-06', { pinned: true })], now, 30).featured?.days).toBeNull();
+    expect(
+      usStrip([date('wedding', '2027-01-01', { pinned: true })], now, 30).featured?.days,
+    ).toBeNull();
+    expect(
+      usStrip([date('today', '2026-11-06', { pinned: true })], now, 30).featured?.days,
+    ).toBeNull();
   });
 
   it('picks the next date other than the featured one', () => {
     const strip = usStrip(
-      [date('together', '2026-01-01', { pinned: true }), date('birthday', '2026-11-10'), date('later', '2026-11-30')],
+      [
+        date('together', '2026-01-01', { pinned: true }),
+        date('birthday', '2026-11-10'),
+        date('later', '2026-11-30'),
+      ],
       now,
       30,
     );
@@ -72,14 +84,22 @@ describe('usStrip', () => {
   });
 
   it('does not repeat the featured date as the next one', () => {
-    const strip = usStrip([date('anniversary', '2020-11-08', { repeat: 'yearly', pinned: true })], now, 30);
+    const strip = usStrip(
+      [date('anniversary', '2020-11-08', { repeat: 'yearly', pinned: true })],
+      now,
+      30,
+    );
     expect(strip.featured?.item.id).toBe('anniversary');
     expect(strip.next).toBeNull();
   });
 
   it("leaves other people's dates and trips out of the strip", () => {
     const dates = [
-      date('marta', '2026-11-08', { type: 'their_birthday', personName: 'Marta', repeat: 'yearly' }),
+      date('marta', '2026-11-08', {
+        type: 'their_birthday',
+        personName: 'Marta',
+        repeat: 'yearly',
+      }),
       date('lisbon', '2026-11-09', { type: 'trip' }),
       date('together', '2026-11-12', { type: 'first_day' }),
     ];

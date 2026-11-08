@@ -1,10 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-  parseRecurrenceRule,
-  expandEventOccurrences,
-  startOfLocalDay,
   addLocalDays,
+  expandEventOccurrences,
   isSameLocalDay,
+  parseRecurrenceRule,
+  startOfLocalDay,
 } from './recurrence';
 
 // Local-time constructor keeps these tests independent of the machine's timezone.

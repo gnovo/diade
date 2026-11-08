@@ -6,10 +6,5 @@ export function capitalizeFirst(text: string): string {
 
 /** Lowercases, strips diacritics and collapses whitespace, so "Açúcar " matches "acucar". */
 export function normalizeText(text: string): string {
-  return text
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '')
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim();
+  return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim();
 }

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { trustedOriginsFor, APP_SCHEME, DEV_APP_SCHEME, EXPO_GO_SCHEME } from './index';
+import { describe, expect, it } from 'vitest';
+import { APP_SCHEME, DEV_APP_SCHEME, EXPO_GO_SCHEME, trustedOriginsFor } from './index';
 
 describe('trusted sign-in origins', () => {
   it('trusts only the release app in production', () => {

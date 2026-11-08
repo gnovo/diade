@@ -1,7 +1,7 @@
+import { expo } from '@better-auth/expo';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { bearer } from 'better-auth/plugins';
-import { expo } from '@better-auth/expo';
 import type { DbClient } from '../db';
 import * as schema from '../db/schema';
 
@@ -38,7 +38,9 @@ export function isAllowedEmail(email: string | null | undefined): boolean {
  * release app's scheme, so a development build can never be used to complete a production sign-in.
  */
 export function trustedOriginsFor(env: Pick<AuthEnv, 'ENVIRONMENT'>): string[] {
-  return env.ENVIRONMENT === 'production' ? [APP_SCHEME] : [APP_SCHEME, DEV_APP_SCHEME, EXPO_GO_SCHEME];
+  return env.ENVIRONMENT === 'production'
+    ? [APP_SCHEME]
+    : [APP_SCHEME, DEV_APP_SCHEME, EXPO_GO_SCHEME];
 }
 
 export function createAuth(db: DbClient, env: AuthEnv) {

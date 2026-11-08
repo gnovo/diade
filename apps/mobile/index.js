@@ -1,5 +1,5 @@
-import { registerRootComponent } from 'expo';
 import * as Sentry from '@sentry/react-native';
+import { registerRootComponent } from 'expo';
 import './src/sentry';
 import App from './src/App';
 

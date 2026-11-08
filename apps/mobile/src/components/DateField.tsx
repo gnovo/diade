@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { Platform, Pressable, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { sizes } from '@diade/design-tokens';
 import { parseDateOnly, toDateInputValue } from '@diade/domain';
+import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+import type React from 'react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Platform, Pressable, Text, View } from 'react-native';
 import { Icon, useScheme } from '../design';
 import { useFormat } from '../i18n';
 
@@ -43,7 +44,9 @@ export const DateField: React.FC<{
         onPress={handlePress}
         accessibilityRole="button"
         accessibilityLabel={`${label}, ${display}`}
-        accessibilityHint={Platform.OS === 'ios' ? t('dateField.showHideCalendar') : t('dateField.openCalendar')}
+        accessibilityHint={
+          Platform.OS === 'ios' ? t('dateField.showHideCalendar') : t('dateField.openCalendar')
+        }
         accessibilityState={{ expanded: Platform.OS === 'ios' ? open : undefined }}
         className="flex-row items-center justify-between bg-surface border border-border-strong rounded-md px-3 min-h-[48px]"
       >

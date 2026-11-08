@@ -1,5 +1,4 @@
-import React from 'react';
-import { SvgXml } from 'react-native-svg';
+import { memoryIconSvg, sizes } from '@diade/design-tokens';
 import {
   ArrowLeft,
   Baby,
@@ -15,49 +14,49 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronUp,
+  CircleCheck,
   Clock,
   CloudOff,
   Cross,
   Gem,
   GripVertical,
   Heart,
+  House,
   Image,
   Images,
   Info,
   ListChecks,
+  Lock,
+  type LucideIcon,
   Luggage,
+  MapPin,
+  Minus,
   Monitor,
   Moon,
-  Sun,
-  Lock,
-  MapPin,
   Pencil,
   Pill,
   Pin,
   Plus,
-  Repeat,
   RefreshCw,
+  Repeat,
   Search,
   Settings,
   ShoppingBasket,
   SlidersHorizontal,
-  Utensils,
-  Minus,
   SquareCheck,
   Star,
   StickyNote,
+  Sun,
   Trash,
   TriangleAlert,
   User,
   Users,
-  House,
-  CircleCheck,
+  Utensils,
   X,
-  type LucideIcon,
 } from 'lucide-react-native';
-import { memoryIconSvg } from '@diade/design-tokens';
+import type React from 'react';
+import { SvgXml } from 'react-native-svg';
 import { useColor } from './theme';
-import { sizes } from '@diade/design-tokens';
 
 /** Lucide icons used by Díade, keyed by the handover's names (24px grid, 2px stroke). */
 const lucideIcons = {
@@ -145,11 +144,11 @@ export const Icon: React.FC<IconProps> = ({
 
   if (name === 'memory') {
     const xml = memoryIconSvg.replace(/\{\{ink\}\}/g, tint);
-    return (
-      <SvgXml xml={xml} width={size} height={size} {...a11y} />
-    );
+    return <SvgXml xml={xml} width={size} height={size} {...a11y} />;
   }
 
   const Component = lucideIcons[name];
-  return <Component size={size} color={tint} strokeWidth={strokeWidth} fill={fill ?? 'none'} {...a11y} />;
+  return (
+    <Component size={size} color={tint} strokeWidth={strokeWidth} fill={fill ?? 'none'} {...a11y} />
+  );
 };

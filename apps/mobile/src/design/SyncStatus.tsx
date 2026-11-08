@@ -1,20 +1,52 @@
-import React, { useEffect, useRef } from 'react';
-import { AccessibilityInfo, Animated, Easing, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { Icon, type IconName } from './Icon';
 import { sizes } from '@diade/design-tokens';
+import type React from 'react';
+import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { AccessibilityInfo, Animated, Easing, Text, View } from 'react-native';
+import { Icon, type IconName } from './Icon';
 
 export type SyncState = 'synced' | 'pending' | 'offline' | 'conflict';
 
-const states: Record<SyncState, { container: string; text: string; icon: IconName; word: 'synced' | 'pending' | 'offline' | 'conflict' }> = {
-  synced: { container: 'bg-success-soft', text: 'text-success', icon: 'circle-check', word: 'synced' },
-  pending: { container: 'bg-warning-soft', text: 'text-warning', icon: 'refresh-cw', word: 'pending' },
-  offline: { container: 'bg-surface border border-border', text: 'text-ink-muted', icon: 'cloud-off', word: 'offline' },
-  conflict: { container: 'bg-danger-soft', text: 'text-danger', icon: 'triangle-alert', word: 'conflict' },
+const states: Record<
+  SyncState,
+  {
+    container: string;
+    text: string;
+    icon: IconName;
+    word: 'synced' | 'pending' | 'offline' | 'conflict';
+  }
+> = {
+  synced: {
+    container: 'bg-success-soft',
+    text: 'text-success',
+    icon: 'circle-check',
+    word: 'synced',
+  },
+  pending: {
+    container: 'bg-warning-soft',
+    text: 'text-warning',
+    icon: 'refresh-cw',
+    word: 'pending',
+  },
+  offline: {
+    container: 'bg-surface border border-border',
+    text: 'text-ink-muted',
+    icon: 'cloud-off',
+    word: 'offline',
+  },
+  conflict: {
+    container: 'bg-danger-soft',
+    text: 'text-danger',
+    icon: 'triangle-alert',
+    word: 'conflict',
+  },
 };
 
 /** Turns forever while `active`, unless the system asks to reduce motion. */
-const Spinner: React.FC<{ active: boolean; children: React.ReactNode }> = ({ active, children }) => {
+const Spinner: React.FC<{ active: boolean; children: React.ReactNode }> = ({
+  active,
+  children,
+}) => {
   const turn = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     if (!active) return undefined;
@@ -22,7 +54,14 @@ const Spinner: React.FC<{ active: boolean; children: React.ReactNode }> = ({ act
     let cancelled = false;
     AccessibilityInfo.isReduceMotionEnabled().then((reduce) => {
       if (cancelled || reduce) return;
-      loop = Animated.loop(Animated.timing(turn, { toValue: 1, duration: 1000, easing: Easing.linear, useNativeDriver: true }));
+      loop = Animated.loop(
+        Animated.timing(turn, {
+          toValue: 1,
+          duration: 1000,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+      );
       loop.start();
     });
     return () => {

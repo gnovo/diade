@@ -1,15 +1,15 @@
-import { useColorScheme as useNativeWindScheme } from 'react-native-css-interop';
 import {
+  type ColorToken,
   colorsDark,
   colorsLight,
   radius,
   shadows,
   sizes,
   space,
-  typography,
-  type ColorToken,
   type TypographyStyle,
+  typography,
 } from '@diade/design-tokens';
+import { useColorScheme as useNativeWindScheme } from 'react-native-css-interop';
 
 export type Scheme = 'light' | 'dark';
 
@@ -31,5 +31,5 @@ export function useShadow(name: 'shadowSm' | 'shadowMd' | 'shadowLg') {
   return shadows[useScheme()][name];
 }
 
-export { radius, sizes, space, typography };
 export type { ColorToken, TypographyStyle };
+export { radius, sizes, space, typography };

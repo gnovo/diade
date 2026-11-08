@@ -1,23 +1,28 @@
 import { describe, expect, it } from 'vitest';
-import type { Recipe, RecipeIngredient, RecipeUnit } from './recipes';
 import {
   buildGroceryList,
   defaultPlanPeriod,
   diffPlanAgainstList,
+  type GroceryRow,
   groceryAmount,
   ingredientMatchKey,
   isEmptyDiff,
   missingStaples,
+  type PlanListItem,
   periodChoice,
   pickCurrentPlan,
   singularWord,
   weekPeriod,
-  type GroceryRow,
-  type PlanListItem,
 } from './mealPlan';
+import type { Recipe, RecipeIngredient, RecipeUnit } from './recipes';
 
 let counter = 0;
-const ing = (name: string, quantity: number | null, unit: RecipeUnit = 'g', staple = false): RecipeIngredient => ({
+const ing = (
+  name: string,
+  quantity: number | null,
+  unit: RecipeUnit = 'g',
+  staple = false,
+): RecipeIngredient => ({
   id: `i${++counter}`,
   name,
   quantity,
@@ -231,7 +236,11 @@ describe('buildGroceryList: merging', () => {
 });
 
 describe('buildGroceryList: staples', () => {
-  const a = recipe('a', 1, [ing('Pasta', 200), ing('Salt', null, 'unit', true), ing('Olive oil', 2, 'tbsp', true)]);
+  const a = recipe('a', 1, [
+    ing('Pasta', 200),
+    ing('Salt', null, 'unit', true),
+    ing('Olive oil', 2, 'tbsp', true),
+  ]);
   const b = recipe('b', 1, [ing('Olive oil', 1, 'tbsp', true), ing('Butter', 20)]);
   const entries = [
     { recipeId: 'a', servings: 1 },
@@ -298,7 +307,9 @@ describe('diffPlanAgainstList', () => {
     const items = generate([both[0]]);
     const diff = diffPlanAgainstList(buildGroceryList(both, [pasta, salad]), items);
     expect(diff.added.map((r) => r.name)).toEqual(['Lettuce']);
-    expect(diff.changed.map((c) => [c.item.name, c.from, c.to])).toEqual([['Tomato', '400 g', '500 g']]);
+    expect(diff.changed.map((c) => [c.item.name, c.from, c.to])).toEqual([
+      ['Tomato', '400 g', '500 g'],
+    ]);
   });
 
   it('scales a row when servings go up', () => {
@@ -314,7 +325,9 @@ describe('diffPlanAgainstList', () => {
   it("subtracts only a removed recipe's share and removes a row that reaches zero", () => {
     const items = generate();
     const diff = diffPlanAgainstList(buildGroceryList([both[0]], [pasta, salad]), items);
-    expect(diff.changed.map((c) => [c.item.name, c.from, c.to])).toEqual([['Tomato', '500 g', '400 g']]);
+    expect(diff.changed.map((c) => [c.item.name, c.from, c.to])).toEqual([
+      ['Tomato', '500 g', '400 g'],
+    ]);
     expect(diff.removed.map((i) => i.name)).toEqual(['Lettuce']);
     expect(diff.added).toEqual([]);
   });
@@ -329,7 +342,9 @@ describe('diffPlanAgainstList', () => {
   });
 
   it('keeps a hand-edited row whose recipe was removed, with no row to compare to', () => {
-    const items = generate().map((i) => (i.name === 'Lettuce' ? { ...i, quantity: '3', editedByHand: true } : i));
+    const items = generate().map((i) =>
+      i.name === 'Lettuce' ? { ...i, quantity: '3', editedByHand: true } : i,
+    );
     const diff = diffPlanAgainstList(buildGroceryList([both[0]], [pasta, salad]), items);
     expect(diff.removed).toEqual([]);
     expect(diff.kept).toEqual([{ item: expect.objectContaining({ name: 'Lettuce' }), row: null }]);
@@ -346,14 +361,21 @@ describe('diffPlanAgainstList', () => {
     const other = recipe('c', 2, [ing('Tomato', 400)]);
     const items = generate([both[0]]);
     // Recipe a is replaced by c, which asks for the same amount of the same thing.
-    const diff = diffPlanAgainstList(buildGroceryList([{ recipeId: 'c', servings: 2 }], [pasta, other]), items);
+    const diff = diffPlanAgainstList(
+      buildGroceryList([{ recipeId: 'c', servings: 2 }], [pasta, other]),
+      items,
+    );
     expect(diff.refreshed.map((r) => r.item.name)).toEqual(['Tomato']);
     expect(diff.removed.map((r) => r.name)).toEqual(['Pasta']);
     expect(isEmptyDiff({ ...diff, removed: [] })).toBe(true);
   });
 
   it('treats a staple the member added by hand as wanted, and does not add the others', () => {
-    const withStaples = recipe('s', 1, [ing('Rice', 100), ing('Salt', 1, 'tsp', true), ing('Pepper', 1, 'tsp', true)]);
+    const withStaples = recipe('s', 1, [
+      ing('Rice', 100),
+      ing('Salt', 1, 'tsp', true),
+      ing('Pepper', 1, 'tsp', true),
+    ]);
     const build = buildGroceryList([{ recipeId: 's', servings: 1 }], [withStaples]);
     const salt = build.staples.find((r) => r.name === 'Salt')!;
     const onList: PlanListItem[] = [
@@ -385,23 +407,38 @@ describe('plan periods', () => {
 
   it('defaults to the Monday on or after today', () => {
     expect(defaultPlanPeriod(wednesday)).toEqual({ startsOn: '2026-11-09', endsOn: '2026-11-15' });
-    expect(defaultPlanPeriod(new Date(2026, 10, 8))).toEqual({ startsOn: '2026-11-09', endsOn: '2026-11-15' }); // Sunday
-    expect(defaultPlanPeriod(new Date(2026, 10, 9))).toEqual({ startsOn: '2026-11-09', endsOn: '2026-11-15' }); // Monday
+    expect(defaultPlanPeriod(new Date(2026, 10, 8))).toEqual({
+      startsOn: '2026-11-09',
+      endsOn: '2026-11-15',
+    }); // Sunday
+    expect(defaultPlanPeriod(new Date(2026, 10, 9))).toEqual({
+      startsOn: '2026-11-09',
+      endsOn: '2026-11-15',
+    }); // Monday
   });
 
   it('crosses month and year ends', () => {
-    expect(weekPeriod(new Date(2026, 11, 30))).toEqual({ startsOn: '2026-12-28', endsOn: '2027-01-03' });
+    expect(weekPeriod(new Date(2026, 11, 30))).toEqual({
+      startsOn: '2026-12-28',
+      endsOn: '2027-01-03',
+    });
   });
 
   it('names the quick choices', () => {
     expect(periodChoice(weekPeriod(wednesday), wednesday)).toBe('thisWeek');
     expect(periodChoice(weekPeriod(wednesday, 1), wednesday)).toBe('nextWeek');
-    expect(periodChoice({ startsOn: '2026-11-04', endsOn: '2026-11-10' }, wednesday)).toBe('custom');
+    expect(periodChoice({ startsOn: '2026-11-04', endsOn: '2026-11-10' }, wednesday)).toBe(
+      'custom',
+    );
   });
 });
 
 describe('pickCurrentPlan', () => {
-  const plan = (startsOn: string, endsOn: string, deletedAt: string | null = null) => ({ startsOn, endsOn, deletedAt });
+  const plan = (startsOn: string, endsOn: string, deletedAt: string | null = null) => ({
+    startsOn,
+    endsOn,
+    deletedAt,
+  });
   const today = new Date(2026, 10, 4);
 
   it('prefers the plan running today, then the next to start, then the latest that ended', () => {

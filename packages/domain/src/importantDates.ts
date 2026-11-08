@@ -213,7 +213,8 @@ export function completedYears(item: Pick<ImportantDateTiming, 'date'>, on: Date
   const original = parseDateOnly(item.date);
   if (!original) return null;
   let years = on.getFullYear() - original.getFullYear();
-  if (anniversaryInYear(original, on.getFullYear()).getTime() > startOfLocalDay(on).getTime()) years -= 1;
+  if (anniversaryInYear(original, on.getFullYear()).getTime() > startOfLocalDay(on).getTime())
+    years -= 1;
   return years < 0 ? null : years;
 }
 

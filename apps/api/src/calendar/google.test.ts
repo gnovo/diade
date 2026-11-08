@@ -1,5 +1,10 @@
-import { describe, it, expect, vi } from 'vitest';
-import { GoogleApiError, GoogleAuthError, createGoogleClient, refreshGoogleAccessToken } from './google';
+import { describe, expect, it, vi } from 'vitest';
+import {
+  createGoogleClient,
+  GoogleApiError,
+  GoogleAuthError,
+  refreshGoogleAccessToken,
+} from './google';
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -20,7 +25,10 @@ describe('createGoogleClient', () => {
     const fetchFn = vi.fn().mockImplementation(async () => json({ items: [] }));
     const client = createGoogleClient(async () => 'tok', fetchFn);
 
-    await client.listEvents('me@x.com', { timeMin: new Date('2026-10-01T00:00:00Z'), timeMax: new Date('2027-10-01T00:00:00Z') });
+    await client.listEvents('me@x.com', {
+      timeMin: new Date('2026-10-01T00:00:00Z'),
+      timeMax: new Date('2027-10-01T00:00:00Z'),
+    });
     const full = new URL(String(fetchFn.mock.calls[0]![0]));
     expect(full.pathname).toBe('/calendar/v3/calendars/me%40x.com/events');
     expect(full.searchParams.get('timeMin')).toBe('2026-10-01T00:00:00.000Z');
@@ -44,7 +52,9 @@ describe('createGoogleClient', () => {
 
     await client.listEvents('c', {});
     expect(getToken).toHaveBeenNthCalledWith(2, true);
-    expect((fetchFn.mock.calls[1]![1] as RequestInit).headers).toMatchObject({ Authorization: 'Bearer fresh' });
+    expect((fetchFn.mock.calls[1]![1] as RequestInit).headers).toMatchObject({
+      Authorization: 'Bearer fresh',
+    });
   });
 
   it('gives up with an auth error when the refreshed token is also rejected', async () => {
@@ -55,12 +65,16 @@ describe('createGoogleClient', () => {
   });
 
   it('flags 410 Gone and rate limiting', async () => {
-    const gone = createGoogleClient(async () => 't', async () => json({ error: { message: 'Gone' } }, 410));
+    const gone = createGoogleClient(
+      async () => 't',
+      async () => json({ error: { message: 'Gone' } }, 410),
+    );
     await expect(gone.listEvents('c', { syncToken: 'x' })).rejects.toMatchObject({ isGone: true });
 
     const limited = createGoogleClient(
       async () => 't',
-      async () => json({ error: { message: 'slow down', errors: [{ reason: 'rateLimitExceeded' }] } }, 403),
+      async () =>
+        json({ error: { message: 'slow down', errors: [{ reason: 'rateLimitExceeded' }] } }, 403),
     );
     const err = await limited.listEvents('c', {}).catch((e) => e);
     expect(err).toBeInstanceOf(GoogleApiError);

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { formatQuantity, parseQuantity } from './parseQuantity';
 
 describe('parseQuantity', () => {
@@ -23,7 +23,11 @@ describe('parseQuantity', () => {
   it('leaves names that merely contain digits alone', () => {
     expect(parseQuantity('7up')).toEqual({ name: '7up', quantity: null, unit: null });
     expect(parseQuantity('2% milk')).toEqual({ name: '2% milk', quantity: null, unit: null });
-    expect(parseQuantity('vitamin B12')).toEqual({ name: 'vitamin B12', quantity: null, unit: null });
+    expect(parseQuantity('vitamin B12')).toEqual({
+      name: 'vitamin B12',
+      quantity: null,
+      unit: null,
+    });
   });
 
   it('keeps a bare number as the name', () => {

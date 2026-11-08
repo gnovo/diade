@@ -1,4 +1,5 @@
-import React, { useLayoutEffect, useRef } from 'react';
+import type React from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { Animated, Easing, type StyleProp, type ViewStyle } from 'react-native';
 
 const DURATION_MS = 260;
@@ -21,6 +22,7 @@ export const ViewTransition: React.FC<{
   dir.current = direction;
 
   // Layout effect, so the new content never shows at full opacity for a frame before it fades in.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: transitionKey is the trigger that restarts the animation
   useLayoutEffect(() => {
     if (first.current) {
       first.current = false;
@@ -41,7 +43,14 @@ export const ViewTransition: React.FC<{
         style,
         {
           opacity: progress,
-          transform: [{ translateX: progress.interpolate({ inputRange: [0, 1], outputRange: [dir.current * SLIDE_PX, 0] }) }],
+          transform: [
+            {
+              translateX: progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [dir.current * SLIDE_PX, 0],
+              }),
+            },
+          ],
         },
       ]}
     >

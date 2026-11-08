@@ -1,29 +1,30 @@
-import React, { useMemo, useState } from 'react';
-import { Alert, Pressable, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { formatCompactRange, formatDateRange } from '@diade/i18n';
 import {
   buildGroceryList,
   clampServings,
   defaultPlanPeriod,
+  type MealPlan,
+  type MealPlanRecipe,
   parseDateOnly,
   periodChoice,
   pickCurrentPlan,
-  weekPeriod,
-  type MealPlan,
-  type MealPlanRecipe,
   type Recipe,
   type SharedList,
+  weekPeriod,
 } from '@diade/domain';
+import { formatCompactRange, formatDateRange } from '@diade/i18n';
+import type React from 'react';
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Alert, Pressable, Text, View } from 'react-native';
+import { generateGroceryList } from '../data/mealPlanActions';
 import { getActiveMealPlans } from '../data/queries';
 import { deleteRecord, insertRecord, updateRecord } from '../data/repository';
-import { generateGroceryList } from '../data/mealPlanActions';
 import { useLiveQuery } from '../data/useLiveQuery';
 import { Icon } from '../design';
 import { DateField } from './DateField';
 import { FilterChips } from './FilterChips';
-import { RecipePicker } from './RecipePicker';
 import { Stepper } from './RecipeForm';
+import { RecipePicker } from './RecipePicker';
 import { Button, Card, EmptyState, SectionLabel, useWriteContext } from './ui';
 
 type PeriodChoice = 'thisWeek' | 'nextWeek' | 'custom';
@@ -57,12 +58,17 @@ export const PlanView: React.FC<{
   const plan = plans.data.find((p) => p.id === selectedId) ?? pickCurrentPlan(plans.data, today);
   const others = plans.data.filter((p) => p.id !== plan?.id);
   const recipeById = useMemo(() => new Map(recipes.map((r) => [r.id, r])), [recipes]);
-  const build = useMemo(() => (plan ? buildGroceryList(plan.recipes, recipes) : null), [plan, recipes]);
+  const build = useMemo(
+    () => (plan ? buildGroceryList(plan.recipes, recipes) : null),
+    [plan, recipes],
+  );
 
   const rangeText = (p: MealPlan, compact = false) => {
     const dates = planDates(p);
     if (!dates) return '';
-    return compact ? formatCompactRange(t, dates.from, dates.to) : formatDateRange(t, dates.from, dates.to);
+    return compact
+      ? formatCompactRange(t, dates.from, dates.to)
+      : formatDateRange(t, dates.from, dates.to);
   };
 
   const fail = (title: string) => (err: unknown) =>
@@ -71,7 +77,10 @@ export const PlanView: React.FC<{
   const createPlan = async () => {
     if (!ctx) return;
     try {
-      const id = await insertRecord('meal_plans', ctx, { ...defaultPlanPeriod(today), recipes: [] });
+      const id = await insertRecord('meal_plans', ctx, {
+        ...defaultPlanPeriod(today),
+        recipes: [],
+      });
       setSelectedId(id);
       setCustomOpen(false);
     } catch (err) {
@@ -178,13 +187,17 @@ export const PlanView: React.FC<{
               <DateField
                 label={t('plan.to')}
                 value={plan.endsOn}
-                onChange={(endsOn) => save(plan, endsOn < plan.startsOn ? { startsOn: endsOn, endsOn } : { endsOn })}
+                onChange={(endsOn) =>
+                  save(plan, endsOn < plan.startsOn ? { startsOn: endsOn, endsOn } : { endsOn })
+                }
               />
             </View>
           </View>
         </Card>
       ) : null}
-      <Text className="text-sm text-ink-muted mb-3">{t('plan.poolHint', { range: rangeText(plan) })}</Text>
+      <Text className="text-sm text-ink-muted mb-3">
+        {t('plan.poolHint', { range: rangeText(plan) })}
+      </Text>
 
       <SectionLabel>{t('plan.recipesHeading')}</SectionLabel>
       {plan.recipes.length === 0 ? (
@@ -196,7 +209,10 @@ export const PlanView: React.FC<{
         const recipe = recipeById.get(entry.recipeId);
         const name = recipe?.name ?? t('plan.recipeGone');
         return (
-          <View key={entry.recipeId} className="bg-surface rounded-2xl p-4 border border-border mb-3">
+          <View
+            key={entry.recipeId}
+            className="bg-surface rounded-2xl p-4 border border-border mb-3"
+          >
             <View className="flex-row items-center">
               <View className="flex-1 mr-2">
                 <Text className="text-base font-semibold text-ink">{name}</Text>
@@ -227,7 +243,11 @@ export const PlanView: React.FC<{
       })}
       {recipes.length > 0 ? (
         <View className="mb-4">
-          <Button label={t('plan.addRecipes')} variant="ghost" onPress={() => setPickerOpen(true)} />
+          <Button
+            label={t('plan.addRecipes')}
+            variant="ghost"
+            onPress={() => setPickerOpen(true)}
+          />
         </View>
       ) : null}
 
@@ -241,12 +261,20 @@ export const PlanView: React.FC<{
             </>
           ) : (
             <>
-              <Text className="text-base font-semibold text-ink">{t('plan.toBuy', { count: toBuy })}</Text>
+              <Text className="text-base font-semibold text-ink">
+                {t('plan.toBuy', { count: toBuy })}
+              </Text>
               {staples > 0 ? (
-                <Text className="text-sm text-ink-muted mt-0.5">{t('plan.staplesLeftOut', { count: staples })}</Text>
+                <Text className="text-sm text-ink-muted mt-0.5">
+                  {t('plan.staplesLeftOut', { count: staples })}
+                </Text>
               ) : null}
               <View className="mt-3">
-                <Button label={t('plan.makeList')} onPress={() => makeList(plan)} disabled={busy || toBuy === 0} />
+                <Button
+                  label={t('plan.makeList')}
+                  onPress={() => makeList(plan)}
+                  disabled={busy || toBuy === 0}
+                />
               </View>
             </>
           )}

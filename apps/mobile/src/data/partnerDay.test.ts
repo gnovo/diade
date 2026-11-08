@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
 import type { ExternalCalendar, ExternalEvent, Task } from '@diade/domain';
+import { describe, expect, it } from 'vitest';
 import { partnerDay } from './partnerDay';
 
 const ME = 'me';
@@ -72,7 +72,14 @@ const external = (over: Partial<ExternalEvent> = {}): ExternalEvent => ({
 });
 
 const run = (tasks: Task[] = [], externalEvents: ExternalEvent[] = []) =>
-  partnerDay({ tasks, externalEvents, externalCalendars: [calendar], userId: ME, partnerId: SOFIA, now: NOW });
+  partnerDay({
+    tasks,
+    externalEvents,
+    externalCalendars: [calendar],
+    userId: ME,
+    partnerId: SOFIA,
+    now: NOW,
+  });
 
 describe('partnerDay tasks', () => {
   it('keeps only open tasks assigned to the partner alone', () => {
@@ -105,8 +112,11 @@ describe('partnerDay tasks', () => {
 });
 
 describe('partnerDay events', () => {
-  it('shows only the partner\'s Google events, not mine', () => {
-    const result = run([], [external({ id: 'hers' }), external({ id: 'mine', userId: ME, calendarId: 'cal-me' })]);
+  it("shows only the partner's Google events, not mine", () => {
+    const result = run(
+      [],
+      [external({ id: 'hers' }), external({ id: 'mine', userId: ME, calendarId: 'cal-me' })],
+    );
     expect(result.events.map((e) => e.event.id)).toEqual(['hers']);
   });
 
@@ -118,18 +128,33 @@ describe('partnerDay events', () => {
   });
 
   it('drops events that already ended today and counts what is left today', () => {
-    const result = run([], [
-      external({ id: 'over', startAt: at(11, 6, 9), endAt: at(11, 6, 10) }),
-      external({ id: 'tonight', startAt: at(11, 6, 18), endAt: at(11, 6, 19) }),
-      external({ id: 'tomorrow', startAt: at(11, 7, 9), endAt: at(11, 7, 10) }),
-      external({ id: 'nextweek', startAt: at(11, 13, 9), endAt: at(11, 13, 10) }),
-    ]);
+    const result = run(
+      [],
+      [
+        external({ id: 'over', startAt: at(11, 6, 9), endAt: at(11, 6, 10) }),
+        external({ id: 'tonight', startAt: at(11, 6, 18), endAt: at(11, 6, 19) }),
+        external({ id: 'tomorrow', startAt: at(11, 7, 9), endAt: at(11, 7, 10) }),
+        external({ id: 'nextweek', startAt: at(11, 13, 9), endAt: at(11, 13, 10) }),
+      ],
+    );
     expect(result.events.map((e) => e.event.id)).toEqual(['tonight', 'tomorrow']);
     expect(result.eventsToday).toBe(1);
   });
 
   it('keeps an all-day event for the whole day', () => {
-    const result = run([], [external({ id: 'holiday', isAllDay: true, startAt: null, endAt: null, startDate: '2026-11-06', endDate: '2026-11-06' })]);
+    const result = run(
+      [],
+      [
+        external({
+          id: 'holiday',
+          isAllDay: true,
+          startAt: null,
+          endAt: null,
+          startDate: '2026-11-06',
+          endDate: '2026-11-06',
+        }),
+      ],
+    );
     expect(result.events.map((e) => e.event.id)).toEqual(['holiday']);
     expect(result.eventsToday).toBe(1);
   });

@@ -1,25 +1,46 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  ScrollView,
-  Text,
-  View,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-  type ScrollViewInstance,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
+import { space } from '@diade/design-tokens';
 import {
   addLocalDays,
-  isSameLocalDay,
-  isThirdPartyDate,
-  startOfLocalDay,
   type CalendarEvent,
   type ExternalCalendar,
   type ExternalEvent,
   type ImportantDate,
+  isSameLocalDay,
+  isThirdPartyDate,
+  startOfLocalDay,
   type Task,
 } from '@diade/domain';
+import type React from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  ScrollView,
+  type ScrollViewInstance,
+  Text,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  dayKey,
+  firstOfMonth,
+  isSameMonth,
+  monthGridStart,
+  shiftMonth,
+} from '../calendar/monthGrid';
+import { CALENDAR_VIEWS, type CalendarView, useCalendarPrefs } from '../calendar/prefs';
+import { weekDays } from '../calendar/timeGrid';
+import { useNeedsCalendarSetup } from '../calendar/useCalendarSetup';
+import { AgendaRow } from '../components/AgendaRow';
+import { CalendarFiltersSheet, hasActiveFilters } from '../components/CalendarFiltersSheet';
+import { CalendarHeader } from '../components/CalendarHeader';
+import { EventForm } from '../components/EventForm';
+import { ExternalEventDetail } from '../components/ExternalEventDetail';
+import { MonthView } from '../components/MonthView';
+import { TimeGrid } from '../components/TimeGrid';
+import { Button, Card, EmptyState } from '../components/ui';
+import { ViewTransition } from '../components/ViewTransition';
 import { useAuth } from '../context/AuthContext';
 import {
   getActiveEvents,
@@ -29,24 +50,9 @@ import {
   getExternalEvents,
 } from '../data/queries';
 import { updateRecord } from '../data/repository';
-import { buildUnifiedAgenda, type AgendaEntry, type GoogleScope } from '../data/unifiedAgenda';
+import { type AgendaEntry, buildUnifiedAgenda, type GoogleScope } from '../data/unifiedAgenda';
 import { useLiveQuery } from '../data/useLiveQuery';
-import { useCalendarPrefs } from '../calendar/prefs';
-import { useNeedsCalendarSetup } from '../calendar/useCalendarSetup';
 import { useFormat } from '../i18n';
-import { AgendaRow } from '../components/AgendaRow';
-import { EventForm } from '../components/EventForm';
-import { ExternalEventDetail } from '../components/ExternalEventDetail';
-import { Button, Card, EmptyState } from '../components/ui';
-import { CalendarHeader } from '../components/CalendarHeader';
-import { MonthView } from '../components/MonthView';
-import { TimeGrid } from '../components/TimeGrid';
-import { ViewTransition } from '../components/ViewTransition';
-import { weekDays } from '../calendar/timeGrid';
-import { CALENDAR_VIEWS, type CalendarView } from '../calendar/prefs';
-import { dayKey, firstOfMonth, isSameMonth, monthGridStart, shiftMonth } from '../calendar/monthGrid';
-import { space } from '@diade/design-tokens';
-import { CalendarFiltersSheet, hasActiveFilters } from '../components/CalendarFiltersSheet';
 import { CalendarSettingsScreen } from './CalendarSettingsScreen';
 
 const AGENDA_DAYS = 60;
@@ -98,10 +104,10 @@ export const CalendarScreen: React.FC = () => {
     hiddenCalendarIds: prefs.hiddenCalendarIds,
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `today` changes only at midnight; the data and the filters are the real dependencies
   const agenda = useMemo(
     () => buildUnifiedAgenda({ ...agendaInput, from: today, to: addLocalDays(today, AGENDA_DAYS) }),
     // `today` changes only at midnight; the data and the filters are the real dependencies.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       events.data,
       externalEvents.data,
@@ -124,6 +130,7 @@ export const CalendarScreen: React.FC = () => {
   );
 
   // What the month grid or the day/week columns need, by day. Schedule builds its own list above.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `today` changes only at midnight; the agenda inputs and view bounds are the real dependencies
   const entriesByDay = useMemo(() => {
     const map = new Map<string, AgendaEntry[]>();
     let from: Date;
@@ -140,7 +147,6 @@ export const CalendarScreen: React.FC = () => {
     const built = buildUnifiedAgenda({ ...agendaInput, from, to: addLocalDays(from, days), today });
     for (const group of built.days) map.set(dayKey(group.day), group.entries);
     return map;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     prefs.view,
     month,
@@ -157,7 +163,8 @@ export const CalendarScreen: React.FC = () => {
     today.getTime(),
   ]);
 
-  const partnerFirstName = members.find((m) => m.userId !== userId)?.displayName.split(' ')[0] ?? t('common.partner');
+  const partnerFirstName =
+    members.find((m) => m.userId !== userId)?.displayName.split(' ')[0] ?? t('common.partner');
   const partnerName = (id: string | null) => {
     if (id === null) return t('common.both');
     if (id === userId) return t('common.me');
@@ -179,7 +186,12 @@ export const CalendarScreen: React.FC = () => {
 
   const connected = externalCalendars.data.length > 0;
   const needsSetup = useNeedsCalendarSetup(connected, settingsOpen);
-  const filtersActive = hasActiveFilters(prefs.googleScope, prefs.hiddenCalendarIds, externalCalendars.data, prefs.showOthersDates);
+  const filtersActive = hasActiveFilters(
+    prefs.googleScope,
+    prefs.hiddenCalendarIds,
+    externalCalendars.data,
+    prefs.showOthersDates,
+  );
 
   const scopeOptions: Array<{ value: GoogleScope; label: string }> = [
     { value: 'both', label: t('calendar.scopeBoth') },
@@ -265,25 +277,37 @@ export const CalendarScreen: React.FC = () => {
     month: [t('calendar.prevMonth'), t('calendar.nextMonth')],
   };
   const titleDate =
-    prefs.view === 'month' ? month : prefs.view === 'schedule' ? scheduleMonth : timeDays[Math.min(3, timeDays.length - 1)]!;
-  const periodKey = prefs.view === 'schedule' ? '' : dayKey(prefs.view === 'month' ? month : timeDays[0]!);
+    prefs.view === 'month'
+      ? month
+      : prefs.view === 'schedule'
+        ? scheduleMonth
+        : timeDays[Math.min(3, timeDays.length - 1)]!;
+  const periodKey =
+    prefs.view === 'schedule' ? '' : dayKey(prefs.view === 'month' ? month : timeDays[0]!);
 
   const topBlock = () => (
     <>
-        {!connected ? (
-          <Card>
-            <Text className="text-base font-semibold text-ink mb-1">{t('googleCalendar.introTitle')}</Text>
-            <Text className="text-sm leading-5 text-ink-muted mb-3">{t('googleCalendar.manageNote')}</Text>
-            <Button label={t('googleCalendar.open')} variant="ghost" onPress={() => setSettingsOpen(true)} />
-          </Card>
-        ) : needsSetup ? (
-          <Card>
-            <Text className="text-base font-semibold text-ink mb-1">{t('calendar.setupTitle')}</Text>
-            <Text className="text-sm leading-5 text-ink-muted mb-3">{t('calendar.setupBody')}</Text>
-            <Button label={t('calendar.setupAction')} onPress={() => setSettingsOpen(true)} />
-          </Card>
-        ) : null}
-
+      {!connected ? (
+        <Card>
+          <Text className="text-base font-semibold text-ink mb-1">
+            {t('googleCalendar.introTitle')}
+          </Text>
+          <Text className="text-sm leading-5 text-ink-muted mb-3">
+            {t('googleCalendar.manageNote')}
+          </Text>
+          <Button
+            label={t('googleCalendar.open')}
+            variant="ghost"
+            onPress={() => setSettingsOpen(true)}
+          />
+        </Card>
+      ) : needsSetup ? (
+        <Card>
+          <Text className="text-base font-semibold text-ink mb-1">{t('calendar.setupTitle')}</Text>
+          <Text className="text-sm leading-5 text-ink-muted mb-3">{t('calendar.setupBody')}</Text>
+          <Button label={t('calendar.setupAction')} onPress={() => setSettingsOpen(true)} />
+        </Card>
+      ) : null}
     </>
   );
 
@@ -300,11 +324,17 @@ export const CalendarScreen: React.FC = () => {
         onNext={() => shift(1)}
         showToday={showToday}
         onToday={goToday}
-        showFilters={(connected && !needsSetup) || specialDates.data.some((d) => isThirdPartyDate(d.type))}
+        showFilters={
+          (connected && !needsSetup) || specialDates.data.some((d) => isThirdPartyDate(d.type))
+        }
         filtersActive={filtersActive}
         onOpenFilters={() => setFiltersOpen(true)}
       />
-      <ViewTransition transitionKey={`${prefs.view}:${periodKey}`} direction={direction.current} style={{ flex: 1 }}>
+      <ViewTransition
+        transitionKey={`${prefs.view}:${periodKey}`}
+        direction={direction.current}
+        style={{ flex: 1 }}
+      >
         {isTime ? (
           <View className="flex-1">
             <View className="px-4 pt-1">{topBlock()}</View>
@@ -326,7 +356,11 @@ export const CalendarScreen: React.FC = () => {
             ref={scrollRef}
             onScroll={isMonth ? undefined : onScroll}
             scrollEventThrottle={32}
-            contentContainerStyle={{ paddingHorizontal: space[4], paddingTop: space[2], paddingBottom: space[8] }}
+            contentContainerStyle={{
+              paddingHorizontal: space[4],
+              paddingTop: space[2],
+              paddingBottom: space[8],
+            }}
             keyboardShouldPersistTaps="handled"
           >
             {topBlock()}
@@ -351,12 +385,19 @@ export const CalendarScreen: React.FC = () => {
               <>
                 {agenda.overdue.length > 0 ? (
                   <View className="mb-5">
-                    <Text className="text-sm font-bold text-ink uppercase tracking-wider mb-2">{t('calendar.overdue')}</Text>
+                    <Text className="text-sm font-bold text-ink uppercase tracking-wider mb-2">
+                      {t('calendar.overdue')}
+                    </Text>
                     <View className="bg-surface rounded-2xl border border-border-strong overflow-hidden">
                       {agenda.overdue.map((task, index) => (
                         <View key={task.id} className={index > 0 ? 'border-t border-border' : ''}>
                           <AgendaRow
-                            entry={{ kind: 'task', key: `overdue:${task.id}`, day: startOfLocalDay(new Date(task.dueDate!)), task }}
+                            entry={{
+                              kind: 'task',
+                              key: `overdue:${task.id}`,
+                              day: startOfLocalDay(new Date(task.dueDate!)),
+                              task,
+                            }}
                             now={now}
                             onOpenEvent={openEvent}
                             onOpenExternal={setDetail}
@@ -364,7 +405,9 @@ export const CalendarScreen: React.FC = () => {
                             partnerName={partnerName}
                           />
                           <Text className="px-4 pb-2 -mt-2 text-xs text-ink-muted">
-                            {t('household.due', { day: format.dayLabel(new Date(task.dueDate!), now) })}
+                            {t('household.due', {
+                              day: format.dayLabel(new Date(task.dueDate!), now),
+                            })}
                           </Text>
                         </View>
                       ))}

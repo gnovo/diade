@@ -1,11 +1,11 @@
+import type { ClientMutation } from '@diade/domain';
 import * as SQLite from 'expo-sqlite';
 import { createSerialQueue } from './serialQueue';
-import type { ClientMutation } from '@diade/domain';
 
 let dbInstance: SQLite.SQLiteDatabase | null = null;
 let openPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
-export const LOCAL_TABLES = [
+const LOCAL_TABLES = [
   'local_events',
   'local_tasks',
   'local_lists',
@@ -276,22 +276,6 @@ export function inTransaction<T>(work: (db: SQLite.SQLiteDatabase) => Promise<T>
 
 // --- Outbox Management Helpers ---
 
-export async function queueLocalMutation(mutation: ClientMutation): Promise<void> {
-  const db = await getLocalDb();
-  await db.runAsync(
-    `INSERT OR REPLACE INTO local_outbox (id, entity, operation, record_id, payload, client_timestamp)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [
-      mutation.id,
-      mutation.entity,
-      mutation.operation,
-      mutation.recordId,
-      JSON.stringify(mutation.payload),
-      mutation.clientTimestamp,
-    ],
-  );
-}
-
 export async function getPendingMutations(): Promise<ClientMutation[]> {
   const db = await getLocalDb();
   // rowid breaks ties when two writes share a timestamp, keeping INSERT before UPDATE.
@@ -306,8 +290,8 @@ export async function getPendingMutations(): Promise<ClientMutation[]> {
 
   return rows.map((r) => ({
     id: r.id,
-    entity: r.entity as any,
-    operation: r.operation as any,
+    entity: r.entity as ClientMutation['entity'],
+    operation: r.operation as ClientMutation['operation'],
     recordId: r.record_id,
     payload: JSON.parse(r.payload),
     clientTimestamp: r.client_timestamp,
@@ -334,10 +318,10 @@ export async function getSyncMeta(key: string): Promise<string | null> {
 
 export async function setSyncMeta(key: string, value: string): Promise<void> {
   const db = await getLocalDb();
-  await db.runAsync(
-    'INSERT OR REPLACE INTO local_sync_meta (key, value) VALUES (?, ?)',
-    [key, value],
-  );
+  await db.runAsync('INSERT OR REPLACE INTO local_sync_meta (key, value) VALUES (?, ?)', [
+    key,
+    value,
+  ]);
 }
 
 // --- Sign-out ---

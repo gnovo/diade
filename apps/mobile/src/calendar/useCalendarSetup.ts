@@ -11,6 +11,7 @@ import { apiClient } from '../api/client';
 export function useNeedsCalendarSetup(hasCalendars: boolean, refreshKey: unknown): boolean {
   const [needsSetup, setNeedsSetup] = useState(false);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey is a re-check trigger and is deliberately not read inside the effect
   useEffect(() => {
     if (!hasCalendars) {
       setNeedsSetup(false);

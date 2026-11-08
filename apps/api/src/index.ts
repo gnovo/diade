@@ -1,14 +1,14 @@
+import type { HealthResponse } from '@diade/contracts';
 import * as Sentry from '@sentry/cloudflare';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
-import type { HealthResponse } from '@diade/contracts';
+import { type AuthInstance, createAuth } from './auth';
+import { syncDueCalendars } from './calendar/service';
 import { createDb, type DbClient } from './db';
-import { createAuth, type AuthInstance } from './auth';
+import { createCalendarRouter } from './routes/calendar';
 import { createSpacesRouter } from './routes/spaces';
 import { createSyncRouter } from './routes/sync';
-import { createCalendarRouter } from './routes/calendar';
-import { syncDueCalendars } from './calendar/service';
 
 export interface AppEnv {
   Bindings: {

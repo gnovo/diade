@@ -7,7 +7,13 @@
  * is an explicit action that shows a diff (see `diffPlanAgainstList`).
  */
 import { toDateInputValue } from './datetime';
-import { MAX_SERVINGS, MIN_SERVINGS, normalizeIngredientName, type Recipe, type RecipeUnit } from './recipes';
+import {
+  MAX_SERVINGS,
+  MIN_SERVINGS,
+  normalizeIngredientName,
+  type Recipe,
+  type RecipeUnit,
+} from './recipes';
 
 export interface MealPlanRecipe {
   recipeId: string;
@@ -81,11 +87,21 @@ export const FAMILY_BASE_UNIT: Record<UnitFamily, RecipeUnit> = {
   pinch: 'pinch',
 };
 
-const TO_BASE: Record<RecipeUnit, number> = { g: 1, kg: 1000, ml: 1, l: 1000, tsp: 1, tbsp: 3, unit: 1, pinch: 1 };
+const TO_BASE: Record<RecipeUnit, number> = {
+  g: 1,
+  kg: 1000,
+  ml: 1,
+  l: 1000,
+  tsp: 1,
+  tbsp: 3,
+  unit: 1,
+  pinch: 1,
+};
 
 /** Sensible precision: whole grams and millilitres from 10 up, one decimal below; two for the rest. */
 function roundBase(quantity: number, unit: RecipeUnit): number {
-  if (unit === 'g' || unit === 'ml') return quantity >= 10 ? Math.round(quantity) : Math.round(quantity * 10) / 10;
+  if (unit === 'g' || unit === 'ml')
+    return quantity >= 10 ? Math.round(quantity) : Math.round(quantity * 10) / 10;
   return Math.round(quantity * 100) / 100;
 }
 
@@ -146,7 +162,9 @@ export function buildGroceryList(
       const unit = FAMILY_BASE_UNIT[family];
       const key = `${ingredientMatchKey(ingredient.name)}|${family}`;
       const quantity =
-        ingredient.quantity === null ? null : roundBase(ingredient.quantity * TO_BASE[ingredient.unit] * factor, unit);
+        ingredient.quantity === null
+          ? null
+          : roundBase(ingredient.quantity * TO_BASE[ingredient.unit] * factor, unit);
       const contribution: GroceryContribution = {
         recipeId: recipe.id,
         recipeName: recipe.name,
@@ -160,7 +178,14 @@ export function buildGroceryList(
         group.allStaples &&= ingredient.staple;
       } else {
         groups.set(key, {
-          row: { key, name: ingredient.name, family, quantity: null, unit, contributions: [contribution] },
+          row: {
+            key,
+            name: ingredient.name,
+            family,
+            quantity: null,
+            unit,
+            contributions: [contribution],
+          },
           allStaples: ingredient.staple,
         });
       }
@@ -242,7 +267,11 @@ export interface PlanDiff {
 }
 
 const amountText = (amount: { quantity: string | null; unit: string | null }) =>
-  amount.quantity === null ? '' : amount.unit ? `${amount.quantity} ${amount.unit}` : amount.quantity;
+  amount.quantity === null
+    ? ''
+    : amount.unit
+      ? `${amount.quantity} ${amount.unit}`
+      : amount.quantity;
 
 const sameContributions = (a: GroceryContribution[], b: GroceryContribution[]) =>
   JSON.stringify(a) === JSON.stringify(b);
@@ -256,7 +285,14 @@ const sameContributions = (a: GroceryContribution[], b: GroceryContribution[]) =
  */
 export function diffPlanAgainstList(desired: GroceryBuild, items: PlanListItem[]): PlanDiff {
   const wanted = new Map([...desired.rows, ...desired.staples].map((row) => [row.key, row]));
-  const diff: PlanDiff = { added: [], changed: [], removed: [], kept: [], refreshed: [], unchanged: [] };
+  const diff: PlanDiff = {
+    added: [],
+    changed: [],
+    removed: [],
+    kept: [],
+    refreshed: [],
+    unchanged: [],
+  };
   const seen = new Set<string>();
 
   for (const item of items) {
@@ -302,7 +338,10 @@ export function isEmptyDiff(diff: PlanDiff): boolean {
 }
 
 /** Staples the plan leaves out that are not already on the list: the "Pantry staples · N left out" group. */
-export function missingStaples(build: GroceryBuild, items: Array<Pick<PlanListItem, 'contributions'>>): GroceryRow[] {
+export function missingStaples(
+  build: GroceryBuild,
+  items: Array<Pick<PlanListItem, 'contributions'>>,
+): GroceryRow[] {
   const present = new Set(items.map((item) => item.contributions[0]?.key).filter(Boolean));
   return build.staples.filter((row) => !present.has(row.key));
 }
@@ -339,13 +378,15 @@ export function weekPeriod(today: Date, weeksAhead = 0): PlanPeriod {
  */
 export function defaultPlanPeriod(today: Date): PlanPeriod {
   const start = weekStart(today);
-  const isMonday = start.getTime() === new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  const isMonday =
+    start.getTime() === new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
   return weekPeriod(today, isMonday ? 0 : 1);
 }
 
 /** Which of the quick choices a period is, if any. */
 export function periodChoice(period: PlanPeriod, today: Date): 'thisWeek' | 'nextWeek' | 'custom' {
-  const same = (other: PlanPeriod) => other.startsOn === period.startsOn && other.endsOn === period.endsOn;
+  const same = (other: PlanPeriod) =>
+    other.startsOn === period.startsOn && other.endsOn === period.endsOn;
   if (same(weekPeriod(today, 0))) return 'thisWeek';
   if (same(weekPeriod(today, 1))) return 'nextWeek';
   return 'custom';
@@ -362,8 +403,11 @@ export function pickCurrentPlan<T extends Pick<MealPlan, 'startsOn' | 'endsOn' |
   const day = toDateInputValue(today);
   const live = plans.filter((plan) => !plan.deletedAt);
   const running = live.filter((plan) => plan.startsOn <= day && day <= plan.endsOn);
-  if (running.length > 0) return [...running].sort((a, b) => b.startsOn.localeCompare(a.startsOn))[0];
-  const upcoming = live.filter((plan) => plan.startsOn > day).sort((a, b) => a.startsOn.localeCompare(b.startsOn));
+  if (running.length > 0)
+    return [...running].sort((a, b) => b.startsOn.localeCompare(a.startsOn))[0];
+  const upcoming = live
+    .filter((plan) => plan.startsOn > day)
+    .sort((a, b) => a.startsOn.localeCompare(b.startsOn));
   if (upcoming.length > 0) return upcoming[0];
   return [...live].sort((a, b) => b.endsOn.localeCompare(a.endsOn))[0] ?? null;
 }

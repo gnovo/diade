@@ -1,16 +1,22 @@
 import 'intl-pluralrules';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { AppState } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+import {
+  createI18n,
+  isLanguagePreference,
+  type LanguagePreference,
+  pickLanguage,
+} from '@diade/i18n';
 import { getLocales } from 'expo-localization';
-import { I18nextProvider, useTranslation } from 'react-i18next';
-import { createI18n, isLanguagePreference, pickLanguage, type LanguagePreference } from '@diade/i18n';
+import * as SecureStore from 'expo-secure-store';
+import type React from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { I18nextProvider } from 'react-i18next';
+import { AppState } from 'react-native';
 
 const STORAGE_KEY = 'diade.language-preference';
 
 const deviceTags = () => getLocales().map((locale) => locale.languageTag);
 
-export const i18n = createI18n(pickLanguage('system', deviceTags()));
+const i18n = createI18n(pickLanguage('system', deviceTags()));
 
 /** Switches the app to the language a preference resolves to. */
 const applyPreference = (preference: LanguagePreference) => {
@@ -71,7 +77,10 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
-  const value = useMemo(() => ({ preference, setPreference, ready }), [preference, setPreference, ready]);
+  const value = useMemo(
+    () => ({ preference, setPreference, ready }),
+    [preference, setPreference, ready],
+  );
   return (
     <LanguageContext.Provider value={value}>
       <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
@@ -84,5 +93,3 @@ export function useLanguagePreference(): LanguageContextValue {
   if (!ctx) throw new Error('useLanguagePreference must be used inside I18nProvider');
   return ctx;
 }
-
-export { useTranslation };

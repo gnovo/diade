@@ -1,8 +1,8 @@
-import { eq } from 'drizzle-orm';
 import { symmetricDecrypt, symmetricEncrypt } from 'better-auth/crypto';
+import { eq } from 'drizzle-orm';
 import type { DbClient } from '../db';
 import { accounts } from '../db/schema';
-import { GoogleAuthError, refreshGoogleAccessToken, type FetchFn } from './google';
+import { type FetchFn, GoogleAuthError, refreshGoogleAccessToken } from './google';
 
 export interface TokenEnv {
   GOOGLE_CLIENT_ID?: string;
@@ -28,7 +28,7 @@ export async function decryptToken(value: string | null, secret: string): Promis
   return symmetricDecrypt({ key: secret, data: value });
 }
 
-export async function encryptToken(value: string, secret: string): Promise<string> {
+async function encryptToken(value: string, secret: string): Promise<string> {
   return symmetricEncrypt({ key: secret, data: value });
 }
 

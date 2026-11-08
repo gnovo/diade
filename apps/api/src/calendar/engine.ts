@@ -4,13 +4,13 @@
  * tombstoning) is testable without a network or a database.
  */
 import { GoogleApiError, type GoogleClient } from './google';
-import { mapGoogleEvent, type EventValues } from './mapper';
+import { type EventValues, mapGoogleEvent } from './mapper';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** A full sync covers this much of the past and future. */
-export const WINDOW_PAST_DAYS = 30;
-export const WINDOW_FUTURE_DAYS = 365;
+const WINDOW_PAST_DAYS = 30;
+const WINDOW_FUTURE_DAYS = 365;
 /** Re-baseline when less than this much of the future window is left. */
 export const WINDOW_REBASE_DAYS = 60;
 /** Re-baseline at least this often, which also catches anything incremental sync missed. */

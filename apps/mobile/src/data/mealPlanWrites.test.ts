@@ -1,5 +1,3 @@
-import { describe, expect, it } from 'vitest';
-import { parseSyncPayload } from '@diade/validation';
 import {
   buildGroceryList,
   diffPlanAgainstList,
@@ -8,8 +6,10 @@ import {
   type RecipeIngredient,
   type RecipeUnit,
 } from '@diade/domain';
-import { diffWrites, generationWrites, itemInput } from './mealPlanWrites';
+import { parseSyncPayload } from '@diade/validation';
+import { describe, expect, it } from 'vitest';
 import { fromRow, toColumns } from './mapping';
+import { diffWrites, generationWrites, itemInput } from './mealPlanWrites';
 
 const RECIPE_A = '66666666-6666-4666-8666-666666666666';
 const RECIPE_B = '77777777-7777-4777-8777-777777777777';
@@ -17,7 +17,12 @@ const LIST = '88888888-8888-4888-8888-888888888888';
 const PLAN = '99999999-9999-4999-8999-999999999999';
 
 let n = 0;
-const ing = (name: string, quantity: number | null, unit: RecipeUnit = 'g', staple = false): RecipeIngredient => ({
+const ing = (
+  name: string,
+  quantity: number | null,
+  unit: RecipeUnit = 'g',
+  staple = false,
+): RecipeIngredient => ({
   id: `i${++n}`,
   name,
   quantity,
@@ -37,7 +42,11 @@ const recipe = (id: string, servings: number, ingredients: RecipeIngredient[]): 
   deletedAt: null,
 });
 
-const pasta = recipe(RECIPE_A, 2, [ing('Pasta', 200), ing('Tomatoes', 400), ing('Salt', null, 'unit', true)]);
+const pasta = recipe(RECIPE_A, 2, [
+  ing('Pasta', 200),
+  ing('Tomatoes', 400),
+  ing('Salt', null, 'unit', true),
+]);
 const salad = recipe(RECIPE_B, 2, [ing('Tomatoes', 100), ing('Lettuce', 1, 'unit')]);
 const both = [
   { recipeId: RECIPE_A, servings: 2 },
@@ -50,12 +59,12 @@ describe('generationWrites', () => {
 
   it('creates the groceries list, pointing at its plan, then one item per row', () => {
     expect(writes[0]).toMatchObject({ op: 'insert', entity: 'lists', id: LIST });
-    expect(writes[0]).toMatchObject({ input: { planId: PLAN, category: 'groceries', icon: 'shopping-basket' } });
-    expect(writes.slice(1).map((w) => w.op === 'insert' && (w.input as { name: string }).name)).toEqual([
-      'Pasta',
-      'Tomatoes',
-      'Lettuce',
-    ]);
+    expect(writes[0]).toMatchObject({
+      input: { planId: PLAN, category: 'groceries', icon: 'shopping-basket' },
+    });
+    expect(
+      writes.slice(1).map((w) => w.op === 'insert' && (w.input as { name: string }).name),
+    ).toEqual(['Pasta', 'Tomatoes', 'Lettuce']);
   });
 
   it('writes amounts for display, keeps the order, and starts unchecked and unedited', () => {
@@ -65,7 +74,9 @@ describe('generationWrites', () => {
       ['500', 'g', 2],
       ['1', null, 3],
     ]);
-    expect(items.every((i) => i.listId === LIST && i.editedByHand === false && i.isChecked === false)).toBe(true);
+    expect(
+      items.every((i) => i.listId === LIST && i.editedByHand === false && i.isChecked === false),
+    ).toBe(true);
   });
 
   it('only writes payloads the server will accept', () => {
@@ -76,7 +87,9 @@ describe('generationWrites', () => {
   });
 
   it('leaves the staples out', () => {
-    expect(writes.some((w) => w.op === 'insert' && (w.input as { name?: string }).name === 'Salt')).toBe(false);
+    expect(
+      writes.some((w) => w.op === 'insert' && (w.input as { name?: string }).name === 'Salt'),
+    ).toBe(false);
   });
 });
 
@@ -96,7 +109,9 @@ describe('diffWrites', () => {
   });
 
   it('adds, changes, removes and keeps, each with the right write', () => {
-    const edited = items.map((i) => (i.name === 'Pasta' ? { ...i, quantity: '1', unit: 'kg', editedByHand: true } : i));
+    const edited = items.map((i) =>
+      i.name === 'Pasta' ? { ...i, quantity: '1', unit: 'kg', editedByHand: true } : i,
+    );
     const smaller = buildGroceryList([{ recipeId: RECIPE_A, servings: 1 }], [pasta, salad]);
     const diff = diffPlanAgainstList(smaller, edited);
     const writes = diffWrites(LIST, diff);
@@ -112,7 +127,9 @@ describe('diffWrites', () => {
     expect(writes).toContainEqual({ op: 'delete', entity: 'list_items', id: 'item2' });
     const keptWrite = writes.find((w) => w.op === 'update' && w.id === 'item0');
     expect(keptWrite).toMatchObject({ changes: { contributions: expect.any(Array) } });
-    expect((keptWrite as { changes: Record<string, unknown> }).changes).not.toHaveProperty('quantity');
+    expect((keptWrite as { changes: Record<string, unknown> }).changes).not.toHaveProperty(
+      'quantity',
+    );
   });
 
   it('inserts added rows into the existing list without a position', () => {
@@ -131,18 +148,25 @@ describe('diffWrites', () => {
   });
 
   it('clears the provenance of a hand-edited row no recipe asks for any more', () => {
-    const edited = items.map((i) => (i.name === 'Lettuce' ? { ...i, quantity: '3', editedByHand: true } : i));
+    const edited = items.map((i) =>
+      i.name === 'Lettuce' ? { ...i, quantity: '3', editedByHand: true } : i,
+    );
     const diff = diffPlanAgainstList(buildGroceryList([both[0]], [pasta, salad]), edited);
     const write = diffWrites(LIST, diff).find((w) => w.op === 'update' && w.id === 'item2');
     expect(write).toMatchObject({ changes: { contributions: null } });
   });
 
   it('only writes payloads the server will accept', () => {
-    const diff = diffPlanAgainstList(buildGroceryList([{ recipeId: RECIPE_A, servings: 4 }], [pasta, salad]), items);
+    const diff = diffPlanAgainstList(
+      buildGroceryList([{ recipeId: RECIPE_A, servings: 4 }], [pasta, salad]),
+      items,
+    );
     for (const write of diffWrites(LIST, diff)) {
       if (write.op === 'delete') continue;
       const input = write.op === 'insert' ? write.input : write.changes;
-      expect(parseSyncPayload(write.entity, write.op === 'insert' ? 'INSERT' : 'UPDATE', input).success).toBe(true);
+      expect(
+        parseSyncPayload(write.entity, write.op === 'insert' ? 'INSERT' : 'UPDATE', input).success,
+      ).toBe(true);
     }
   });
 });
@@ -155,7 +179,10 @@ describe('item rows in the local store', () => {
     const stored = Object.fromEntries(columns.map((c, i) => [c, values[i]]));
     expect(stored.contributions).toBe(JSON.stringify(row.contributions));
     expect(stored.edited_by_hand).toBe(0);
-    expect(fromRow(stored)).toMatchObject({ contributions: row.contributions, editedByHand: false });
+    expect(fromRow(stored)).toMatchObject({
+      contributions: row.contributions,
+      editedByHand: false,
+    });
 
     const plain = toColumns({ id: 'y', contributions: null });
     expect(plain.values).toEqual(['y', null]);

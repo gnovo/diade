@@ -1,17 +1,17 @@
-import { and, eq, gt, inArray, or } from 'drizzle-orm';
 import {
-  redactExternalCalendar,
-  redactExternalEvent,
-  resolveEffectiveVisibility,
   type ExternalCalendar,
   type ExternalEvent,
+  type ExternalResponse,
   type ExternalVisibility,
   type ExternalVisibilityOverride,
   type GoogleAccessRole,
   type GoogleEventVisibility,
-  type ExternalResponse,
+  redactExternalCalendar,
+  redactExternalEvent,
+  resolveEffectiveVisibility,
   type StoredExternalEvent,
 } from '@diade/domain';
+import { and, eq, gt, inArray, or } from 'drizzle-orm';
 import type { DbClient } from '../db';
 import { externalCalendars, externalEvents, spaceMembers } from '../db/schema';
 
@@ -84,7 +84,8 @@ export async function buildExternalPull(
       deletedAt: iso(row.deletedAt),
     };
     // A disabled or removed calendar hides everything from the partner, whatever the rows say.
-    const calendarGone = calendar.deletedAt !== null || !calendar.syncEnabled || calendar.confirmedAt === null;
+    const calendarGone =
+      calendar.deletedAt !== null || !calendar.syncEnabled || calendar.confirmedAt === null;
     const effective: ExternalVisibility = calendarGone
       ? 'private'
       : resolveEffectiveVisibility({

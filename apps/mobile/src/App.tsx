@@ -1,15 +1,15 @@
 import '../global.css';
+import { useFonts } from 'expo-font';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from './context/AuthContext';
-import { SyncProvider } from './sync/SyncProvider';
+import { ThemeProvider, useScheme, useThemeColors, useThemePreference } from './design';
+import { I18nProvider, useLanguagePreference } from './i18n';
 import { RootNavigator } from './navigation/RootNavigator';
 import { getLocalDb } from './storage/sqlite';
-import { I18nProvider, useLanguagePreference } from './i18n';
-import { ThemeProvider, useScheme, useThemeColors, useThemePreference } from './design';
+import { SyncProvider } from './sync/SyncProvider';
 
 // Plus Jakarta Sans static faces (SIL OFL 1.1). Family names match tailwind.config.js and generated.ts.
 const fonts = {
@@ -50,7 +50,14 @@ function Gate() {
   if ((!fontsLoaded && !fontError) || !themeReady || !languageReady) {
     // Matches the splash background so there is no flash of a different colour.
     return (
-      <View style={{ flex: 1, backgroundColor: colors['brand-deep'], alignItems: 'center', justifyContent: 'center' }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: colors['brand-deep'],
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <ActivityIndicator color={colors['brand-mint']} />
       </View>
     );

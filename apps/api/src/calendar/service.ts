@@ -2,22 +2,29 @@
  * Database-backed calendar sync: connection state, the calendar list, per-calendar sync with
  * a lease, and disconnect. Routes and the cron handler call into here.
  */
+
+import { type ExternalVisibility, GOOGLE_CALENDAR_SCOPES, isNarrowerOrEqual } from '@diade/domain';
 import { and, asc, eq, inArray, isNotNull, isNull, lt, or, sql } from 'drizzle-orm';
-import { GOOGLE_CALENDAR_SCOPES, isNarrowerOrEqual, type ExternalVisibility } from '@diade/domain';
 import type { DbClient } from '../db';
 import { accounts, externalCalendars, externalEvents } from '../db/schema';
-import { syncCalendarEvents, type SyncTarget } from './engine';
+import { type SyncTarget, syncCalendarEvents } from './engine';
 import {
+  createGoogleClient,
+  type FetchFn,
   GoogleApiError,
   GoogleAuthError,
-  createGoogleClient,
-  revokeGoogleToken,
-  type FetchFn,
   type GoogleClient,
+  revokeGoogleToken,
 } from './google';
 import { mapGoogleCalendar } from './mapper';
 import { createDrizzleEventStore } from './store';
-import { decryptToken, getGoogleAccessToken, hasScopes, parseScopes, type TokenEnv } from './tokens';
+import {
+  decryptToken,
+  getGoogleAccessToken,
+  hasScopes,
+  parseScopes,
+  type TokenEnv,
+} from './tokens';
 
 export interface CalendarDeps {
   db: DbClient;
@@ -27,7 +34,7 @@ export interface CalendarDeps {
 }
 
 /** Values stored in `external_calendars.last_error`. Never contain event content. */
-export const SYNC_ERRORS = {
+const SYNC_ERRORS = {
   needsReauth: 'needs_reauth',
   rateLimited: 'rate_limited',
   failed: 'sync_failed',
@@ -35,9 +42,9 @@ export const SYNC_ERRORS = {
 
 const LEASE_MS = 2 * 60_000;
 /** A calendar synced this recently is skipped by on-demand syncs. */
-export const MIN_SYNC_INTERVAL_MS = 60_000;
+const MIN_SYNC_INTERVAL_MS = 60_000;
 /** Calendars handled per cron run, so a single invocation stays well inside Worker limits. */
-export const CRON_CALENDAR_BATCH = 20;
+const CRON_CALENDAR_BATCH = 20;
 
 const nowOf = (deps: CalendarDeps) => (deps.now ? deps.now() : new Date());
 
@@ -50,7 +57,7 @@ async function googleAccountOf(db: DbClient, userId: string) {
   return account ?? null;
 }
 
-export function accountHasCalendarAccess(
+function accountHasCalendarAccess(
   account: { scope: string | null; refreshToken: string | null } | null,
 ): boolean {
   return Boolean(account?.refreshToken && hasScopes(account.scope, GOOGLE_CALENDAR_SCOPES));
@@ -58,7 +65,12 @@ export function accountHasCalendarAccess(
 
 function clientFor(deps: CalendarDeps, accountId: string): GoogleClient {
   return createGoogleClient(
-    (force) => getGoogleAccessToken(deps.db, deps.env, accountId, { forceRefresh: force, fetchFn: deps.fetchFn, now: nowOf(deps) }),
+    (force) =>
+      getGoogleAccessToken(deps.db, deps.env, accountId, {
+        forceRefresh: force,
+        fetchFn: deps.fetchFn,
+        now: nowOf(deps),
+      }),
     deps.fetchFn,
   );
 }
@@ -82,7 +94,8 @@ export async function getConnection(db: DbClient, userId: string): Promise<Conne
     .orderBy(asc(externalCalendars.name));
 
   const connected = accountHasCalendarAccess(account);
-  const needsReauth = calendars.some((c) => c.lastError === SYNC_ERRORS.needsReauth) ||
+  const needsReauth =
+    calendars.some((c) => c.lastError === SYNC_ERRORS.needsReauth) ||
     (calendars.length > 0 && !connected);
   return {
     connected,
@@ -103,14 +116,18 @@ export async function getConnection(db: DbClient, userId: string): Promise<Conne
 export async function refreshCalendarList(deps: CalendarDeps, userId: string): Promise<void> {
   const { db } = deps;
   const account = await googleAccountOf(db, userId);
-  if (!account || !accountHasCalendarAccess(account)) throw new GoogleAuthError('Calendar access not granted');
+  if (!account || !accountHasCalendarAccess(account))
+    throw new GoogleAuthError('Calendar access not granted');
 
   const now = nowOf(deps);
   const entries = (await clientFor(deps, account.id).listCalendars())
     .map(mapGoogleCalendar)
     .filter((c): c is NonNullable<typeof c> => c !== null);
 
-  const existing = await db.select().from(externalCalendars).where(eq(externalCalendars.userId, userId));
+  const existing = await db
+    .select()
+    .from(externalCalendars)
+    .where(eq(externalCalendars.userId, userId));
   const byGoogleId = new Map(existing.map((c) => [c.googleCalendarId, c]));
   const alreadyConfirmed = existing.some((c) => c.confirmedAt !== null);
   const seen = new Set<string>();
@@ -175,7 +192,12 @@ export async function refreshCalendarList(deps: CalendarDeps, userId: string): P
 }
 
 /** Switches a calendar off and tombstones its events so the partner's device drops them. */
-async function retireCalendar(db: DbClient, calendarId: string, now: Date, deleted = true): Promise<void> {
+async function retireCalendar(
+  db: DbClient,
+  calendarId: string,
+  now: Date,
+  deleted = true,
+): Promise<void> {
   await tombstoneCalendarEvents(db, calendarId, now);
   await db
     .update(externalCalendars)
@@ -194,7 +216,14 @@ async function retireCalendar(db: DbClient, calendarId: string, now: Date, delet
 async function tombstoneCalendarEvents(db: DbClient, calendarId: string, now: Date): Promise<void> {
   await db
     .update(externalEvents)
-    .set({ deletedAt: now, updatedAt: now, title: null, description: null, location: null, htmlLink: null })
+    .set({
+      deletedAt: now,
+      updatedAt: now,
+      title: null,
+      description: null,
+      location: null,
+      htmlLink: null,
+    })
     .where(and(eq(externalEvents.calendarId, calendarId), isNull(externalEvents.deletedAt)));
 }
 
@@ -211,13 +240,21 @@ export async function updateCalendarSettings(
   const [calendar] = await db
     .select()
     .from(externalCalendars)
-    .where(and(eq(externalCalendars.id, calendarId), eq(externalCalendars.userId, userId), isNull(externalCalendars.deletedAt)))
+    .where(
+      and(
+        eq(externalCalendars.id, calendarId),
+        eq(externalCalendars.userId, userId),
+        isNull(externalCalendars.deletedAt),
+      ),
+    )
     .limit(1);
   if (!calendar) return 'not_found';
 
   // Free/busy-only calendars can never be shared in full.
   const visibility =
-    changes.visibility && calendar.accessRole === 'freeBusyReader' && changes.visibility === 'shared'
+    changes.visibility &&
+    calendar.accessRole === 'freeBusyReader' &&
+    changes.visibility === 'shared'
       ? 'busy_only'
       : changes.visibility;
 
@@ -242,7 +279,10 @@ export async function updateCalendarSettings(
   // A visibility change must reach the partner: touch the events so their next pull
   // receives the narrower (or wider) version, or a tombstone.
   if (visibility && visibility !== calendar.visibility) {
-    await db.update(externalEvents).set({ updatedAt: now }).where(eq(externalEvents.calendarId, calendar.id));
+    await db
+      .update(externalEvents)
+      .set({ updatedAt: now })
+      .where(eq(externalEvents.calendarId, calendar.id));
   }
   return 'ok';
 }
@@ -281,10 +321,17 @@ export async function updateEventOverride(
     .select({ event: externalEvents, calendarVisibility: externalCalendars.visibility })
     .from(externalEvents)
     .innerJoin(externalCalendars, eq(externalEvents.calendarId, externalCalendars.id))
-    .where(and(eq(externalEvents.id, eventId), eq(externalEvents.userId, userId), isNull(externalEvents.deletedAt)))
+    .where(
+      and(
+        eq(externalEvents.id, eventId),
+        eq(externalEvents.userId, userId),
+        isNull(externalEvents.deletedAt),
+      ),
+    )
     .limit(1);
   if (!row) return 'not_found';
-  if (override && !isNarrowerOrEqual(override, row.calendarVisibility as ExternalVisibility)) return 'too_wide';
+  if (override && !isNarrowerOrEqual(override, row.calendarVisibility as ExternalVisibility))
+    return 'too_wide';
 
   await db
     .update(externalEvents)
@@ -303,7 +350,13 @@ export async function setEventHighlight(
   const updated = await deps.db
     .update(externalEvents)
     .set({ highlighted, updatedAt: nowOf(deps) })
-    .where(and(eq(externalEvents.id, eventId), eq(externalEvents.userId, userId), isNull(externalEvents.deletedAt)))
+    .where(
+      and(
+        eq(externalEvents.id, eventId),
+        eq(externalEvents.userId, userId),
+        isNull(externalEvents.deletedAt),
+      ),
+    )
     .returning({ id: externalEvents.id });
   return updated.length > 0 ? 'ok' : 'not_found';
 }
@@ -375,7 +428,12 @@ export async function syncOneCalendar(
     return { calendarId: calendar.id, status: 'synced', mode: result.mode };
   } catch (err) {
     const code = errorCode(err);
-    console.error('[calendar] sync failed', calendar.id, code, err instanceof Error ? err.name : 'error');
+    console.error(
+      '[calendar] sync failed',
+      calendar.id,
+      code,
+      err instanceof Error ? err.name : 'error',
+    );
     await db
       .update(externalCalendars)
       .set({ lastError: code, lockUntil: null })
@@ -406,7 +464,8 @@ export async function syncUserCalendars(
   const outcomes: CalendarSyncOutcome[] = [];
   for (const calendar of calendars) {
     const recent =
-      calendar.lastSyncedAt && now.getTime() - calendar.lastSyncedAt.getTime() < MIN_SYNC_INTERVAL_MS;
+      calendar.lastSyncedAt &&
+      now.getTime() - calendar.lastSyncedAt.getTime() < MIN_SYNC_INTERVAL_MS;
     if (recent && !options.force) {
       outcomes.push({ calendarId: calendar.id, status: 'skipped' });
       continue;
@@ -458,12 +517,22 @@ export async function disconnect(deps: CalendarDeps, userId: string): Promise<vo
   const now = nowOf(deps);
   const account = await googleAccountOf(db, userId);
 
-  const calendars = await db.select({ id: externalCalendars.id }).from(externalCalendars).where(eq(externalCalendars.userId, userId));
+  const calendars = await db
+    .select({ id: externalCalendars.id })
+    .from(externalCalendars)
+    .where(eq(externalCalendars.userId, userId));
   if (calendars.length > 0) {
     const ids = calendars.map((c) => c.id);
     await db
       .update(externalEvents)
-      .set({ deletedAt: now, updatedAt: now, title: null, description: null, location: null, htmlLink: null })
+      .set({
+        deletedAt: now,
+        updatedAt: now,
+        title: null,
+        description: null,
+        location: null,
+        htmlLink: null,
+      })
       .where(and(inArray(externalEvents.calendarId, ids), isNull(externalEvents.deletedAt)));
     await db
       .update(externalCalendars)
@@ -485,7 +554,9 @@ export async function disconnect(deps: CalendarDeps, userId: string): Promise<vo
   if (account) {
     // Revoke first (needs the token), best effort.
     if (deps.env.BETTER_AUTH_SECRET && account.refreshToken) {
-      const token = await decryptToken(account.refreshToken, deps.env.BETTER_AUTH_SECRET).catch(() => null);
+      const token = await decryptToken(account.refreshToken, deps.env.BETTER_AUTH_SECRET).catch(
+        () => null,
+      );
       if (token) await revokeGoogleToken(token, deps.fetchFn).catch(() => undefined);
     }
     const remaining = parseScopes(account.scope).filter(
