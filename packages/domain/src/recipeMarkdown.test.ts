@@ -7,6 +7,7 @@ import {
   parseRecipesMarkdown,
   type RecipeInput,
 } from './recipeMarkdown';
+import { normalizeRecipeNotes } from './recipeSections';
 
 const files = import.meta.glob('./__fixtures__/recipes/*.md', {
   query: '?raw',
@@ -77,7 +78,8 @@ describe('parseRecipesMarkdown fixtures', () => {
       'looseMeasure',
       'looseMeasure',
     ]);
-    expect(recipe.notes).toContain('## Preparação');
+    expect(recipe.notes).toContain('## Steps');
+    expect(recipe.notes).toContain('1. Coza as batatas.');
   });
 
   it('strips every bullet style, checkboxes, emphasis and wiki links', () => {
@@ -107,10 +109,10 @@ describe('parseRecipesMarkdown fixtures', () => {
       'Garlic bread',
     ]);
     expect(recipes.map((r) => r.servings)).toEqual([2, 8, 4, 4]);
-    expect(recipes[0].notes).toBe('## Method\nSimmer for twenty minutes.');
+    expect(recipes[0].notes).toBe('## Steps\n1. Simmer for twenty minutes.');
     expect(recipes[2].warnings).toEqual(['noIngredients']);
     // The explicit Notes heading is not repeated inside the notes.
-    expect(recipes[3].notes).toBe('Bake at 200 C.');
+    expect(recipes[3].notes).toBe('## Notes\nBake at 200 C.');
     expect(recipes[1].lines.map((l) => l.flag)).toEqual([
       null,
       'unknownUnit',
@@ -126,11 +128,11 @@ describe('parseRecipesMarkdown fixtures', () => {
     expect(toast.name).toBe('Quick toast');
     expect(toast.lines).toEqual([]);
     expect(toast.warnings).toEqual(['noIngredients']);
-    expect(toast.notes).toBe('Toast the bread. Add butter. Done.');
+    expect(toast.notes).toBe('## Notes\nToast the bread. Add butter. Done.');
     expect(eggs.servings).toBe(2);
     expect(summary(eggs)).toEqual(['2 unit Eggs', '2 unit Slices bread']);
     expect(eggs.lines[1].flag).toBe('looseMeasure');
-    expect(eggs.notes).toBe('## Tips\nUse good bread.');
+    expect(eggs.notes).toBe('## Notes\n## Tips\nUse good bread.');
   });
 
   it('flags the lines the parser can only guess at', () => {
@@ -168,7 +170,7 @@ describe('parseRecipesMarkdown fixtures', () => {
     expect(recipe.name).toBe('Weeknight bolognese');
     expect(recipe.servings).toBe(5);
     expect(summary(recipe)).toEqual(['500 g Beef mince', '400 g Tomatoes']);
-    expect(recipe.notes).toBe('Method:\nBrown the mince.');
+    expect(recipe.notes).toBe('## Steps\n1. Brown the mince.');
     expect(recipe.warnings).toEqual([]);
   });
 
@@ -225,8 +227,10 @@ describe('formatRecipeMarkdown round trip', () => {
       ingredients: input.ingredients.map(({ name, quantity, unit }) => ({ name, quantity, unit })),
     };
   };
+  // Notes come back in the current sectioned form: old free text gains its "## Notes" heading.
   const plain = (recipe: RecipeInput) => ({
     ...recipe,
+    notes: normalizeRecipeNotes(recipe.notes),
     ingredients: recipe.ingredients.map(({ name, quantity, unit }) => ({ name, quantity, unit })),
   });
   const row = (
@@ -354,9 +358,33 @@ describe('formatRecipeMarkdown round trip', () => {
     };
     const [draft, ...more] = parseRecipesMarkdown(formatRecipeMarkdown(recipe), () => 'x');
     expect(more).toHaveLength(0);
-    expect(draft.notes).toBe(notes);
+    expect(draft.notes).toBe(`## Notes\n${notes}`);
     expect(draft.servings).toBe(3);
     expect(draft.lines).toHaveLength(1);
+  });
+
+  it('round-trips steps, notes and a source as sections', () => {
+    const notes =
+      '## Steps\n1. Boil.\n2. Toss.\n\n## Notes\nNever add cream.\n\n## Source\nhttps://example.test/carbonara';
+    const recipe: RecipeInput = {
+      name: 'Spaghetti carbonara',
+      servings: 4,
+      notes,
+      ingredients: [row('Spaghetti', 400, 'g')],
+    };
+    const text = formatRecipeMarkdown(recipe);
+    expect(text).toContain(
+      '## Ingredients\n- 400 g Spaghetti\n\n## Steps\n1. Boil.\n2. Toss.\n\n## Notes',
+    );
+    expect(roundTrip(recipe).notes).toBe(notes);
+  });
+
+  it('reads Steps, Notes and Source whatever order or language they come in', () => {
+    const [draft] = parseRecipesMarkdown(
+      '# Bacalhau\n\n## Ingredientes\n- 800 g bacalhau\n\n## Fonte\nA avó\n\n## Notas\nServir quente.\n\n## Modo de preparo\n1. Coza.',
+      () => 'x',
+    );
+    expect(draft.notes).toBe('## Steps\n1. Coza.\n\n## Notes\nServir quente.\n\n## Source\nA avó');
   });
 
   it('keeps a recipe name that ends in #', () => {

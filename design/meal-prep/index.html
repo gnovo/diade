@@ -38,7 +38,7 @@ th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute
 #lb.wide img{width:min(1464px,100%)}
 </style>
 <div class="wrap">
-<nav><a href="#flow">Flow</a><a href="#s1">1 Library</a><a href="#s2">2 Recipe sheet</a><a href="#s3">3 Plan</a><a href="#s4">4 Pick</a><a href="#s5">5 Grocery list</a><a href="#s6">6 Wizard type</a><a href="#s7">7 Name</a><a href="#s8">8 Recipes</a><a href="#s9">9 Review</a><a href="#s10">10 Import</a><a href="#s11">11 Review</a><a href="#s12">12 Add recipe</a><a href="#s13">13 Empty week</a><a href="#rules">Rules</a><a href="#open">Open questions</a></nav>
+<nav><a href="#flow">Flow</a><a href="#s1">1 Library</a><a href="#s2">2 Recipe sheet</a><a href="#s3">3 Plan</a><a href="#s4">4 Pick</a><a href="#s5">5 Grocery list</a><a href="#s6">6 Wizard type</a><a href="#s7">7 Name</a><a href="#s8">8 Recipes</a><a href="#s9">9 Review</a><a href="#s10">10 Import</a><a href="#s11">11 Review</a><a href="#s12">12 Add recipe</a><a href="#s13">13 Empty week</a><a href="#s14">14 Recipe detail</a><a href="#rules">Rules</a><a href="#open">Open questions</a></nav>
 <header>
 <div class="crumb">Díade mobile · Lists tab</div>
 <h1>Meal prep: recipes, a weekly plan, and smarter lists</h1>
@@ -57,10 +57,10 @@ th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute
 <div class="row"><div class="wire" data-zoom><img src="wireframes/01-recipes-library.svg" alt="Recipes library"></div>
 <div><ol class="notes"><li><span class="n">1</span><span>Three-way switch. The header and the switch stay mounted while the content below fades, so switching does not jump.</span></li><li><span class="n">2</span><span>Search matches recipe names and ingredient names, so "salmon" finds every recipe that uses it.</span></li><li><span class="n">3</span><span>Cards show ingredient and serving counts. Tapping opens the recipe; the plus button in the header adds one.</span></li></ol></div></div></section>
 
-<section id="s2"><h2>2 · Recipe sheet (PR B, shipped)</h2>
-<p class="sub">A bottom sheet, the same pattern as adding a list. Ingredients are typed one per line.</p>
+<section id="s2"><h2>2 · Recipe sheet (PR B, steps and sections added)</h2>
+<p class="sub">A bottom sheet, the same pattern as adding a list. Ingredients are typed one per line; the method is a list of steps.</p>
 <div class="row"><div class="wire" data-zoom><img src="wireframes/02-recipe-sheet.svg" alt="Recipe sheet"></div>
-<div><ol class="notes"><li><span class="n">1</span><span>Name. Save lives in the sheet footer so it stays reachable above the keyboard.</span></li><li><span class="n">2</span><span>One line per ingredient. English or Portuguese: "400 g de esparguete", "2 colheres de sopa de azeite", "1 lb beef".</span></li><li><span class="n">3</span><span>Everything is stored in metric. Pounds, ounces and cups convert on entry (1 lb becomes 454 g).</span></li><li><span class="n">4</span><span>The Pantry pill marks staples. It is pre-filled from a built-in en/pt-PT list (salt, olive oil, azeite, sal) and can be flipped per ingredient.</span></li></ol><div class="why"><b>Why one line per ingredient:</b> it is the same parser the markdown import uses, so what you type and what you import behave identically.</div></div></div></section>
+<div><ol class="notes"><li><span class="n">1</span><span>Name. Save lives in the sheet footer so it stays reachable above the keyboard.</span></li><li><span class="n">2</span><span>One line per ingredient. English or Portuguese: "400 g de esparguete", "2 colheres de sopa de azeite", "1 lb beef".</span></li><li><span class="n">3</span><span>Everything is stored in metric. Pounds, ounces and cups convert on entry (1 lb becomes 454 g). The Pantry pill marks staples, pre-filled from a built-in en/pt-PT list.</span></li><li><span class="n">4</span><span><b>Steps.</b> Type a step and tap Add step. Tap a step to edit it: the box shows its text, and arrows move it up or down, with a remove button. A step still in the box is saved with the recipe.</span></li><li><span class="n">5</span><span>The numbered steps. Below them: <b>Notes</b> (free text: tips, variations) and <b>Source</b> (a link, a book, who gave it to you).</span></li></ol><div class="why"><b>Where it is stored:</b> still the recipe's one notes text, written as markdown sections (<code>## Steps</code>, <code>## Notes</code>, <code>## Source</code>). No migration; the import and share text is the same. Notes written before sections existed open as Notes.</div><div class="why"><b>Why one line per ingredient:</b> it is the same parser the markdown import uses, so what you type and what you import behave identically.</div></div></div></section>
 
 <section id="s3"><h2>3 · Plan: a week of recipes (PR C, redesigned)</h2>
 <p class="sub">One screen answers "what are we cooking this week, and what do we buy?". A plan is still a pool of recipes (no per-day slots), but now it is organised by week.</p>
@@ -116,6 +116,11 @@ th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute
 <p class="sub">The + in Recipes asks first, like the new-list wizard asks the type first. The recipe sheet (02) no longer carries an import button.</p>
 <div class="row"><div class="wire" data-zoom><img src="wireframes/12-add-recipe.svg" alt="Add a recipe chooser"></div>
 <div><ol class="notes"><li><span class="n">1</span><span><b>Write a recipe</b> opens the recipe sheet (02).</span></li><li><span class="n">2</span><span><b>Import</b> opens the paste step (10). The word markdown never appears; a link or a photo can become further rows here later.</span></li></ol></div></div></section>
+
+<section id="s14"><h2>14 · Recipe detail with sections</h2>
+<p class="sub">What a recipe looks like when you open it. Edit, share and delete are unchanged.</p>
+<div class="row"><div class="wire" data-zoom><img src="wireframes/14-recipe-detail.svg" alt="Recipe detail"></div>
+<div><ol class="notes"><li><span class="n">1</span><span>Ingredients, with pantry staples set apart.</span></li><li><span class="n">2</span><span>Steps, numbered. A recipe with no steps shows no Steps card.</span></li><li><span class="n">3</span><span>Notes, as typed.</span></li><li><span class="n">4</span><span>Source. A web address opens in the browser; anything else is shown as text.</span></li></ol><div class="why"><b>Next:</b> a cooking view (large step text, tick off ingredients, screen kept awake) is its own PR; it needs the keep-awake native module checked first.</div></div></div></section>
 
 <section id="rules"><h2>Rules that cut across screens</h2>
 <p class="sub">Decided in the brainstorm; each is a few lines of code but easy to get wrong later.</p>

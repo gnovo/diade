@@ -9,6 +9,12 @@
 import { type KnownName, knownIngredientNames, similarKnownName } from './ingredientNames';
 import { ingredientMatchKey } from './mealPlan';
 import {
+  formatRecipeNotes,
+  normalizeRecipeNotes,
+  parseRecipeNotes,
+  sectionKind,
+} from './recipeSections';
+import {
   type AssessedIngredient,
   assessIngredientLine,
   DEFAULT_SERVINGS,
@@ -64,7 +70,6 @@ const FENCE = /^\s*(?:```|~~~)/;
 const BULLET_OR_CHECKBOX = /^\s*(?:(?:[-*+•]|\d+[.)])\s+)?(?:\[[ xX]\]\s*)?/;
 const META = /^\s*(servings?|serves|doses?|por[cç][õo]es|por[cç][aã]o|tags?)\s*:\s*(.*)$/i;
 const INGREDIENTS_TITLE = /\bingredient(?:e)?s?\b/;
-const NOTES_TITLE = /^(?:notes?|notas?)$/;
 /** A `# ` line inside notes is written `\\# ` so it does not start another recipe. */
 const ESCAPED_H1 = /^(\\+)(#\s)/;
 const H1_IN_NOTES = /^(\\*)(#\s)/;
@@ -158,11 +163,19 @@ function parseChunk(chunk: Chunk, newId: () => string): DraftRecipe {
   let fenced = false;
 
   for (const line of chunk.lines) {
-    // After a Notes heading everything is notes, as written: no headings, labels or fields are read.
+    // After a Notes or Source heading everything is text, as written: no ingredients, labels or fields are
+    // read. Only a Steps, Notes or Source heading (level 2) ends it, as in the sections of `recipeSections`.
     if (section === 'verbatim') {
-      notes.push(
-        line.replace(ESCAPED_H1, (_, slashes: string, hash: string) => slashes.slice(1) + hash),
-      );
+      const heading = /^##[ \t]+(.+?)[ \t]*$/.exec(line);
+      const kind = heading ? sectionKind(sectionTitle(heading[1])) : null;
+      if (kind) {
+        notes.push(line.trim());
+        section = kind === 'steps' ? 'other' : 'verbatim';
+      } else {
+        notes.push(
+          line.replace(ESCAPED_H1, (_, slashes: string, hash: string) => slashes.slice(1) + hash),
+        );
+      }
       continue;
     }
     if (FENCE.test(line)) fenced = !fenced;
@@ -177,13 +190,15 @@ function parseChunk(chunk: Chunk, newId: () => string): DraftRecipe {
       const title = sectionTitle(heading ? heading[2] : (label?.[1] ?? ''));
       if (INGREDIENTS_TITLE.test(title)) {
         section = 'ingredients';
-      } else if (NOTES_TITLE.test(title)) {
-        // The heading this app writes (and a member's own "Notes") is not repeated inside the notes.
-        section = 'verbatim';
       } else {
-        section = 'other';
+        const kind = sectionKind(title);
+        // Steps, Notes and Source are sections of the notes (see `recipeSections`); written the same way
+        // whatever the member's heading level or language.
+        if (kind)
+          notes.push(`## ${kind === 'steps' ? 'Steps' : kind === 'notes' ? 'Notes' : 'Source'}`);
         // Any other heading the member wrote stays with the notes.
-        notes.push(line.trim());
+        else notes.push(line.trim());
+        section = kind === 'notes' || kind === 'source' ? 'verbatim' : 'other';
       }
       continue;
     }
@@ -210,7 +225,7 @@ function parseChunk(chunk: Chunk, newId: () => string): DraftRecipe {
   if (!name) warnings.push('missingName');
   name = name.slice(0, MAX_NAME).trim();
 
-  let noteText = notes.join('\n').trim();
+  let noteText = normalizeRecipeNotes(notes.join('\n')) ?? '';
   if (noteText.length > MAX_NOTES) {
     noteText = noteText.slice(0, MAX_NOTES).trimEnd();
     warnings.push('notesTruncated');
@@ -310,16 +325,16 @@ function ingredientLine(ingredient: RecipeIngredient): string {
 
 /**
  * A recipe as markdown, in the format `parseRecipesMarkdown` reads, so a recipe survives a round trip.
- * Amounts stay as stored (1500 g, not 1.5 kg). Notes go last, under "## Notes", and are read back verbatim.
+ * Amounts stay as stored (1500 g, not 1.5 kg). Steps, notes and source go last, as the sections of `recipeSections`, and read back the same.
  */
 export function formatRecipeMarkdown(recipe: RecipeInput): string {
   const out = [`# ${recipe.name}`, `servings: ${recipe.servings}`, '', '## Ingredients'];
   for (const ingredient of recipe.ingredients) out.push(ingredientLine(ingredient));
-  if (recipe.notes) {
-    const notes = recipe.notes
-      .split('\n')
-      .map((line) => (H1_IN_NOTES.test(line) ? `\\${line}` : line));
-    out.push('', '## Notes', ...notes);
+  // Steps, notes and source, in the sections the app edits; old free text is written under "## Notes".
+  const tail = formatRecipeNotes(parseRecipeNotes(recipe.notes));
+  if (tail) {
+    const lines = tail.split('\n').map((line) => (H1_IN_NOTES.test(line) ? `\\${line}` : line));
+    out.push('', ...lines);
   }
   return `${out.join('\n')}\n`;
 }

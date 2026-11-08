@@ -2,13 +2,14 @@ import {
   formatAmount,
   formatRecipeMarkdown,
   normalizeIngredientName,
+  parseRecipeNotes,
   type Recipe,
   type RecipeIngredient,
 } from '@diade/domain';
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, BackHandler, Pressable, Share, Text, View } from 'react-native';
+import { Alert, BackHandler, Linking, Pressable, Share, Text, View } from 'react-native';
 import { deleteRecord } from '../data/repository';
 import { Icon } from '../design';
 import { decimalFor } from './RecipeForm';
@@ -31,6 +32,9 @@ const IngredientLine: React.FC<{
   );
 };
 
+/** A source that is a single web address opens in the browser; anything else is just text. */
+const isLink = (source: string): boolean => /^https?:\/\/\S+$/i.test(source);
+
 /** One recipe on its own screen: ingredients (pantry staples set apart), notes, edit and delete. */
 export const RecipeDetailScreen: React.FC<{
   recipe: Recipe;
@@ -52,6 +56,17 @@ export const RecipeDetailScreen: React.FC<{
   }, [onBack]);
 
   // The system share sheet carries the text to any app, and has its own Copy action: no clipboard module needed.
+  const sections = useMemo(() => parseRecipeNotes(recipe.notes), [recipe.notes]);
+  // Identical steps get distinct keys: the text plus how many came before it.
+  const stepRows = useMemo(() => {
+    const seen = new Map<string, number>();
+    return sections.steps.map((step) => {
+      const count = seen.get(step) ?? 0;
+      seen.set(step, count + 1);
+      return { step, key: `${step}#${count}` };
+    });
+  }, [sections.steps]);
+
   const share = async () => {
     try {
       await Share.share({ message: formatRecipeMarkdown(recipe) });
@@ -103,10 +118,39 @@ export const RecipeDetailScreen: React.FC<{
         ) : null}
       </Card>
 
-      {recipe.notes ? (
+      {sections.steps.length > 0 ? (
+        <Card>
+          <SectionLabel>{t('recipes.steps')}</SectionLabel>
+          {stepRows.map(({ step, key }, index) => (
+            <View key={key} className="flex-row items-start py-2">
+              <Text className="w-7 text-sm font-semibold text-ink-muted">{index + 1}.</Text>
+              <Text className="flex-1 text-sm leading-5 text-ink">{step}</Text>
+            </View>
+          ))}
+        </Card>
+      ) : null}
+
+      {sections.notes ? (
         <Card>
           <SectionLabel>{t('recipes.notes')}</SectionLabel>
-          <Text className="text-sm leading-5 text-ink">{recipe.notes}</Text>
+          <Text className="text-sm leading-5 text-ink">{sections.notes}</Text>
+        </Card>
+      ) : null}
+
+      {sections.source ? (
+        <Card>
+          <SectionLabel>{t('recipes.source')}</SectionLabel>
+          {isLink(sections.source) ? (
+            <Pressable
+              onPress={() => Linking.openURL(sections.source).catch(() => undefined)}
+              accessibilityRole="link"
+              className="min-h-[48px] justify-center active:opacity-70"
+            >
+              <Text className="text-sm leading-5 text-ink underline">{sections.source}</Text>
+            </Pressable>
+          ) : (
+            <Text className="text-sm leading-5 text-ink">{sections.source}</Text>
+          )}
         </Card>
       ) : null}
 
