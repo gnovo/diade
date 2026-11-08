@@ -20,17 +20,18 @@ brief for the PR, then `dev-notes.md`. Wireframes: `design/meal-prep/index.html`
 | B | Recipes: library, CRUD, metric parser, pantry flag | [pr-b](pr-b-recipes.md) | merged (#16) |
 | C | Plan + grocery generation + merge rules | [pr-c](pr-c-plan-and-groceries.md) | merged (#17) |
 | D | New-list wizard | [pr-d](pr-d-new-list-wizard.md) | merged (#18) |
-| E | Markdown import and export | [pr-e](pr-e-markdown-import.md) | built (paste, share; format in [recipe-markdown](../../features/recipe-markdown.md)) |
+| E | Markdown import and export | [pr-e](pr-e-markdown-import.md) | merged (#22); format in [recipe-markdown](../../features/recipe-markdown.md) |
 
-Follow-ups after E, in order (decided, not yet built):
+Follow-ups after E, in order. Full detail, process notes and a starting prompt: [follow-ups-handover.md](follow-ups-handover.md).
 
-1. **Possible duplicates at the grocery review:** "Meat ↔ Meet, merge?" on the new-list wizard review and "Update from plan",
-   every merge confirmed. E already offers known names while typing and flags near-miss names on import
-   (`packages/domain/src/ingredientNames.ts`); this catches what those miss.
-2. **Ingredient catalog** (a synced entity with aliases, so aubergine = eggplant and cebola = onion). The proper fix, but it
-   revisits decision 2 (ingredients as JSON on the recipe): brainstorm and lock before building.
-3. "Update from plan" re-proposes rows left off in the wizard review (needs a dismissed-keys column on lists).
-4. A `.md` file picker / share target (new native module, needs an APK release).
+1. **Expo and dependency update**, its own quick PR (check `pnpm fingerprint` before and after: expo-updates and Sentry are native, so it may need an APK release).
+2. **Possible duplicates at the grocery review:** "Meat ↔ Meet, merge?" on the new-list wizard review and "Update from plan", every merge
+   confirmed. E already offers known names while typing and flags near-miss names on import (`packages/domain/src/ingredientNames.ts`);
+   this catches what those miss.
+3. **Ingredient catalog** (a synced entity with aliases, so aubergine = eggplant and cebola = onion). The proper fix, but it revisits
+   decision 2 (ingredients as JSON on the recipe): brainstorm and lock before building.
+4. "Update from plan" re-proposes rows left off in the wizard review (needs a dismissed-keys column on lists).
+5. A `.md` file picker / share target (new native module, needs an APK release).
 
 Dependencies: C needs B. D needs B and C (it reuses the recipe picker and the generator). E needs B
 only, so it can move earlier if wanted. Update this table when a PR merges.
