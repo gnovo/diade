@@ -20,7 +20,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, Text, type TextInput, View } from 'react-native';
 import { newId } from '../data/ids';
+import { stampIngredients } from '../data/ingredientActions';
 import { insertRecord, updateRecord } from '../data/repository';
+import { useIngredientCatalog } from '../data/useIngredientCatalog';
 import { Icon, useColor } from '../design';
 import { BottomSheet } from './BottomSheet';
 import { RecipeStepsEditor, stepsWithDraft } from './RecipeStepsEditor';
@@ -153,6 +155,7 @@ export const RecipeForm: React.FC<{
 }> = ({ visible, onClose, recipe, onSaved, library }) => {
   const { t, i18n } = useTranslation();
   const ctx = useWriteContext();
+  const { resolver } = useIngredientCatalog();
   const decimal = decimalFor(i18n.language);
   const editing = Boolean(recipe);
 
@@ -250,14 +253,15 @@ export const RecipeForm: React.FC<{
           )
         : [...ingredients, pending];
     }
-    const next = {
-      name: name.trim(),
-      servings,
-      notes: notesText,
-      ingredients: finalIngredients,
-    };
     try {
       setSaving(true);
+      // The catalog entries these ingredients are (made now if this is their first use) and their ids.
+      const next = {
+        name: name.trim(),
+        servings,
+        notes: notesText,
+        ingredients: await stampIngredients(ctx, finalIngredients, resolver),
+      };
       let id: string;
       if (recipe) {
         id = recipe.id;

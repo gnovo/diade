@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
+import { createIngredientResolver } from './ingredientCatalog';
+import { ingredientMatchKey, singularWord } from './ingredientKeys';
 import {
   buildGroceryList,
   defaultPlanPeriod,
   diffPlanAgainstList,
   type GroceryRow,
   groceryAmount,
-  ingredientMatchKey,
   isEmptyDiff,
   isWeekPlan,
   mergeGroceryRows,
@@ -14,7 +15,6 @@ import {
   periodChoice,
   pickCurrentPlan,
   planForWeek,
-  singularWord,
   weekPeriod,
 } from './mealPlan';
 import type { Recipe, RecipeIngredient, RecipeUnit } from './recipes';
@@ -422,11 +422,11 @@ describe('merging confirmed duplicates', () => {
   });
 
   it('keeps null ("to taste") out of the sum, and stays null when nothing has an amount', () => {
-    const t = recipe('t', 1, [ing('Salt', null), ing('Sal', null)]);
-    const [salt, sal] = buildGroceryList([{ recipeId: 't', servings: 1 }], [t]).rows;
-    expect(mergeGroceryRows(salt, sal).quantity).toBeNull();
+    const t = recipe('t', 1, [ing('Oregano', null), ing('Oregao', null)]);
+    const [oregano, oregao] = buildGroceryList([{ recipeId: 't', servings: 1 }], [t]).rows;
+    expect(mergeGroceryRows(oregano, oregao).quantity).toBeNull();
     const [meat] = build().rows;
-    expect(mergeGroceryRows(salt, meat).quantity).toBe(500);
+    expect(mergeGroceryRows(oregano, meat).quantity).toBe(500);
   });
 
   it('does not re-propose the absorbed row, and finds a merged list unchanged', () => {
@@ -576,5 +576,67 @@ describe('week plans', () => {
       startsOn: '2026-11-02',
       endsOn: '2026-11-08',
     });
+  });
+});
+
+describe('ingredients that are one thing under two names', () => {
+  const a = recipe('a', 2, [ing('Aubergine', 200), ing('Tomatoes', 400)]);
+  const b = recipe('b', 2, [ing('Eggplant', 100), ing('Tomato', 100)]);
+  const both = [
+    { recipeId: 'a', servings: 2 },
+    { recipeId: 'b', servings: 2 },
+  ];
+
+  it('groups dictionary synonyms and plurals into one row, keeping the first name', () => {
+    const { rows } = buildGroceryList(both, [a, b]);
+    expect(rows.map((r) => [r.name, r.quantity])).toEqual([
+      ['Aubergine', 300],
+      ['Tomatoes', 500],
+    ]);
+  });
+
+  it('uses a household alias too', () => {
+    const resolver = createIngredientResolver([
+      { id: 'm', matchKey: 'meat', aliases: [], mergedIntoId: null, deletedAt: null },
+      { id: 't', matchKey: 'meet', aliases: [], mergedIntoId: 'm', deletedAt: null },
+    ]);
+    const x = recipe('x', 1, [ing('Meat', 500)]);
+    const y = recipe('y', 1, [ing('Meet', 250)]);
+    const { rows } = buildGroceryList(
+      [
+        { recipeId: 'x', servings: 1 },
+        { recipeId: 'y', servings: 1 },
+      ],
+      [x, y],
+      { resolver },
+    );
+    expect(rows.map((r) => [r.name, r.quantity])).toEqual([['Meat', 750]]);
+  });
+
+  it('matches items stored under keys from before the synonym was known', () => {
+    // A list made when "Eggplant" and "Aubergine" were two rows (two items, each under its own key).
+    const old = (key: string, name: string, quantity: string): PlanListItem => ({
+      id: key,
+      name,
+      quantity,
+      unit: 'g',
+      isChecked: false,
+      editedByHand: false,
+      contributions: [
+        {
+          recipeId: 'a',
+          recipeName: 'Recipe a',
+          key: `${key}|mass`,
+          quantity: Number(quantity),
+          unit: 'g',
+        },
+      ],
+    });
+    const items = [old('aubergine', 'Aubergine', '200'), old('eggplant', 'Eggplant', '100')];
+    const diff = diffPlanAgainstList(buildGroceryList(both, [a, b]), items);
+    // The plan now has one aubergine row of 300 g. The first old item is the row; the second is a stray.
+    expect(diff.added.map((r) => r.name)).toEqual(['Tomatoes']);
+    expect(diff.changed.map((c) => [c.item.name, c.to])).toEqual([['Aubergine', '300 g']]);
+    expect(diff.unchanged.map((i) => i.name)).toEqual(['Eggplant']);
   });
 });

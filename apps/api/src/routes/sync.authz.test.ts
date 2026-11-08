@@ -188,3 +188,74 @@ describe('a list generated from a plan', () => {
     ).toBe('ok');
   });
 });
+
+describe('ingredient catalog authorisation', () => {
+  const OTHER_SPACE = '99999999-9999-4999-8999-999999999999';
+  const TARGET = '66666666-6666-4666-8666-666666666666';
+
+  it('lets either member edit or delete an ingredient in their space (always shared)', async () => {
+    const db = fakeDb({ ingredients: [{ id: RECORD }] });
+    expect(await authorizeMutation(db, mutation('ingredients', 'UPDATE'), {}, SPACE, ME)).toBe(
+      'ok',
+    );
+    expect(await authorizeMutation(db, mutation('ingredients', 'DELETE'), {}, SPACE, PARTNER)).toBe(
+      'ok',
+    );
+  });
+
+  it("reports not_found when the ingredient is not in the caller's space", async () => {
+    expect(
+      await authorizeMutation(fakeDb({}), mutation('ingredients', 'UPDATE'), {}, SPACE, ME),
+    ).toBe('not_found');
+  });
+
+  it('allows inserts', async () => {
+    expect(
+      await authorizeMutation(fakeDb({}), mutation('ingredients', 'INSERT'), {}, SPACE, ME),
+    ).toBe('ok');
+  });
+
+  it('may be merged into an ingredient of its own space, or one that has not arrived yet', async () => {
+    const own = fakeDb({ ingredients: [{ spaceId: SPACE }] });
+    expect(
+      await authorizeMutation(
+        own,
+        mutation('ingredients', 'INSERT'),
+        { mergedIntoId: TARGET },
+        SPACE,
+        ME,
+      ),
+    ).toBe('ok');
+    expect(
+      await authorizeMutation(
+        fakeDb({}),
+        mutation('ingredients', 'INSERT'),
+        { mergedIntoId: TARGET },
+        SPACE,
+        ME,
+      ),
+    ).toBe('ok');
+  });
+
+  it('is refused a merge into an ingredient of another space', async () => {
+    const db = fakeDb({ ingredients: [{ spaceId: OTHER_SPACE }] });
+    expect(
+      await authorizeMutation(
+        db,
+        mutation('ingredients', 'INSERT'),
+        { mergedIntoId: TARGET },
+        SPACE,
+        ME,
+      ),
+    ).toBe('forbidden');
+    expect(
+      await authorizeMutation(
+        db,
+        mutation('ingredients', 'UPDATE'),
+        { mergedIntoId: TARGET },
+        SPACE,
+        ME,
+      ),
+    ).toBe('forbidden');
+  });
+});

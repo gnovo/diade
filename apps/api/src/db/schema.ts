@@ -194,6 +194,39 @@ export const recipes = pgTable('recipes', {
 });
 
 /**
+ * An ingredient in the household's catalog, always shared within the space: what a grocery list uses to know
+ * that two written names are one ingredient. One live row per `match_key`; its id is derived from the space
+ * and the key (see `ingredientId` in @diade/domain), so two phones that add the same ingredient at the same
+ * moment make the same row and the second insert changes nothing. `match_key` never changes; a rename, an
+ * alias or a merge changes the other columns. `merged_into_id` has no foreign key on purpose: a merge can
+ * reach the server before the row it points to, and the resolver copes with a target it does not have.
+ */
+export const ingredients = pgTable(
+  'ingredients',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    spaceId: uuid('space_id')
+      .notNull()
+      .references(() => spaces.id, { onDelete: 'cascade' }),
+    creatorId: text('creator_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    matchKey: text('match_key').notNull(),
+    aliases: jsonb('aliases').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    mergedIntoId: uuid('merged_into_id'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+    deletedAt: timestamp('deleted_at'),
+  },
+  (table) => [
+    uniqueIndex('ingredients_space_match_key')
+      .on(table.spaceId, table.matchKey)
+      .where(sql`${table.deletedAt} IS NULL`),
+  ],
+);
+
+/**
  * A meal plan, always shared within the space: a pool of recipes (with servings) for a period, not a
  * calendar. The recipes are one JSON array on the plan, edited and read whole, like a recipe's ingredients.
  * `starts_on` and `ends_on` are plain calendar days.

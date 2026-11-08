@@ -4,6 +4,7 @@ import type {
   ExternalCalendar,
   ExternalEvent,
   ImportantDate,
+  Ingredient,
   ListItem,
   MealPlan,
   Recipe,
@@ -91,3 +92,6 @@ export const getActiveRecipes = () =>
 
 export const getActiveMealPlans = () =>
   selectActive<MealPlan>('local_meal_plans', 'starts_on ASC, created_at ASC');
+
+export const getActiveIngredients = () =>
+  selectActive<Ingredient>('local_ingredients', 'name COLLATE NOCASE ASC');

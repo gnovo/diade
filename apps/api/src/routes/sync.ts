@@ -16,6 +16,7 @@ import {
   captureItems,
   events,
   importantDates,
+  ingredients,
   listItems,
   lists,
   mealPlans,
@@ -57,6 +58,17 @@ export async function authorizeMutation(
       .where(and(eq(mealPlans.id, data.planId), eq(mealPlans.spaceId, spaceId)))
       .limit(1);
     if (!plan) return 'forbidden';
+  }
+
+  // An ingredient may be merged only into one of its own space. The target may not have arrived yet (a merge can
+  // reach the server before the row it points to), so a missing target is allowed; one in another space is not.
+  if (entity === 'ingredients' && typeof data.mergedIntoId === 'string' && operation !== 'DELETE') {
+    const [target] = await db
+      .select({ spaceId: ingredients.spaceId })
+      .from(ingredients)
+      .where(eq(ingredients.id, data.mergedIntoId))
+      .limit(1);
+    if (target && target.spaceId !== spaceId) return 'forbidden';
   }
 
   if (operation === 'INSERT') {
@@ -120,6 +132,15 @@ export async function authorizeMutation(
         .select({ id: recipes.id })
         .from(recipes)
         .where(and(eq(recipes.id, recordId), eq(recipes.spaceId, spaceId)))
+        .limit(1);
+      return row ? 'ok' : 'not_found';
+    }
+    case 'ingredients': {
+      // Always shared: any member may edit, but only within their own space.
+      const [row] = await db
+        .select({ id: ingredients.id })
+        .from(ingredients)
+        .where(and(eq(ingredients.id, recordId), eq(ingredients.spaceId, spaceId)))
         .limit(1);
       return row ? 'ok' : 'not_found';
     }
@@ -401,6 +422,39 @@ async function applyMutation(
       if (d.notes !== undefined) changes.notes = d.notes;
       if (d.ingredients !== undefined) changes.ingredients = d.ingredients;
       await db.update(recipes).set(changes).where(where);
+      return;
+    }
+
+    case 'ingredients': {
+      if (operation === 'INSERT') {
+        // The id is derived from the space and the match key, so a second phone adding the same ingredient
+        // sends the same row: it is already here, and that is fine.
+        await db
+          .insert(ingredients)
+          .values({
+            id: recordId,
+            spaceId,
+            creatorId: userId,
+            name: d.name,
+            matchKey: d.matchKey,
+            aliases: d.aliases ?? [],
+            mergedIntoId: d.mergedIntoId ?? null,
+            createdAt: now,
+            updatedAt: now,
+          })
+          .onConflictDoNothing();
+        return;
+      }
+      const where = and(eq(ingredients.id, recordId), eq(ingredients.spaceId, spaceId));
+      if (operation === 'DELETE') {
+        await db.update(ingredients).set({ deletedAt: now, updatedAt: now }).where(where);
+        return;
+      }
+      const changes: Partial<typeof ingredients.$inferInsert> = { updatedAt: now };
+      if (d.name !== undefined) changes.name = d.name;
+      if (d.aliases !== undefined) changes.aliases = d.aliases;
+      if (d.mergedIntoId !== undefined) changes.mergedIntoId = d.mergedIntoId;
+      await db.update(ingredients).set(changes).where(where);
       return;
     }
 
@@ -726,6 +780,17 @@ export function createSyncRouter(
         ),
       );
 
+    // Ingredient catalog (always shared within the space)
+    const ingredientRecords = await db
+      .select()
+      .from(ingredients)
+      .where(
+        and(
+          eq(ingredients.spaceId, spaceId),
+          or(gt(ingredients.updatedAt, sinceDate), gt(ingredients.deletedAt, sinceDate)),
+        ),
+      );
+
     // Google Calendar events and calendars: own in full, partner's redacted on the server.
     const external = await buildExternalPull(db, { since: sinceDate, spaceId, viewerId: user.id });
 
@@ -787,6 +852,12 @@ export function createSyncRouter(
           createdAt: p.createdAt.toISOString(),
           updatedAt: p.updatedAt.toISOString(),
           deletedAt: p.deletedAt?.toISOString() || null,
+        })),
+        ingredients: ingredientRecords.map((i) => ({
+          ...i,
+          createdAt: i.createdAt.toISOString(),
+          updatedAt: i.updatedAt.toISOString(),
+          deletedAt: i.deletedAt?.toISOString() || null,
         })),
       },
     });

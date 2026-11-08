@@ -22,6 +22,7 @@ import { Alert, Pressable, Text, View } from 'react-native';
 import { generateGroceryList } from '../data/mealPlanActions';
 import { getActiveMealPlans } from '../data/queries';
 import { deleteRecord, insertRecord, updateRecord } from '../data/repository';
+import { useIngredientCatalog } from '../data/useIngredientCatalog';
 import { useLiveQuery } from '../data/useLiveQuery';
 import { Icon, useColor } from '../design';
 import { planItemsOf } from './PlanListSection';
@@ -85,6 +86,7 @@ export const PlanView: React.FC<{
   const { t } = useTranslation();
   const ctx = useWriteContext();
   const plans = useLiveQuery(getActiveMealPlans, [] as MealPlan[]);
+  const { resolver } = useIngredientCatalog();
   const today = new Date();
   // Weeks from today; a Sunday opens on the week that begins tomorrow, as new plans do.
   const [offset, setOffset] = useState(() =>
@@ -104,8 +106,8 @@ export const PlanView: React.FC<{
   );
   const recipeById = useMemo(() => new Map(recipes.map((r) => [r.id, r])), [recipes]);
   const build = useMemo(
-    () => (plan ? buildGroceryList(plan.recipes, recipes) : null),
-    [plan, recipes],
+    () => (plan ? buildGroceryList(plan.recipes, recipes, { resolver }) : null),
+    [plan, recipes, resolver],
   );
   const generated = plan ? (lists.find((list) => list.planId === plan.id) ?? null) : null;
   const listItems = useMemo(
@@ -114,8 +116,10 @@ export const PlanView: React.FC<{
   );
   const outOfDate = useMemo(
     () =>
-      build && generated ? !isEmptyDiff(diffPlanAgainstList(build, planItemsOf(listItems))) : false,
-    [build, generated, listItems],
+      build && generated
+        ? !isEmptyDiff(diffPlanAgainstList(build, planItemsOf(listItems), resolver))
+        : false,
+    [build, generated, listItems, resolver],
   );
 
   const rangeText = (p: Pick<MealPlan, 'startsOn' | 'endsOn'>, compact = false) => {
@@ -180,6 +184,7 @@ export const PlanView: React.FC<{
         target,
         recipes,
         t('plan.listName', { range: rangeText(target, true) }),
+        resolver,
       );
       onOpenList(listId);
     } catch (err) {

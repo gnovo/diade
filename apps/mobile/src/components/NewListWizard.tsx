@@ -31,6 +31,7 @@ import {
   wizardPath,
 } from '../data/newListFlow';
 import { getActiveMealPlans } from '../data/queries';
+import { useIngredientCatalog } from '../data/useIngredientCatalog';
 import { useLiveQuery } from '../data/useLiveQuery';
 import { Icon, useColor } from '../design';
 import { BottomSheet } from './BottomSheet';
@@ -156,6 +157,7 @@ export const NewListWizard: React.FC<{
   const ctx = useWriteContext();
   const ink = useColor('ink');
   const plans = useLiveQuery(getActiveMealPlans, [] as MealPlan[]);
+  const { resolver } = useIngredientCatalog();
 
   const defaultName = (id: ListTemplateId) =>
     id === 'blank' ? '' : t(`lists.template.${id}.name`);
@@ -212,8 +214,8 @@ export const NewListWizard: React.FC<{
   const total = stepCount(path);
   const known = useMemo(() => new Set(recipes.map((r) => r.id)), [recipes]);
   const build = useMemo(
-    () => (path === 'plan' ? buildGroceryList(selection, recipes) : null),
-    [path, selection, recipes],
+    () => (path === 'plan' ? buildGroceryList(selection, recipes, { resolver }) : null),
+    [path, selection, recipes, resolver],
   );
   // The rows the member sees: the build with the merges they confirmed applied.
   const reviewRows = useMemo(() => (build ? applyMerges(build.rows, merges) : []), [build, merges]);

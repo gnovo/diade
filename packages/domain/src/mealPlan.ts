@@ -7,13 +7,8 @@
  * is an explicit action that shows a diff (see `diffPlanAgainstList`).
  */
 import { toDateInputValue } from './datetime';
-import {
-  MAX_SERVINGS,
-  MIN_SERVINGS,
-  normalizeIngredientName,
-  type Recipe,
-  type RecipeUnit,
-} from './recipes';
+import { DEFAULT_RESOLVER, type IngredientResolver } from './ingredientCatalog';
+import { MAX_SERVINGS, MIN_SERVINGS, type Recipe, type RecipeUnit } from './recipes';
 
 export interface MealPlanRecipe {
   recipeId: string;
@@ -35,26 +30,6 @@ export interface MealPlan {
 }
 
 export const MAX_PLAN_RECIPES = 50;
-
-// --- Names ---
-
-/**
- * One word to its singular form, for matching only (the name that is shown is never changed). The rule
- * is deliberately conservative: it drops a single trailing "s" and nothing else, so `egg`/`eggs`
- * and `ovo`/`ovos` meet. Words of three letters or fewer, and words ending in "ss", "us" or "is"
- * (`hummus`, `couscous`, `asparagus`), are left alone. Irregular plurals (`tomato`/`tomatoes`,
- * `peach`/`peaches`, `pão`/`pães`) are not merged: two rows are better than a wrong merge.
- */
-export function singularWord(word: string): string {
-  if (word.length < 4 || !word.endsWith('s')) return word;
-  if (/(ss|us|is)$/.test(word)) return word;
-  return word.slice(0, -1);
-}
-
-/** Accent-, case- and plural-insensitive form of an ingredient name: what rows are grouped by. */
-export function ingredientMatchKey(name: string): string {
-  return normalizeIngredientName(name).split(' ').map(singularWord).join(' ');
-}
 
 // --- Units ---
 
@@ -111,7 +86,7 @@ function roundBase(quantity: number, unit: RecipeUnit): number {
 export interface GroceryContribution {
   recipeId: string;
   recipeName: string;
-  /** Row identity: `ingredientMatchKey(name)|family`. Lets a stored item be matched back to a row. */
+  /** Row identity: the ingredient's resolved match key, `|`, the unit family. Lets a stored item be matched back to a row. */
   key: string;
   quantity: number | null;
   unit: RecipeUnit;
@@ -139,8 +114,9 @@ export interface GroceryBuild {
  * Scales every recipe in the plan, groups the ingredients and sums them.
  *
  * - Scale by `servings / recipe.servings`.
- * - Group by name (accent, case and plural insensitive) and unit family. `1 onion` and `200 g onion`
- *   stay two rows; we do not guess.
+ * - Group by ingredient and unit family. An ingredient is a name resolved through the household's catalog and
+ *   the built-in dictionary, so `aubergine` and `eggplant` are one row; a name nobody knows is matched by
+ *   accent, case and plural only. `1 onion` and `200 g onion` stay two rows; we do not guess.
  * - A null quantity ("to taste") joins any row of the same name and adds nothing.
  * - A row is a staple only when every ingredient that feeds it is flagged as one.
  * - Entries whose recipe no longer exists are skipped.
@@ -148,8 +124,9 @@ export interface GroceryBuild {
 export function buildGroceryList(
   entries: MealPlanRecipe[],
   recipes: Recipe[],
-  options: { includeStaples?: boolean } = {},
+  options: { includeStaples?: boolean; resolver?: IngredientResolver } = {},
 ): GroceryBuild {
+  const resolver = options.resolver ?? DEFAULT_RESOLVER;
   const byId = new Map(recipes.map((recipe) => [recipe.id, recipe]));
   const groups = new Map<string, { row: GroceryRow; allStaples: boolean }>();
 
@@ -160,7 +137,7 @@ export function buildGroceryList(
     for (const ingredient of recipe.ingredients) {
       const family = unitFamily(ingredient.unit);
       const unit = FAMILY_BASE_UNIT[family];
-      const key = `${ingredientMatchKey(ingredient.name)}|${family}`;
+      const key = `${resolver.key(ingredient.name)}|${family}`;
       const quantity =
         ingredient.quantity === null
           ? null
@@ -305,7 +282,11 @@ const sameContributions = (a: GroceryContribution[], b: GroceryContribution[]) =
  * Staples the member added by hand from the "left out" group count as wanted rows, so they are scaled
  * with the rest instead of being removed. Staples that are not on the list are not added.
  */
-export function diffPlanAgainstList(desired: GroceryBuild, items: PlanListItem[]): PlanDiff {
+export function diffPlanAgainstList(
+  desired: GroceryBuild,
+  items: PlanListItem[],
+  resolver: IngredientResolver = DEFAULT_RESOLVER,
+): PlanDiff {
   const wanted = new Map([...desired.rows, ...desired.staples].map((row) => [row.key, row]));
   const diff: PlanDiff = {
     added: [],
@@ -320,7 +301,8 @@ export function diffPlanAgainstList(desired: GroceryBuild, items: PlanListItem[]
   for (const item of items) {
     // An item the member merged at review carries several keys (one per row it absorbed): all of them are
     // "seen", and its wanted row is those rows merged again, so it is not proposed as new next time.
-    const keys = [...new Set(item.contributions.map((c) => c.key))];
+    // Keys stored before an alias was known are resolved the way today's rows are, so they still match.
+    const keys = [...new Set(item.contributions.map((c) => resolver.canonicalRowKey(c.key)))];
     const key = keys[0];
     if (!key) continue;
     // A second item for the same row (it should not happen) is left alone, not double counted.
@@ -371,8 +353,11 @@ export function isEmptyDiff(diff: PlanDiff): boolean {
 export function missingStaples(
   build: GroceryBuild,
   items: Array<Pick<PlanListItem, 'contributions'>>,
+  resolver: IngredientResolver = DEFAULT_RESOLVER,
 ): GroceryRow[] {
-  const present = new Set(items.map((item) => item.contributions[0]?.key).filter(Boolean));
+  const present = new Set(
+    items.flatMap((item) => item.contributions.map((c) => resolver.canonicalRowKey(c.key))),
+  );
   return build.staples.filter((row) => !present.has(row.key));
 }
 

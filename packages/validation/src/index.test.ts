@@ -419,3 +419,67 @@ describe('plan provenance on lists and items', () => {
     ).toBe(false);
   });
 });
+
+describe('ingredient catalog sync payloads', () => {
+  const mergedInto = '77777777-7777-4777-8777-777777777777';
+
+  it('accepts an ingredient with a name and a match key, and defaults the aliases to none', () => {
+    const result = parseSyncPayload('ingredients', 'INSERT', { name: 'Meat', matchKey: 'meat' });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.aliases).toEqual([]);
+  });
+
+  it('accepts aliases and a merge target, and rejects a name or key that is empty', () => {
+    expect(
+      parseSyncPayload('ingredients', 'INSERT', {
+        name: 'Meet',
+        matchKey: 'meet',
+        aliases: ['Mince'],
+        mergedIntoId: mergedInto,
+      }).success,
+    ).toBe(true);
+    expect(parseSyncPayload('ingredients', 'INSERT', { name: ' ', matchKey: 'meat' }).success).toBe(
+      false,
+    );
+    expect(parseSyncPayload('ingredients', 'INSERT', { name: 'Meat', matchKey: '' }).success).toBe(
+      false,
+    );
+    expect(
+      parseSyncPayload('ingredients', 'INSERT', {
+        name: 'Meat',
+        matchKey: 'meat',
+        mergedIntoId: 'not-a-uuid',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('lets an update change the name, aliases or merge, but not the match key', () => {
+    expect(parseSyncPayload('ingredients', 'UPDATE', { name: 'Beef' }).success).toBe(true);
+    expect(
+      parseSyncPayload('ingredients', 'UPDATE', { aliases: ['Mince', 'Ground beef'] }).success,
+    ).toBe(true);
+    expect(parseSyncPayload('ingredients', 'UPDATE', { mergedIntoId: null }).success).toBe(true);
+    const withKey = parseSyncPayload('ingredients', 'UPDATE', { name: 'Beef', matchKey: 'other' });
+    expect(withKey.success).toBe(true);
+    if (withKey.success) expect(withKey.data).not.toHaveProperty('matchKey');
+  });
+
+  it('accepts an optional ingredientId on a recipe line', () => {
+    const line = { id: 'a', name: 'Meat', quantity: 500, unit: 'g', staple: false };
+    expect(
+      parseSyncPayload('recipes', 'INSERT', { name: 'Stew', ingredients: [line] }).success,
+    ).toBe(true);
+    expect(
+      parseSyncPayload('recipes', 'INSERT', {
+        name: 'Stew',
+        ingredients: [{ ...line, ingredientId: mergedInto }],
+      }).success,
+    ).toBe(true);
+    expect(
+      parseSyncPayload('recipes', 'INSERT', {
+        name: 'Stew',
+        ingredients: [{ ...line, ingredientId: 'x' }],
+      }).success,
+    ).toBe(false);
+  });
+});

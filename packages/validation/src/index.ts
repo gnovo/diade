@@ -195,6 +195,8 @@ export const recipeIngredientSchema = z.object({
   quantity: z.number().finite().positive().max(100000).nullable(),
   unit: recipeUnitSchema,
   staple: z.boolean(),
+  /** The catalog entry (see `ingredientId` in @diade/domain); absent on a line saved before the catalog. */
+  ingredientId: z.string().uuid().optional(),
 });
 
 const recipeIngredientsSchema = z
@@ -219,6 +221,28 @@ export const updateRecipeSchema = z.object({
   servings: servingsSchema.optional(),
   notes: z.string().max(5000).nullable().optional(),
   ingredients: recipeIngredientsSchema.optional(),
+});
+
+// --- Ingredient catalog Schemas ---
+//
+// A household's catalog of ingredients, shared between both members: one row per match key (the id is derived
+// from the space and the key, so two phones adding the same ingredient make the same row). `matchKey` is set
+// on insert and never changes; a rename, an alias or a merge changes the other fields.
+
+const ingredientNameSchema = z.string().trim().min(1, 'Name is required').max(120);
+const ingredientAliasesSchema = z.array(z.string().trim().min(1).max(120)).max(50);
+
+export const createIngredientSchema = z.object({
+  name: ingredientNameSchema,
+  matchKey: z.string().trim().min(1).max(120),
+  aliases: ingredientAliasesSchema.default([]),
+  mergedIntoId: z.string().uuid().nullable().optional(),
+});
+
+export const updateIngredientSchema = z.object({
+  name: ingredientNameSchema.optional(),
+  aliases: ingredientAliasesSchema.optional(),
+  mergedIntoId: z.string().uuid().nullable().optional(),
 });
 
 // --- Meal Plans Schemas ---
@@ -310,6 +334,7 @@ export const syncEntityNameSchema = z.enum([
   'important_dates',
   'recipes',
   'meal_plans',
+  'ingredients',
 ]);
 
 export const mutationOperationSchema = z.enum(['INSERT', 'UPDATE', 'DELETE']);
@@ -403,6 +428,7 @@ export const syncPayloadSchemas = {
   important_dates: { INSERT: createImportantDateSchema, UPDATE: updateImportantDateSchema },
   recipes: { INSERT: createRecipeSchema, UPDATE: updateRecipeSchema },
   meal_plans: { INSERT: createMealPlanSchema, UPDATE: updateMealPlanSchema },
+  ingredients: { INSERT: createIngredientSchema, UPDATE: updateIngredientSchema },
 } as const;
 
 /** DELETE mutations carry no payload; everything else must match its entity schema. */

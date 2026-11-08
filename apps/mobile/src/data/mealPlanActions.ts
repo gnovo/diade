@@ -5,6 +5,7 @@
 import {
   buildGroceryList,
   type GroceryRow,
+  type IngredientResolver,
   type MealPlan,
   type PlanDiff,
   type Recipe,
@@ -19,8 +20,9 @@ export async function generateGroceryList(
   plan: MealPlan,
   recipes: Recipe[],
   name: string,
+  resolver: IngredientResolver,
 ): Promise<string> {
-  const { rows } = buildGroceryList(plan.recipes, recipes);
+  const { rows } = buildGroceryList(plan.recipes, recipes, { resolver });
   const listId = newId();
   await writeBatch(ctx, generationWrites(listId, plan.id, name, rows));
   return listId;

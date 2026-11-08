@@ -21,6 +21,7 @@ brief for the PR, then `dev-notes.md`. Wireframes: `design/meal-prep/index.html`
 | C | Plan + grocery generation + merge rules | [pr-c](pr-c-plan-and-groceries.md) | merged (#17) |
 | D | New-list wizard | [pr-d](pr-d-new-list-wizard.md) | merged (#18) |
 | E | Markdown import and export | [pr-e](pr-e-markdown-import.md) | merged (#22); format in [recipe-markdown](../../features/recipe-markdown.md) |
+| F | Ingredient catalog: data, sync, resolver | [pr-f](pr-f-ingredient-catalog.md) | built, awaiting the dev rollout |
 
 Follow-ups after E, in order. Full detail, process notes and a starting prompt: [follow-ups-handover.md](follow-ups-handover.md).
 

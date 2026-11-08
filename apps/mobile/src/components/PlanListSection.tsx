@@ -18,6 +18,7 @@ import { Alert, Pressable, Text, View } from 'react-native';
 import { addStapleToList, applyPlanDiff } from '../data/mealPlanActions';
 import { amountText } from '../data/newListFlow';
 import { getActiveMealPlans } from '../data/queries';
+import { useIngredientCatalog } from '../data/useIngredientCatalog';
 import { useLiveQuery } from '../data/useLiveQuery';
 import { Icon } from '../design';
 import { BottomSheet } from './BottomSheet';
@@ -76,22 +77,23 @@ export const PlanListSection: React.FC<{
   const { t } = useTranslation();
   const ctx = useWriteContext();
   const plans = useLiveQuery(getActiveMealPlans, [] as MealPlan[]);
+  const { resolver } = useIngredientCatalog();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [staplesOpen, setStaplesOpen] = useState(false);
 
   const plan = plans.data.find((p) => p.id === list.planId) ?? null;
   const planItems = useMemo(() => planItemsOf(items), [items]);
   const build = useMemo(
-    () => (plan ? buildGroceryList(plan.recipes, recipes) : null),
-    [plan, recipes],
+    () => (plan ? buildGroceryList(plan.recipes, recipes, { resolver }) : null),
+    [plan, recipes, resolver],
   );
   const diff = useMemo(
-    () => (build ? diffPlanAgainstList(build, planItems) : null),
-    [build, planItems],
+    () => (build ? diffPlanAgainstList(build, planItems, resolver) : null),
+    [build, planItems, resolver],
   );
   const staples = useMemo(
-    () => (build ? missingStaples(build, planItems) : []),
-    [build, planItems],
+    () => (build ? missingStaples(build, planItems, resolver) : []),
+    [build, planItems, resolver],
   );
 
   if (!plan || !build || !diff) {
