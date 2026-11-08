@@ -1,0 +1,96 @@
+# Meal prep: plan and reasoning
+
+Five PRs that turn Lists into a place to plan meals and build a grocery list from recipes. This folder
+is the single source of context so each PR can be built in a fresh session: read this file, then the
+brief for the PR, then `dev-notes.md`. Wireframes: `design/meal-prep/index.html` (open it in a browser).
+
+## Goal
+
+> Start a "groceries" list by selecting one or more recipes. Recipes (meal prep) is a feature of its
+> own: create, read, update and delete recipes, pick the ones to prepare for a period (default a
+> week), and their ingredients land on the list, where they can be added and removed. Ingredients are
+> metric, and recipes can be imported from markdown. Adding a list becomes a multi-step wizard, like
+> adding a special date, with calmer animation.
+
+## Status
+
+| PR | Scope | Brief | Status |
+|---|---|---|---|
+| A | Wizard motion on the UI thread | [pr-a](pr-a-wizard-motion.md) | merged (#15) |
+| B | Recipes: library, CRUD, metric parser, pantry flag | [pr-b](pr-b-recipes.md) | in review |
+| C | Plan + grocery generation + merge rules | [pr-c](pr-c-plan-and-groceries.md) | not started |
+| D | New-list wizard | [pr-d](pr-d-new-list-wizard.md) | not started |
+| E | Markdown import and export | [pr-e](pr-e-markdown-import.md) | not started |
+
+Dependencies: C needs B. D needs B and C (it reuses the recipe picker and the generator). E needs B
+only, so it can move earlier if wanted. Update this table when a PR merges.
+
+## Decisions (and why)
+
+These were settled in conversation. Do not reopen them without a reason.
+
+1. **Recipes are shared across the space**, like lists and important dates. Two people, one kitchen.
+2. **Ingredients live as one JSON array on the recipe**, not as child rows. A recipe is edited and read
+   whole, and sync stays one entity. Cost: if two people edit the same recipe at the same moment, last
+   write wins on the whole array. Acceptable for a two-person household.
+3. **Quantities are numeric and metric.** Units: `g, kg, ml, l, tbsp, tsp, pinch`, and `unit` for counted
+   things (2 eggs). A quantity of `null` means "to taste". Imperial (oz, lb, cup) converts on entry
+   (1 lb becomes 454 g). Numeric storage is what makes merging possible; the lists' existing free-text
+   `quantity` column cannot be added together.
+4. **pt-PT and English both.** Recipe and ingredient text is never translated; the parser and the staple
+   dictionary understand both languages.
+5. **A plan is a pool of recipes for a period, not a calendar.** No per-day slots in v1. The goal is
+   "what are we prepping this week". Days can be added later as an additive column.
+6. **One-way link from plan to list.** Generate once. After that the list is an ordinary list, and
+   "Update from plan" is an explicit action that shows a diff. Silent two-way sync was rejected: it is
+   the kind of magic that deletes things you added by hand.
+7. **Pantry staples are a flag per ingredient** (salt, olive oil), pre-filled from a built-in en/pt-PT
+   dictionary and overridable. Generated lists leave staples out by default and offer them in a
+   collapsed group, so salt is not bought every week. Open: whether one flag is enough (see PR C).
+8. **Navigation: the Lists tab gets a switch** (Lists | Recipes | Plan). Five tabs are already full.
+9. **Out of v1:** nutrition, prices, photos, per-day slots, recipe tags.
+10. **Shared motion.** Wizards use `StepPager`, `StepProgress`, `FoldingFooter` from
+    `apps/mobile/src/components/StepPager.tsx`: Reanimated, UI thread, 460 ms, curve
+    `bezier(0.32, 0.72, 0, 1)`, reduce-motion respected. The previous curve (0.2, 0, 0, 1) front-loaded
+    nearly all travel into the first tenth of the duration and read as a snap followed by a stall.
+
+## Data model (current and planned)
+
+Shipped in PR B:
+
+- `recipes(id, space_id, creator_id, name, servings int default 4, notes, ingredients jsonb, created_at, updated_at, deleted_at)`
+- `RecipeIngredient = { id, name, quantity: number | null, unit, staple: boolean }`
+- Domain: `packages/domain/src/recipes.ts` (parser, formatter, staple dictionary). Validation:
+  `createRecipeSchema` / `updateRecipeSchema` in `packages/validation`.
+
+Planned (details in the briefs):
+
+- `meal_plans(id, space_id, creator_id, starts_on date, ends_on date, recipes jsonb [{recipeId, servings}], ...)`: PR C
+- `lists.plan_id` (nullable) and, on `list_items`, a record of which recipes contributed and whether the
+  item was edited by hand: PR C
+
+## How to add a synced entity (what PR B touched)
+
+The same checklist applies to `meal_plans`:
+
+1. `packages/domain/src/index.ts`: add the name to `SyncEntityName`, the field to `SyncPullResult`.
+2. `packages/validation/src/index.ts`: schemas, `syncEntityNameSchema`, `syncPayloadSchemas`.
+3. `apps/api/src/db/schema.ts` + `pnpm db:generate` in `apps/api` (rename the migration to something
+   readable and fix the tag in `drizzle/migrations/meta/_journal.json`).
+4. `apps/api/src/routes/sync.ts`: `authorizeMutation`, `applyMutation`, the pull query and response.
+5. `apps/mobile/src/storage/sqlite.ts`: `CREATE TABLE`, `LOCAL_TABLES`; `data/repository.ts`:
+   `ENTITY_TABLES`, `OWNED_ENTITIES`; `sync/engine.ts`: `PULL_SECTIONS`; `data/mapping.ts`: `JSON_KEYS`
+   or `BOOLEAN_KEYS` if the new columns need it; `data/queries.ts`: a `getActive...` reader.
+6. i18n in both `packages/i18n/src/locales/en.ts` and `pt-PT.ts` (a parity test enforces the same keys).
+7. Tests: validation, authorisation (`sync.authz.test.ts`), mapping.
+
+**Deploy order matters:** apply the migration to the database before deploying the Worker. A client that
+pushes an entity an old Worker does not know gets a 400, which blocks that client's whole sync.
+
+## Starting a session for a PR
+
+1. Read this file, the PR's brief, and `dev-notes.md`.
+2. Branch from an up-to-date `main`: `git checkout main && git pull && git checkout -b feat/<name>`.
+3. Open `design/meal-prep/index.html` for the screens involved. To change a wireframe, edit
+   `design/meal-prep/build_wireframes.py` and re-run it.
+4. When the PR merges, update the status table above.
