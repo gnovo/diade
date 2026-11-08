@@ -33,3 +33,24 @@ export function formatLongDate(t: TFunction, date: Date): string {
     year: date.getFullYear(),
   });
 }
+
+const sameMonth = (a: Date, b: Date) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
+
+/**
+ * "Mon 9 to Sun 15 Nov" / "seg, 9 a dom, 15 de nov": a period with weekdays. The month is written once
+ * when both days fall in it.
+ */
+export function formatDateRange(t: TFunction, from: Date, to: Date): string {
+  const start = sameMonth(from, to)
+    ? t('format.weekdayDay', { weekday: t(`format.weekdayShort.${WEEKDAYS[from.getDay()]}`), day: from.getDate() })
+    : formatDayLabel(t, from, new Date(0));
+  const end = formatDayLabel(t, to, new Date(0));
+  return t('format.range', { from: start, to: end });
+}
+
+/** "9–15 Nov" / "30 Nov – 6 Dec": a period short enough for a list name. */
+export function formatCompactRange(t: TFunction, from: Date, to: Date): string {
+  const month = (date: Date) => t(`format.monthShort.${MONTHS[date.getMonth()]}`);
+  if (sameMonth(from, to)) return `${from.getDate()}–${to.getDate()} ${month(to)}`;
+  return `${from.getDate()} ${month(from)} – ${to.getDate()} ${month(to)}`;
+}

@@ -18,6 +18,7 @@ export const ENTITY_TABLES: Record<SyncEntityName, string> = {
   capture_items: 'local_capture_items',
   important_dates: 'local_important_dates',
   recipes: 'local_recipes',
+  meal_plans: 'local_meal_plans',
 };
 
 export interface WriteContext {
@@ -33,6 +34,7 @@ const OWNED_ENTITIES = new Set<SyncEntityName>([
   'capture_items',
   'important_dates',
   'recipes',
+  'meal_plans',
 ]);
 
 async function queueMutation(
@@ -156,6 +158,64 @@ export async function deleteRecord(entity: SyncEntityName, id: string): Promise<
       [now, now, id],
     );
     await queueMutation(db, entity, 'DELETE', id, {});
+  });
+
+  emitDataChanged();
+  emitLocalWrite();
+}
+
+/** One write in a batch. `id` on an insert lets a later write in the same batch refer to the new record. */
+export type BatchWrite =
+  | { op: 'insert'; entity: SyncEntityName; id?: string; input: Row }
+  | { op: 'update'; entity: SyncEntityName; id: string; changes: Row }
+  | { op: 'delete'; entity: SyncEntityName; id: string };
+
+/**
+ * Applies several inserts, updates and deletes in one transaction, so a reader (or the sync engine)
+ * never sees half of them and the UI re-reads once. Everything is validated before anything is written.
+ * Used to generate a grocery list (the list and all its items) and to apply "Update from plan".
+ */
+export async function writeBatch(ctx: WriteContext, writes: BatchWrite[]): Promise<void> {
+  if (writes.length === 0) return;
+  const now = new Date().toISOString();
+  const prepared = writes.map((write) => {
+    if (write.op === 'insert') {
+      const fields = validatePayload(write.entity, 'INSERT', write.input);
+      return { ...write, id: write.id ?? newId(), fields };
+    }
+    if (write.op === 'update') return { ...write, fields: validatePayload(write.entity, 'UPDATE', write.changes) };
+    return write;
+  });
+
+  await inTransaction(async (db) => {
+    for (const write of prepared) {
+      const table = ENTITY_TABLES[write.entity];
+      if (write.op === 'insert') {
+        const { columns, values } = toColumns({
+          id: write.id,
+          ...(OWNED_ENTITIES.has(write.entity) ? { spaceId: ctx.spaceId, creatorId: ctx.userId } : {}),
+          ...write.fields,
+          createdAt: now,
+          updatedAt: now,
+          deletedAt: null,
+        });
+        await db.runAsync(
+          `INSERT INTO ${table} (${columns.join(', ')}) VALUES (${columns.map(() => '?').join(', ')})`,
+          values as (string | number | null)[],
+        );
+        await queueMutation(db, write.entity, 'INSERT', write.id, write.fields);
+      } else if (write.op === 'update') {
+        const { columns, values } = toColumns({ ...write.fields, updatedAt: now });
+        await db.runAsync(
+          `UPDATE ${table} SET ${columns.map((c) => `${c} = ?`).join(', ')} WHERE id = ?`,
+          [...(values as (string | number | null)[]), write.id],
+        );
+        await queueMutation(db, write.entity, 'UPDATE', write.id, write.fields);
+      } else {
+        await db.runAsync(`UPDATE ${table} SET deleted_at = ?, updated_at = ? WHERE id = ?`, [now, now, write.id]);
+        await queueMutation(db, write.entity, 'DELETE', write.id, {});
+      }
+    }
   });
 
   emitDataChanged();

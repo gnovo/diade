@@ -21,7 +21,7 @@ import { Button, Card, SectionLabel, TextField, useWriteContext } from './ui';
 /** The decimal separator a member of this language writes. */
 export const decimalFor = (language: string): string => (language.startsWith('pt') ? ',' : '.');
 
-const Stepper: React.FC<{
+export const Stepper: React.FC<{
   value: number;
   onChange: (next: number) => void;
   decreaseLabel: string;

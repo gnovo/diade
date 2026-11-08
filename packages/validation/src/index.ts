@@ -8,6 +8,7 @@ import {
   MIN_SERVINGS,
   MAX_SERVINGS,
   DEFAULT_SERVINGS,
+  MAX_PLAN_RECIPES,
   parseDateOnly,
   type SyncEntityName,
   type MutationOperation,
@@ -82,10 +83,21 @@ export const listCategorySchema = z.enum([
   'other',
 ]);
 
+/** What one recipe asked for of a generated item; see `GroceryContribution` in @diade/domain. */
+export const groceryContributionSchema = z.object({
+  recipeId: z.string().uuid(),
+  recipeName: z.string().max(120),
+  key: z.string().min(1).max(200),
+  quantity: z.number().finite().nonnegative().max(1_000_000).nullable(),
+  unit: z.enum(RECIPE_UNITS),
+});
+
 export const createListSchema = z.object({
   name: z.string().min(1, 'List name is required').max(100),
   icon: z.string().max(50).nullable().optional(),
   category: listCategorySchema.default('groceries'),
+  /** The meal plan this list was generated from. */
+  planId: z.string().uuid().nullable().optional(),
 });
 
 export const updateListSchema = createListSchema.partial().extend({
@@ -100,6 +112,10 @@ export const createListItemSchema = z.object({
   notes: z.string().max(500).nullable().optional(),
   /** Manual order within the list; items without one sort after those with one. */
   position: z.number().finite().nullable().optional(),
+  /** What each recipe asked for, when the item was generated from a meal plan. */
+  contributions: z.array(groceryContributionSchema).max(50).nullable().optional(),
+  /** Set when a member changes a plan item, so "Update from plan" leaves it alone. */
+  editedByHand: z.boolean().optional(),
 });
 
 export const updateListItemSchema = createListItemSchema.partial().extend({
@@ -202,6 +218,40 @@ export const updateRecipeSchema = z.object({
   ingredients: recipeIngredientsSchema.optional(),
 });
 
+// --- Meal Plans Schemas ---
+//
+// A plan is a pool of recipes for a period, shared between both members. The recipes are one array on
+// the plan, for the same reasons as a recipe's ingredients: it is edited and read whole.
+
+export const mealPlanRecipeSchema = z.object({
+  recipeId: z.string().uuid(),
+  servings: servingsSchema,
+});
+
+const mealPlanRecipesSchema = z
+  .array(mealPlanRecipeSchema)
+  .max(MAX_PLAN_RECIPES)
+  .refine((rows) => new Set(rows.map((row) => row.recipeId)).size === rows.length, 'A recipe can be in a plan once');
+
+const periodNotBackwards = (value: { startsOn?: string; endsOn?: string }) =>
+  value.startsOn === undefined || value.endsOn === undefined || value.endsOn >= value.startsOn;
+
+export const createMealPlanSchema = z
+  .object({
+    startsOn: dateOnlySchema,
+    endsOn: dateOnlySchema,
+    recipes: mealPlanRecipesSchema.default([]),
+  })
+  .refine(periodNotBackwards, { message: 'The plan cannot end before it starts', path: ['endsOn'] });
+
+export const updateMealPlanSchema = z
+  .object({
+    startsOn: dateOnlySchema.optional(),
+    endsOn: dateOnlySchema.optional(),
+    recipes: mealPlanRecipesSchema.optional(),
+  })
+  .refine(periodNotBackwards, { message: 'The plan cannot end before it starts', path: ['endsOn'] });
+
 // --- Google Calendar sync (REST, not the outbox) ---
 
 export const externalVisibilitySchema = z.enum(EXTERNAL_VISIBILITIES);
@@ -244,6 +294,7 @@ export const syncEntityNameSchema = z.enum([
   'capture_items',
   'important_dates',
   'recipes',
+  'meal_plans',
 ]);
 
 export const mutationOperationSchema = z.enum(['INSERT', 'UPDATE', 'DELETE']);
@@ -300,6 +351,7 @@ const listUpdatePayload = z.object({
   name: z.string().min(1).max(100).optional(),
   icon: z.string().max(50).nullable().optional(),
   category: listCategorySchema.optional(),
+  planId: z.string().uuid().nullable().optional(),
 });
 
 const listItemUpdatePayload = z.object({
@@ -308,6 +360,8 @@ const listItemUpdatePayload = z.object({
   unit: z.string().max(50).nullable().optional(),
   notes: z.string().max(500).nullable().optional(),
   position: z.number().finite().nullable().optional(),
+  contributions: z.array(groceryContributionSchema).max(50).nullable().optional(),
+  editedByHand: z.boolean().optional(),
   isChecked: z.boolean().optional(),
 });
 
@@ -333,6 +387,7 @@ export const syncPayloadSchemas = {
   },
   important_dates: { INSERT: createImportantDateSchema, UPDATE: updateImportantDateSchema },
   recipes: { INSERT: createRecipeSchema, UPDATE: updateRecipeSchema },
+  meal_plans: { INSERT: createMealPlanSchema, UPDATE: updateMealPlanSchema },
 } as const;
 
 /** DELETE mutations carry no payload; everything else must match its entity schema. */

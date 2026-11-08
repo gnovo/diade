@@ -112,3 +112,39 @@ describe('recipes authorisation', () => {
     expect(await authorizeMutation(fakeDb({}), mutation('recipes', 'INSERT'), {}, SPACE, ME)).toBe('ok');
   });
 });
+
+describe('meal plans authorisation', () => {
+  it('lets either member edit or delete a plan in their space (always shared)', async () => {
+    const db = fakeDb({ meal_plans: [{ id: RECORD }] });
+    expect(await authorizeMutation(db, mutation('meal_plans', 'UPDATE'), {}, SPACE, ME)).toBe('ok');
+    expect(await authorizeMutation(db, mutation('meal_plans', 'DELETE'), {}, SPACE, PARTNER)).toBe('ok');
+  });
+
+  it("reports not_found when the plan is not in the caller's space", async () => {
+    expect(await authorizeMutation(fakeDb({}), mutation('meal_plans', 'UPDATE'), {}, SPACE, ME)).toBe('not_found');
+  });
+
+  it('allows inserts', async () => {
+    expect(await authorizeMutation(fakeDb({}), mutation('meal_plans', 'INSERT'), {}, SPACE, ME)).toBe('ok');
+  });
+});
+
+describe('a list generated from a plan', () => {
+  const PLAN = '55555555-5555-4555-8555-555555555555';
+
+  it('may point at a plan of its own space', async () => {
+    const db = fakeDb({ meal_plans: [{ id: PLAN }] });
+    expect(await authorizeMutation(db, mutation('lists', 'INSERT'), { planId: PLAN }, SPACE, ME)).toBe('ok');
+  });
+
+  it("is refused when the plan is not in the caller's space", async () => {
+    expect(await authorizeMutation(fakeDb({}), mutation('lists', 'INSERT'), { planId: PLAN }, SPACE, ME)).toBe('forbidden');
+    const db = fakeDb({ lists: [{ id: RECORD }] });
+    expect(await authorizeMutation(db, mutation('lists', 'UPDATE'), { planId: PLAN }, SPACE, ME)).toBe('forbidden');
+  });
+
+  it('needs no plan lookup when planId is absent or null', async () => {
+    expect(await authorizeMutation(fakeDb({}), mutation('lists', 'INSERT'), {}, SPACE, ME)).toBe('ok');
+    expect(await authorizeMutation(fakeDb({}), mutation('lists', 'INSERT'), { planId: null }, SPACE, ME)).toBe('ok');
+  });
+});

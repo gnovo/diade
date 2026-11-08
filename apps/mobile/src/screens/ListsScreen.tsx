@@ -29,6 +29,8 @@ import { NewListSheet, type NewListRequest } from '../components/NewListSheet';
 import { ItemSuggestions } from '../components/ItemSuggestions';
 import { RecipeDetailScreen, RecipesLibrary } from '../components/RecipesView';
 import { RecipeForm } from '../components/RecipeForm';
+import { PlanView } from '../components/PlanView';
+import { PlanListSection } from '../components/PlanListSection';
 import { STEP_EASING, STEP_MS, useReduceMotion } from '../components/StepPager';
 import { SortableList } from '../components/SortableList';
 import { SwipeToDelete } from '../components/SwipeToDelete';
@@ -58,7 +60,7 @@ export const ListsScreen: React.FC = () => {
   const history = useLiveQuery(getItemHistory, [] as ItemHistoryRow[]);
   const recipes = useLiveQuery(getActiveRecipes, [] as Recipe[]);
   const reduceMotion = useReduceMotion();
-  const [section, setSection] = useState<'lists' | 'recipes'>('lists');
+  const [section, setSection] = useState<'lists' | 'recipes' | 'plan'>('lists');
   // The first section shown does not fade in with the screen; only a switch does.
   const [switched, setSwitched] = useState(false);
   const [openRecipeId, setOpenRecipeId] = useState<string | null>(null);
@@ -125,9 +127,17 @@ export const ListsScreen: React.FC = () => {
       : itemsFor(openList.id).find((i) => i.isChecked && normalizeText(i.name) === norm);
     try {
       if (checkedMatch) {
+        const fromPlan = itemsFor(openList.id).find((i) => i.id === checkedMatch.id)?.contributions;
         await updateRecord('list_items', checkedMatch.id, {
           isChecked: false,
-          ...(parsed.quantity ? { quantity: parsed.quantity, unit: parsed.unit } : {}),
+          ...(parsed.quantity
+            ? {
+                quantity: parsed.quantity,
+                unit: parsed.unit,
+                // A quantity typed over a plan item is the member's: "Update from plan" must not undo it.
+                ...(fromPlan ? { editedByHand: true } : {}),
+              }
+            : {}),
         });
       } else {
         await insertRecord('list_items', ctx, {
@@ -213,6 +223,7 @@ export const ListsScreen: React.FC = () => {
         options={[
           { value: 'lists', label: t('lists.title') },
           { value: 'recipes', label: t('recipes.title') },
+          { value: 'plan', label: t('plan.title') },
         ]}
       />
     </View>
@@ -256,6 +267,8 @@ export const ListsScreen: React.FC = () => {
           scrollEnabled={!dragging}
           refreshable={!dragging}
         >
+          {openList.planId ? <PlanListSection list={openList} items={listItems} recipes={recipes.data} /> : null}
+
           <Card>
             <TextField
               value={newItemText}
@@ -341,11 +354,11 @@ export const ListsScreen: React.FC = () => {
   return (
     <>
       <ScreenScaffold
-        title={t(section === 'lists' ? 'lists.title' : 'recipes.title')}
+        title={t(section === 'lists' ? 'lists.title' : section === 'recipes' ? 'recipes.title' : 'plan.title')}
         right={
           section === 'lists' ? (
             <HeaderAddButton label={t('lists.newList')} onPress={() => setSheetOpen(true)} />
-          ) : (
+          ) : section === 'plan' ? undefined : (
             <HeaderAddButton
               label={t('recipes.newRecipe')}
               onPress={() => setRecipeForm({ open: true, recipe: null })}
@@ -361,6 +374,16 @@ export const ListsScreen: React.FC = () => {
         >
           {section === 'recipes' ? (
             <RecipesLibrary recipes={recipes.data} onOpen={(recipe) => setOpenRecipeId(recipe.id)} />
+          ) : section === 'plan' ? (
+            <PlanView
+              recipes={recipes.data}
+              lists={lists.data}
+              onOpenList={(listId) => {
+                // The generated list lives in the Lists section, so leave the plan behind.
+                setSection('lists');
+                setOpenListId(listId);
+              }}
+            />
           ) : (
             <>
               {lists.data.length === 0 ? (
@@ -426,6 +449,10 @@ const ItemRow: React.FC<{
 }> = ({ item, first, onToggle, onDelete, handle, onMoveUp, onMoveDown }) => {
   const { t } = useTranslation();
   const quantity = formatQuantity(item.quantity, item.unit);
+  // Items made from a plan say which recipes want them: "Carbonara, Lentil soup".
+  const source = item.contributions
+    ? [...new Set(item.contributions.map((c) => c.recipeName))].join(', ')
+    : null;
   return (
     <View>
       {first ? null : <View className="h-px bg-border my-1" />}
@@ -443,9 +470,16 @@ const ItemRow: React.FC<{
             onToggle={onToggle}
             label={t(item.isChecked ? 'lists.uncheck' : 'lists.check', { name: item.name })}
           />
-          <Text className={`flex-1 text-sm ${item.isChecked ? 'text-ink-muted line-through' : 'text-ink font-medium'}`}>
-            {item.name}
-          </Text>
+          <View className="flex-1">
+            <Text className={`text-sm ${item.isChecked ? 'text-ink-muted line-through' : 'text-ink font-medium'}`}>
+              {item.name}
+            </Text>
+            {source ? (
+              <Text className="text-xs text-ink-muted mt-0.5" numberOfLines={1}>
+                {source}
+              </Text>
+            ) : null}
+          </View>
           {quantity ? <Text className="text-sm text-ink-muted">{quantity}</Text> : null}
           {handle}
         </View>
