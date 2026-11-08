@@ -709,7 +709,6 @@ export const ptPT: Shape<Catalog> = {
     recipeGone: 'Receita apagada',
     lessServings: 'Menos doses de {{name}}',
     moreServings: 'Mais doses de {{name}}',
-    servingsLabel: 'doses',
     otherPlans: 'Outros planos',
     recipeCount_one: '{{count}} receita',
     recipeCount_other: '{{count}} receitas',
