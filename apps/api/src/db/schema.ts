@@ -1,4 +1,5 @@
 import { sql } from 'drizzle-orm';
+import type { RecipeIngredient } from '@diade/domain';
 import {
   pgTable,
   text,
@@ -9,6 +10,7 @@ import {
   date,
   integer,
   doublePrecision,
+  jsonb,
   uniqueIndex,
   index,
 } from 'drizzle-orm/pg-core';
@@ -165,6 +167,27 @@ export const tasks = pgTable('tasks', {
   priority: text('priority').notNull().default('normal'), // 'normal' | 'important'
   visibility: text('visibility').notNull().default('shared'),
   completedAt: timestamp('completed_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  deletedAt: timestamp('deleted_at'),
+});
+
+/**
+ * A recipe, always shared within the space. The ingredients are one JSON array on the recipe, not
+ * rows of their own: a recipe is edited as a whole and is read whole when a grocery list is built.
+ */
+export const recipes = pgTable('recipes', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  spaceId: uuid('space_id')
+    .notNull()
+    .references(() => spaces.id, { onDelete: 'cascade' }),
+  creatorId: text('creator_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  servings: integer('servings').notNull().default(4),
+  notes: text('notes'),
+  ingredients: jsonb('ingredients').$type<RecipeIngredient[]>().notNull().default(sql`'[]'::jsonb`),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   deletedAt: timestamp('deleted_at'),

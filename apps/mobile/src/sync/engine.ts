@@ -165,6 +165,7 @@ const PULL_SECTIONS: Array<[SyncEntityName, keyof SyncPullResult]> = [
   ['list_items', 'listItems'],
   ['capture_items', 'captureItems'],
   ['important_dates', 'importantDates'],
+  ['recipes', 'recipes'],
 ];
 
 /** Server-owned mirrors: stored as received, with no pending local changes to overlay. */
@@ -202,7 +203,7 @@ async function applyPull(result: SyncPullResult): Promise<void> {
     }
   });
 
-  // `importantDates` is absent from responses by an API that predates the entity.
+  // `importantDates` and `recipes` are absent from responses by an API that predates them.
   const pulled = [...PULL_SECTIONS.map(([, section]) => section), ...EXTERNAL_SECTIONS.map(([, section]) => section)].reduce(
     (total, section) => total + (((result[section] as unknown as Row[] | undefined) ?? []).length),
     0,

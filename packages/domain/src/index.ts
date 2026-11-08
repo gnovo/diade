@@ -7,9 +7,11 @@ export * from './datetime';
 export * from './importantDates';
 export * from './externalCalendar';
 export * from './listTemplates';
+export * from './recipes';
 
 import type { ImportantDateType, ImportantDateRepeat } from './importantDates';
 import type { ExternalCalendar, ExternalEvent } from './externalCalendar';
+import type { Recipe } from './recipes';
 
 // --- Identity & Space ---
 
@@ -155,7 +157,8 @@ export type SyncEntityName =
   | 'lists'
   | 'list_items'
   | 'capture_items'
-  | 'important_dates';
+  | 'important_dates'
+  | 'recipes';
 export type MutationOperation = 'INSERT' | 'UPDATE' | 'DELETE';
 
 export interface ClientMutation {
@@ -193,6 +196,8 @@ export interface SyncPullResult {
   listItems: ListItem[];
   captureItems: CaptureItem[];
   importantDates: ImportantDate[];
+  /** Absent from an API that predates recipes. */
+  recipes?: Recipe[];
   /** Absent from an API that predates Google Calendar sync. */
   externalCalendars?: ExternalCalendar[];
   externalEvents?: ExternalEvent[];

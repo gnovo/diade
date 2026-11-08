@@ -12,6 +12,7 @@ export const LOCAL_TABLES = [
   'local_list_items',
   'local_capture_items',
   'local_important_dates',
+  'local_recipes',
   'local_external_calendars',
   'local_external_events',
   'local_outbox',
@@ -125,6 +126,20 @@ async function openLocalDb(): Promise<SQLite.SQLiteDatabase> {
       repeat TEXT NOT NULL DEFAULT 'yearly',
       pinned INTEGER NOT NULL DEFAULT 0,
       alert_offset_days INTEGER,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS local_recipes (
+      id TEXT PRIMARY KEY NOT NULL,
+      space_id TEXT NOT NULL,
+      creator_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      servings INTEGER NOT NULL DEFAULT 4,
+      notes TEXT,
+      -- A JSON array of ingredients; see RecipeIngredient in @diade/domain.
+      ingredients TEXT NOT NULL DEFAULT '[]',
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       deleted_at TEXT

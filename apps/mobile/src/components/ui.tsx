@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, KeyboardAvoidingView, View, Text, TextInput, ScrollView, Pressable, RefreshControl, type TextInputProps } from 'react-native';
+import { KeyboardAvoidingView, View, Text, TextInput, ScrollView, Pressable, RefreshControl, type TextInputProps } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { STEP_EASING, useReduceMotion } from './StepPager';
 import { useAuth } from '../context/AuthContext';
 import { useSync } from '../sync/SyncProvider';
 import {
@@ -137,7 +139,8 @@ export const SectionLabel: React.FC<{ children: React.ReactNode; right?: React.R
   </View>
 );
 
-export const TextField: React.FC<TextInputProps> = (props) => {
+/** `ref` is a plain prop in React 19, so it reaches the TextInput through the spread. */
+export const TextField: React.FC<TextInputProps & { ref?: React.Ref<React.ComponentRef<typeof TextInput>> }> = (props) => {
   const placeholder = useColor('ink-muted');
   const ink = useColor('ink');
   return (
@@ -174,27 +177,28 @@ export function Segmented<T extends string>({
   onChange: (value: T) => void;
 }) {
   const PADDING = 4;
+  /** A short slide: quicker than moving between steps, but on the same curve. */
+  const SLIDE_MS = 340;
+  const reduceMotion = useReduceMotion();
   const [width, setWidth] = useState(0);
   const index = Math.max(0, options.findIndex((option) => option.value === value));
-  const position = useRef(new Animated.Value(index)).current;
+  const position = useSharedValue(index);
   const placed = useRef(false);
   const segmentWidth = width > 0 ? (width - PADDING * 2) / options.length : 0;
 
-  // The highlight glides to the chosen segment. It jumps there the first time, so it does not slide in on mount.
+  // The highlight glides to the chosen segment on the UI thread. It jumps there the first time,
+  // so it does not slide in on mount.
   useEffect(() => {
     if (segmentWidth === 0) return;
-    if (!placed.current) {
-      position.setValue(index);
+    if (!placed.current || reduceMotion) {
       placed.current = true;
+      position.value = index;
       return;
     }
-    Animated.timing(position, {
-      toValue: index,
-      duration: 260,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }).start();
-  }, [index, position, segmentWidth]);
+    position.value = withTiming(index, { duration: SLIDE_MS, easing: STEP_EASING });
+  }, [index, position, segmentWidth, reduceMotion]);
+
+  const highlight = useAnimatedStyle(() => ({ transform: [{ translateX: position.value * segmentWidth }] }));
 
   return (
     <View
@@ -205,13 +209,7 @@ export function Segmented<T extends string>({
         <Animated.View
           pointerEvents="none"
           className="absolute bg-action rounded-sm"
-          style={{
-            top: PADDING,
-            bottom: PADDING,
-            left: PADDING,
-            width: segmentWidth,
-            transform: [{ translateX: Animated.multiply(position, segmentWidth) }],
-          }}
+          style={[{ top: PADDING, bottom: PADDING, left: PADDING, width: segmentWidth }, highlight]}
         />
       ) : null}
       {options.map((option) => {

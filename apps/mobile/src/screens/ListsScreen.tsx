@@ -2,8 +2,15 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, Pressable, Alert, BackHandler } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from '@diade/i18n';
-import { listIconFor, type ListItem, type SharedList } from '@diade/domain';
-import { getActiveLists, getActiveListItems, getItemHistory, type ItemHistoryRow } from '../data/queries';
+import { listIconFor, type ListItem, type Recipe, type SharedList } from '@diade/domain';
+import Animated, { FadeIn } from 'react-native-reanimated';
+import {
+  getActiveLists,
+  getActiveListItems,
+  getActiveRecipes,
+  getItemHistory,
+  type ItemHistoryRow,
+} from '../data/queries';
 import { insertRecord, updateRecord, updateRecords, deleteRecord } from '../data/repository';
 import { useLiveQuery } from '../data/useLiveQuery';
 import {
@@ -14,11 +21,15 @@ import {
   HeaderAddButton,
   ScreenScaffold,
   SectionLabel,
+  Segmented,
   TextField,
   useWriteContext,
 } from '../components/ui';
 import { NewListSheet, type NewListRequest } from '../components/NewListSheet';
 import { ItemSuggestions } from '../components/ItemSuggestions';
+import { RecipeDetailScreen, RecipesLibrary } from '../components/RecipesView';
+import { RecipeForm } from '../components/RecipeForm';
+import { STEP_EASING, STEP_MS, useReduceMotion } from '../components/StepPager';
 import { SortableList } from '../components/SortableList';
 import { SwipeToDelete } from '../components/SwipeToDelete';
 import { UndoToast } from '../components/UndoToast';
@@ -45,6 +56,13 @@ export const ListsScreen: React.FC = () => {
   const lists = useLiveQuery(getActiveLists, [] as SharedList[]);
   const items = useLiveQuery(getActiveListItems, [] as ListItem[]);
   const history = useLiveQuery(getItemHistory, [] as ItemHistoryRow[]);
+  const recipes = useLiveQuery(getActiveRecipes, [] as Recipe[]);
+  const reduceMotion = useReduceMotion();
+  const [section, setSection] = useState<'lists' | 'recipes'>('lists');
+  // The first section shown does not fade in with the screen; only a switch does.
+  const [switched, setSwitched] = useState(false);
+  const [openRecipeId, setOpenRecipeId] = useState<string | null>(null);
+  const [recipeForm, setRecipeForm] = useState<{ open: boolean; recipe: Recipe | null }>({ open: false, recipe: null });
   const [openListId, setOpenListId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [newItemText, setNewItemText] = useState('');
@@ -184,6 +202,45 @@ export const ListsScreen: React.FC = () => {
     <UndoToast message={undoable.pending.message} actionLabel={t('lists.undo')} onAction={undoable.undo} />
   ) : null;
 
+  const switcher = (
+    <View className="mb-4">
+      <Segmented
+        value={section}
+        onChange={(next) => {
+          setSwitched(true);
+          setSection(next);
+        }}
+        options={[
+          { value: 'lists', label: t('lists.title') },
+          { value: 'recipes', label: t('recipes.title') },
+        ]}
+      />
+    </View>
+  );
+
+  const openRecipe = recipes.data.find((r) => r.id === openRecipeId) ?? null;
+  const recipeSheet = (
+    <RecipeForm
+      visible={recipeForm.open}
+      recipe={recipeForm.recipe}
+      onClose={() => setRecipeForm((f) => ({ ...f, open: false }))}
+      onSaved={(id) => setOpenRecipeId(id)}
+    />
+  );
+
+  if (section === 'recipes' && openRecipe) {
+    return (
+      <>
+        <RecipeDetailScreen
+          recipe={openRecipe}
+          onBack={() => setOpenRecipeId(null)}
+          onEdit={() => setRecipeForm({ open: true, recipe: openRecipe })}
+        />
+        {recipeSheet}
+      </>
+    );
+  }
+
   if (openList) {
     const listItems = itemsFor(openList.id);
     const open = listItems.filter((i) => !i.isChecked);
@@ -233,7 +290,9 @@ export const ListsScreen: React.FC = () => {
           </Card>
 
           <Card>
-            <SectionLabel right={<Text className="text-sm text-ink-muted">{t('lists.toGet', { count: open.length })}</Text>}>
+            <SectionLabel
+              right={<Text className="text-sm text-ink-muted">{t('lists.toGet', { count: open.length })}</Text>}
+            >
               {t('lists.items')}
             </SectionLabel>
             {open.length === 0 ? <EmptyState message={t('lists.emptyItems')} /> : null}
@@ -260,7 +319,13 @@ export const ListsScreen: React.FC = () => {
                   <Button label={t('lists.clearChecked')} variant="ghost" small onPress={clearChecked} />
                 </View>
                 {done.map((item, index) => (
-                  <ItemRow key={item.id} item={item} first={index === 0} onToggle={() => toggleItem(item)} onDelete={() => removeItem(item)} />
+                  <ItemRow
+                    key={item.id}
+                    item={item}
+                    first={index === 0}
+                    onToggle={() => toggleItem(item)}
+                    onDelete={() => removeItem(item)}
+                  />
                 ))}
               </View>
             ) : null}
@@ -276,50 +341,75 @@ export const ListsScreen: React.FC = () => {
   return (
     <>
       <ScreenScaffold
-        title={t('lists.title')}
-        right={<HeaderAddButton label={t('lists.newList')} onPress={() => setSheetOpen(true)} />}
+        title={t(section === 'lists' ? 'lists.title' : 'recipes.title')}
+        right={
+          section === 'lists' ? (
+            <HeaderAddButton label={t('lists.newList')} onPress={() => setSheetOpen(true)} />
+          ) : (
+            <HeaderAddButton
+              label={t('recipes.newRecipe')}
+              onPress={() => setRecipeForm({ open: true, recipe: null })}
+            />
+          )
+        }
       >
-        {lists.data.length === 0 ? (
-          <Card>
-            <EmptyState message={t('lists.empty')} />
-          </Card>
-        ) : null}
-
-        {lists.data.map((list) => {
-          const all = itemsFor(list.id);
-          const remaining = all.filter((i) => !i.isChecked).length;
-          const done = all.length - remaining;
-          return (
-            <TouchableOpacity
-              key={list.id}
-              onPress={() => setOpenListId(list.id)}
-              activeOpacity={0.7}
-              className="bg-surface rounded-2xl p-5 border border-border mb-3"
-            >
-              <View className="flex-row items-center">
-                <View className="w-10 h-10 rounded-full bg-surface-tint items-center justify-center mr-3">
-                  <Icon name={listIconFor(list)} />
-                </View>
-                <View className="flex-1 mr-2">
-                  <Text className="text-base font-semibold text-ink">{list.name}</Text>
-                  <Text className="text-sm text-ink-muted mt-0.5">
-                    {categoryLabel(t, list.category)}
-                    {all.length > 0 ? ` · ${t('lists.progress', { done, total: all.length })}` : ''}
-                  </Text>
-                </View>
-                <Text className="text-sm font-medium text-action">{t('lists.toGet', { count: remaining })}</Text>
-              </View>
-              {all.length > 0 ? (
-                <View className="h-1 rounded-full bg-surface-sunken mt-3 overflow-hidden" accessible={false}>
-                  <View className="h-1 bg-action" style={{ width: `${Math.round((done / all.length) * 100)}%` }} />
-                </View>
+        {switcher}
+        {/* The header and the switch stay mounted; only what is below them is swapped, and it fades in. */}
+        <Animated.View
+          key={section}
+          entering={switched && !reduceMotion ? FadeIn.duration(STEP_MS).easing(STEP_EASING) : undefined}
+        >
+          {section === 'recipes' ? (
+            <RecipesLibrary recipes={recipes.data} onOpen={(recipe) => setOpenRecipeId(recipe.id)} />
+          ) : (
+            <>
+              {lists.data.length === 0 ? (
+                <Card>
+                  <EmptyState message={t('lists.empty')} />
+                </Card>
               ) : null}
-            </TouchableOpacity>
-          );
-        })}
 
+              {lists.data.map((list) => {
+                const all = itemsFor(list.id);
+                const remaining = all.filter((i) => !i.isChecked).length;
+                const done = all.length - remaining;
+                return (
+                  <TouchableOpacity
+                    key={list.id}
+                    onPress={() => setOpenListId(list.id)}
+                    activeOpacity={0.7}
+                    className="bg-surface rounded-2xl p-5 border border-border mb-3"
+                  >
+                    <View className="flex-row items-center">
+                      <View className="w-10 h-10 rounded-full bg-surface-tint items-center justify-center mr-3">
+                        <Icon name={listIconFor(list)} />
+                      </View>
+                      <View className="flex-1 mr-2">
+                        <Text className="text-base font-semibold text-ink">{list.name}</Text>
+                        <Text className="text-sm text-ink-muted mt-0.5">
+                          {categoryLabel(t, list.category)}
+                          {all.length > 0 ? ` · ${t('lists.progress', { done, total: all.length })}` : ''}
+                        </Text>
+                      </View>
+                      <Text className="text-sm font-medium text-action">{t('lists.toGet', { count: remaining })}</Text>
+                    </View>
+                    {all.length > 0 ? (
+                      <View className="h-1 rounded-full bg-surface-sunken mt-3 overflow-hidden" accessible={false}>
+                        <View
+                          className="h-1 bg-action"
+                          style={{ width: `${Math.round((done / all.length) * 100)}%` }}
+                        />
+                      </View>
+                    ) : null}
+                  </TouchableOpacity>
+                );
+              })}
+            </>
+          )}
+        </Animated.View>
       </ScreenScaffold>
       <NewListSheet visible={sheetOpen} onClose={() => setSheetOpen(false)} onCreate={createList} />
+      {recipeSheet}
     </>
   );
 };
@@ -348,7 +438,11 @@ const ItemRow: React.FC<{
         ]}
       >
         <View className="flex-row items-center">
-          <Checkbox checked={item.isChecked} onToggle={onToggle} label={t(item.isChecked ? 'lists.uncheck' : 'lists.check', { name: item.name })} />
+          <Checkbox
+            checked={item.isChecked}
+            onToggle={onToggle}
+            label={t(item.isChecked ? 'lists.uncheck' : 'lists.check', { name: item.name })}
+          />
           <Text className={`flex-1 text-sm ${item.isChecked ? 'text-ink-muted line-through' : 'text-ink font-medium'}`}>
             {item.name}
           </Text>

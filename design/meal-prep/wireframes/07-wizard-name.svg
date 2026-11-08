@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812" font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
+<!-- 07 New list wizard, step 2: name and start (PR D) · mobile 375x812 · 8px grid -->
+<rect x="0" y="0" width="375" height="812" fill="#fff"/>
+<g opacity="0.25">
+<text x="16" y="32" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">9:41</text>
+<rect x="311" y="22" width="32" height="12" rx="3" fill="#fff"/>
+<text x="16" y="96" font-size="28" text-anchor="start" stroke="none" fill="#000" font-weight="700">Lists</text>
+<circle cx="335" cy="80" r="24" fill="#000"/>
+<line x1="327" y1="80" x2="343" y2="80" stroke="#fff" stroke-width="2.5"/>
+<line x1="335" y1="72" x2="335" y2="88" stroke="#fff" stroke-width="2.5"/>
+<rect x="16" y="128" width="343" height="48" rx="8" fill="#e6e6e6"/>
+<rect x="20" y="132" width="111" height="40" rx="6" fill="#000"/>
+<text x="75.5" y="157" font-size="14" text-anchor="middle" stroke="none" fill="#fff" font-weight="700">Lists</text>
+<rect x="131" y="132" width="111" height="40" rx="6" fill="#e6e6e6" stroke-width="0"/>
+<text x="186.5" y="157" font-size="14" text-anchor="middle" stroke="none" fill="#000">Recipes</text>
+<rect x="242" y="132" width="111" height="40" rx="6" fill="#e6e6e6" stroke-width="0"/>
+<text x="297.5" y="157" font-size="14" text-anchor="middle" stroke="none" fill="#000">Plan</text>
+<rect x="16" y="208" width="343" height="80" rx="8" fill="#fff"/>
+<circle cx="52" cy="248" r="20" fill="#e6e6e6"/>
+<text x="84" y="244" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Groceries</text>
+<text x="84" y="264" font-size="12" text-anchor="start" stroke="none" fill="#666">Groceries · 2 of 9</text>
+<rect x="16" y="304" width="343" height="80" rx="8" fill="#fff"/>
+<circle cx="52" cy="344" r="20" fill="#e6e6e6"/>
+<text x="84" y="340" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Pharmacy</text>
+<text x="84" y="360" font-size="12" text-anchor="start" stroke="none" fill="#666">Pharmacy</text>
+<line x1="0" y1="748" x2="375" y2="748" stroke="#000"/>
+<rect x="9.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="37.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="37.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Today</text>
+<rect x="84.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="112.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="112.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Calendar</text>
+<rect x="159.5" y="756" width="56" height="32" rx="16" fill="#000"/>
+<text x="187.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#fff">▫</text>
+<text x="187.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#000">Lists</text>
+<rect x="234.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="262.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="262.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Home</text>
+<rect x="309.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="337.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="337.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Dates</text>
+</g>
+<rect x="0" y="0" width="375" height="812" fill="#000" opacity="0.35" stroke="none"/>
+<rect x="0" y="224" width="375" height="604" rx="16" fill="#fff"/>
+<rect x="168" y="232" width="40" height="4" rx="2" fill="#000"/>
+<text x="187.5" y="264" font-size="14" text-anchor="middle" stroke="none" fill="#000" font-weight="700">New list</text>
+<text x="16" y="296" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">‹ Groceries</text>
+<text x="359" y="296" font-size="12" text-anchor="end" stroke="none" fill="#666">Step 2 of 4</text>
+<rect x="16" y="312" width="75" height="4" rx="2" fill="#000"/>
+<rect x="99" y="312" width="75" height="4" rx="2" fill="#000"/>
+<rect x="182" y="312" width="75" height="4" rx="2" fill="#e6e6e6"/>
+<rect x="265" y="312" width="75" height="4" rx="2" fill="#e6e6e6"/>
+<text x="16" y="360" font-size="20" text-anchor="start" stroke="none" fill="#000" font-weight="700">Name your list</text>
+<rect x="16" y="376" width="343" height="48" rx="8" fill="#fff"/>
+<text x="28" y="405.0" font-size="14" text-anchor="start" stroke="none" fill="#000">Groceries</text>
+<text x="16" y="456" font-size="12" text-anchor="start" stroke="none" fill="#666">START FROM</text>
+<rect x="16" y="472" width="343" height="48" rx="8" fill="#e6e6e6"/>
+<rect x="20" y="476" width="167" height="40" rx="6" fill="#e6e6e6" stroke-width="0"/>
+<text x="103.5" y="501" font-size="14" text-anchor="middle" stroke="none" fill="#000">Empty</text>
+<rect x="187" y="476" width="167" height="40" rx="6" fill="#000"/>
+<text x="270.5" y="501" font-size="14" text-anchor="middle" stroke="none" fill="#fff" font-weight="700">Meal plan</text>
+<text x="16" y="552" font-size="12" text-anchor="start" stroke="none" fill="#666">Pick recipes and their ingredients are added</text>
+<text x="16" y="570" font-size="12" text-anchor="start" stroke="none" fill="#666">for you, in metric.</text>
+<rect x="16" y="740" width="343" height="48" rx="8" fill="#000"/>
+<text x="187.5" y="769.0" font-size="14" text-anchor="middle" stroke="none" fill="#fff" font-weight="700">Continue</text>
+<g><circle cx="8" cy="312" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="316" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">1</text></g>
+<g><circle cx="8" cy="496" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="500" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">2</text></g>
+<g><circle cx="8" cy="764" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="768" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">3</text></g>
+</svg>

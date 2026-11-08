@@ -15,6 +15,9 @@ const BOOLEAN_KEYS = new Set([
   'highlighted',
 ]);
 
+/** Stored as JSON text locally; arrays and objects in the domain. */
+const JSON_KEYS = new Set(['ingredients']);
+
 export type Row = Record<string, unknown>;
 
 export const toColumn = (key: string): string => key.replace(/[A-Z]/g, (m) => `_${m.toLowerCase()}`);
@@ -28,9 +31,18 @@ export function toColumns(record: Row): { columns: string[]; values: unknown[] }
   for (const [key, value] of Object.entries(record)) {
     if (value === undefined) continue;
     columns.push(toColumn(key));
-    values.push(BOOLEAN_KEYS.has(key) ? (value ? 1 : 0) : value);
+    values.push(BOOLEAN_KEYS.has(key) ? (value ? 1 : 0) : JSON_KEYS.has(key) ? JSON.stringify(value) : value);
   }
   return { columns, values };
+}
+
+function parseJson(value: unknown): unknown {
+  if (typeof value !== 'string') return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return [];
+  }
 }
 
 /** Converts a SQLite row back into a domain object. */
@@ -38,7 +50,7 @@ export function fromRow(row: Row): Row {
   const result: Row = {};
   for (const [column, value] of Object.entries(row)) {
     const key = toKey(column);
-    result[key] = BOOLEAN_KEYS.has(key) ? value === 1 : value;
+    result[key] = BOOLEAN_KEYS.has(key) ? value === 1 : JSON_KEYS.has(key) ? parseJson(value) : value;
   }
   return result;
 }

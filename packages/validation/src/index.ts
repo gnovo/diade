@@ -4,6 +4,10 @@ import {
   TASK_PRIORITIES,
   IMPORTANT_DATE_REPEATS,
   IMPORTANT_DATE_TYPES,
+  RECIPE_UNITS,
+  MIN_SERVINGS,
+  MAX_SERVINGS,
+  DEFAULT_SERVINGS,
   parseDateOnly,
   type SyncEntityName,
   type MutationOperation,
@@ -161,6 +165,43 @@ export const updateImportantDateSchema = z.object({
   alertOffsetDays: z.number().int().min(0).max(365).nullable().optional(),
 });
 
+// --- Recipes Schemas ---
+//
+// Recipes are always shared between both members. Ingredients are stored on the recipe as one
+// array rather than as rows of their own: a recipe is edited as a whole, and two people editing
+// the same recipe at once is rare enough that last write wins on the array is acceptable.
+
+export const recipeUnitSchema = z.enum(RECIPE_UNITS);
+
+export const recipeIngredientSchema = z.object({
+  id: z.string().min(1).max(64),
+  name: z.string().trim().min(1, 'Name is required').max(120),
+  quantity: z.number().finite().positive().max(100000).nullable(),
+  unit: recipeUnitSchema,
+  staple: z.boolean(),
+});
+
+const recipeIngredientsSchema = z
+  .array(recipeIngredientSchema)
+  .max(100)
+  .refine((rows) => new Set(rows.map((row) => row.id)).size === rows.length, 'Ingredient ids must be unique');
+
+const servingsSchema = z.number().int().min(MIN_SERVINGS).max(MAX_SERVINGS);
+
+export const createRecipeSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required').max(120),
+  servings: servingsSchema.default(DEFAULT_SERVINGS),
+  notes: z.string().max(5000).nullable().optional(),
+  ingredients: recipeIngredientsSchema.default([]),
+});
+
+export const updateRecipeSchema = z.object({
+  name: z.string().trim().min(1).max(120).optional(),
+  servings: servingsSchema.optional(),
+  notes: z.string().max(5000).nullable().optional(),
+  ingredients: recipeIngredientsSchema.optional(),
+});
+
 // --- Google Calendar sync (REST, not the outbox) ---
 
 export const externalVisibilitySchema = z.enum(EXTERNAL_VISIBILITIES);
@@ -202,6 +243,7 @@ export const syncEntityNameSchema = z.enum([
   'list_items',
   'capture_items',
   'important_dates',
+  'recipes',
 ]);
 
 export const mutationOperationSchema = z.enum(['INSERT', 'UPDATE', 'DELETE']);
@@ -290,6 +332,7 @@ export const syncPayloadSchemas = {
     UPDATE: captureItemUpdatePayload,
   },
   important_dates: { INSERT: createImportantDateSchema, UPDATE: updateImportantDateSchema },
+  recipes: { INSERT: createRecipeSchema, UPDATE: updateRecipeSchema },
 } as const;
 
 /** DELETE mutations carry no payload; everything else must match its entity schema. */
