@@ -21,7 +21,7 @@
     "better-auth": "^1.2.6",
     "drizzle-orm": "^0.40.0",
     "hono": "^4.7.4",
-    "postgres": "^3.4.5"
+    "postgres": "^4.0.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250224.0",
