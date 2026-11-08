@@ -2,7 +2,7 @@
   "extends": "@diade/config/tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": ".",
     "jsx": "react-jsx",
     "types": [
       "react",
@@ -12,6 +12,7 @@
   "include": [
     "src/**/*",
     "index.js",
+    "app.config.ts",
     "app.json",
     "nativewind-env.d.ts"
   ]

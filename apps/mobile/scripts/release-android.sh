@@ -13,6 +13,12 @@
 # Requires: eas login (ota), gh auth login (apk), plus everything build-android-prod.sh needs.
 set -euo pipefail
 
+# A development variant must never be built or published as the release app.
+if [ -n "${APP_VARIANT:-}" ] && [ "${APP_VARIANT}" != "production" ]; then
+  echo "error: APP_VARIANT=${APP_VARIANT} is set. Unset it before a release build or update." >&2
+  exit 1
+fi
+
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$APP_DIR"
 MODE="${1:-}"
@@ -49,7 +55,10 @@ case "$MODE" in
     TAG="v${VERSION}-${NEW_CODE}"
 
     # Re-apply app.json to the generated android/ project (signing/ABI plugins are idempotent).
-    npx expo prebuild --platform android --no-install
+    # A previous dev prebuild leaves dev sources behind, so start clean in that case.
+    CLEAN=""
+    grep -q "applicationId 'com.diade.app.dev'" android/app/build.gradle 2>/dev/null && CLEAN="--clean"
+    npx expo prebuild --platform android --no-install $CLEAN
     bash scripts/build-android-prod.sh
 
     SRC="$APP_DIR/android/app/build/outputs/apk/release/app-release.apk"

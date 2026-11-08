@@ -6,6 +6,18 @@
   "build": {
     "production": {
       "channel": "production"
+    },
+    "development": {
+      "channel": "development",
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "APP_VARIANT": "dev",
+        "EXPO_PUBLIC_APP_ENV": "dev",
+        "EXPO_PUBLIC_API_URL": "https://diade-api-dev.diade.workers.dev"
+      }
     }
   }
 }
