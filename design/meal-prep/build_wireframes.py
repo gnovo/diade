@@ -197,24 +197,36 @@ def lists_screen(s):
     tab_bar(s, 2)
 
 
+def week_header(s, y, label, sub):
+    """Week navigator: previous, the week, next. A plan always exists for the week shown."""
+    s.circle(36, y + 24, 20)
+    s.text(36, y + 31, '\u2039', 24, 'middle')
+    s.text(W / 2, y + 22, label, 16, 'middle', bold=True)
+    s.text(W / 2, y + 42, sub, 12, 'middle', '#666')
+    s.circle(339, y + 24, 20)
+    s.text(339, y + 31, '\u203a', 24, 'middle')
+
+
 def plan_screen(s, filled=True):
     status_bar(s)
     header(s, 'Plan', plus=False)
     segmented(s, 128, ['Lists', 'Recipes', 'Plan'], 2)
     tab_bar(s, 2)
-    x = 16
-    for i, label in enumerate(['This week', 'Next week', 'Custom']):
-        x += chip(s, x, 192, label, i == 0) + 8
-    s.text(16, 264, 'Mon 9 – Sun 15 Nov · a pool of recipes, no days', 12, fill='#666')
+    week_header(s, 188, 'Mon 9 \u2013 Sun 15 Nov', 'This week')
     if filled:
         for i, (n, k) in enumerate([('Spaghetti carbonara', 4), ('Chicken curry', 4), ('Lentil soup', 2)]):
-            y = 280 + i * 88
+            y = 252 + i * 80
             card(s, 16, y, 343, 72)
             s.text(32, y + 32, n, 14, bold=True)
             s.text(32, y + 52, 'servings', 12, fill='#666')
             stepper(s, 191, y + 20, k)
-            s.text(335, y + 41, '×', 20, 'middle')
-    button(s, 16, 552, 343, '+ Add recipes', False, 56, True)
+            s.text(335, y + 41, '\u00d7', 20, 'middle')
+        button(s, 16, 500, 343, '+ Add recipes', False, 48, True)
+    else:
+        card(s, 16, 252, 343, 120)
+        s.text(W / 2, 296, 'Nothing planned for this week', 14, 'middle', bold=True)
+        s.text(W / 2, 318, 'Pick the recipes you want to cook.', 12, 'middle', '#666')
+        button(s, 32, 328, 311, 'Add recipes', True, 32)
 
 
 def recipes_screen(s):
@@ -270,18 +282,30 @@ def s02():
 
 
 def s03():
-    s = Svg('03 Plan: a pool of recipes for a period (PR C)')
+    s = Svg('03 Plan: a week of recipes (PR C, redesigned)')
     plan_screen(s)
-    card(s, 16, 624, 343, 104)
-    s.text(32, 652, '28 ingredients to buy', 14, bold=True)
-    s.text(32, 672, '7 pantry staples left out', 12, fill='#666')
-    button(s, 32, 680, 311, 'Create grocery list', True, 40)
-    s.callout(343, 152)
+    card(s, 16, 560, 343, 136)
+    s.text(32, 588, 'Shopping list', 14, bold=True)
+    s.text(32, 608, '6 items \u00b7 2 bought', 12, fill='#666')
+    s.rect(212, 574, 131, 28, 14, '#e6e6e6')
+    s.text(277, 593, 'Plan changed', 12, 'middle', bold=True)
+    button(s, 32, 624, 311, 'Open list', True, 56 - 16)
+    s.text(W / 2, 722, 'Clear this week', 12, 'middle', '#666')
+    s.callout(343, 150)
     s.callout(343, 212)
-    s.callout(343, 304)
-    s.callout(343, 580)
-    s.callout(343, 648)
+    s.callout(343, 292)
+    s.callout(343, 524)
+    s.callout(343, 588)
+    s.callout(343, 722)
     s.finish('03-plan.svg')
+
+
+def s13():
+    s = Svg('13 Plan: a week with nothing planned yet')
+    plan_screen(s, filled=False)
+    s.callout(343, 212)
+    s.callout(343, 340)
+    s.finish('13-plan-empty-week.svg')
 
 
 def s04():
@@ -537,6 +561,6 @@ def flow():
 
 
 if __name__ == '__main__':
-    for fn in (s01, s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, s12, flow):
+    for fn in (s01, s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, s12, s13, flow):
         fn()
     print('wrote', len(os.listdir(OUT)), 'files to', OUT)

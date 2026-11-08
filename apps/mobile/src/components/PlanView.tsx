@@ -2,11 +2,14 @@ import {
   buildGroceryList,
   clampServings,
   defaultPlanPeriod,
+  diffPlanAgainstList,
+  isEmptyDiff,
+  isWeekPlan,
+  type ListItem,
   type MealPlan,
   type MealPlanRecipe,
   parseDateOnly,
-  periodChoice,
-  pickCurrentPlan,
+  planForWeek,
   type Recipe,
   type SharedList,
   weekPeriod,
@@ -20,14 +23,11 @@ import { generateGroceryList } from '../data/mealPlanActions';
 import { getActiveMealPlans } from '../data/queries';
 import { deleteRecord, insertRecord, updateRecord } from '../data/repository';
 import { useLiveQuery } from '../data/useLiveQuery';
-import { Icon } from '../design';
-import { DateField } from './DateField';
-import { FilterChips } from './FilterChips';
+import { Icon, useColor } from '../design';
+import { planItemsOf } from './PlanListSection';
 import { Stepper } from './RecipeForm';
 import { RecipePicker } from './RecipePicker';
 import { Button, Card, EmptyState, SectionLabel, useWriteContext } from './ui';
-
-type PeriodChoice = 'thisWeek' | 'nextWeek' | 'custom';
 
 /** A plan's period as dates, or null for a stored value that is not a real day. */
 function planDates(plan: Pick<MealPlan, 'startsOn' | 'endsOn'>): { from: Date; to: Date } | null {
@@ -36,34 +36,89 @@ function planDates(plan: Pick<MealPlan, 'startsOn' | 'endsOn'>): { from: Date; t
   return from && to ? { from, to } : null;
 }
 
+/** Previous / next week around the dates being shown. */
+const WeekNavigator: React.FC<{
+  label: string;
+  sub: string;
+  onPrevious: () => void;
+  onNext: () => void;
+}> = ({ label, sub, onPrevious, onNext }) => {
+  const { t } = useTranslation();
+  const ink = useColor('ink');
+  return (
+    <View className="flex-row items-center mb-4">
+      <Pressable
+        onPress={onPrevious}
+        accessibilityRole="button"
+        accessibilityLabel={t('plan.previousWeek')}
+        className="w-12 h-12 items-center justify-center rounded-full border border-border active:opacity-60"
+      >
+        <Icon name="chevron-left" size={20} color={ink} />
+      </Pressable>
+      <View className="flex-1 items-center" accessibilityLiveRegion="polite">
+        <Text className="text-base font-bold text-ink">{label}</Text>
+        {sub ? <Text className="text-xs text-ink-muted mt-0.5">{sub}</Text> : null}
+      </View>
+      <Pressable
+        onPress={onNext}
+        accessibilityRole="button"
+        accessibilityLabel={t('plan.nextWeekLabel')}
+        className="w-12 h-12 items-center justify-center rounded-full border border-border active:opacity-60"
+      >
+        <Icon name="chevron-right" size={20} color={ink} />
+      </Pressable>
+    </View>
+  );
+};
+
 /**
- * The Plan section of the Lists tab: a period and a pool of recipes (not a calendar), and the action that
- * turns it into a grocery list. It is only the content: the header, the switch and the scroll view belong to
- * the screen that shows it, so they stay put while this fades in.
+ * The Plan section of the Lists tab: one week at a time. A plan is a pool of recipes (not a calendar) and
+ * always exists for the week shown: the first recipe added creates it. It is only the content: the header,
+ * the switch and the scroll view belong to the screen that shows it, so they stay put while this fades in.
  */
 export const PlanView: React.FC<{
   recipes: Recipe[];
   lists: SharedList[];
+  items: ListItem[];
   onOpenList: (listId: string) => void;
-}> = ({ recipes, lists, onOpenList }) => {
+}> = ({ recipes, lists, items, onOpenList }) => {
   const { t } = useTranslation();
   const ctx = useWriteContext();
   const plans = useLiveQuery(getActiveMealPlans, [] as MealPlan[]);
   const today = new Date();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [customOpen, setCustomOpen] = useState(false);
+  // Weeks from today; a Sunday opens on the week that begins tomorrow, as new plans do.
+  const [offset, setOffset] = useState(() =>
+    defaultPlanPeriod(today).startsOn === weekPeriod(today, 0).startsOn ? 0 : 1,
+  );
+  // A plan that is not one whole week (made before the week view) is opened from "Other plans".
+  const [otherId, setOtherId] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const plan = plans.data.find((p) => p.id === selectedId) ?? pickCurrentPlan(plans.data, today);
-  const others = plans.data.filter((p) => p.id !== plan?.id);
+  const week = weekPeriod(today, offset);
+  const weekPlan = planForWeek(plans.data, week);
+  const plan = plans.data.find((p) => p.id === otherId) ?? weekPlan;
+  // Plans the arrows cannot reach: custom periods, and a second plan for the same week.
+  const others = plans.data.filter(
+    (p) => p.id !== plan?.id && (!isWeekPlan(p) || p.id !== planForWeek(plans.data, p)?.id),
+  );
   const recipeById = useMemo(() => new Map(recipes.map((r) => [r.id, r])), [recipes]);
   const build = useMemo(
     () => (plan ? buildGroceryList(plan.recipes, recipes) : null),
     [plan, recipes],
   );
+  const generated = plan ? (lists.find((list) => list.planId === plan.id) ?? null) : null;
+  const listItems = useMemo(
+    () => (generated ? items.filter((item) => item.listId === generated.id) : []),
+    [generated, items],
+  );
+  const outOfDate = useMemo(
+    () =>
+      build && generated ? !isEmptyDiff(diffPlanAgainstList(build, planItemsOf(listItems))) : false,
+    [build, generated, listItems],
+  );
 
-  const rangeText = (p: MealPlan, compact = false) => {
+  const rangeText = (p: Pick<MealPlan, 'startsOn' | 'endsOn'>, compact = false) => {
     const dates = planDates(p);
     if (!dates) return '';
     return compact
@@ -74,50 +129,43 @@ export const PlanView: React.FC<{
   const fail = (title: string) => (err: unknown) =>
     Alert.alert(title, err instanceof Error ? err.message : t('common.tryAgain'));
 
-  const createPlan = async () => {
+  const save = (target: MealPlan, changes: Record<string, unknown>) =>
+    updateRecord('meal_plans', target.id, changes).catch(fail(t('plan.couldNotSave')));
+
+  const setRecipes = async (next: MealPlanRecipe[]) => {
+    if (plan) {
+      await save(plan, { recipes: next });
+      return;
+    }
+    // The first recipe of a week creates its plan.
     if (!ctx) return;
     try {
-      const id = await insertRecord('meal_plans', ctx, {
-        ...defaultPlanPeriod(today),
-        recipes: [],
-      });
-      setSelectedId(id);
-      setCustomOpen(false);
+      await insertRecord('meal_plans', ctx, { ...week, recipes: next });
     } catch (err) {
       fail(t('plan.couldNotSave'))(err);
     }
   };
 
-  const save = (target: MealPlan, changes: Record<string, unknown>) =>
-    updateRecord('meal_plans', target.id, changes).catch(fail(t('plan.couldNotSave')));
-
-  const choosePeriod = (target: MealPlan, choice: PeriodChoice) => {
-    if (choice === 'custom') {
-      setCustomOpen(true);
-      return;
-    }
-    setCustomOpen(false);
-    save(target, { ...weekPeriod(today, choice === 'thisWeek' ? 0 : 1) });
-  };
-
-  const setRecipes = (target: MealPlan, next: MealPlanRecipe[]) => save(target, { recipes: next });
-
   const setServings = (target: MealPlan, recipeId: string, servings: number) =>
-    setRecipes(
-      target,
-      target.recipes.map((entry) =>
+    save(target, {
+      recipes: target.recipes.map((entry) =>
         entry.recipeId === recipeId ? { ...entry, servings: clampServings(servings) } : entry,
       ),
-    );
+    });
 
-  const confirmDelete = (target: MealPlan) =>
-    Alert.alert(t('plan.deleteTitle'), t('plan.deleteBody', { range: rangeText(target) }), [
+  const go = (by: number) => {
+    setOtherId(null);
+    setOffset((current) => current + by);
+  };
+
+  const confirmClear = (target: MealPlan) =>
+    Alert.alert(t('plan.clearTitle'), t('plan.clearBody', { range: rangeText(target) }), [
       { text: t('common.cancel'), style: 'cancel' },
       {
-        text: t('common.delete'),
+        text: t('plan.clearWeek'),
         style: 'destructive',
         onPress: async () => {
-          setSelectedId(null);
+          setOtherId(null);
           await deleteRecord('meal_plans', target.id);
         },
       },
@@ -141,156 +189,136 @@ export const PlanView: React.FC<{
     }
   };
 
-  if (!plan) {
-    return (
-      <Card>
-        <EmptyState message={t('plan.empty')} />
-        <View className="mt-2">
-          <Button label={t('plan.startPlan')} onPress={createPlan} />
-        </View>
-      </Card>
-    );
-  }
-
-  const choice: PeriodChoice = customOpen ? 'custom' : periodChoice(plan, today);
-  const generated = lists.find((list) => list.planId === plan.id) ?? null;
+  const shown = plan ?? week;
+  const dates = planDates(shown);
+  const label = dates ? formatCompactRange(t, dates.from, dates.to) : '';
+  const sub =
+    !plan || plan.id === weekPlan?.id
+      ? offset === 0
+        ? t('plan.thisWeek')
+        : offset === 1
+          ? t('plan.nextWeek')
+          : offset === -1
+            ? t('plan.lastWeek')
+            : ''
+      : '';
   const toBuy = build?.rows.length ?? 0;
   const staples = build?.staples.length ?? 0;
+  const bought = listItems.filter((item) => item.isChecked).length;
 
   return (
     <>
-      <FilterChips
-        label={t('plan.periodLabel')}
-        value={choice}
-        onChange={(next) => choosePeriod(plan, next)}
-        options={[
-          { value: 'thisWeek', label: t('plan.thisWeek') },
-          { value: 'nextWeek', label: t('plan.nextWeek') },
-          { value: 'custom', label: t('plan.custom') },
-        ]}
-      />
-      {choice === 'custom' ? (
-        <Card>
-          <View className="gap-3">
-            <View>
-              <SectionLabel>{t('plan.from')}</SectionLabel>
-              <DateField
-                label={t('plan.from')}
-                value={plan.startsOn}
-                onChange={(startsOn) =>
-                  save(plan, startsOn > plan.endsOn ? { startsOn, endsOn: startsOn } : { startsOn })
-                }
-              />
-            </View>
-            <View>
-              <SectionLabel>{t('plan.to')}</SectionLabel>
-              <DateField
-                label={t('plan.to')}
-                value={plan.endsOn}
-                onChange={(endsOn) =>
-                  save(plan, endsOn < plan.startsOn ? { startsOn: endsOn, endsOn } : { endsOn })
-                }
-              />
-            </View>
-          </View>
-        </Card>
-      ) : null}
-      <Text className="text-sm text-ink-muted mb-3">
-        {t('plan.poolHint', { range: rangeText(plan) })}
-      </Text>
+      <WeekNavigator label={label} sub={sub} onPrevious={() => go(-1)} onNext={() => go(1)} />
 
-      <SectionLabel>{t('plan.recipesHeading')}</SectionLabel>
-      {plan.recipes.length === 0 ? (
+      {!plan || plan.recipes.length === 0 ? (
         <Card>
-          <EmptyState message={recipes.length === 0 ? t('plan.noLibrary') : t('plan.noRecipes')} />
-        </Card>
-      ) : null}
-      {plan.recipes.map((entry) => {
-        const recipe = recipeById.get(entry.recipeId);
-        const name = recipe?.name ?? t('plan.recipeGone');
-        return (
-          <View
-            key={entry.recipeId}
-            className="bg-surface rounded-2xl p-4 border border-border mb-3"
-          >
-            <View className="flex-row items-center">
-              <View className="flex-1 mr-2">
-                <Text className="text-base font-semibold text-ink">{name}</Text>
-                <Text className="text-sm text-ink-muted mt-0.5">{t('plan.servingsLabel')}</Text>
-              </View>
-              <Stepper
-                value={entry.servings}
-                onChange={(next) => setServings(plan, entry.recipeId, next)}
-                decreaseLabel={t('plan.lessServings', { name })}
-                increaseLabel={t('plan.moreServings', { name })}
-              />
-              <Pressable
-                onPress={() =>
-                  setRecipes(
-                    plan,
-                    plan.recipes.filter((r) => r.recipeId !== entry.recipeId),
-                  )
-                }
-                accessibilityRole="button"
-                accessibilityLabel={t('plan.removeRecipe', { name })}
-                className="w-12 h-12 items-center justify-center ml-1 active:opacity-60"
-              >
-                <Icon name="x" size={18} />
-              </Pressable>
+          <EmptyState message={recipes.length === 0 ? t('plan.noLibrary') : t('plan.emptyWeek')} />
+          {recipes.length > 0 ? (
+            <View className="mt-2">
+              <Button label={t('plan.addRecipes')} onPress={() => setPickerOpen(true)} />
             </View>
+          ) : null}
+        </Card>
+      ) : (
+        <>
+          {plan.recipes.map((entry) => {
+            const recipe = recipeById.get(entry.recipeId);
+            const name = recipe?.name ?? t('plan.recipeGone');
+            return (
+              <View
+                key={entry.recipeId}
+                className="bg-surface rounded-2xl p-4 border border-border mb-3"
+              >
+                <View className="flex-row items-center">
+                  <View className="flex-1 mr-2">
+                    <Text className="text-base font-semibold text-ink">{name}</Text>
+                    <Text className="text-sm text-ink-muted mt-0.5">{t('plan.servingsLabel')}</Text>
+                  </View>
+                  <Stepper
+                    value={entry.servings}
+                    onChange={(next) => setServings(plan, entry.recipeId, next)}
+                    decreaseLabel={t('plan.lessServings', { name })}
+                    increaseLabel={t('plan.moreServings', { name })}
+                  />
+                  <Pressable
+                    onPress={() =>
+                      setRecipes(plan.recipes.filter((r) => r.recipeId !== entry.recipeId))
+                    }
+                    accessibilityRole="button"
+                    accessibilityLabel={t('plan.removeRecipe', { name })}
+                    className="w-12 h-12 items-center justify-center ml-1 active:opacity-60"
+                  >
+                    <Icon name="x" size={18} />
+                  </Pressable>
+                </View>
+              </View>
+            );
+          })}
+          <View className="mb-4">
+            <Button
+              label={t('plan.addRecipes')}
+              variant="outline"
+              onPress={() => setPickerOpen(true)}
+            />
           </View>
-        );
-      })}
-      {recipes.length > 0 ? (
-        <View className="mb-4">
+
+          <Card>
+            {generated ? (
+              <>
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-base font-semibold text-ink">{t('plan.listReady')}</Text>
+                  {outOfDate ? (
+                    <View className="bg-surface-sunken rounded-full px-3 py-1">
+                      <Text className="text-xs font-semibold text-ink">{t('plan.changed')}</Text>
+                    </View>
+                  ) : null}
+                </View>
+                <Text className="text-sm text-ink-muted mt-0.5 mb-3">
+                  {t('plan.shoppingProgress', { done: bought, total: listItems.length })}
+                </Text>
+                <Button label={t('plan.openList')} onPress={() => onOpenList(generated.id)} />
+              </>
+            ) : (
+              <>
+                <Text className="text-base font-semibold text-ink">
+                  {t('plan.toBuy', { count: toBuy })}
+                </Text>
+                {staples > 0 ? (
+                  <Text className="text-sm text-ink-muted mt-0.5">
+                    {t('plan.staplesLeftOut', { count: staples })}
+                  </Text>
+                ) : null}
+                <View className="mt-3">
+                  <Button
+                    label={t('plan.makeList')}
+                    onPress={() => makeList(plan)}
+                    disabled={busy || toBuy === 0}
+                  />
+                </View>
+              </>
+            )}
+          </Card>
+        </>
+      )}
+
+      {plan ? (
+        <View className="items-center mt-2">
           <Button
-            label={t('plan.addRecipes')}
+            label={t('plan.clearWeek')}
             variant="ghost"
-            onPress={() => setPickerOpen(true)}
+            small
+            onPress={() => confirmClear(plan)}
           />
         </View>
       ) : null}
 
-      {plan.recipes.length > 0 ? (
-        <Card>
-          {generated ? (
-            <>
-              <Text className="text-base font-semibold text-ink">{t('plan.listReady')}</Text>
-              <Text className="text-sm text-ink-muted mt-0.5 mb-3">{generated.name}</Text>
-              <Button label={t('plan.openList')} onPress={() => onOpenList(generated.id)} />
-            </>
-          ) : (
-            <>
-              <Text className="text-base font-semibold text-ink">
-                {t('plan.toBuy', { count: toBuy })}
-              </Text>
-              {staples > 0 ? (
-                <Text className="text-sm text-ink-muted mt-0.5">
-                  {t('plan.staplesLeftOut', { count: staples })}
-                </Text>
-              ) : null}
-              <View className="mt-3">
-                <Button
-                  label={t('plan.makeList')}
-                  onPress={() => makeList(plan)}
-                  disabled={busy || toBuy === 0}
-                />
-              </View>
-            </>
-          )}
-        </Card>
-      ) : null}
-
       {others.length > 0 ? (
-        <View className="mt-2">
+        <View className="mt-4">
           <SectionLabel>{t('plan.otherPlans')}</SectionLabel>
           {others.map((other) => (
             <Pressable
               key={other.id}
-              onPress={() => {
-                setSelectedId(other.id);
-                setCustomOpen(false);
-              }}
+              onPress={() => setOtherId(other.id)}
               accessibilityRole="button"
               className="bg-surface rounded-2xl p-4 border border-border mb-3 flex-row items-center active:opacity-70"
             >
@@ -306,17 +334,12 @@ export const PlanView: React.FC<{
         </View>
       ) : null}
 
-      <View className="gap-3 mt-2">
-        <Button label={t('plan.newPlan')} variant="ghost" onPress={createPlan} />
-        <Button label={t('plan.deletePlan')} variant="danger" onPress={() => confirmDelete(plan)} />
-      </View>
-
       <RecipePicker
         visible={pickerOpen}
         onClose={() => setPickerOpen(false)}
         recipes={recipes}
-        selected={plan.recipes}
-        onConfirm={(next) => setRecipes(plan, next)}
+        selected={plan?.recipes ?? []}
+        onConfirm={setRecipes}
       />
     </>
   );

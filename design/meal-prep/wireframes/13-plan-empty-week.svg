@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812" font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
+<!-- 13 Plan: a week with nothing planned yet · mobile 375x812 · 8px grid -->
+<rect x="0" y="0" width="375" height="812" fill="#fff"/>
+<text x="16" y="32" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">9:41</text>
+<rect x="311" y="22" width="32" height="12" rx="3" fill="#fff"/>
+<text x="16" y="96" font-size="28" text-anchor="start" stroke="none" fill="#000" font-weight="700">Plan</text>
+<rect x="16" y="128" width="343" height="48" rx="8" fill="#e6e6e6"/>
+<rect x="20" y="132" width="111" height="40" rx="6" fill="#e6e6e6" stroke-width="0"/>
+<text x="75.5" y="157" font-size="14" text-anchor="middle" stroke="none" fill="#000">Lists</text>
+<rect x="131" y="132" width="111" height="40" rx="6" fill="#e6e6e6" stroke-width="0"/>
+<text x="186.5" y="157" font-size="14" text-anchor="middle" stroke="none" fill="#000">Recipes</text>
+<rect x="242" y="132" width="111" height="40" rx="6" fill="#000"/>
+<text x="297.5" y="157" font-size="14" text-anchor="middle" stroke="none" fill="#fff" font-weight="700">Plan</text>
+<line x1="0" y1="748" x2="375" y2="748" stroke="#000"/>
+<rect x="9.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="37.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="37.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Today</text>
+<rect x="84.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="112.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="112.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Calendar</text>
+<rect x="159.5" y="756" width="56" height="32" rx="16" fill="#000"/>
+<text x="187.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#fff">▫</text>
+<text x="187.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#000">Lists</text>
+<rect x="234.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="262.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="262.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Home</text>
+<rect x="309.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="337.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="337.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Dates</text>
+<circle cx="36" cy="212" r="20" fill="#fff"/>
+<text x="36" y="219" font-size="24" text-anchor="middle" stroke="none" fill="#000">‹</text>
+<text x="187.5" y="210" font-size="16" text-anchor="middle" stroke="none" fill="#000" font-weight="700">Mon 9 – Sun 15 Nov</text>
+<text x="187.5" y="230" font-size="12" text-anchor="middle" stroke="none" fill="#666">This week</text>
+<circle cx="339" cy="212" r="20" fill="#fff"/>
+<text x="339" y="219" font-size="24" text-anchor="middle" stroke="none" fill="#000">›</text>
+<rect x="16" y="252" width="343" height="120" rx="8" fill="#fff"/>
+<text x="187.5" y="296" font-size="14" text-anchor="middle" stroke="none" fill="#000" font-weight="700">Nothing planned for this week</text>
+<text x="187.5" y="318" font-size="12" text-anchor="middle" stroke="none" fill="#666">Pick the recipes you want to cook.</text>
+<rect x="32" y="328" width="311" height="32" rx="8" fill="#000"/>
+<text x="187.5" y="349.0" font-size="14" text-anchor="middle" stroke="none" fill="#fff" font-weight="700">Add recipes</text>
+<g><circle cx="8" cy="212" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="216" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">1</text></g>
+<g><circle cx="8" cy="340" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="344" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">2</text></g>
+</svg>
