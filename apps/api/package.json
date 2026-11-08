@@ -12,23 +12,23 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@better-auth/expo": "1.7.15",
+    "@better-auth/expo": "1.7.17",
     "@diade/contracts": "workspace:*",
     "@diade/domain": "workspace:*",
     "@diade/validation": "workspace:*",
-    "@hono/zod-validator": "^0.4.3",
-    "@sentry/cloudflare": "^11.10.0",
-    "better-auth": "^1.2.6",
-    "drizzle-orm": "^0.45.2",
+    "@hono/zod-validator": "^0.9.1",
+    "@sentry/cloudflare": "^11.11.0",
+    "better-auth": "^1.7.17",
+    "drizzle-orm": "^0.45.4",
     "hono": "^4.7.4",
     "postgres": "^3.4.5"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261104.1",
     "@diade/config": "workspace:*",
-    "drizzle-kit": "^0.30.5",
+    "drizzle-kit": "^0.31.11",
     "typescript": "^5.8.2",
-    "vitest": "^5.0.5",
-    "wrangler": "^4.156.0"
+    "vitest": "^5.1.0",
+    "wrangler": "^4.158.0"
   }
 }
