@@ -28,42 +28,41 @@
 <rect x="309.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
 <text x="337.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
 <text x="337.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Dates</text>
-<rect x="16" y="192" width="104" height="40" rx="20" fill="#000"/>
-<text x="68.0" y="217" font-size="14" text-anchor="middle" stroke="none" fill="#fff">This week</text>
-<rect x="128" y="192" width="104" height="40" rx="20" fill="#fff"/>
-<text x="180.0" y="217" font-size="14" text-anchor="middle" stroke="none" fill="#000">Next week</text>
-<rect x="240" y="192" width="80" height="40" rx="20" fill="#fff"/>
-<text x="280.0" y="217" font-size="14" text-anchor="middle" stroke="none" fill="#000">Custom</text>
-<text x="16" y="264" font-size="12" text-anchor="start" stroke="none" fill="#666">Mon 9 – Sun 15 Nov · a pool of recipes, no days</text>
-<rect x="16" y="280" width="343" height="72" rx="8" fill="#fff"/>
-<text x="32" y="312" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Spaghetti carbonara</text>
-<text x="32" y="332" font-size="12" text-anchor="start" stroke="none" fill="#666">servings</text>
-<rect x="191" y="300" width="32" height="32" rx="16" fill="#fff"/>
-<text x="207" y="321" font-size="14" text-anchor="middle" stroke="none" fill="#000">−</text>
-<text x="239" y="321" font-size="14" text-anchor="middle" stroke="none" fill="#000" font-weight="700">4</text>
-<rect x="255" y="300" width="32" height="32" rx="16" fill="#fff"/>
-<text x="271" y="321" font-size="14" text-anchor="middle" stroke="none" fill="#000">+</text>
-<text x="335" y="321" font-size="20" text-anchor="middle" stroke="none" fill="#000">×</text>
-<rect x="16" y="368" width="343" height="72" rx="8" fill="#fff"/>
-<text x="32" y="400" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Chicken curry</text>
-<text x="32" y="420" font-size="12" text-anchor="start" stroke="none" fill="#666">servings</text>
-<rect x="191" y="388" width="32" height="32" rx="16" fill="#fff"/>
-<text x="207" y="409" font-size="14" text-anchor="middle" stroke="none" fill="#000">−</text>
-<text x="239" y="409" font-size="14" text-anchor="middle" stroke="none" fill="#000" font-weight="700">4</text>
-<rect x="255" y="388" width="32" height="32" rx="16" fill="#fff"/>
-<text x="271" y="409" font-size="14" text-anchor="middle" stroke="none" fill="#000">+</text>
-<text x="335" y="409" font-size="20" text-anchor="middle" stroke="none" fill="#000">×</text>
-<rect x="16" y="456" width="343" height="72" rx="8" fill="#fff"/>
-<text x="32" y="488" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Lentil soup</text>
-<text x="32" y="508" font-size="12" text-anchor="start" stroke="none" fill="#666">servings</text>
-<rect x="191" y="476" width="32" height="32" rx="16" fill="#fff"/>
-<text x="207" y="497" font-size="14" text-anchor="middle" stroke="none" fill="#000">−</text>
-<text x="239" y="497" font-size="14" text-anchor="middle" stroke="none" fill="#000" font-weight="700">2</text>
-<rect x="255" y="476" width="32" height="32" rx="16" fill="#fff"/>
-<text x="271" y="497" font-size="14" text-anchor="middle" stroke="none" fill="#000">+</text>
-<text x="335" y="497" font-size="20" text-anchor="middle" stroke="none" fill="#000">×</text>
-<rect x="16" y="552" width="343" height="56" rx="8" fill="#fff" stroke-dasharray="6 4"/>
-<text x="187.5" y="585.0" font-size="14" text-anchor="middle" stroke="none" fill="#000">+ Add recipes</text>
+<circle cx="36" cy="212" r="20" fill="#fff"/>
+<text x="36" y="219" font-size="24" text-anchor="middle" stroke="none" fill="#000">‹</text>
+<text x="187.5" y="210" font-size="16" text-anchor="middle" stroke="none" fill="#000" font-weight="700">Mon 9 – Sun 15 Nov</text>
+<text x="187.5" y="230" font-size="12" text-anchor="middle" stroke="none" fill="#666">This week</text>
+<circle cx="339" cy="212" r="20" fill="#fff"/>
+<text x="339" y="219" font-size="24" text-anchor="middle" stroke="none" fill="#000">›</text>
+<rect x="16" y="252" width="343" height="72" rx="8" fill="#fff"/>
+<text x="32" y="284" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Spaghetti carbonara</text>
+<text x="32" y="304" font-size="12" text-anchor="start" stroke="none" fill="#666">servings</text>
+<rect x="191" y="272" width="32" height="32" rx="16" fill="#fff"/>
+<text x="207" y="293" font-size="14" text-anchor="middle" stroke="none" fill="#000">−</text>
+<text x="239" y="293" font-size="14" text-anchor="middle" stroke="none" fill="#000" font-weight="700">4</text>
+<rect x="255" y="272" width="32" height="32" rx="16" fill="#fff"/>
+<text x="271" y="293" font-size="14" text-anchor="middle" stroke="none" fill="#000">+</text>
+<text x="335" y="293" font-size="20" text-anchor="middle" stroke="none" fill="#000">×</text>
+<rect x="16" y="332" width="343" height="72" rx="8" fill="#fff"/>
+<text x="32" y="364" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Chicken curry</text>
+<text x="32" y="384" font-size="12" text-anchor="start" stroke="none" fill="#666">servings</text>
+<rect x="191" y="352" width="32" height="32" rx="16" fill="#fff"/>
+<text x="207" y="373" font-size="14" text-anchor="middle" stroke="none" fill="#000">−</text>
+<text x="239" y="373" font-size="14" text-anchor="middle" stroke="none" fill="#000" font-weight="700">4</text>
+<rect x="255" y="352" width="32" height="32" rx="16" fill="#fff"/>
+<text x="271" y="373" font-size="14" text-anchor="middle" stroke="none" fill="#000">+</text>
+<text x="335" y="373" font-size="20" text-anchor="middle" stroke="none" fill="#000">×</text>
+<rect x="16" y="412" width="343" height="72" rx="8" fill="#fff"/>
+<text x="32" y="444" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Lentil soup</text>
+<text x="32" y="464" font-size="12" text-anchor="start" stroke="none" fill="#666">servings</text>
+<rect x="191" y="432" width="32" height="32" rx="16" fill="#fff"/>
+<text x="207" y="453" font-size="14" text-anchor="middle" stroke="none" fill="#000">−</text>
+<text x="239" y="453" font-size="14" text-anchor="middle" stroke="none" fill="#000" font-weight="700">2</text>
+<rect x="255" y="432" width="32" height="32" rx="16" fill="#fff"/>
+<text x="271" y="453" font-size="14" text-anchor="middle" stroke="none" fill="#000">+</text>
+<text x="335" y="453" font-size="20" text-anchor="middle" stroke="none" fill="#000">×</text>
+<rect x="16" y="500" width="343" height="48" rx="8" fill="#fff" stroke-dasharray="6 4"/>
+<text x="187.5" y="529.0" font-size="14" text-anchor="middle" stroke="none" fill="#000">+ Add recipes</text>
 </g>
 <rect x="0" y="0" width="375" height="812" fill="#000" opacity="0.35" stroke="none"/>
 <rect x="0" y="96" width="375" height="732" rx="16" fill="#fff"/>

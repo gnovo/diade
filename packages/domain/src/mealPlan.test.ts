@@ -7,11 +7,13 @@ import {
   groceryAmount,
   ingredientMatchKey,
   isEmptyDiff,
+  isWeekPlan,
   mergeGroceryRows,
   missingStaples,
   type PlanListItem,
   periodChoice,
   pickCurrentPlan,
+  planForWeek,
   singularWord,
   weekPeriod,
 } from './mealPlan';
@@ -541,5 +543,38 @@ describe('pickCurrentPlan', () => {
   it('ignores deleted plans and returns null when there are none', () => {
     expect(pickCurrentPlan([plan('2026-11-02', '2026-11-08', 'x')], today)).toBeNull();
     expect(pickCurrentPlan([], today)).toBeNull();
+  });
+});
+
+describe('week plans', () => {
+  const week = (startsOn: string, endsOn: string, deletedAt: string | null = null) => ({
+    startsOn,
+    endsOn,
+    deletedAt,
+  });
+
+  it('knows a Monday-to-Sunday plan from a custom one', () => {
+    expect(isWeekPlan(week('2026-11-09', '2026-11-15'))).toBe(true);
+    expect(isWeekPlan(week('2026-11-10', '2026-11-16'))).toBe(false); // starts on a Tuesday
+    expect(isWeekPlan(week('2026-11-09', '2026-11-12'))).toBe(false); // ends early
+    expect(isWeekPlan(week('not a date', '2026-11-15'))).toBe(false);
+  });
+
+  it('finds the plan for exactly that week, ignoring deleted ones', () => {
+    const plans = [
+      week('2026-11-02', '2026-11-08'),
+      week('2026-11-09', '2026-11-15', '2026-11-01T00:00:00Z'),
+      week('2026-11-09', '2026-11-15'),
+    ];
+    expect(planForWeek(plans, weekPeriod(new Date(2026, 10, 11), 0))).toBe(plans[2]);
+    expect(planForWeek(plans, weekPeriod(new Date(2026, 10, 11), -1))).toBe(plans[0]);
+    expect(planForWeek(plans, weekPeriod(new Date(2026, 10, 11), 3))).toBeNull();
+  });
+
+  it('pages backwards as well as forwards', () => {
+    expect(weekPeriod(new Date(2026, 10, 11), -1)).toEqual({
+      startsOn: '2026-11-02',
+      endsOn: '2026-11-08',
+    });
   });
 });

@@ -428,6 +428,7 @@ export const ListsScreen: React.FC = () => {
             <PlanView
               recipes={recipes.data}
               lists={lists.data}
+              items={items.data}
               onOpenList={(listId) => {
                 // The generated list lives in the Lists section, so leave the plan behind.
                 setSection('lists');

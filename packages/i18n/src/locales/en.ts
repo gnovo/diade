@@ -619,19 +619,8 @@ export const en = {
 
   plan: {
     title: 'Plan',
-    newPlan: 'New plan',
-    empty:
-      'Plan the week: choose the recipes you want to cook and build the grocery list from them.',
-    startPlan: 'Plan a week',
-    periodLabel: 'Period',
     thisWeek: 'This week',
     nextWeek: 'Next week',
-    custom: 'Custom',
-    from: 'From',
-    to: 'To',
-    poolHint: '{{range}} · a pool of recipes, no days',
-    recipesHeading: 'Recipes',
-    noRecipes: 'No recipes in this plan yet.',
     noLibrary: 'Add a recipe in the Recipes tab first, then plan with it.',
     addRecipes: 'Add recipes',
     removeRecipe: 'Remove {{name}} from the plan',
@@ -652,9 +641,19 @@ export const en = {
     openList: 'Open list',
     couldNotSave: 'Could not save the plan',
     couldNotGenerate: 'Could not create the grocery list',
-    deletePlan: 'Delete plan',
-    deleteTitle: 'Delete this plan?',
-    deleteBody:
+    periodLabel: 'Period',
+    custom: 'Custom',
+    from: 'From',
+    to: 'To',
+    lastWeek: 'Last week',
+    previousWeek: 'Previous week',
+    nextWeekLabel: 'Next week',
+    emptyWeek: 'Nothing planned for this week yet. Pick the recipes you want to cook.',
+    changed: 'Plan changed',
+    shoppingProgress: '{{done}} of {{total}} bought',
+    clearWeek: 'Clear this week',
+    clearTitle: 'Clear this week?',
+    clearBody:
       'The plan for {{range}} will be removed for both of you. Grocery lists made from it are kept.',
     picker: {
       title: 'Add recipes',

@@ -445,3 +445,23 @@ export function pickCurrentPlan<T extends Pick<MealPlan, 'startsOn' | 'endsOn' |
 /** Keeps servings in range; the stepper and the validation share this. */
 export const clampServings = (servings: number): number =>
   Math.min(MAX_SERVINGS, Math.max(MIN_SERVINGS, Math.round(servings)));
+
+/** Plans that cover exactly one Monday-to-Sunday week: the only kind the week view pages through. */
+export function isWeekPlan(plan: Pick<MealPlan, 'startsOn' | 'endsOn'>): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(plan.startsOn);
+  if (!match) return false;
+  const week = weekPeriod(new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])), 0);
+  return week.startsOn === plan.startsOn && week.endsOn === plan.endsOn;
+}
+
+/** The plan for exactly this week, if there is one. A second plan for the same week is left to the caller. */
+export function planForWeek<T extends Pick<MealPlan, 'startsOn' | 'endsOn' | 'deletedAt'>>(
+  plans: T[],
+  week: PlanPeriod,
+): T | null {
+  return (
+    plans.find(
+      (plan) => !plan.deletedAt && plan.startsOn === week.startsOn && plan.endsOn === week.endsOn,
+    ) ?? null
+  );
+}
