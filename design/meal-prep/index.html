@@ -38,7 +38,7 @@ th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute
 #lb.wide img{width:min(1464px,100%)}
 </style>
 <div class="wrap">
-<nav><a href="#flow">Flow</a><a href="#s1">1 Library</a><a href="#s2">2 Recipe sheet</a><a href="#s3">3 Plan</a><a href="#s4">4 Pick</a><a href="#s5">5 Grocery list</a><a href="#s6">6 Wizard type</a><a href="#s7">7 Name</a><a href="#s8">8 Recipes</a><a href="#s9">9 Review</a><a href="#s10">10 Import</a><a href="#s11">11 Review</a><a href="#s12">12 Add recipe</a><a href="#s13">13 Empty week</a><a href="#s14">14 Recipe detail</a><a href="#s15">15 Cooking</a><a href="#rules">Rules</a><a href="#open">Open questions</a></nav>
+<nav><a href="#flow">Flow</a><a href="#s1">1 Library</a><a href="#s2">2 Recipe sheet</a><a href="#s3">3 Plan</a><a href="#s4">4 Pick</a><a href="#s5">5 Grocery list</a><a href="#s6">6 Wizard type</a><a href="#s7">7 Name</a><a href="#s8">8 Recipes</a><a href="#s9">9 Review</a><a href="#s10">10 Import</a><a href="#s11">11 Review</a><a href="#s12">12 Add recipe</a><a href="#s13">13 Empty week</a><a href="#s14">14 Recipe detail</a><a href="#s15">15 Cooking</a><a href="#s17">17 Ingredients</a><a href="#s18">18 Merge names</a><a href="#rules">Rules</a><a href="#open">Open questions</a></nav>
 <header>
 <div class="crumb">Díade mobile · Lists tab</div>
 <h1>Meal prep: recipes, a weekly plan, and smarter lists</h1>
@@ -100,7 +100,7 @@ th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute
 <section id="s9"><h2>9 · Wizard step 4: review (PR D)</h2>
 <p class="sub">Last chance to drop what you already have, before anything is written.</p>
 <div class="row"><div class="wire" data-zoom><img src="wireframes/09-wizard-review.svg" alt="Wizard step 4"></div>
-<div><ol class="notes"><li><span class="n">1</span><span>Totals: what will be added, and how many staples were left out.</span></li><li><span class="n">2</span><span>Every row can be unticked; unticked rows are not added. Sources show which recipes asked for it.</span></li><li><span class="n">3</span><span>Merged rows, such as onions shared by two recipes.</span></li><li><span class="n">4</span><span><b>Possible duplicate.</b> Two rows in the same unit family whose names are one typo apart ("Meat" and "Meet") are offered as a pair. Nothing changes until the member taps Merge; Keep separate dismisses the pair. After a merge the row shows the summed amount and both recipes, and a line under the list ("Meet merged into Meat" with Undo) reverses it. The row fed by more recipes is kept. Never merged automatically: fuzzy matching also links unrelated words.</span></li><li><span class="n">5</span><span>Staples stay collapsed here too.</span></li></ol></div></div></section>
+<div><ol class="notes"><li><span class="n">1</span><span>Totals: what will be added, and how many staples were left out.</span></li><li><span class="n">2</span><span>Every row can be unticked; unticked rows are not added. Sources show which recipes asked for it.</span></li><li><span class="n">3</span><span>Merged rows, such as onions shared by two recipes.</span></li><li><span class="n">4</span><span><b>Possible duplicate.</b> Two rows in the same unit family whose names are one typo apart ("Meat" and "Meet") are offered as a pair. Nothing changes until the member taps Merge; Keep separate dismisses the pair. After a merge the row shows the summed amount and both recipes, and a line under the list ("Meet merged into Meat" with Undo) reverses it. The row fed by more recipes is kept. Never merged automatically: fuzzy matching also links unrelated words. A merge you confirm is <b>remembered</b>: when the list is created it is saved to the household's ingredient catalog, so later lists add the two names up without asking, and the Ingredients screen (17) lists it.</span></li><li><span class="n">5</span><span>Staples stay collapsed here too.</span></li></ol></div></div></section>
 
 <section id="s10"><h2>10 · Import recipes: entry (PR E)</h2>
 <p class="sub">Paste only for now: a file picker or share sheet needs a native module, so it waits for an APK release.</p>
@@ -131,6 +131,16 @@ th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute
 <p class="sub">Every ingredient, pantry staples included, as one list to tick off while you gather them.</p>
 <div class="row"><div class="wire" data-zoom><img src="wireframes/16-cooking-ingredients.svg" alt="Cooking ingredients"></div>
 <div><ol class="notes"><li><span class="n">1</span><span>How many are ready.</span></li><li><span class="n">2</span><span>Tap anywhere on a row to tick it; a ticked row is struck through and dimmed. Quantities are the recipe's, not scaled: scaling servings while cooking is a later idea.</span></li></ol></div></div></section>
+
+<section id="s17"><h2>17 · Ingredients screen</h2>
+<p class="sub">Reached from the Recipes tab (a row above the search). Full screen, like the cooking view.</p>
+<div class="row"><div class="wire" data-zoom><img src="wireframes/17-ingredients.svg" alt="Ingredients screen"></div>
+<div><ol class="notes"><li><span class="n">1</span><span>What it is for, in one sentence.</span></li><li><span class="n">2</span><span><b>Merge two names</b> opens the merge sheet (18). Merges made at the grocery review appear here too.</span></li><li><span class="n">3</span><span>Each kept name with the names merged into it. <b>Rename</b> changes the name lists use for it (the recipes keep what was written).</span></li><li><span class="n">4</span><span><b>Separate</b> undoes one merge; the name stands on its own again. Nothing is deleted.</span></li></ol><div class="why"><b>Cost:</b> a merge is one or two syncs, not one per ingredient. Rows are made only here and at the review, never when a recipe is saved. Staple defaults and aisles come later.</div></div></div></section>
+
+<section id="s18"><h2>18 · Merge two names</h2>
+<p class="sub">Two taps and a confirm, from the names your recipes already use.</p>
+<div class="row"><div class="wire" data-zoom><img src="wireframes/18-merge-names.svg" alt="Merge two names"></div>
+<div><ol class="notes"><li><span class="n">1</span><span>First pick the name lists should use. Names the dictionary or an earlier merge already joins show once, most used first.</span></li><li><span class="n">2</span><span>Search narrows the list.</span></li><li><span class="n">3</span><span>Then pick the name that is also that ingredient. The footer button reads <b>Merge "Meet" into "Meat"</b>, and nothing is saved until it is tapped. A pair that is already one ingredient is refused.</span></li></ol></div></div></section>
 
 <section id="rules"><h2>Rules that cut across screens</h2>
 <p class="sub">Decided in the brainstorm; each is a few lines of code but easy to get wrong later.</p>

@@ -94,7 +94,7 @@ export interface GroceryContribution {
 
 export interface GroceryRow {
   key: string;
-  /** The name as the first recipe wrote it. */
+  /** The household's name for it if it has one, else as the first recipe wrote it. */
   name: string;
   family: UnitFamily;
   /** In the base unit of the family; null when every contribution is "to taste". */
@@ -157,7 +157,8 @@ export function buildGroceryList(
         groups.set(key, {
           row: {
             key,
-            name: ingredient.name,
+            // The household's own name for it, when it gave one (a merge or a rename), else as the first recipe wrote it.
+            name: resolver.name(resolver.key(ingredient.name)) ?? ingredient.name,
             family,
             quantity: null,
             unit,

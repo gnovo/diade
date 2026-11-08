@@ -175,10 +175,11 @@ export const RecipeDetailScreen: React.FC<{
  * Lists / Recipes switch and the scroll view belong to the screen that shows it, so they stay put
  * while this fades in.
  */
-export const RecipesLibrary: React.FC<{ recipes: Recipe[]; onOpen: (recipe: Recipe) => void }> = ({
-  recipes,
-  onOpen,
-}) => {
+export const RecipesLibrary: React.FC<{
+  recipes: Recipe[];
+  onOpen: (recipe: Recipe) => void;
+  onOpenIngredients: () => void;
+}> = ({ recipes, onOpen, onOpenIngredients }) => {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
 
@@ -203,6 +204,17 @@ export const RecipesLibrary: React.FC<{ recipes: Recipe[]; onOpen: (recipe: Reci
 
   return (
     <>
+      <Pressable
+        onPress={onOpenIngredients}
+        accessibilityRole="button"
+        className="flex-row items-center bg-surface rounded-2xl p-4 border border-border mb-3 active:opacity-70"
+      >
+        <View className="flex-1 mr-2">
+          <Text className="text-sm font-semibold text-ink">{t('ingredients.entry')}</Text>
+          <Text className="text-xs text-ink-muted mt-0.5">{t('ingredients.entryHint')}</Text>
+        </View>
+        <Icon name="chevron-right" size={18} />
+      </Pressable>
       <View className="mb-4">
         <TextField
           value={query}

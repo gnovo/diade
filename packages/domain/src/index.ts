@@ -8,6 +8,7 @@ export * from './importantDates';
 export * from './ingredientCatalog';
 export * from './ingredientDictionary';
 export * from './ingredientKeys';
+export * from './ingredientMerges';
 export * from './ingredientNames';
 export * from './listTemplates';
 export * from './mealPlan';

@@ -19,6 +19,7 @@ import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, Text, View } from 'react-native';
+import { rememberMerges } from '../data/ingredientActions';
 import { createEmptyList, createPlanList } from '../data/newListActions';
 import {
   amountText,
@@ -121,6 +122,7 @@ const DuplicateSuggestion: React.FC<{
       <Text className="text-sm font-semibold text-ink mt-1">
         {pair.keep.name} ↔ {pair.absorb.name}
       </Text>
+      <Text className="text-xs text-ink-muted mt-0.5">{t('lists.wizard.duplicate.remember')}</Text>
       <View className="flex-row mt-3">
         <View className="flex-1 mr-2">
           <Button label={t('lists.wizard.duplicate.merge')} onPress={onMerge} />
@@ -157,7 +159,7 @@ export const NewListWizard: React.FC<{
   const ctx = useWriteContext();
   const ink = useColor('ink');
   const plans = useLiveQuery(getActiveMealPlans, [] as MealPlan[]);
-  const { resolver } = useIngredientCatalog();
+  const { entries: catalog, resolver } = useIngredientCatalog();
 
   const defaultName = (id: ListTemplateId) =>
     id === 'blank' ? '' : t(`lists.template.${id}.name`);
@@ -319,6 +321,19 @@ export const NewListWizard: React.FC<{
                 .filter((id) => !skipped.has(id))
                 .map((id) => starterLabel(template.id, id)),
             );
+      // The merges confirmed at the review are remembered for every list from now on. The list is already made, so a
+      // failure here must not undo it.
+      if (path === 'plan' && build && merges.size > 0) {
+        const nameOf = (key: string) => build.rows.find((row) => row.key === key)?.name;
+        const pairs = [...merges].flatMap(([absorbKey, keepKey]) => {
+          const absorbName = nameOf(absorbKey);
+          const keepName = nameOf(keepKey);
+          return absorbName && keepName ? [{ keepName, absorbName }] : [];
+        });
+        await rememberMerges(ctx, catalog, pairs).catch((err) =>
+          console.warn('Could not remember the merges', err),
+        );
+      }
       onCreated(listId);
     } catch (err) {
       setSaving(false);
