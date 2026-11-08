@@ -11,11 +11,11 @@ const UNIT = UNITS.join('|');
 // "500g flour", "1.5 l water", "2 kg rice"
 const LEADING_UNIT = new RegExp(`^(${NUM})\\s*(${UNIT})\\s+(.+)$`, 'i');
 // "2 milk", "2x milk", "2 x milk"
-const LEADING_COUNT = new RegExp(`^(\\d{1,3})\\s*x?\\s+(.+)$`, 'i');
+const LEADING_COUNT = /^(\d{1,3})\s*x?\s+(.+)$/i;
 // "milk x2", "milk x 2"
-const TRAILING_X = new RegExp(`^(.+?)\\s*\\bx\\s*(\\d{1,3})$`, 'i');
+const TRAILING_X = /^(.+?)\s*\bx\s*(\d{1,3})$/i;
 // "milk 2"
-const TRAILING_COUNT = new RegExp(`^(.+?)\\s+(\\d{1,3})$`);
+const TRAILING_COUNT = /^(.+?)\s+(\d{1,3})$/;
 
 const clean = (value: string) => value.trim().replace(/\s+/g, ' ');
 
@@ -32,7 +32,8 @@ export function parseQuantity(input: string): ParsedItem {
   const withUnit = LEADING_UNIT.exec(text);
   if (withUnit) {
     const name = clean(withUnit[3]);
-    if (name) return { name, quantity: withUnit[1].replace(',', '.'), unit: withUnit[2].toLowerCase() };
+    if (name)
+      return { name, quantity: withUnit[1].replace(',', '.'), unit: withUnit[2].toLowerCase() };
   }
 
   const leading = LEADING_COUNT.exec(text);

@@ -1,7 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import {
+  clampServings,
+  type MealPlanRecipe,
+  normalizeIngredientName,
+  type Recipe,
+} from '@diade/domain';
+import type React from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { clampServings, normalizeIngredientName, type MealPlanRecipe, type Recipe } from '@diade/domain';
+import { Pressable, Text, View } from 'react-native';
 import { BottomSheet } from './BottomSheet';
 import { Stepper } from './RecipeForm';
 import { Button, Checkbox, EmptyState, TextField } from './ui';
@@ -18,7 +24,10 @@ export const RecipeChoiceList: React.FC<{
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
 
-  const servingsById = useMemo(() => new Map(selected.map((entry) => [entry.recipeId, entry.servings])), [selected]);
+  const servingsById = useMemo(
+    () => new Map(selected.map((entry) => [entry.recipeId, entry.servings])),
+    [selected],
+  );
 
   const matches = useMemo(() => {
     const needle = normalizeIngredientName(query);
@@ -40,7 +49,9 @@ export const RecipeChoiceList: React.FC<{
 
   const setServings = (recipeId: string, servings: number) =>
     onChange(
-      selected.map((entry) => (entry.recipeId === recipeId ? { ...entry, servings: clampServings(servings) } : entry)),
+      selected.map((entry) =>
+        entry.recipeId === recipeId ? { ...entry, servings: clampServings(servings) } : entry,
+      ),
     );
 
   return (
@@ -56,7 +67,9 @@ export const RecipeChoiceList: React.FC<{
           clearButtonMode="while-editing"
         />
       </View>
-      {matches.length === 0 ? <EmptyState message={t('plan.picker.noMatches', { query: query.trim() })} /> : null}
+      {matches.length === 0 ? (
+        <EmptyState message={t('plan.picker.noMatches', { query: query.trim() })} />
+      ) : null}
       {matches.map((recipe, index) => {
         const servings = servingsById.get(recipe.id);
         const checked = servings !== undefined;
@@ -67,7 +80,9 @@ export const RecipeChoiceList: React.FC<{
               <Checkbox
                 checked={checked}
                 onToggle={() => toggle(recipe)}
-                label={t(checked ? 'plan.picker.deselect' : 'plan.picker.select', { name: recipe.name })}
+                label={t(checked ? 'plan.picker.deselect' : 'plan.picker.select', {
+                  name: recipe.name,
+                })}
               />
               <Pressable onPress={() => toggle(recipe)} accessible={false} className="flex-1 mr-2">
                 <Text className="text-sm font-semibold text-ink">{recipe.name}</Text>
@@ -128,7 +143,9 @@ export const RecipePicker: React.FC<{
       title={t('plan.picker.title')}
       footer={
         <Button
-          label={draft.length > 0 ? t('plan.picker.add', { count: draft.length }) : t('plan.picker.done')}
+          label={
+            draft.length > 0 ? t('plan.picker.add', { count: draft.length }) : t('plan.picker.done')
+          }
           onPress={confirm}
         />
       }

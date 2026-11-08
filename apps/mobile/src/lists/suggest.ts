@@ -68,7 +68,10 @@ function matchTier(query: string, norm: string): 0 | 1 | 2 | null {
   return null;
 }
 
-function buildCandidates(history: readonly HistoryEntry[], dictionary: readonly string[]): Map<string, Candidate> {
+function buildCandidates(
+  history: readonly HistoryEntry[],
+  dictionary: readonly string[],
+): Map<string, Candidate> {
   const byName = new Map<string, Candidate>();
   for (const entry of history) {
     const norm = normalizeText(entry.name);
@@ -81,7 +84,14 @@ function buildCandidates(history: readonly HistoryEntry[], dictionary: readonly 
         prior.name = entry.name;
       }
     } else {
-      byName.set(norm, { name: entry.name, norm, source: 'history', count: entry.count, lastUsedAt: entry.lastUsedAt, rank: 0 });
+      byName.set(norm, {
+        name: entry.name,
+        norm,
+        source: 'history',
+        count: entry.count,
+        lastUsedAt: entry.lastUsedAt,
+        rank: 0,
+      });
     }
   }
   dictionary.forEach((name, rank) => {
@@ -98,7 +108,13 @@ function buildCandidates(history: readonly HistoryEntry[], dictionary: readonly 
  * either, prefix matches beat word-start matches beat one-typo matches. Items already on
  * the list are left out, except checked ones, which come back as "add again".
  */
-export function suggest({ query, history, dictionary, existing, limit = DEFAULT_LIMIT }: SuggestInput): Suggestion[] {
+export function suggest({
+  query,
+  history,
+  dictionary,
+  existing,
+  limit = DEFAULT_LIMIT,
+}: SuggestInput): Suggestion[] {
   const q = normalizeText(query);
   const candidates = buildCandidates(history, dictionary);
 
@@ -125,7 +141,8 @@ export function suggest({ query, history, dictionary, existing, limit = DEFAULT_
     if (a.tier !== b.tier) return a.tier - b.tier;
     if (a.candidate.source !== b.candidate.source) return a.candidate.source === 'history' ? -1 : 1;
     if (a.candidate.count !== b.candidate.count) return b.candidate.count - a.candidate.count;
-    if (a.candidate.lastUsedAt !== b.candidate.lastUsedAt) return a.candidate.lastUsedAt < b.candidate.lastUsedAt ? 1 : -1;
+    if (a.candidate.lastUsedAt !== b.candidate.lastUsedAt)
+      return a.candidate.lastUsedAt < b.candidate.lastUsedAt ? 1 : -1;
     if (a.candidate.rank !== b.candidate.rank) return a.candidate.rank - b.candidate.rank;
     return a.candidate.name.localeCompare(b.candidate.name);
   });

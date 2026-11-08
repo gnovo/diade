@@ -138,7 +138,8 @@ export const ptPT: Shape<Catalog> = {
     createButton: 'Criar e obter código',
     nameRequired: 'Introduza um nome para o seu espaço',
     created: 'Espaço criado!',
-    createdBody: 'O seu código de convite é: {{code}}\nPartilhe-o com o seu parceiro(a) para se ligarem.',
+    createdBody:
+      'O seu código de convite é: {{code}}\nPartilhe-o com o seu parceiro(a) para se ligarem.',
     couldNotCreate: 'Não foi possível criar o espaço',
     or: 'OU',
     joinTitle: 'Entrar num espaço existente',
@@ -215,14 +216,16 @@ export const ptPT: Shape<Catalog> = {
     showing: 'Calendários Google',
     scopeBoth: 'Ambos',
     setupTitle: 'Conclua a configuração do Google Calendar',
-    setupBody: 'Escolha que calendários trazer e quem os pode ver. Nada é sincronizado nem partilhado até o fazer.',
+    setupBody:
+      'Escolha que calendários trazer e quem os pode ver. Nada é sincronizado nem partilhado até o fazer.',
     setupAction: 'Escolher calendários',
     filters: 'Filtros',
     filtersOn: 'Filtros, ativos',
     highlight: 'Destacar',
     highlighted: 'Destacado',
     highlightHint: 'Aparece no ecrã Hoje para os dois.',
-    highlightBusyNote: 'O seu parceiro(a) não vê este destaque, porque este evento não está totalmente partilhado.',
+    highlightBusyNote:
+      'O seu parceiro(a) não vê este destaque, porque este evento não está totalmente partilhado.',
     viewSchedule: 'Agenda',
     viewDay: 'Dia',
     viewWeek: 'Semana',
@@ -244,7 +247,8 @@ export const ptPT: Shape<Catalog> = {
     noCalendarsToToggle: 'Ainda não há calendários para mostrar.',
     datesSection: 'Datas',
     showOthersDates: 'Aniversários e datas de outras pessoas',
-    showOthersDatesHint: 'Datas que adicionou para amigos e família. Os aniversários do Google das mesmas pessoas ficam escondidos para não aparecerem duas vezes.',
+    showOthersDatesHint:
+      'Datas que adicionou para amigos e família. Os aniversários do Google das mesmas pessoas ficam escondidos para não aparecerem duas vezes.',
     hideFilters: 'Ocultar filtros',
     task: 'Tarefa',
     importantTask: 'Importante',
@@ -295,7 +299,8 @@ export const ptPT: Shape<Catalog> = {
     sharedHelp: 'O seu parceiro(a) vê os detalhes.',
     busyOnlyHelp: 'O seu parceiro(a) vê um bloco "Ocupado" sem detalhes.',
     privateHelp: 'Só você vê estes eventos.',
-    freeBusyNote: 'Só tem acesso a livre/ocupado, por isso os detalhes nunca podem ser partilhados.',
+    freeBusyNote:
+      'Só tem acesso a livre/ocupado, por isso os detalhes nunca podem ser partilhados.',
     syncNow: 'Sincronizar agora',
     refreshList: 'Atualizar calendários',
     refreshing: 'A atualizar…',
@@ -372,8 +377,10 @@ export const ptPT: Shape<Catalog> = {
       startFrom: 'Começar com',
       empty: 'Vazia',
       mealPlan: 'Plano de refeições',
-      mealPlanHint: 'Escolha as receitas e os ingredientes são adicionados por si, em unidades métricas.',
-      noRecipesHint: 'Adicione receitas na secção Receitas para começar uma lista a partir de um plano.',
+      mealPlanHint:
+        'Escolha as receitas e os ingredientes são adicionados por si, em unidades métricas.',
+      noRecipesHint:
+        'Adicione receitas na secção Receitas para começar uma lista a partir de um plano.',
       continue: 'Continuar',
       continueRecipes_one: 'Continuar · {{count}} receita',
       continueRecipes_other: 'Continuar · {{count}} receitas',
@@ -482,7 +489,8 @@ export const ptPT: Shape<Catalog> = {
       other: 'Outras',
     },
     emptyFiltered: 'Ainda não há nada aqui. Toque em + para adicionar uma data.',
-    empty: 'Adicione as datas que importam: quando se conheceram, foram viver juntos ou um aniversário.',
+    empty:
+      'Adicione as datas que importam: quando se conheceram, foram viver juntos ou um aniversário.',
     everyYear: 'todos os anos',
     heroSince: 'desde {{date}}',
     heroOn: 'em {{date}}',
@@ -551,7 +559,8 @@ export const ptPT: Shape<Catalog> = {
     servings_other: '{{count}} doses',
     ingredientsHeading: 'Ingredientes',
     pantryHeading: 'Despensa',
-    pantryHint: 'Costuma haver em casa, por isso uma lista de compras feita a partir de receitas deixa-os de fora.',
+    pantryHint:
+      'Costuma haver em casa, por isso uma lista de compras feita a partir de receitas deixa-os de fora.',
     noIngredients: 'Ainda sem ingredientes.',
     notes: 'Notas',
     deleteRecipe: 'Apagar receita',
@@ -567,7 +576,8 @@ export const ptPT: Shape<Catalog> = {
       moreServings: 'Mais doses',
       ingredients: 'Ingredientes',
       addPlaceholder: 'Adicionar ingrediente, p. ex. 400 g de esparguete',
-      addHint: 'Quantidades métricas: g, kg, ml, l, colher de sopa, colher de chá. Libras, onças e chávenas são convertidas.',
+      addHint:
+        'Quantidades métricas: g, kg, ml, l, colher de sopa, colher de chá. Libras, onças e chávenas são convertidas.',
       updateIngredient: 'Atualizar ingrediente',
       editIngredient: 'Editar {{name}}',
       removeIngredient: 'Remover {{name}}',
@@ -581,7 +591,8 @@ export const ptPT: Shape<Catalog> = {
   plan: {
     title: 'Plano',
     newPlan: 'Novo plano',
-    empty: 'Planeie a semana: escolha as receitas que quer cozinhar e faça a lista de compras a partir delas.',
+    empty:
+      'Planeie a semana: escolha as receitas que quer cozinhar e faça a lista de compras a partir delas.',
     startPlan: 'Planear uma semana',
     periodLabel: 'Período',
     thisWeek: 'Esta semana',
@@ -614,7 +625,8 @@ export const ptPT: Shape<Catalog> = {
     couldNotGenerate: 'Não foi possível criar a lista de compras',
     deletePlan: 'Apagar plano',
     deleteTitle: 'Apagar este plano?',
-    deleteBody: 'O plano de {{range}} vai ser removido para os dois. As listas de compras feitas a partir dele ficam.',
+    deleteBody:
+      'O plano de {{range}} vai ser removido para os dois. As listas de compras feitas a partir dele ficam.',
     picker: {
       title: 'Adicionar receitas',
       search: 'Pesquisar receitas ou ingredientes',
@@ -746,7 +758,8 @@ export const ptPT: Shape<Catalog> = {
       feature: 'Destacar no topo e em Hoje',
       replaces: 'Substitui "{{title}}", só uma data pode ficar em destaque.',
       alert: 'Alerta',
-      alertHint: 'Os lembretes ainda não são enviados. A sua escolha fica guardada com a data para quando forem.',
+      alertHint:
+        'Os lembretes ainda não são enviados. A sua escolha fica guardada com a data para quando forem.',
       notes: 'Notas',
       notesPlaceholder: 'Algo que valha a pena lembrar',
       delete: 'Eliminar dia especial',

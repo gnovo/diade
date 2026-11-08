@@ -1,14 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-  createSpaceSchema,
-  createEventSchema,
-  createTaskSchema,
   clientMutationSchema,
-  syncPushSchema,
+  confirmExternalCalendarsSchema,
+  createEventSchema,
+  createSpaceSchema,
+  createTaskSchema,
   parseSyncPayload,
+  syncPushSchema,
   updateExternalCalendarSchema,
   updateExternalEventSchema,
-  confirmExternalCalendarsSchema,
 } from './index';
 
 describe('Validation Schemas', () => {
@@ -88,13 +88,19 @@ describe('Validation Schemas', () => {
   });
 
   it('ignores payloads for DELETE mutations', () => {
-    expect(parseSyncPayload('lists', 'DELETE', { anything: 1 })).toEqual({ success: true, data: {} });
+    expect(parseSyncPayload('lists', 'DELETE', { anything: 1 })).toEqual({
+      success: true,
+      data: {},
+    });
   });
 });
 
 describe('important dates', () => {
   it('applies defaults on insert: yearly, not pinned, type other', () => {
-    const result = parseSyncPayload('important_dates', 'INSERT', { title: 'First date', date: '2020-08-18' });
+    const result = parseSyncPayload('important_dates', 'INSERT', {
+      title: 'First date',
+      date: '2020-08-18',
+    });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toMatchObject({
@@ -113,14 +119,32 @@ describe('important dates', () => {
   });
 
   it('rejects impossible or malformed dates', () => {
-    expect(parseSyncPayload('important_dates', 'INSERT', { title: 'x', date: '2026-02-31' }).success).toBe(false);
-    expect(parseSyncPayload('important_dates', 'INSERT', { title: 'x', date: '18/08/2020' }).success).toBe(false);
-    expect(parseSyncPayload('important_dates', 'UPDATE', { date: '2020-13-01' }).success).toBe(false);
+    expect(
+      parseSyncPayload('important_dates', 'INSERT', { title: 'x', date: '2026-02-31' }).success,
+    ).toBe(false);
+    expect(
+      parseSyncPayload('important_dates', 'INSERT', { title: 'x', date: '18/08/2020' }).success,
+    ).toBe(false);
+    expect(parseSyncPayload('important_dates', 'UPDATE', { date: '2020-13-01' }).success).toBe(
+      false,
+    );
   });
 
   it('rejects unknown types and repeat values', () => {
-    expect(parseSyncPayload('important_dates', 'INSERT', { title: 'x', date: '2020-01-01', type: 'bday' }).success).toBe(false);
-    expect(parseSyncPayload('important_dates', 'INSERT', { title: 'x', date: '2020-01-01', repeat: 'monthly' }).success).toBe(false);
+    expect(
+      parseSyncPayload('important_dates', 'INSERT', {
+        title: 'x',
+        date: '2020-01-01',
+        type: 'bday',
+      }).success,
+    ).toBe(false);
+    expect(
+      parseSyncPayload('important_dates', 'INSERT', {
+        title: 'x',
+        date: '2020-01-01',
+        repeat: 'monthly',
+      }).success,
+    ).toBe(false);
   });
 
   it('strips a client-supplied visibility: these dates are always shared', () => {
@@ -134,10 +158,18 @@ describe('important dates', () => {
   });
 
   it('bounds the alert offset', () => {
-    expect(parseSyncPayload('important_dates', 'UPDATE', { alertOffsetDays: 7 }).success).toBe(true);
-    expect(parseSyncPayload('important_dates', 'UPDATE', { alertOffsetDays: null }).success).toBe(true);
-    expect(parseSyncPayload('important_dates', 'UPDATE', { alertOffsetDays: -1 }).success).toBe(false);
-    expect(parseSyncPayload('important_dates', 'UPDATE', { alertOffsetDays: 1.5 }).success).toBe(false);
+    expect(parseSyncPayload('important_dates', 'UPDATE', { alertOffsetDays: 7 }).success).toBe(
+      true,
+    );
+    expect(parseSyncPayload('important_dates', 'UPDATE', { alertOffsetDays: null }).success).toBe(
+      true,
+    );
+    expect(parseSyncPayload('important_dates', 'UPDATE', { alertOffsetDays: -1 }).success).toBe(
+      false,
+    );
+    expect(parseSyncPayload('important_dates', 'UPDATE', { alertOffsetDays: 1.5 }).success).toBe(
+      false,
+    );
   });
 });
 
@@ -165,20 +197,36 @@ describe('calendar settings schemas', () => {
 
   it('only allows an event override that narrows, or clears it', () => {
     expect(updateExternalEventSchema.safeParse({ visibilityOverride: null }).success).toBe(true);
-    expect(updateExternalEventSchema.safeParse({ visibilityOverride: 'private' }).success).toBe(true);
+    expect(updateExternalEventSchema.safeParse({ visibilityOverride: 'private' }).success).toBe(
+      true,
+    );
     // "shared" is not an override: it would widen, so clearing (null) is the only way back.
-    expect(updateExternalEventSchema.safeParse({ visibilityOverride: 'shared' }).success).toBe(false);
+    expect(updateExternalEventSchema.safeParse({ visibilityOverride: 'shared' }).success).toBe(
+      false,
+    );
   });
 
   it('validates the picker payload', () => {
     const id = '11111111-1111-4111-8111-111111111111';
-    expect(confirmExternalCalendarsSchema.safeParse({ calendars: [{ id, syncEnabled: true, visibility: 'shared' }] }).success).toBe(true);
-    expect(confirmExternalCalendarsSchema.safeParse({ calendars: [{ id: 'nope', syncEnabled: true, visibility: 'shared' }] }).success).toBe(false);
+    expect(
+      confirmExternalCalendarsSchema.safeParse({
+        calendars: [{ id, syncEnabled: true, visibility: 'shared' }],
+      }).success,
+    ).toBe(true);
+    expect(
+      confirmExternalCalendarsSchema.safeParse({
+        calendars: [{ id: 'nope', syncEnabled: true, visibility: 'shared' }],
+      }).success,
+    ).toBe(false);
   });
 
   it('accepts a list item position on insert and update, and rejects a non-number', () => {
     const listId = '5f9f1c9e-6f51-4a29-9d5c-0b6d7a1f2c3d';
-    const insert = parseSyncPayload('list_items', 'INSERT', { listId, name: 'Milk', position: 1500.5 });
+    const insert = parseSyncPayload('list_items', 'INSERT', {
+      listId,
+      name: 'Milk',
+      position: 1500.5,
+    });
     expect(insert.success).toBe(true);
     expect(insert.success && (insert.data as { position?: number }).position).toBe(1500.5);
 
@@ -188,7 +236,9 @@ describe('calendar settings schemas', () => {
 
     expect(parseSyncPayload('list_items', 'UPDATE', { position: null }).success).toBe(true);
     expect(parseSyncPayload('list_items', 'UPDATE', { position: 'first' }).success).toBe(false);
-    expect(parseSyncPayload('list_items', 'UPDATE', { position: Number.POSITIVE_INFINITY }).success).toBe(false);
+    expect(
+      parseSyncPayload('list_items', 'UPDATE', { position: Number.POSITIVE_INFINITY }).success,
+    ).toBe(false);
   });
 });
 
@@ -198,16 +248,21 @@ describe('dates about other people', () => {
     for (const type of ['their_birthday', 'trip', 'other_anniversary']) {
       expect(parseSyncPayload('important_dates', 'INSERT', { ...base, type }).success).toBe(true);
     }
-    const named = parseSyncPayload('important_dates', 'INSERT', { ...base, type: 'their_birthday', personName: ' Marta ' });
+    const named = parseSyncPayload('important_dates', 'INSERT', {
+      ...base,
+      type: 'their_birthday',
+      personName: ' Marta ',
+    });
     expect(named.success && (named.data as { personName?: string }).personName).toBe('Marta');
   });
 
   it('allows clearing the name, and rejects an empty one', () => {
     expect(parseSyncPayload('important_dates', 'UPDATE', { personName: null }).success).toBe(true);
-    expect(parseSyncPayload('important_dates', 'UPDATE', { personName: '   ' }).success).toBe(false);
+    expect(parseSyncPayload('important_dates', 'UPDATE', { personName: '   ' }).success).toBe(
+      false,
+    );
   });
 });
-
 
 describe('recipes sync payloads', () => {
   const salt = { id: 'i1', name: 'Salt', quantity: 1, unit: 'tsp', staple: true };
@@ -215,7 +270,8 @@ describe('recipes sync payloads', () => {
   it('defaults servings and ingredients on INSERT', () => {
     const result = parseSyncPayload('recipes', 'INSERT', { name: 'Carbonara' });
     expect(result.success).toBe(true);
-    if (result.success) expect(result.data).toMatchObject({ name: 'Carbonara', servings: 4, ingredients: [] });
+    if (result.success)
+      expect(result.data).toMatchObject({ name: 'Carbonara', servings: 4, ingredients: [] });
   });
 
   it('leaves absent fields out of an UPDATE, so they mean "unchanged"', () => {
@@ -225,20 +281,36 @@ describe('recipes sync payloads', () => {
   });
 
   it('accepts ingredients with a null quantity (to taste)', () => {
-    expect(parseSyncPayload('recipes', 'INSERT', { name: 'x', ingredients: [{ ...salt, quantity: null, unit: 'unit' }] }).success).toBe(true);
+    expect(
+      parseSyncPayload('recipes', 'INSERT', {
+        name: 'x',
+        ingredients: [{ ...salt, quantity: null, unit: 'unit' }],
+      }).success,
+    ).toBe(true);
   });
 
   it('rejects an empty name, bad servings, bad units and bad quantities', () => {
     expect(parseSyncPayload('recipes', 'INSERT', { name: '  ' }).success).toBe(false);
     expect(parseSyncPayload('recipes', 'INSERT', { name: 'x', servings: 0 }).success).toBe(false);
     expect(parseSyncPayload('recipes', 'INSERT', { name: 'x', servings: 2.5 }).success).toBe(false);
-    expect(parseSyncPayload('recipes', 'INSERT', { name: 'x', ingredients: [{ ...salt, unit: 'oz' }] }).success).toBe(false);
-    expect(parseSyncPayload('recipes', 'INSERT', { name: 'x', ingredients: [{ ...salt, quantity: -1 }] }).success).toBe(false);
-    expect(parseSyncPayload('recipes', 'INSERT', { name: 'x', ingredients: [{ ...salt, name: '' }] }).success).toBe(false);
+    expect(
+      parseSyncPayload('recipes', 'INSERT', { name: 'x', ingredients: [{ ...salt, unit: 'oz' }] })
+        .success,
+    ).toBe(false);
+    expect(
+      parseSyncPayload('recipes', 'INSERT', { name: 'x', ingredients: [{ ...salt, quantity: -1 }] })
+        .success,
+    ).toBe(false);
+    expect(
+      parseSyncPayload('recipes', 'INSERT', { name: 'x', ingredients: [{ ...salt, name: '' }] })
+        .success,
+    ).toBe(false);
   });
 
   it('rejects duplicate ingredient ids and more than 100 ingredients', () => {
-    expect(parseSyncPayload('recipes', 'UPDATE', { ingredients: [salt, salt] }).success).toBe(false);
+    expect(parseSyncPayload('recipes', 'UPDATE', { ingredients: [salt, salt] }).success).toBe(
+      false,
+    );
     const many = Array.from({ length: 101 }, (_, n) => ({ ...salt, id: `i${n}` }));
     expect(parseSyncPayload('recipes', 'UPDATE', { ingredients: many }).success).toBe(false);
   });
@@ -252,11 +324,18 @@ describe('recipes sync payloads', () => {
 
 describe('meal plans sync payloads', () => {
   const recipeId = '66666666-6666-4666-8666-666666666666';
-  const plan = { startsOn: '2026-11-09', endsOn: '2026-11-15', recipes: [{ recipeId, servings: 4 }] };
+  const plan = {
+    startsOn: '2026-11-09',
+    endsOn: '2026-11-15',
+    recipes: [{ recipeId, servings: 4 }],
+  };
 
   it('accepts a plan with a period and recipes, and defaults the recipes to none', () => {
     expect(parseSyncPayload('meal_plans', 'INSERT', plan).success).toBe(true);
-    const bare = parseSyncPayload('meal_plans', 'INSERT', { startsOn: '2026-11-09', endsOn: '2026-11-09' });
+    const bare = parseSyncPayload('meal_plans', 'INSERT', {
+      startsOn: '2026-11-09',
+      endsOn: '2026-11-09',
+    });
     expect(bare).toMatchObject({ success: true, data: { recipes: [] } });
   });
 
@@ -266,35 +345,77 @@ describe('meal plans sync payloads', () => {
   });
 
   it('rejects a backwards period, a bad date and a bad servings count', () => {
-    expect(parseSyncPayload('meal_plans', 'INSERT', { ...plan, endsOn: '2026-11-01' }).success).toBe(false);
-    expect(parseSyncPayload('meal_plans', 'UPDATE', { startsOn: '2026-11-10', endsOn: '2026-11-09' }).success).toBe(false);
-    expect(parseSyncPayload('meal_plans', 'INSERT', { ...plan, startsOn: '2026-02-31' }).success).toBe(false);
-    expect(parseSyncPayload('meal_plans', 'INSERT', { ...plan, recipes: [{ recipeId, servings: 0 }] }).success).toBe(false);
+    expect(
+      parseSyncPayload('meal_plans', 'INSERT', { ...plan, endsOn: '2026-11-01' }).success,
+    ).toBe(false);
+    expect(
+      parseSyncPayload('meal_plans', 'UPDATE', { startsOn: '2026-11-10', endsOn: '2026-11-09' })
+        .success,
+    ).toBe(false);
+    expect(
+      parseSyncPayload('meal_plans', 'INSERT', { ...plan, startsOn: '2026-02-31' }).success,
+    ).toBe(false);
+    expect(
+      parseSyncPayload('meal_plans', 'INSERT', { ...plan, recipes: [{ recipeId, servings: 0 }] })
+        .success,
+    ).toBe(false);
   });
 
   it('rejects the same recipe twice and a recipe id that is not a UUID', () => {
     const twice = { ...plan, recipes: [plan.recipes[0], plan.recipes[0]] };
     expect(parseSyncPayload('meal_plans', 'INSERT', twice).success).toBe(false);
-    expect(parseSyncPayload('meal_plans', 'INSERT', { ...plan, recipes: [{ recipeId: 'x', servings: 2 }] }).success).toBe(false);
+    expect(
+      parseSyncPayload('meal_plans', 'INSERT', {
+        ...plan,
+        recipes: [{ recipeId: 'x', servings: 2 }],
+      }).success,
+    ).toBe(false);
   });
 });
 
 describe('plan provenance on lists and items', () => {
   const recipeId = '66666666-6666-4666-8666-666666666666';
-  const contribution = { recipeId, recipeName: 'Carbonara', key: 'egg|count', quantity: 3, unit: 'unit' };
+  const contribution = {
+    recipeId,
+    recipeName: 'Carbonara',
+    key: 'egg|count',
+    quantity: 3,
+    unit: 'unit',
+  };
 
   it('lets a list point at a plan, or at none', () => {
-    expect(parseSyncPayload('lists', 'INSERT', { name: 'Groceries', planId: recipeId }).success).toBe(true);
-    expect(parseSyncPayload('lists', 'INSERT', { name: 'Groceries', planId: null }).success).toBe(true);
-    expect(parseSyncPayload('lists', 'INSERT', { name: 'Groceries', planId: 'nope' }).success).toBe(false);
+    expect(
+      parseSyncPayload('lists', 'INSERT', { name: 'Groceries', planId: recipeId }).success,
+    ).toBe(true);
+    expect(parseSyncPayload('lists', 'INSERT', { name: 'Groceries', planId: null }).success).toBe(
+      true,
+    );
+    expect(parseSyncPayload('lists', 'INSERT', { name: 'Groceries', planId: 'nope' }).success).toBe(
+      false,
+    );
   });
 
   it('carries contributions and the hand-edited flag on items', () => {
     const base = { listId: recipeId, name: 'Eggs' };
-    expect(parseSyncPayload('list_items', 'INSERT', { ...base, contributions: [contribution], editedByHand: false }).success).toBe(true);
-    expect(parseSyncPayload('list_items', 'INSERT', { ...base, contributions: null }).success).toBe(true);
+    expect(
+      parseSyncPayload('list_items', 'INSERT', {
+        ...base,
+        contributions: [contribution],
+        editedByHand: false,
+      }).success,
+    ).toBe(true);
+    expect(parseSyncPayload('list_items', 'INSERT', { ...base, contributions: null }).success).toBe(
+      true,
+    );
     expect(parseSyncPayload('list_items', 'UPDATE', { editedByHand: true }).success).toBe(true);
-    expect(parseSyncPayload('list_items', 'UPDATE', { contributions: [{ ...contribution, unit: 'oz' }] }).success).toBe(false);
-    expect(parseSyncPayload('list_items', 'UPDATE', { contributions: [{ ...contribution, quantity: -1 }] }).success).toBe(false);
+    expect(
+      parseSyncPayload('list_items', 'UPDATE', { contributions: [{ ...contribution, unit: 'oz' }] })
+        .success,
+    ).toBe(false);
+    expect(
+      parseSyncPayload('list_items', 'UPDATE', {
+        contributions: [{ ...contribution, quantity: -1 }],
+      }).success,
+    ).toBe(false);
   });
 });

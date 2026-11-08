@@ -24,7 +24,8 @@ function applyReleaseSigning(contents) {
 
   // 1. Add a release signing config next to the debug one.
   const signingIdx = contents.indexOf('signingConfigs {');
-  if (signingIdx === -1) throw new Error('with-diade-release-signing: signingConfigs block not found');
+  if (signingIdx === -1)
+    throw new Error('with-diade-release-signing: signingConfigs block not found');
   const insertAt = contents.indexOf('\n', signingIdx) + 1;
   contents = contents.slice(0, insertAt) + RELEASE_SIGNING_BLOCK + contents.slice(insertAt);
 
@@ -36,10 +37,9 @@ function applyReleaseSigning(contents) {
   }
   const windowEnd = releaseIdx + 600;
   const head = contents.slice(0, releaseIdx);
-  const tail = contents.slice(releaseIdx, windowEnd).replace(
-    'signingConfig signingConfigs.debug',
-    'signingConfig signingConfigs.release',
-  );
+  const tail = contents
+    .slice(releaseIdx, windowEnd)
+    .replace('signingConfig signingConfigs.debug', 'signingConfig signingConfigs.release');
   return head + tail + contents.slice(windowEnd);
 }
 
@@ -55,7 +55,12 @@ module.exports = function withDiadeReleaseSigning(config) {
       (item) => item.type === 'property' && item.key === 'reactNativeArchitectures',
     );
     if (existing) existing.value = 'arm64-v8a';
-    else cfg.modResults.push({ type: 'property', key: 'reactNativeArchitectures', value: 'arm64-v8a' });
+    else
+      cfg.modResults.push({
+        type: 'property',
+        key: 'reactNativeArchitectures',
+        value: 'arm64-v8a',
+      });
     return cfg;
   });
 

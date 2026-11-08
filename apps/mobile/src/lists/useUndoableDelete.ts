@@ -13,7 +13,10 @@ export interface PendingDelete {
  * record. Starting another delete commits the previous one straight away, and leaving the
  * screen flushes it. If the app dies inside the window the items simply stay.
  */
-export function useUndoableDelete(commit: (ids: string[]) => Promise<void> | void, delayMs = UNDO_WINDOW_MS) {
+export function useUndoableDelete(
+  commit: (ids: string[]) => Promise<void> | void,
+  delayMs = UNDO_WINDOW_MS,
+) {
   const [pending, setPending] = useState<PendingDelete | null>(null);
   const pendingRef = useRef<PendingDelete | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);

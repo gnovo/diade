@@ -1,28 +1,29 @@
-import React, { useState } from 'react';
-import { View, Text, Pressable } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import { sizes } from '@diade/design-tokens';
 import {
-  IMPORTANT_DATE_GROUPS,
   describeImportantDate,
   elapsedDays,
+  IMPORTANT_DATE_GROUPS,
+  type ImportantDate,
+  type ImportantDateGroup,
   importantDateGroup,
   parseDateOnly,
   sortImportantDates,
-  type ImportantDate,
-  type ImportantDateGroup,
 } from '@diade/domain';
-import { getActiveImportantDates } from '../data/queries';
-import { useLiveQuery } from '../data/useLiveQuery';
-import { importantDateTypeLabel, statusLabel } from '../data/importantDateDisplay';
-import { useFormat } from '../i18n';
+import type React from 'react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Pressable, Text, View } from 'react-native';
 import { FilterChips } from '../components/FilterChips';
 import { ImportantDateDetail } from '../components/ImportantDateDetail';
 import { ImportantDateForm } from '../components/ImportantDateForm';
 import { ImportantDateIcon } from '../components/ImportantDateIcon';
 import { ImportantDateWizard } from '../components/ImportantDateWizard';
 import { Card, EmptyState, HeaderAddButton, ScreenScaffold, SectionLabel } from '../components/ui';
+import { importantDateTypeLabel, statusLabel } from '../data/importantDateDisplay';
+import { getActiveImportantDates } from '../data/queries';
+import { useLiveQuery } from '../data/useLiveQuery';
 import { Icon, useColor } from '../design';
+import { useFormat } from '../i18n';
 
 type Filter = 'all' | ImportantDateGroup;
 
@@ -39,10 +40,13 @@ export const DatesScreen: React.FC = () => {
 
   const today = new Date();
   const pinned = dates.data.find((d) => d.pinned) ?? null;
-  const visible = dates.data.filter((d) => filter === 'all' || importantDateGroup(d.type) === filter);
+  const visible = dates.data.filter(
+    (d) => filter === 'all' || importantDateGroup(d.type) === filter,
+  );
   const sorted = sortImportantDates(visible, today);
   // The featured date leads All, and leads the group it belongs to.
-  const showHero = pinned !== null && (filter === 'all' || importantDateGroup(pinned.type) === filter);
+  const showHero =
+    pinned !== null && (filter === 'all' || importantDateGroup(pinned.type) === filter);
   // Read the open record from live data so edits show immediately and a deletion closes it.
   const detail = detailId ? (dates.data.find((d) => d.id === detailId) ?? null) : null;
 
@@ -56,7 +60,10 @@ export const DatesScreen: React.FC = () => {
 
   const filterOptions: Array<{ value: Filter; label: string }> = [
     { value: 'all', label: t('us.filter.all') },
-    ...IMPORTANT_DATE_GROUPS.map((group) => ({ value: group as Filter, label: t(`us.filter.${group}`) })),
+    ...IMPORTANT_DATE_GROUPS.map((group) => ({
+      value: group as Filter,
+      label: t(`us.filter.${group}`),
+    })),
   ];
 
   return (
@@ -64,21 +71,33 @@ export const DatesScreen: React.FC = () => {
       title={t('us.title')}
       right={<HeaderAddButton label={t('us.addDate')} onPress={() => setWizardOpen(true)} />}
     >
-      <FilterChips options={filterOptions} value={filter} onChange={setFilter} label={t('us.filtersLabel')} />
+      <FilterChips
+        options={filterOptions}
+        value={filter}
+        onChange={setFilter}
+        label={t('us.filtersLabel')}
+      />
 
       {showHero && pinned && heroStatus ? (
         <Pressable
           onPress={() => setDetailId(pinned.id)}
           accessibilityRole="button"
-          accessibilityLabel={t('us.openDetails', { title: pinned.title, status: statusLabel(t, heroStatus) })}
+          accessibilityLabel={t('us.openDetails', {
+            title: pinned.title,
+            status: statusLabel(t, heroStatus),
+          })}
         >
           <Card className="items-center py-6">
             <ImportantDateIcon type={pinned.type} large />
             <Text className="text-base leading-6 text-ink-muted mt-3">{pinned.title}</Text>
             {heroSince !== null && heroStatus.kind !== 'today' ? (
-              <Text className="text-display font-bold text-ink mt-1">{t('common.day', { count: heroSince })}</Text>
+              <Text className="text-display font-bold text-ink mt-1">
+                {t('common.day', { count: heroSince })}
+              </Text>
             ) : (
-              <Text className="text-display font-bold text-ink mt-1">{statusLabel(t, heroStatus)}</Text>
+              <Text className="text-display font-bold text-ink mt-1">
+                {statusLabel(t, heroStatus)}
+              </Text>
             )}
             <Text className="text-body-strong text-ink-muted">
               {t(heroSince !== null && heroStatus.kind !== 'today' ? 'us.heroSince' : 'us.heroOn', {
@@ -124,10 +143,20 @@ export const DatesScreen: React.FC = () => {
                 </View>
                 <View className="flex-1 mr-3">
                   <View className="flex-row items-center gap-1.5">
-                    <Text className="flex-shrink text-base font-semibold text-ink" numberOfLines={2}>
+                    <Text
+                      className="flex-shrink text-base font-semibold text-ink"
+                      numberOfLines={2}
+                    >
                       {item.title}
                     </Text>
-                    {item.pinned ? <Icon name="pin" size={sizes['icon-sm']} color={inkMuted} title={t('common.featured')} /> : null}
+                    {item.pinned ? (
+                      <Icon
+                        name="pin"
+                        size={sizes['icon-sm']}
+                        color={inkMuted}
+                        title={t('common.featured')}
+                      />
+                    ) : null}
                   </View>
                   <Text className="text-sm text-ink-muted mt-0.5">
                     {original ? format.longDate(original) : item.date}
@@ -163,7 +192,11 @@ export const DatesScreen: React.FC = () => {
         }}
       />
 
-      <ImportantDateWizard visible={wizardOpen} onClose={() => setWizardOpen(false)} pinnedItem={pinned} />
+      <ImportantDateWizard
+        visible={wizardOpen}
+        onClose={() => setWizardOpen(false)}
+        pinnedItem={pinned}
+      />
     </ScreenScaffold>
   );
 };

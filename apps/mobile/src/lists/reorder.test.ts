@@ -1,8 +1,9 @@
-import { describe, it, expect } from 'vitest';
-import { moveItem, POSITION_STEP, type Orderable } from './reorder';
+import { describe, expect, it } from 'vitest';
+import { moveItem, type Orderable, POSITION_STEP } from './reorder';
 
 const item = (id: string, position: number | null): Orderable => ({ id, position });
-const ordered = (...positions: number[]) => positions.map((p, i) => item(String.fromCharCode(97 + i), p));
+const ordered = (...positions: number[]) =>
+  positions.map((p, i) => item(String.fromCharCode(97 + i), p));
 
 describe('moveItem', () => {
   it('does nothing for a move to the same place or out of range', () => {

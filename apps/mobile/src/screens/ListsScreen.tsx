@@ -1,18 +1,20 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, Pressable, Alert, BackHandler } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { type ListItem, listIconFor, type Recipe, type SharedList } from '@diade/domain';
 import type { TFunction } from '@diade/i18n';
-import { listIconFor, type ListItem, type Recipe, type SharedList } from '@diade/domain';
+import type React from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Alert, BackHandler, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import {
-  getActiveLists,
-  getActiveListItems,
-  getActiveRecipes,
-  getItemHistory,
-  type ItemHistoryRow,
-} from '../data/queries';
-import { insertRecord, updateRecord, updateRecords, deleteRecord } from '../data/repository';
-import { useLiveQuery } from '../data/useLiveQuery';
+import { ItemSuggestions } from '../components/ItemSuggestions';
+import { NewListWizard } from '../components/NewListWizard';
+import { PlanListSection } from '../components/PlanListSection';
+import { PlanView } from '../components/PlanView';
+import { RecipeForm } from '../components/RecipeForm';
+import { RecipeDetailScreen, RecipesLibrary } from '../components/RecipesView';
+import { SortableList } from '../components/SortableList';
+import { STEP_EASING, STEP_MS, useReduceMotion } from '../components/StepPager';
+import { SwipeToDelete } from '../components/SwipeToDelete';
+import { UndoToast } from '../components/UndoToast';
 import {
   Button,
   Card,
@@ -25,25 +27,25 @@ import {
   TextField,
   useWriteContext,
 } from '../components/ui';
-import { NewListWizard } from '../components/NewListWizard';
-import { ItemSuggestions } from '../components/ItemSuggestions';
-import { RecipeDetailScreen, RecipesLibrary } from '../components/RecipesView';
-import { RecipeForm } from '../components/RecipeForm';
-import { PlanView } from '../components/PlanView';
-import { PlanListSection } from '../components/PlanListSection';
-import { STEP_EASING, STEP_MS, useReduceMotion } from '../components/StepPager';
-import { SortableList } from '../components/SortableList';
-import { SwipeToDelete } from '../components/SwipeToDelete';
-import { UndoToast } from '../components/UndoToast';
+import {
+  getActiveListItems,
+  getActiveLists,
+  getActiveRecipes,
+  getItemHistory,
+  type ItemHistoryRow,
+} from '../data/queries';
+import { deleteRecord, insertRecord, updateRecord, updateRecords } from '../data/repository';
+import { useLiveQuery } from '../data/useLiveQuery';
 import { Icon } from '../design';
 import { dictionaryFor } from '../lists/dictionary';
-import { formatQuantity, parseQuantity } from '../lists/parseQuantity';
 import { capitalizeFirst, normalizeText } from '../lists/normalize';
-import { suggest, type HistoryEntry, type Suggestion } from '../lists/suggest';
+import { formatQuantity, parseQuantity } from '../lists/parseQuantity';
 import { moveItem } from '../lists/reorder';
+import { type HistoryEntry, type Suggestion, suggest } from '../lists/suggest';
 import { useUndoableDelete } from '../lists/useUndoableDelete';
 
-const categoryLabel = (t: TFunction, category: SharedList['category']): string => t(`lists.category.${category}`);
+const categoryLabel = (t: TFunction, category: SharedList['category']): string =>
+  t(`lists.category.${category}`);
 
 /** History is per category, so a packing list is not suggested groceries. "Other" sees everything. */
 function historyFor(rows: ItemHistoryRow[], category: SharedList['category']): HistoryEntry[] {
@@ -64,7 +66,10 @@ export const ListsScreen: React.FC = () => {
   // The first section shown does not fade in with the screen; only a switch does.
   const [switched, setSwitched] = useState(false);
   const [openRecipeId, setOpenRecipeId] = useState<string | null>(null);
-  const [recipeForm, setRecipeForm] = useState<{ open: boolean; recipe: Recipe | null }>({ open: false, recipe: null });
+  const [recipeForm, setRecipeForm] = useState<{ open: boolean; recipe: Recipe | null }>({
+    open: false,
+    recipe: null,
+  });
   const [openListId, setOpenListId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [newItemText, setNewItemText] = useState('');
@@ -77,7 +82,8 @@ export const ListsScreen: React.FC = () => {
   const hiddenIds = useMemo(() => new Set(undoable.pending?.ids ?? []), [undoable.pending]);
 
   const openList = lists.data.find((l) => l.id === openListId) ?? null;
-  const itemsFor = (listId: string) => items.data.filter((i) => i.listId === listId && !hiddenIds.has(i.id));
+  const itemsFor = (listId: string) =>
+    items.data.filter((i) => i.listId === listId && !hiddenIds.has(i.id));
 
   const parsed = quantityDismissed
     ? { name: newItemText.trim(), quantity: null, unit: null }
@@ -136,21 +142,32 @@ export const ListsScreen: React.FC = () => {
       }
       resetAdder();
     } catch (err) {
-      Alert.alert(t('lists.couldNotAddItem'), err instanceof Error ? err.message : t('common.tryAgain'));
+      Alert.alert(
+        t('lists.couldNotAddItem'),
+        err instanceof Error ? err.message : t('common.tryAgain'),
+      );
     }
   };
 
   /** Saves a new order for the unchecked items. `open` is the order currently on screen. */
   const reorderOpen = (open: ListItem[], from: number, to: number) => {
-    const updates = moveItem(open, from, to).map(({ id, position }) => ({ id, changes: { position } }));
+    const updates = moveItem(open, from, to).map(({ id, position }) => ({
+      id,
+      changes: { position },
+    }));
     updateRecords('list_items', updates).catch((err) =>
-      Alert.alert(t('lists.couldNotReorder'), err instanceof Error ? err.message : t('common.tryAgain')),
+      Alert.alert(
+        t('lists.couldNotReorder'),
+        err instanceof Error ? err.message : t('common.tryAgain'),
+      ),
     );
   };
 
-  const toggleItem = (item: ListItem) => updateRecord('list_items', item.id, { isChecked: !item.isChecked });
+  const toggleItem = (item: ListItem) =>
+    updateRecord('list_items', item.id, { isChecked: !item.isChecked });
 
-  const removeItem = (item: ListItem) => undoable.schedule([item.id], t('lists.itemRemoved', { name: item.name }));
+  const removeItem = (item: ListItem) =>
+    undoable.schedule([item.id], t('lists.itemRemoved', { name: item.name }));
 
   const clearChecked = () => {
     if (!openList) return;
@@ -195,7 +212,11 @@ export const ListsScreen: React.FC = () => {
   }, [openListId]);
 
   const toast = undoable.pending ? (
-    <UndoToast message={undoable.pending.message} actionLabel={t('lists.undo')} onAction={undoable.undo} />
+    <UndoToast
+      message={undoable.pending.message}
+      actionLabel={t('lists.undo')}
+      onAction={undoable.undo}
+    />
   ) : null;
 
   const switcher = (
@@ -253,7 +274,9 @@ export const ListsScreen: React.FC = () => {
           scrollEnabled={!dragging}
           refreshable={!dragging}
         >
-          {openList.planId ? <PlanListSection list={openList} items={listItems} recipes={recipes.data} /> : null}
+          {openList.planId ? (
+            <PlanListSection list={openList} items={listItems} recipes={recipes.data} />
+          ) : null}
 
           <Card>
             <TextField
@@ -290,7 +313,11 @@ export const ListsScreen: React.FC = () => {
 
           <Card>
             <SectionLabel
-              right={<Text className="text-sm text-ink-muted">{t('lists.toGet', { count: open.length })}</Text>}
+              right={
+                <Text className="text-sm text-ink-muted">
+                  {t('lists.toGet', { count: open.length })}
+                </Text>
+              }
             >
               {t('lists.items')}
             </SectionLabel>
@@ -307,15 +334,24 @@ export const ListsScreen: React.FC = () => {
                   onDelete={() => removeItem(item)}
                   handle={handle}
                   onMoveUp={index > 0 ? () => reorderOpen(open, index, index - 1) : undefined}
-                  onMoveDown={index < open.length - 1 ? () => reorderOpen(open, index, index + 1) : undefined}
+                  onMoveDown={
+                    index < open.length - 1 ? () => reorderOpen(open, index, index + 1) : undefined
+                  }
                 />
               )}
             />
             {done.length > 0 ? (
               <View className="mt-4 pt-4 border-t border-border">
                 <View className="flex-row items-center justify-between mb-2">
-                  <Text className="text-sm text-ink-muted">{t('lists.checked', { count: done.length })}</Text>
-                  <Button label={t('lists.clearChecked')} variant="ghost" small onPress={clearChecked} />
+                  <Text className="text-sm text-ink-muted">
+                    {t('lists.checked', { count: done.length })}
+                  </Text>
+                  <Button
+                    label={t('lists.clearChecked')}
+                    variant="ghost"
+                    small
+                    onPress={clearChecked}
+                  />
                 </View>
                 {done.map((item, index) => (
                   <ItemRow
@@ -340,7 +376,13 @@ export const ListsScreen: React.FC = () => {
   return (
     <>
       <ScreenScaffold
-        title={t(section === 'lists' ? 'lists.title' : section === 'recipes' ? 'recipes.title' : 'plan.title')}
+        title={t(
+          section === 'lists'
+            ? 'lists.title'
+            : section === 'recipes'
+              ? 'recipes.title'
+              : 'plan.title',
+        )}
         right={
           section === 'lists' ? (
             <HeaderAddButton label={t('lists.newList')} onPress={() => setSheetOpen(true)} />
@@ -356,10 +398,15 @@ export const ListsScreen: React.FC = () => {
         {/* The header and the switch stay mounted; only what is below them is swapped, and it fades in. */}
         <Animated.View
           key={section}
-          entering={switched && !reduceMotion ? FadeIn.duration(STEP_MS).easing(STEP_EASING) : undefined}
+          entering={
+            switched && !reduceMotion ? FadeIn.duration(STEP_MS).easing(STEP_EASING) : undefined
+          }
         >
           {section === 'recipes' ? (
-            <RecipesLibrary recipes={recipes.data} onOpen={(recipe) => setOpenRecipeId(recipe.id)} />
+            <RecipesLibrary
+              recipes={recipes.data}
+              onOpen={(recipe) => setOpenRecipeId(recipe.id)}
+            />
           ) : section === 'plan' ? (
             <PlanView
               recipes={recipes.data}
@@ -397,13 +444,20 @@ export const ListsScreen: React.FC = () => {
                         <Text className="text-base font-semibold text-ink">{list.name}</Text>
                         <Text className="text-sm text-ink-muted mt-0.5">
                           {categoryLabel(t, list.category)}
-                          {all.length > 0 ? ` · ${t('lists.progress', { done, total: all.length })}` : ''}
+                          {all.length > 0
+                            ? ` · ${t('lists.progress', { done, total: all.length })}`
+                            : ''}
                         </Text>
                       </View>
-                      <Text className="text-sm font-medium text-action">{t('lists.toGet', { count: remaining })}</Text>
+                      <Text className="text-sm font-medium text-action">
+                        {t('lists.toGet', { count: remaining })}
+                      </Text>
                     </View>
                     {all.length > 0 ? (
-                      <View className="h-1 rounded-full bg-surface-sunken mt-3 overflow-hidden" accessible={false}>
+                      <View
+                        className="h-1 rounded-full bg-surface-sunken mt-3 overflow-hidden"
+                        accessible={false}
+                      >
                         <View
                           className="h-1 bg-action"
                           style={{ width: `${Math.round((done / all.length) * 100)}%` }}
@@ -456,7 +510,9 @@ const ItemRow: React.FC<{
         deleteLabel={t('lists.deleteItem', { name: item.name })}
         extraActions={[
           ...(onMoveUp ? [{ name: 'moveUp', label: t('lists.moveUp'), onAction: onMoveUp }] : []),
-          ...(onMoveDown ? [{ name: 'moveDown', label: t('lists.moveDown'), onAction: onMoveDown }] : []),
+          ...(onMoveDown
+            ? [{ name: 'moveDown', label: t('lists.moveDown'), onAction: onMoveDown }]
+            : []),
         ]}
       >
         <View className="flex-row items-center">
@@ -466,7 +522,9 @@ const ItemRow: React.FC<{
             label={t(item.isChecked ? 'lists.uncheck' : 'lists.check', { name: item.name })}
           />
           <View className="flex-1">
-            <Text className={`text-sm ${item.isChecked ? 'text-ink-muted line-through' : 'text-ink font-medium'}`}>
+            <Text
+              className={`text-sm ${item.isChecked ? 'text-ink-muted line-through' : 'text-ink font-medium'}`}
+            >
               {item.name}
             </Text>
             {source ? (

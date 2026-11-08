@@ -1,12 +1,12 @@
 import type {
   ExternalCalendar,
   ExternalVisibility,
-  User,
   Space,
   SpaceMember,
+  SyncPullResult,
   SyncPushPayload,
   SyncPushResult,
-  SyncPullResult,
+  User,
 } from '@diade/domain';
 
 // --- Common API Responses ---
@@ -63,7 +63,7 @@ export interface InviteCodeResponse {
 
 // --- Sync Contracts ---
 
-export type { SyncPushPayload, SyncPushResult, SyncPullResult };
+export type { SyncPullResult, SyncPushPayload, SyncPushResult };
 
 export interface SyncPullParams {
   since?: string; // ISO 8601 string

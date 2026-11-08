@@ -1,6 +1,6 @@
+import type { ClientMutation } from '@diade/domain';
 import * as SQLite from 'expo-sqlite';
 import { createSerialQueue } from './serialQueue';
-import type { ClientMutation } from '@diade/domain';
 
 let dbInstance: SQLite.SQLiteDatabase | null = null;
 let openPromise: Promise<SQLite.SQLiteDatabase> | null = null;
@@ -334,10 +334,10 @@ export async function getSyncMeta(key: string): Promise<string | null> {
 
 export async function setSyncMeta(key: string, value: string): Promise<void> {
   const db = await getLocalDb();
-  await db.runAsync(
-    'INSERT OR REPLACE INTO local_sync_meta (key, value) VALUES (?, ?)',
-    [key, value],
-  );
+  await db.runAsync('INSERT OR REPLACE INTO local_sync_meta (key, value) VALUES (?, ?)', [
+    key,
+    value,
+  ]);
 }
 
 // --- Sign-out ---

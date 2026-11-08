@@ -1,17 +1,23 @@
 import './types';
 
-export { en, type Catalog } from './locales/en';
-export { ptPT } from './locales/pt-PT';
+export type { i18n as I18n, TFunction } from 'i18next';
 export {
-  SUPPORTED_LANGUAGES,
+  formatCompactRange,
+  formatDateRange,
+  formatDayLabel,
+  formatLongDate,
+  formatMonthYear,
+} from './format';
+export { createI18n, resources } from './i18n';
+export {
   DEFAULT_LANGUAGE,
-  LANGUAGE_PREFERENCES,
-  resolveLanguage,
-  pickLanguage,
   isLanguagePreference,
+  LANGUAGE_PREFERENCES,
   type Language,
   type LanguagePreference,
+  pickLanguage,
+  resolveLanguage,
+  SUPPORTED_LANGUAGES,
 } from './languages';
-export { createI18n, resources } from './i18n';
-export { formatDayLabel, formatLongDate, formatMonthYear, formatDateRange, formatCompactRange } from './format';
-export type { TFunction, i18n as I18n } from 'i18next';
+export { type Catalog, en } from './locales/en';
+export { ptPT } from './locales/pt-PT';

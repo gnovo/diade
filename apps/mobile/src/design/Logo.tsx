@@ -1,6 +1,6 @@
-import React from 'react';
-import { SvgXml } from 'react-native-svg';
 import { logoSvg } from '@diade/design-tokens';
+import type React from 'react';
+import { SvgXml } from 'react-native-svg';
 import { useThemeColors } from './theme';
 
 export type LogoVariant = 'lockup' | 'stacked' | 'mark' | 'wordmark';
@@ -25,7 +25,10 @@ export const Logo: React.FC<LogoProps> = ({ variant = 'lockup', height = 32, mon
     .replace(/\{\{brand-mint\}\}/g, mono ? colors.ink : colors['brand-mint'])
     .replace(/\{\{brand-overlap\}\}/g, mono ? colors.ink : colors['brand-overlap']);
 
-  const [, , vbWidth, vbHeight] = source.match(/viewBox="([\d.\s-]+)"/)?.[1].split(/\s+/).map(Number) ?? [0, 0, 1, 1];
+  const [, , vbWidth, vbHeight] = source
+    .match(/viewBox="([\d.\s-]+)"/)?.[1]
+    .split(/\s+/)
+    .map(Number) ?? [0, 0, 1, 1];
   const width = (height * vbWidth) / vbHeight;
 
   return (

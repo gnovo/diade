@@ -1,20 +1,30 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, View, Text, TextInput, ScrollView, Pressable, RefreshControl, type TextInputProps } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { space } from '@diade/design-tokens';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import {
+  KeyboardAvoidingView,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TextInput,
+  type TextInputProps,
+  View,
+} from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { STEP_EASING, useReduceMotion } from './StepPager';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
-import { useSync } from '../sync/SyncProvider';
 import {
   Badge,
+  type BadgeTone,
   Button as DSButton,
   Checkbox as DSCheckbox,
   Icon,
   useColor,
   useShadow,
-  type BadgeTone,
 } from '../design';
-import { space } from '@diade/design-tokens';
+import { useSync } from '../sync/SyncProvider';
+import { STEP_EASING, useReduceMotion } from './StepPager';
 
 /** Write context for repository calls. Null until the member has a space. */
 export function useWriteContext(): { spaceId: string; userId: string } | null {
@@ -39,14 +49,29 @@ export const ScreenScaffold: React.FC<{
   /** Pinned below the scrolling content, above the tab bar. */
   footer?: React.ReactNode;
   children: React.ReactNode;
-}> = ({ eyebrow, title, right, onBack, backLabel, refreshable = true, scrollEnabled = true, header, footer, children }) => {
+}> = ({
+  eyebrow,
+  title,
+  right,
+  onBack,
+  backLabel,
+  refreshable = true,
+  scrollEnabled = true,
+  header,
+  footer,
+  children,
+}) => {
   const { refresh, refreshing } = useSync();
   const accent = useColor('action');
   const surface = useColor('surface');
   const body = (
     <>
       <ScrollView
-        contentContainerStyle={{ paddingHorizontal: space[4], paddingTop: space[4], paddingBottom: space[8] }}
+        contentContainerStyle={{
+          paddingHorizontal: space[4],
+          paddingTop: space[4],
+          paddingBottom: space[8],
+        }}
         keyboardShouldPersistTaps="handled"
         scrollEnabled={scrollEnabled}
         // Always mounted and switched with `enabled`: adding or removing a refreshControl changes how
@@ -76,7 +101,9 @@ export const ScreenScaffold: React.FC<{
           ) : null}
           {header ?? (
             <View className="flex-1 mr-3">
-              {eyebrow ? <Text className="text-sm leading-5 text-ink-muted mb-1">{eyebrow}</Text> : null}
+              {eyebrow ? (
+                <Text className="text-sm leading-5 text-ink-muted mb-1">{eyebrow}</Text>
+              ) : null}
               <Text className="text-title-1 font-bold text-ink">{title}</Text>
             </View>
           )}
@@ -102,7 +129,10 @@ export const ScreenScaffold: React.FC<{
 };
 
 /** Round "+" for a screen header's right-hand slot (Lists, Dates). */
-export const HeaderAddButton: React.FC<{ label: string; onPress: () => void }> = ({ label, onPress }) => {
+export const HeaderAddButton: React.FC<{ label: string; onPress: () => void }> = ({
+  label,
+  onPress,
+}) => {
   const onAction = useColor('on-action');
   return (
     <Pressable
@@ -123,7 +153,10 @@ export const Card: React.FC<{ children: React.ReactNode; className?: string }> =
 }) => {
   const shadow = useShadow('shadowSm');
   return (
-    <View style={shadow} className={`bg-surface rounded-lg p-5 border border-border mb-5 ${className}`}>
+    <View
+      style={shadow}
+      className={`bg-surface rounded-lg p-5 border border-border mb-5 ${className}`}
+    >
       {children}
     </View>
   );
@@ -134,13 +167,17 @@ export const SectionLabel: React.FC<{ children: React.ReactNode; right?: React.R
   right,
 }) => (
   <View className="flex-row items-center justify-between mb-3">
-    <Text className="text-xs leading-4 font-semibold text-ink-muted tracking-wider uppercase">{children}</Text>
+    <Text className="text-xs leading-4 font-semibold text-ink-muted tracking-wider uppercase">
+      {children}
+    </Text>
     {right}
   </View>
 );
 
 /** `ref` is a plain prop in React 19, so it reaches the TextInput through the spread. */
-export const TextField: React.FC<TextInputProps & { ref?: React.Ref<React.ComponentRef<typeof TextInput>> }> = (props) => {
+export const TextField: React.FC<
+  TextInputProps & { ref?: React.Ref<React.ComponentRef<typeof TextInput>> }
+> = (props) => {
   const placeholder = useColor('ink-muted');
   const ink = useColor('ink');
   return (
@@ -181,7 +218,10 @@ export function Segmented<T extends string>({
   const SLIDE_MS = 340;
   const reduceMotion = useReduceMotion();
   const [width, setWidth] = useState(0);
-  const index = Math.max(0, options.findIndex((option) => option.value === value));
+  const index = Math.max(
+    0,
+    options.findIndex((option) => option.value === value),
+  );
   const position = useSharedValue(index);
   const placed = useRef(false);
   const segmentWidth = width > 0 ? (width - PADDING * 2) / options.length : 0;
@@ -198,7 +238,9 @@ export function Segmented<T extends string>({
     position.value = withTiming(index, { duration: SLIDE_MS, easing: STEP_EASING });
   }, [index, position, segmentWidth, reduceMotion]);
 
-  const highlight = useAnimatedStyle(() => ({ transform: [{ translateX: position.value * segmentWidth }] }));
+  const highlight = useAnimatedStyle(() => ({
+    transform: [{ translateX: position.value * segmentWidth }],
+  }));
 
   return (
     <View
@@ -222,7 +264,9 @@ export function Segmented<T extends string>({
             accessibilityState={{ selected }}
             className="flex-1 min-h-[40px] rounded-sm items-center justify-center"
           >
-            <Text className={`text-sm leading-5 font-semibold ${selected ? 'text-on-action' : 'text-ink-muted'}`}>
+            <Text
+              className={`text-sm leading-5 font-semibold ${selected ? 'text-on-action' : 'text-ink-muted'}`}
+            >
               {option.label}
             </Text>
           </Pressable>
@@ -232,9 +276,9 @@ export function Segmented<T extends string>({
   );
 }
 
-export const Checkbox: React.FC<{ checked: boolean; onToggle: () => void; label: string }> = (props) => (
-  <DSCheckbox {...props} />
-);
+export const Checkbox: React.FC<{ checked: boolean; onToggle: () => void; label: string }> = (
+  props,
+) => <DSCheckbox {...props} />;
 
 /** Ownership label: "Shared" / "Personal" / neutral. Always icon + word. */
 export const Pill: React.FC<{ label: string; tone?: 'shared' | 'personal' | 'neutral' }> = ({

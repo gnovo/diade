@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 /**
@@ -33,7 +33,11 @@ export const ListItem: React.FC<{
     tint === 'shared' ? 'bg-surface-tint' : 'bg-surface'
   }`;
   return onPress ? (
-    <Pressable onPress={onPress} accessibilityRole="button" className={`${className} active:bg-surface-sunken`}>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      className={`${className} active:bg-surface-sunken`}
+    >
       {body}
     </Pressable>
   ) : (

@@ -25,7 +25,9 @@ export class GoogleApiError extends Error {
 
   /** Quota or rate limiting; try again at the next scheduled run. */
   get isRateLimited(): boolean {
-    return this.status === 429 || (this.status === 403 && /rateLimit|quota/i.test(this.reason ?? ''));
+    return (
+      this.status === 429 || (this.status === 403 && /rateLimit|quota/i.test(this.reason ?? ''))
+    );
   }
 }
 
@@ -135,23 +137,24 @@ export function createGoogleClient(
     },
 
     async listEvents(calendarId, params) {
-      const page = await get<{ items?: GoogleEvent[]; nextPageToken?: string; nextSyncToken?: string }>(
-        `/calendars/${encodeURIComponent(calendarId)}/events`,
-        {
-          maxResults: '250',
-          singleEvents: 'true',
-          showDeleted: 'true',
-          pageToken: params.pageToken,
-          // Google rejects timeMin/timeMax together with a syncToken; the original window
-          // stays in force for incremental requests.
-          ...(params.syncToken
-            ? { syncToken: params.syncToken }
-            : {
-                timeMin: params.timeMin?.toISOString(),
-                timeMax: params.timeMax?.toISOString(),
-              }),
-        },
-      );
+      const page = await get<{
+        items?: GoogleEvent[];
+        nextPageToken?: string;
+        nextSyncToken?: string;
+      }>(`/calendars/${encodeURIComponent(calendarId)}/events`, {
+        maxResults: '250',
+        singleEvents: 'true',
+        showDeleted: 'true',
+        pageToken: params.pageToken,
+        // Google rejects timeMin/timeMax together with a syncToken; the original window
+        // stays in force for incremental requests.
+        ...(params.syncToken
+          ? { syncToken: params.syncToken }
+          : {
+              timeMin: params.timeMin?.toISOString(),
+              timeMax: params.timeMax?.toISOString(),
+            }),
+      });
       return {
         items: page.items ?? [],
         nextPageToken: page.nextPageToken,
@@ -210,7 +213,11 @@ export async function refreshGoogleAccessToken(
     if (code === 'invalid_grant' || code === 'invalid_client' || code === 'unauthorized_client') {
       throw new GoogleAuthError(`Google refused the refresh token (${code})`);
     }
-    throw new GoogleApiError(`Token refresh failed (${code || response.status})`, response.status, code);
+    throw new GoogleApiError(
+      `Token refresh failed (${code || response.status})`,
+      response.status,
+      code,
+    );
   }
 
   const body = (await response.json()) as {
@@ -218,7 +225,11 @@ export async function refreshGoogleAccessToken(
     expires_in: number;
     refresh_token?: string;
   };
-  return { accessToken: body.access_token, expiresIn: body.expires_in, refreshToken: body.refresh_token };
+  return {
+    accessToken: body.access_token,
+    expiresIn: body.expires_in,
+    refreshToken: body.refresh_token,
+  };
 }
 
 /** Revokes a token at Google. Best effort: failures are ignored by callers. */

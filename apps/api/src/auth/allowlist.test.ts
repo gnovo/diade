@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { isAllowedEmail, ALLOWED_EMAILS } from './index';
+import { describe, expect, it } from 'vitest';
+import { ALLOWED_EMAILS, isAllowedEmail } from './index';
 
 describe('Díade account allowlist', () => {
   it('allows the two members', () => {

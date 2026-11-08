@@ -1,7 +1,20 @@
 import type { TFunction } from 'i18next';
 
 const WEEKDAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
-const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'] as const;
+const MONTHS = [
+  'jan',
+  'feb',
+  'mar',
+  'apr',
+  'may',
+  'jun',
+  'jul',
+  'aug',
+  'sep',
+  'oct',
+  'nov',
+  'dec',
+] as const;
 
 /** "Today", "Tomorrow", or "Mon 3 Nov" / "seg, 3 de nov". */
 export function formatDayLabel(t: TFunction, date: Date, now: Date = new Date()): string {
@@ -34,7 +47,8 @@ export function formatLongDate(t: TFunction, date: Date): string {
   });
 }
 
-const sameMonth = (a: Date, b: Date) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
+const sameMonth = (a: Date, b: Date) =>
+  a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
 
 /**
  * "Mon 9 to Sun 15 Nov" / "seg, 9 a dom, 15 de nov": a period with weekdays. The month is written once
@@ -42,7 +56,10 @@ const sameMonth = (a: Date, b: Date) => a.getFullYear() === b.getFullYear() && a
  */
 export function formatDateRange(t: TFunction, from: Date, to: Date): string {
   const start = sameMonth(from, to)
-    ? t('format.weekdayDay', { weekday: t(`format.weekdayShort.${WEEKDAYS[from.getDay()]}`), day: from.getDate() })
+    ? t('format.weekdayDay', {
+        weekday: t(`format.weekdayShort.${WEEKDAYS[from.getDay()]}`),
+        day: from.getDate(),
+      })
     : formatDayLabel(t, from, new Date(0));
   const end = formatDayLabel(t, to, new Date(0));
   return t('format.range', { from: start, to: end });

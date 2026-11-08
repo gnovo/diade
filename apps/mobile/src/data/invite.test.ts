@@ -11,7 +11,9 @@ describe('inviteState', () => {
   });
 
   it('is none once the partner has joined', () => {
-    expect(inviteState({ inviteCode: 'ABC', inviteExpiresAt: later }, 2, now)).toEqual({ kind: 'none' });
+    expect(inviteState({ inviteCode: 'ABC', inviteExpiresAt: later }, 2, now)).toEqual({
+      kind: 'none',
+    });
   });
 
   it('is valid with a code that has not expired', () => {
@@ -31,7 +33,11 @@ describe('inviteState', () => {
   });
 
   it('is expired past its expiry or without a code', () => {
-    expect(inviteState({ inviteCode: 'ABC', inviteExpiresAt: earlier }, 1, now)).toEqual({ kind: 'expired' });
-    expect(inviteState({ inviteCode: '', inviteExpiresAt: later }, 1, now)).toEqual({ kind: 'expired' });
+    expect(inviteState({ inviteCode: 'ABC', inviteExpiresAt: earlier }, 1, now)).toEqual({
+      kind: 'expired',
+    });
+    expect(inviteState({ inviteCode: '', inviteExpiresAt: later }, 1, now)).toEqual({
+      kind: 'expired',
+    });
   });
 });

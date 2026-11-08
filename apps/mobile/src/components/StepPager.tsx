@@ -1,13 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, LayoutChangeEvent, View } from 'react-native';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { AccessibilityInfo, type LayoutChangeEvent, View } from 'react-native';
 import Animated, {
   Easing,
   Extrapolation,
   interpolate,
+  type SharedValue,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  type SharedValue,
 } from 'react-native-reanimated';
 
 /**
@@ -72,7 +73,10 @@ export const StepProgress: React.FC<{ step: number; total: number }> = ({ step, 
   );
 };
 
-const Segment: React.FC<{ filled: boolean; reduceMotion: boolean }> = ({ filled, reduceMotion }) => {
+const Segment: React.FC<{ filled: boolean; reduceMotion: boolean }> = ({
+  filled,
+  reduceMotion,
+}) => {
   const fill = useSharedValue(filled ? 1 : 0);
   const [width, setWidth] = useState(0);
   useEffect(() => {
@@ -80,7 +84,10 @@ const Segment: React.FC<{ filled: boolean; reduceMotion: boolean }> = ({ filled,
   }, [filled, reduceMotion, fill]);
   // Scale from the left edge: scaleX pivots on the centre, so shift by half the lost width.
   const style = useAnimatedStyle(() => ({
-    transform: [{ translateX: (-width * (1 - fill.value)) / 2 }, { scaleX: Math.max(fill.value, 0.001) }],
+    transform: [
+      { translateX: (-width * (1 - fill.value)) / 2 },
+      { scaleX: Math.max(fill.value, 0.001) },
+    ],
   }));
   return (
     <View
@@ -128,7 +135,10 @@ export const FoldingFooter: React.FC<{
  * that changes height while in view (a section opening) is eased with a decaying offset.
  * Steps out of view are hidden from touch and screen readers.
  */
-export const StepPager: React.FC<{ index: number; steps: React.ReactNode[] }> = ({ index, steps }) => {
+export const StepPager: React.FC<{ index: number; steps: React.ReactNode[] }> = ({
+  index,
+  steps,
+}) => {
   const count = steps.length;
   const progress = useStepProgress(index);
   const width = useSharedValue(0);
@@ -168,7 +178,9 @@ export const StepPager: React.FC<{ index: number; steps: React.ReactNode[] }> = 
     return { height: base + resize.value };
   });
 
-  const trackStyle = useAnimatedStyle(() => ({ transform: [{ translateX: -progress.value * width.value }] }));
+  const trackStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: -progress.value * width.value }],
+  }));
 
   return (
     <Animated.View
@@ -179,7 +191,10 @@ export const StepPager: React.FC<{ index: number; steps: React.ReactNode[] }> = 
       }}
     >
       <Animated.View
-        style={[{ flexDirection: 'row', alignItems: 'flex-start', width: `${count * 100}%` }, trackStyle]}
+        style={[
+          { flexDirection: 'row', alignItems: 'flex-start', width: `${count * 100}%` },
+          trackStyle,
+        ]}
       >
         {steps.map((step, i) => (
           <PagerStep

@@ -1,26 +1,26 @@
-import { Hono, type Context } from 'hono';
-import { zValidator } from '@hono/zod-validator';
+import type { ExternalCalendar, ExternalVisibility, GoogleAccessRole } from '@diade/domain';
 import {
   confirmExternalCalendarsSchema,
   updateExternalCalendarSchema,
   updateExternalEventSchema,
 } from '@diade/validation';
-import type { ExternalCalendar, ExternalVisibility, GoogleAccessRole } from '@diade/domain';
-import type { DbClient } from '../db';
+import { zValidator } from '@hono/zod-validator';
+import { type Context, Hono } from 'hono';
+import { GoogleApiError, GoogleAuthError } from '../calendar/google';
 import {
+  type CalendarDeps,
   confirmCalendars,
   disconnect,
   getConnection,
   refreshCalendarList,
+  setEventHighlight,
   syncUserCalendars,
   updateCalendarSettings,
-  setEventHighlight,
   updateEventOverride,
-  type CalendarDeps,
 } from '../calendar/service';
-import { GoogleApiError, GoogleAuthError } from '../calendar/google';
-import type { externalCalendars } from '../db/schema';
 import type { TokenEnv } from '../calendar/tokens';
+import type { DbClient } from '../db';
+import type { externalCalendars } from '../db/schema';
 
 const iso = (d: Date | null): string | null => (d ? d.toISOString() : null);
 
@@ -42,8 +42,12 @@ export function toCalendarDto(row: typeof externalCalendars.$inferSelect): Exter
   };
 }
 
-const fail = (c: Context, status: 400 | 401 | 403 | 404 | 409 | 502, code: string, message: string) =>
-  c.json({ success: false, error: { code, message } }, status);
+const fail = (
+  c: Context,
+  status: 400 | 401 | 403 | 404 | 409 | 502,
+  code: string,
+  message: string,
+) => c.json({ success: false, error: { code, message } }, status);
 
 /**
  * Google Calendar connection and settings. These are server-owned records, so they are
@@ -72,7 +76,12 @@ export function createCalendarRouter(
       return fail(c, 403, 'CALENDAR_NEEDS_REAUTH', 'Reconnect Google Calendar to continue');
     }
     if (err instanceof GoogleApiError && err.isRateLimited) {
-      return fail(c, 502, 'CALENDAR_RATE_LIMITED', 'Google is limiting requests; try again shortly');
+      return fail(
+        c,
+        502,
+        'CALENDAR_RATE_LIMITED',
+        'Google is limiting requests; try again shortly',
+      );
     }
     throw err;
   };
@@ -111,27 +120,36 @@ export function createCalendarRouter(
   });
 
   // POST /api/calendar/calendars/confirm: the picker's "Start syncing"
-  router.post('/calendars/confirm', zValidator('json', confirmExternalCalendarsSchema), async (c) => {
-    const user = c.get('user');
-    const { calendars } = c.req.valid('json');
-    await confirmCalendars(deps(c), user.id, calendars);
+  router.post(
+    '/calendars/confirm',
+    zValidator('json', confirmExternalCalendarsSchema),
+    async (c) => {
+      const user = c.get('user');
+      const { calendars } = c.req.valid('json');
+      await confirmCalendars(deps(c), user.id, calendars);
 
-    // Sync in the background so the button returns at once; the app picks the result up on its next pull.
-    const run = syncUserCalendars(deps(c), user.id, { force: true }).catch((err) =>
-      console.error('[calendar] first sync failed', err instanceof Error ? err.name : 'error'),
-    );
-    try {
-      c.executionCtx.waitUntil(run);
-    } catch {
-      await run; // No execution context (tests, local runtimes): finish before responding.
-    }
-    return c.json({ success: true, data: { started: true } });
-  });
+      // Sync in the background so the button returns at once; the app picks the result up on its next pull.
+      const run = syncUserCalendars(deps(c), user.id, { force: true }).catch((err) =>
+        console.error('[calendar] first sync failed', err instanceof Error ? err.name : 'error'),
+      );
+      try {
+        c.executionCtx.waitUntil(run);
+      } catch {
+        await run; // No execution context (tests, local runtimes): finish before responding.
+      }
+      return c.json({ success: true, data: { started: true } });
+    },
+  );
 
   // PATCH /api/calendar/calendars/:id
   router.patch('/calendars/:id', zValidator('json', updateExternalCalendarSchema), async (c) => {
     const user = c.get('user');
-    const result = await updateCalendarSettings(deps(c), user.id, c.req.param('id'), c.req.valid('json'));
+    const result = await updateCalendarSettings(
+      deps(c),
+      user.id,
+      c.req.param('id'),
+      c.req.valid('json'),
+    );
     if (result === 'not_found') return fail(c, 404, 'NOT_FOUND', 'Calendar not found');
 
     // Turning a calendar on should show its events without waiting for the next cron tick.
@@ -156,7 +174,12 @@ export function createCalendarRouter(
       const result = await updateEventOverride(deps(c), userId, eventId, body.visibilityOverride);
       if (result === 'not_found') return fail(c, 404, 'NOT_FOUND', 'Event not found');
       if (result === 'too_wide') {
-        return fail(c, 409, 'VISIBILITY_TOO_WIDE', "An event cannot be more visible than its calendar");
+        return fail(
+          c,
+          409,
+          'VISIBILITY_TOO_WIDE',
+          'An event cannot be more visible than its calendar',
+        );
       }
     }
     if (body.highlighted !== undefined) {
@@ -175,7 +198,9 @@ export function createCalendarRouter(
         data: {
           synced: outcomes.filter((o) => o.status === 'synced').length,
           skipped: outcomes.filter((o) => o.status === 'skipped').length,
-          errors: outcomes.filter((o) => o.status === 'error').map((o) => ({ calendarId: o.calendarId, error: o.error })),
+          errors: outcomes
+            .filter((o) => o.status === 'error')
+            .map((o) => ({ calendarId: o.calendarId, error: o.error })),
         },
       });
     } catch (err) {

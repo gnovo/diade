@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
-import sqliteSource from '../storage/sqlite.ts?raw';
 import type { ExternalCalendar, ExternalEvent, Task } from '@diade/domain';
-import { toColumns, fromRow, toColumn, toKey } from './mapping';
+import { describe, expect, it } from 'vitest';
+import sqliteSource from '../storage/sqlite.ts?raw';
+import { fromRow, toColumn, toColumns, toKey } from './mapping';
 
 describe('row mapping', () => {
   it('converts between camelCase keys and snake_case columns', () => {
@@ -28,7 +28,10 @@ describe('row mapping', () => {
     const { columns, values } = toColumns({ id: 'r', ingredients });
     expect(columns).toEqual(['id', 'ingredients']);
     expect(values).toEqual(['r', JSON.stringify(ingredients)]);
-    expect(fromRow({ id: 'r', ingredients: JSON.stringify(ingredients) })).toEqual({ id: 'r', ingredients });
+    expect(fromRow({ id: 'r', ingredients: JSON.stringify(ingredients) })).toEqual({
+      id: 'r',
+      ingredients,
+    });
   });
 
   it('reads an unreadable ingredients column as an empty array rather than throwing', () => {
@@ -43,11 +46,24 @@ describe('row mapping', () => {
 
 describe('important date rows', () => {
   it('stores the pin and first-day flags as 0/1 and restores them as booleans', () => {
-    const { columns, values } = toColumns({ id: 'a', countFirstDay: true, pinned: false, alertOffsetDays: 7 });
+    const { columns, values } = toColumns({
+      id: 'a',
+      countFirstDay: true,
+      pinned: false,
+      alertOffsetDays: 7,
+    });
     expect(columns).toEqual(['id', 'count_first_day', 'pinned', 'alert_offset_days']);
     expect(values).toEqual(['a', 1, 0, 7]);
 
-    expect(fromRow({ id: 'a', count_first_day: 0, pinned: 1, alert_offset_days: null, date: '2020-08-18' })).toEqual({
+    expect(
+      fromRow({
+        id: 'a',
+        count_first_day: 0,
+        pinned: 1,
+        alert_offset_days: null,
+        date: '2020-08-18',
+      }),
+    ).toEqual({
       id: 'a',
       countFirstDay: false,
       pinned: true,
@@ -60,7 +76,10 @@ describe('important date rows', () => {
 describe('Google Calendar rows', () => {
   // Every field the server sends must have a local column, or pulling would fail on the device.
   const columnsOf = (table: string): Set<string> => {
-    const body = new RegExp(`CREATE TABLE IF NOT EXISTS ${table} \\(([\\s\\S]*?)\\n    \\);`).exec(sqliteSource)?.[1] ?? '';
+    const body =
+      new RegExp(`CREATE TABLE IF NOT EXISTS ${table} \\(([\\s\\S]*?)\\n    \\);`).exec(
+        sqliteSource,
+      )?.[1] ?? '';
     return new Set(
       body
         .split('\n')
@@ -70,20 +89,63 @@ describe('Google Calendar rows', () => {
   };
 
   const event: ExternalEvent = {
-    id: 'e', calendarId: 'c', userId: 'u', googleEventId: 'g', icalUid: null, title: null, description: null,
-    location: null, startAt: null, endAt: null, startDate: null, endDate: null, isAllDay: false,
-    status: 'confirmed', transparency: 'opaque', myResponse: null, googleVisibility: null,
-    visibilityOverride: null, htmlLink: null, isRecurringInstance: false, highlighted: false, effectiveVisibility: 'shared',
-    redacted: false, createdAt: 'x', updatedAt: 'x', deletedAt: null,
+    id: 'e',
+    calendarId: 'c',
+    userId: 'u',
+    googleEventId: 'g',
+    icalUid: null,
+    title: null,
+    description: null,
+    location: null,
+    startAt: null,
+    endAt: null,
+    startDate: null,
+    endDate: null,
+    isAllDay: false,
+    status: 'confirmed',
+    transparency: 'opaque',
+    myResponse: null,
+    googleVisibility: null,
+    visibilityOverride: null,
+    htmlLink: null,
+    isRecurringInstance: false,
+    highlighted: false,
+    effectiveVisibility: 'shared',
+    redacted: false,
+    createdAt: 'x',
+    updatedAt: 'x',
+    deletedAt: null,
   };
   const calendar: ExternalCalendar = {
-    id: 'c', userId: 'u', name: null, color: null, timeZone: null, accessRole: null, syncEnabled: true,
-    visibility: 'shared', lastSyncedAt: null, lastError: null, createdAt: 'x', updatedAt: 'x', deletedAt: null,
+    id: 'c',
+    userId: 'u',
+    name: null,
+    color: null,
+    timeZone: null,
+    accessRole: null,
+    syncEnabled: true,
+    visibility: 'shared',
+    lastSyncedAt: null,
+    lastError: null,
+    createdAt: 'x',
+    updatedAt: 'x',
+    deletedAt: null,
   };
   const task: Task = {
-    id: 't', spaceId: 's', creatorId: 'u', assigneeId: null, title: 'x', notes: null, dueDate: null,
-    status: 'todo', priority: 'normal', visibility: 'shared', completedAt: null, createdAt: 'x',
-    updatedAt: 'x', deletedAt: null,
+    id: 't',
+    spaceId: 's',
+    creatorId: 'u',
+    assigneeId: null,
+    title: 'x',
+    notes: null,
+    dueDate: null,
+    status: 'todo',
+    priority: 'normal',
+    visibility: 'shared',
+    completedAt: null,
+    createdAt: 'x',
+    updatedAt: 'x',
+    deletedAt: null,
   };
 
   it.each([
@@ -98,12 +160,19 @@ describe('Google Calendar rows', () => {
   });
 
   it('stores booleans as 0/1 and reads them back', () => {
-    const { columns, values } = toColumns({ redacted: true, syncEnabled: false, isRecurringInstance: true });
+    const { columns, values } = toColumns({
+      redacted: true,
+      syncEnabled: false,
+      isRecurringInstance: true,
+    });
     expect(Object.fromEntries(columns.map((c, i) => [c, values[i]]))).toEqual({
       redacted: 1,
       sync_enabled: 0,
       is_recurring_instance: 1,
     });
-    expect(fromRow({ redacted: 1, sync_enabled: 0 })).toEqual({ redacted: true, syncEnabled: false });
+    expect(fromRow({ redacted: 1, sync_enabled: 0 })).toEqual({
+      redacted: true,
+      syncEnabled: false,
+    });
   });
 });

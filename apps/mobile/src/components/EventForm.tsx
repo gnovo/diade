@@ -1,15 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, View, Text, ScrollView, Switch, Alert, KeyboardAvoidingView, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
 import {
+  type CalendarEvent,
   parseLocalDateTime,
   toDateInputValue,
   toTimeInputValue,
-  type CalendarEvent,
   type Visibility,
 } from '@diade/domain';
-import { insertRecord, updateRecord, deleteRecord } from '../data/repository';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { deleteRecord, insertRecord, updateRecord } from '../data/repository';
 import { Button, Segmented, TextField, useWriteContext } from './ui';
 
 type Repeat = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
@@ -119,7 +129,10 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event })
       }
       onClose();
     } catch (err) {
-      Alert.alert(t('common.couldNotSave'), err instanceof Error ? err.message : t('common.tryAgain'));
+      Alert.alert(
+        t('common.couldNotSave'),
+        err instanceof Error ? err.message : t('common.tryAgain'),
+      );
     } finally {
       setSaving(false);
     }
@@ -128,40 +141,69 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event })
   const handleDelete = () => {
     if (!event) return;
     const seriesNote = event.recurrenceRule ? `\n\n${t('eventForm.deleteSeriesNote')}` : '';
-    Alert.alert(t('eventForm.deleteTitle'), `${t('eventForm.deleteBody', { title: event.title })}${seriesNote}`, [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: async () => {
-          await deleteRecord('events', event.id);
-          onClose();
+    Alert.alert(
+      t('eventForm.deleteTitle'),
+      `${t('eventForm.deleteBody', { title: event.title })}${seriesNote}`,
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            await deleteRecord('events', event.id);
+            onClose();
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   const heading = editing ? t('eventForm.editEvent') : t('eventForm.newEvent');
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
       <SafeAreaView className="flex-1 bg-bg" edges={['top', 'bottom']}>
-        <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <KeyboardAvoidingView
+          className="flex-1"
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
           <View className="flex-row items-center justify-between px-5 py-4 border-b border-border bg-surface">
             <Button label={t('common.cancel')} variant="ghost" small onPress={onClose} />
             <Text className="text-base font-semibold text-ink">{heading}</Text>
             <Button label={t('common.save')} small onPress={handleSave} disabled={saving || !ctx} />
           </View>
 
-          <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }} keyboardShouldPersistTaps="handled">
+          <ScrollView
+            contentContainerStyle={{ padding: 20, gap: 16 }}
+            keyboardShouldPersistTaps="handled"
+          >
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('eventForm.title')}</Text>
-              <TextField value={title} onChangeText={setTitle} placeholder={t('eventForm.titlePlaceholder')} maxLength={200} />
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">
+                {t('eventForm.title')}
+              </Text>
+              <TextField
+                value={title}
+                onChangeText={setTitle}
+                placeholder={t('eventForm.titlePlaceholder')}
+                maxLength={200}
+              />
             </View>
 
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('eventForm.date')}</Text>
-              <TextField value={date} onChangeText={setDate} placeholder="2026-11-14" keyboardType="numbers-and-punctuation" />
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">
+                {t('eventForm.date')}
+              </Text>
+              <TextField
+                value={date}
+                onChangeText={setDate}
+                placeholder="2026-11-14"
+                keyboardType="numbers-and-punctuation"
+              />
             </View>
 
             <View className="flex-row items-center justify-between">
@@ -172,11 +214,15 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event })
             {!isAllDay ? (
               <View className="flex-row gap-3">
                 <View className="flex-1">
-                  <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('eventForm.starts')}</Text>
+                  <Text className="text-sm font-semibold text-ink-muted mb-1.5">
+                    {t('eventForm.starts')}
+                  </Text>
                   <TextField value={startTime} onChangeText={setStartTime} placeholder="19:30" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('eventForm.ends')}</Text>
+                  <Text className="text-sm font-semibold text-ink-muted mb-1.5">
+                    {t('eventForm.ends')}
+                  </Text>
                   <TextField value={endTime} onChangeText={setEndTime} placeholder="21:00" />
                 </View>
               </View>
@@ -188,7 +234,9 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event })
             </View>
 
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('eventForm.whoSees')}</Text>
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">
+                {t('eventForm.whoSees')}
+              </Text>
               <Segmented<Visibility>
                 value={visibility}
                 onChange={setVisibility}
@@ -200,7 +248,9 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event })
             </View>
 
             <View>
-              <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('eventForm.repeats')}</Text>
+              <Text className="text-sm font-semibold text-ink-muted mb-1.5">
+                {t('eventForm.repeats')}
+              </Text>
               <Segmented<Repeat> value={repeat} onChange={setRepeat} options={repeatOptions} />
               {editing && event?.recurrenceRule ? (
                 <Text className="text-sm text-ink-muted mt-2">{t('eventForm.seriesNote')}</Text>

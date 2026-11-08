@@ -1,9 +1,9 @@
-import { Hono } from 'hono';
+import { createInviteSchema, createSpaceSchema, joinSpaceSchema } from '@diade/validation';
 import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
-import { createSpaceSchema, joinSpaceSchema, createInviteSchema } from '@diade/validation';
+import { Hono } from 'hono';
 import type { DbClient } from '../db';
-import { spaces, spaceMembers, users } from '../db/schema';
+import { spaceMembers, spaces, users } from '../db/schema';
 
 // Helper to generate a friendly 8-character uppercase alphanumeric code
 export function generateInviteCode(): string {

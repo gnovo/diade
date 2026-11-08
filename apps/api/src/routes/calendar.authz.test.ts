@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
 import { getTableName } from 'drizzle-orm';
+import { describe, expect, it } from 'vitest';
 import { buildExternalPull } from '../calendar/pull';
 import type { DbClient } from '../db';
 
@@ -74,24 +74,37 @@ const pull = (fixtures: Parameters<typeof fakeDb>[0]) =>
 
 describe('partner calendar data in the pull response', () => {
   it('delivers a shared partner event with details but without the Google link', async () => {
-    const { externalEvents } = await pull({ external_calendars: [calendar()], external_events: [event()] });
+    const { externalEvents } = await pull({
+      external_calendars: [calendar()],
+      external_events: [event()],
+    });
     expect(externalEvents).toHaveLength(1);
-    expect(externalEvents[0]).toMatchObject({ title: 'Session with Dr X', location: 'Clinic', redacted: false, htmlLink: null });
+    expect(externalEvents[0]).toMatchObject({
+      title: 'Session with Dr X',
+      location: 'Clinic',
+      redacted: false,
+      htmlLink: null,
+    });
   });
 
-  it('never sends a busy-only event\'s title, description or location', async () => {
+  it("never sends a busy-only event's title, description or location", async () => {
     const { externalEvents } = await pull({
       external_calendars: [calendar({ visibility: 'busy_only' })],
       external_events: [event()],
     });
     const json = JSON.stringify(externalEvents[0]);
-    expect(externalEvents[0]).toMatchObject({ title: null, description: null, location: null, redacted: true });
+    expect(externalEvents[0]).toMatchObject({
+      title: null,
+      description: null,
+      location: null,
+      redacted: true,
+    });
     expect(json).not.toContain('Dr X');
     expect(json).not.toContain('Private notes');
     expect(json).not.toContain('Clinic');
   });
 
-  it('sends a private calendar\'s events as content-free tombstones', async () => {
+  it("sends a private calendar's events as content-free tombstones", async () => {
     const { externalEvents } = await pull({
       external_calendars: [calendar({ visibility: 'private' })],
       external_events: [event()],
@@ -100,7 +113,7 @@ describe('partner calendar data in the pull response', () => {
     expect(JSON.stringify(externalEvents[0])).not.toContain('Dr X');
   });
 
-  it('applies a per-event override and Google\'s private flag', async () => {
+  it("applies a per-event override and Google's private flag", async () => {
     const overridden = await pull({
       external_calendars: [calendar()],
       external_events: [event({ visibilityOverride: 'private' })],
@@ -124,7 +137,10 @@ describe('partner calendar data in the pull response', () => {
 
   it('hides everything of a disabled, deleted or unconfirmed calendar', async () => {
     for (const over of [{ syncEnabled: false }, { deletedAt: T }, { confirmedAt: null }]) {
-      const { externalEvents } = await pull({ external_calendars: [calendar(over)], external_events: [event()] });
+      const { externalEvents } = await pull({
+        external_calendars: [calendar(over)],
+        external_events: [event()],
+      });
       expect(externalEvents[0]!.deletedAt).not.toBeNull();
       expect(externalEvents[0]!.title).toBeNull();
     }
@@ -135,7 +151,11 @@ describe('partner calendar data in the pull response', () => {
       external_calendars: [calendar({ id: 'cal-m', userId: ME, visibility: 'private' })],
       external_events: [event({ calendarId: 'cal-m', userId: ME })],
     });
-    expect(mine.externalEvents[0]).toMatchObject({ title: 'Session with Dr X', redacted: false, deletedAt: null });
+    expect(mine.externalEvents[0]).toMatchObject({
+      title: 'Session with Dr X',
+      redacted: false,
+      deletedAt: null,
+    });
   });
 
   it('keeps the name of a non-shared partner calendar to itself', async () => {

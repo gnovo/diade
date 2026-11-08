@@ -1,14 +1,14 @@
 import type {
   CalendarEvent,
-  Task,
-  SharedList,
-  ListItem,
   CaptureItem,
-  ImportantDate,
-  Recipe,
-  MealPlan,
   ExternalCalendar,
   ExternalEvent,
+  ImportantDate,
+  ListItem,
+  MealPlan,
+  Recipe,
+  SharedList,
+  Task,
 } from '@diade/domain';
 import { getLocalDb } from '../storage/sqlite';
 import { fromRow } from './mapping';
@@ -26,7 +26,8 @@ async function selectActive<T>(table: string, orderBy: string): Promise<T[]> {
 
 export const getActiveEvents = () => selectActive<CalendarEvent>('local_events', 'start_at ASC');
 
-export const getActiveTasks = () => selectActive<Task>('local_tasks', 'due_date IS NULL, due_date ASC, created_at ASC');
+export const getActiveTasks = () =>
+  selectActive<Task>('local_tasks', 'due_date IS NULL, due_date ASC, created_at ASC');
 
 export const getActiveLists = () => selectActive<SharedList>('local_lists', 'created_at ASC');
 
@@ -85,6 +86,8 @@ export async function getPendingCount(): Promise<number> {
   return row?.n ?? 0;
 }
 
-export const getActiveRecipes = () => selectActive<Recipe>('local_recipes', 'name COLLATE NOCASE ASC');
+export const getActiveRecipes = () =>
+  selectActive<Recipe>('local_recipes', 'name COLLATE NOCASE ASC');
 
-export const getActiveMealPlans = () => selectActive<MealPlan>('local_meal_plans', 'starts_on ASC, created_at ASC');
+export const getActiveMealPlans = () =>
+  selectActive<MealPlan>('local_meal_plans', 'starts_on ASC, created_at ASC');

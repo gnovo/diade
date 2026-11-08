@@ -1,7 +1,7 @@
-import React from 'react';
+import { sizes } from '@diade/design-tokens';
+import type React from 'react';
 import { Pressable, View } from 'react-native';
 import { Icon } from './Icon';
-import { sizes } from '@diade/design-tokens';
 import { useColor } from './theme';
 
 /** 24px box inside a 48px hit area. Checked = `action` fill with a check icon. */
@@ -25,7 +25,9 @@ export const Checkbox: React.FC<{ checked: boolean; onToggle: () => void; label:
           checked ? 'bg-action border-action' : 'bg-surface border-border-strong'
         }`}
       >
-        {checked ? <Icon name="check" size={sizes['icon-sm']} color={onAction} strokeWidth={3} /> : null}
+        {checked ? (
+          <Icon name="check" size={sizes['icon-sm']} color={onAction} strokeWidth={3} />
+        ) : null}
       </View>
     </Pressable>
   );

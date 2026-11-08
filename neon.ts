@@ -1,4 +1,4 @@
-import { defineConfig } from "@neon/config/v1";
+import { defineConfig } from '@neon/config/v1';
 
 export default defineConfig({
   // Declare your Neon services here (Postgres is provisioned by default; Neon Auth intentionally disabled, app uses Better Auth)
@@ -11,7 +11,7 @@ export default defineConfig({
     if (!branch.exists) {
       // New non-default branches: auto-expire
       // Run `neon checkout <name>` to create a new branch with these settings
-      return { ttl: "7d" };
+      return { ttl: '7d' };
     }
     // Existing branch: no changes
     return {};

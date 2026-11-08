@@ -1,16 +1,26 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Switch, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
-import { space as spacing, sizes } from '@diade/design-tokens';
-import type { ExternalCalendar, ExternalVisibility } from '@diade/domain';
-import type { CalendarConnectionResponse } from '@diade/contracts';
 import { ApiError } from '@diade/api-client';
+import type { CalendarConnectionResponse } from '@diade/contracts';
+import { sizes, space as spacing } from '@diade/design-tokens';
+import type { ExternalCalendar, ExternalVisibility } from '@diade/domain';
+import type React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  ActivityIndicator,
+  Alert,
+  Modal,
+  Pressable,
+  ScrollView,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { apiClient } from '../api/client';
 import { connectGoogleCalendar } from '../calendar/connect';
-import { useSync } from '../sync/SyncProvider';
-import { Button, Card, EmptyState, Segmented, SectionLabel } from '../components/ui';
+import { Button, Card, EmptyState, SectionLabel, Segmented } from '../components/ui';
 import { Icon, useColor } from '../design';
+import { useSync } from '../sync/SyncProvider';
 
 type Phase =
   | { kind: 'loading' }
@@ -22,7 +32,8 @@ type Draft = Record<string, { syncEnabled: boolean; visibility: ExternalVisibili
 const FIRST_SYNC_POLL_MS = 2_500;
 const FIRST_SYNC_POLL_TRIES = 8;
 
-const isNeedsReauth = (err: unknown) => err instanceof ApiError && err.code === 'CALENDAR_NEEDS_REAUTH';
+const isNeedsReauth = (err: unknown) =>
+  err instanceof ApiError && err.code === 'CALENDAR_NEEDS_REAUTH';
 
 /**
  * Connect Google Calendar, pick which calendars to bring in and who sees them.
@@ -39,7 +50,9 @@ export const CalendarSettingsScreen: React.FC<{ visible: boolean; onClose: () =>
   const { syncNow } = useSync();
   const [phase, setPhase] = useState<Phase>({ kind: 'loading' });
   const [draft, setDraft] = useState<Draft>({});
-  const [busy, setBusy] = useState<null | 'connect' | 'start' | 'sync' | 'refresh' | 'disconnect'>(null);
+  const [busy, setBusy] = useState<null | 'connect' | 'start' | 'sync' | 'refresh' | 'disconnect'>(
+    null,
+  );
   const mounted = useRef(true);
 
   useEffect(() => {
@@ -111,7 +124,9 @@ export const CalendarSettingsScreen: React.FC<{ visible: boolean; onClose: () =>
       try {
         const connection = await apiClient.getCalendarConnection();
         adopt(connection);
-        const pending = connection.calendars.some((c) => c.syncEnabled && !c.lastSyncedAt && !c.lastError);
+        const pending = connection.calendars.some(
+          (c) => c.syncEnabled && !c.lastSyncedAt && !c.lastError,
+        );
         if (!pending) break;
       } catch {
         break;
@@ -134,7 +149,10 @@ export const CalendarSettingsScreen: React.FC<{ visible: boolean; onClose: () =>
       adopt(await apiClient.getCalendarConnection());
       await waitForFirstSync();
     } catch (err) {
-      Alert.alert(t('googleCalendar.couldNotSave'), err instanceof Error ? err.message : t('common.tryAgain'));
+      Alert.alert(
+        t('googleCalendar.couldNotSave'),
+        err instanceof Error ? err.message : t('common.tryAgain'),
+      );
     } finally {
       if (mounted.current) setBusy(null);
     }
@@ -153,7 +171,10 @@ export const CalendarSettingsScreen: React.FC<{ visible: boolean; onClose: () =>
     try {
       const result = await apiClient.updateCalendar(calendar.id, changes);
       if (mounted.current) {
-        setPhase({ kind: 'ready', connection: { ...phase.connection, calendars: result.calendars } });
+        setPhase({
+          kind: 'ready',
+          connection: { ...phase.connection, calendars: result.calendars },
+        });
       }
       // The partner and this device pick the change up on the next pull.
       syncNow();
@@ -173,7 +194,11 @@ export const CalendarSettingsScreen: React.FC<{ visible: boolean; onClose: () =>
       adopt(await apiClient.refreshCalendarList());
     } catch (err) {
       if (isNeedsReauth(err)) await load();
-      else Alert.alert(t('googleCalendar.refreshFailed'), err instanceof Error ? err.message : t('common.tryAgain'));
+      else
+        Alert.alert(
+          t('googleCalendar.refreshFailed'),
+          err instanceof Error ? err.message : t('common.tryAgain'),
+        );
     } finally {
       if (mounted.current) setBusy(null);
     }
@@ -187,7 +212,11 @@ export const CalendarSettingsScreen: React.FC<{ visible: boolean; onClose: () =>
       await syncNow();
     } catch (err) {
       if (isNeedsReauth(err)) await load();
-      else Alert.alert(t('googleCalendar.couldNotSave'), err instanceof Error ? err.message : t('common.tryAgain'));
+      else
+        Alert.alert(
+          t('googleCalendar.couldNotSave'),
+          err instanceof Error ? err.message : t('common.tryAgain'),
+        );
     } finally {
       if (mounted.current) setBusy(null);
     }
@@ -207,7 +236,10 @@ export const CalendarSettingsScreen: React.FC<{ visible: boolean; onClose: () =>
             await load();
             await syncNow();
           } catch (err) {
-            Alert.alert(t('googleCalendar.couldNotSave'), err instanceof Error ? err.message : t('common.tryAgain'));
+            Alert.alert(
+              t('googleCalendar.couldNotSave'),
+              err instanceof Error ? err.message : t('common.tryAgain'),
+            );
           } finally {
             if (mounted.current) setBusy(null);
           }
@@ -232,7 +264,11 @@ export const CalendarSettingsScreen: React.FC<{ visible: boolean; onClose: () =>
         </View>
 
         <ScrollView
-          contentContainerStyle={{ paddingHorizontal: spacing[4], paddingTop: spacing[4], paddingBottom: spacing[8] }}
+          contentContainerStyle={{
+            paddingHorizontal: spacing[4],
+            paddingTop: spacing[4],
+            paddingBottom: spacing[8],
+          }}
         >
           {phase.kind === 'loading' ? (
             <View className="py-10 items-center">
@@ -242,7 +278,9 @@ export const CalendarSettingsScreen: React.FC<{ visible: boolean; onClose: () =>
 
           {phase.kind === 'error' ? (
             <Card>
-              <Text className="text-base font-semibold text-ink mb-1">{t('googleCalendar.couldNotLoad')}</Text>
+              <Text className="text-base font-semibold text-ink mb-1">
+                {t('googleCalendar.couldNotLoad')}
+              </Text>
               <Text className="text-sm leading-5 text-ink-muted mb-4">
                 {phase.offline ? t('googleCalendar.needsConnection') : t('common.tryAgain')}
               </Text>
@@ -275,11 +313,24 @@ const ReadyView: React.FC<{
   busy: null | 'connect' | 'start' | 'sync' | 'refresh' | 'disconnect';
   onConnect: () => void;
   onStart: () => void;
-  onChange: (calendar: ExternalCalendar, changes: { syncEnabled?: boolean; visibility?: ExternalVisibility }) => void;
+  onChange: (
+    calendar: ExternalCalendar,
+    changes: { syncEnabled?: boolean; visibility?: ExternalVisibility },
+  ) => void;
   onSync: () => void;
   onRefresh: () => void;
   onDisconnect: () => void;
-}> = ({ connection, draft, busy, onConnect, onStart, onChange, onSync, onRefresh, onDisconnect }) => {
+}> = ({
+  connection,
+  draft,
+  busy,
+  onConnect,
+  onStart,
+  onChange,
+  onSync,
+  onRefresh,
+  onDisconnect,
+}) => {
   const { t } = useTranslation();
 
   // Not connected, or the grant is gone: explain and offer to (re)connect.
@@ -297,13 +348,24 @@ const ReadyView: React.FC<{
           {reauth ? t('googleCalendar.needsReauthBody') : t('googleCalendar.introBody')}
         </Text>
         <Button
-          label={busy === 'connect' ? t('googleCalendar.connecting') : reauth ? t('googleCalendar.reconnect') : t('googleCalendar.connect')}
+          label={
+            busy === 'connect'
+              ? t('googleCalendar.connecting')
+              : reauth
+                ? t('googleCalendar.reconnect')
+                : t('googleCalendar.connect')
+          }
           onPress={onConnect}
           disabled={busy !== null}
         />
         {reauth ? (
           <View className="mt-2">
-            <Button label={t('googleCalendar.disconnect')} variant="ghost" onPress={onDisconnect} disabled={busy !== null} />
+            <Button
+              label={t('googleCalendar.disconnect')}
+              variant="ghost"
+              onPress={onDisconnect}
+              disabled={busy !== null}
+            />
           </View>
         ) : null}
       </Card>
@@ -317,7 +379,9 @@ const ReadyView: React.FC<{
     <>
       {picking ? (
         <View className="mb-5">
-          <Text className="text-lg leading-7 font-semibold text-ink mb-1">{t('googleCalendar.pickerTitle')}</Text>
+          <Text className="text-lg leading-7 font-semibold text-ink mb-1">
+            {t('googleCalendar.pickerTitle')}
+          </Text>
           <Text className="text-sm leading-5 text-ink-muted">{t('googleCalendar.pickerNote')}</Text>
         </View>
       ) : (
@@ -330,7 +394,12 @@ const ReadyView: React.FC<{
         <CalendarRow
           key={calendar.id}
           calendar={calendar}
-          state={draft[calendar.id] ?? { syncEnabled: calendar.syncEnabled, visibility: calendar.visibility }}
+          state={
+            draft[calendar.id] ?? {
+              syncEnabled: calendar.syncEnabled,
+              visibility: calendar.visibility,
+            }
+          }
           showStatus={!picking}
           onChange={(changes) => onChange(calendar, changes)}
         />
@@ -338,7 +407,9 @@ const ReadyView: React.FC<{
 
       <View className="mb-4">
         <Button
-          label={busy === 'refresh' ? t('googleCalendar.refreshing') : t('googleCalendar.refreshList')}
+          label={
+            busy === 'refresh' ? t('googleCalendar.refreshing') : t('googleCalendar.refreshList')
+          }
           variant="ghost"
           onPress={onRefresh}
           disabled={busy !== null}
@@ -359,7 +430,12 @@ const ReadyView: React.FC<{
             disabled={busy !== null}
           />
           <View className="h-2" />
-          <Button label={t('googleCalendar.disconnect')} variant="danger" onPress={onDisconnect} disabled={busy !== null} />
+          <Button
+            label={t('googleCalendar.disconnect')}
+            variant="danger"
+            onPress={onDisconnect}
+            disabled={busy !== null}
+          />
         </>
       )}
     </>
@@ -394,7 +470,9 @@ const CalendarRow: React.FC<{
     if (calendar.lastError === 'rate_limited') return t('googleCalendar.errorRateLimited');
     if (calendar.lastError) return t('googleCalendar.errorSync');
     if (!calendar.lastSyncedAt) return t('googleCalendar.neverSynced');
-    return t('googleCalendar.lastSynced', { time: new Date(calendar.lastSyncedAt).toLocaleString() });
+    return t('googleCalendar.lastSynced', {
+      time: new Date(calendar.lastSyncedAt).toLocaleString(),
+    });
   })();
 
   return (
@@ -411,7 +489,9 @@ const CalendarRow: React.FC<{
             {calendar.name ?? ''}
           </Text>
           {status ? (
-            <Text className={`text-xs leading-4 mt-0.5 ${calendar.lastError ? 'text-ink' : 'text-ink-muted'}`}>
+            <Text
+              className={`text-xs leading-4 mt-0.5 ${calendar.lastError ? 'text-ink' : 'text-ink-muted'}`}
+            >
               {status}
             </Text>
           ) : null}
@@ -426,7 +506,9 @@ const CalendarRow: React.FC<{
 
       {state.syncEnabled ? (
         <View className="mt-4">
-          <Text className="text-sm font-semibold text-ink-muted mb-1.5">{t('googleCalendar.visibility')}</Text>
+          <Text className="text-sm font-semibold text-ink-muted mb-1.5">
+            {t('googleCalendar.visibility')}
+          </Text>
           <Segmented<ExternalVisibility>
             value={visibility}
             onChange={(value) => onChange({ visibility: value })}

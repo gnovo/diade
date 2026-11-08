@@ -1,26 +1,26 @@
-import { Hono } from 'hono';
-import { zValidator } from '@hono/zod-validator';
-import { eq, and, gt, or, ne, isNull } from 'drizzle-orm';
-import { syncPushSchema, syncPullQuerySchema, parseSyncPayload } from '@diade/validation';
 import {
-  canAccessRecord,
   type ClientMutation,
+  canAccessRecord,
   type RejectedMutation,
   type Visibility,
 } from '@diade/domain';
-import type { DbClient } from '../db';
+import { parseSyncPayload, syncPullQuerySchema, syncPushSchema } from '@diade/validation';
+import { zValidator } from '@hono/zod-validator';
+import { and, eq, gt, isNull, ne, or } from 'drizzle-orm';
+import { Hono } from 'hono';
 import { buildExternalPull } from '../calendar/pull';
+import type { DbClient } from '../db';
 import {
-  events,
-  tasks,
-  lists,
-  listItems,
   captureItems,
+  events,
   importantDates,
-  recipes,
+  listItems,
+  lists,
   mealPlans,
-  syncMutations,
+  recipes,
   spaceMembers,
+  syncMutations,
+  tasks,
 } from '../db/schema';
 
 type Access = 'ok' | 'not_found' | 'forbidden';
@@ -456,7 +456,6 @@ async function applyMutation(
   }
 }
 
-
 export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) => any) {
   const router = new Hono<{
     Variables: {
@@ -537,7 +536,11 @@ export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) 
       // 2. Validate the payload for this entity and operation
       const parsed = parseSyncPayload(mutation.entity, mutation.operation, mutation.payload);
       if (!parsed.success) {
-        rejectedMutations.push({ id: mutation.id, code: 'INVALID_PAYLOAD', message: parsed.message });
+        rejectedMutations.push({
+          id: mutation.id,
+          code: 'INVALID_PAYLOAD',
+          message: parsed.message,
+        });
         continue;
       }
 
@@ -558,7 +561,13 @@ export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) 
           await applyMutation(db, mutation, parsed.data, { spaceId, userId: user.id, now });
         }
       } catch (err) {
-        console.error('[sync] mutation failed', mutation.id, mutation.entity, mutation.operation, err);
+        console.error(
+          '[sync] mutation failed',
+          mutation.id,
+          mutation.entity,
+          mutation.operation,
+          err,
+        );
         rejectedMutations.push({
           id: mutation.id,
           code: 'APPLY_FAILED',

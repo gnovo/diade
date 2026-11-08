@@ -5,9 +5,9 @@
 import {
   describeImportantDate,
   elapsedDays,
-  isCoupleDate,
   type ImportantDate,
   type ImportantDateStatus,
+  isCoupleDate,
 } from '@diade/domain';
 
 export interface DescribedDate {
@@ -16,7 +16,11 @@ export interface DescribedDate {
 }
 
 /** Dates happening today or within `lookaheadDays`, soonest first. Dates already behind us are left out. */
-export function upcomingSpecialDates(dates: ImportantDate[], now: Date, lookaheadDays: number): DescribedDate[] {
+export function upcomingSpecialDates(
+  dates: ImportantDate[],
+  now: Date,
+  lookaheadDays: number,
+): DescribedDate[] {
   return dates
     .filter((item) => isCoupleDate(item.type))
     .map((item) => ({ item, status: describeImportantDate(item, now) }))
@@ -39,8 +43,13 @@ export function usStrip(allDates: ImportantDate[], now: Date, lookaheadDays: num
   if (pinned) {
     const status = describeImportantDate(pinned, now);
     const since = elapsedDays(pinned, now);
-    featured = { item: pinned, status, days: since !== null && status.kind !== 'today' ? since : null };
+    featured = {
+      item: pinned,
+      status,
+      days: since !== null && status.kind !== 'today' ? since : null,
+    };
   }
-  const next = upcomingSpecialDates(dates, now, lookaheadDays).find((d) => d.item.id !== pinned?.id) ?? null;
+  const next =
+    upcomingSpecialDates(dates, now, lookaheadDays).find((d) => d.item.id !== pinned?.id) ?? null;
   return { featured, next };
 }

@@ -54,7 +54,11 @@ export interface MarkerPalette {
 }
 
 /** The dots under a day number. One dot per calendar, so a busy day does not turn into a wall. */
-export function dayMarkers(entries: AgendaEntry[], palette: MarkerPalette, max: number = 3): DayMarkers {
+export function dayMarkers(
+  entries: AgendaEntry[],
+  palette: MarkerPalette,
+  max: number = 3,
+): DayMarkers {
   const seen: string[] = [];
   for (const entry of entries) {
     let color: string;

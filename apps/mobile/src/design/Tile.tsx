@@ -1,16 +1,16 @@
-import React from 'react';
+import { sizes } from '@diade/design-tokens';
+import type React from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { Icon, type IconName } from './Icon';
-import { sizes } from '@diade/design-tokens';
 import { useColor, useShadow } from './theme';
 
 /** Home dashboard module card. */
-export const Tile: React.FC<{ icon: IconName; title: string; meta?: string; onPress?: () => void }> = ({
-  icon,
-  title,
-  meta,
-  onPress,
-}) => {
+export const Tile: React.FC<{
+  icon: IconName;
+  title: string;
+  meta?: string;
+  onPress?: () => void;
+}> = ({ icon, title, meta, onPress }) => {
   const shadow = useShadow('shadowSm');
   const onTint = useColor('on-action-soft');
   return (

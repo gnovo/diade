@@ -1,6 +1,6 @@
+import { formatDayLabel, formatLongDate, formatMonthYear } from '@diade/i18n';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { formatDayLabel, formatLongDate, formatMonthYear } from '@diade/i18n';
 
 /** Date formatters bound to the current language. Re-created when the language changes. */
 export function useFormat() {

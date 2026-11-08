@@ -44,14 +44,8 @@
         "expo-localization",
         {
           "supportedLocales": {
-            "ios": [
-              "en",
-              "pt-PT"
-            ],
-            "android": [
-              "en",
-              "pt-PT"
-            ]
+            "ios": ["en", "pt-PT"],
+            "android": ["en", "pt-PT"]
           }
         }
       ]

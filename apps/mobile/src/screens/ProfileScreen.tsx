@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { Alert, Pressable, Share, Text, View } from 'react-native';
-import Constants from 'expo-constants';
-import { useTranslation } from 'react-i18next';
 import { sizes } from '@diade/design-tokens';
 import type { LanguagePreference } from '@diade/i18n';
+import Constants from 'expo-constants';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Alert, Pressable, Share, Text, View } from 'react-native';
 import { apiClient } from '../api/client';
+import { Sheet } from '../components/Sheet';
+import { Button, SectionLabel, Segmented } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import { inviteState } from '../data/invite';
-import { Button, Segmented, SectionLabel } from '../components/ui';
-import { Sheet } from '../components/Sheet';
-import { useLanguagePreference } from '../i18n';
 import { Icon, ThemeToggle, useColor, useThemePreference } from '../design';
+import { useLanguagePreference } from '../i18n';
 import { CalendarSettingsScreen } from './CalendarSettingsScreen';
 
 export const userInitial = (name?: string | null, email?: string | null) =>
@@ -58,7 +58,10 @@ const SettingRow: React.FC<{
 };
 
 /** Profile and preferences: a sheet over Today, opened from the greeting. */
-export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> = ({ visible, onClose }) => {
+export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> = ({
+  visible,
+  onClose,
+}) => {
   const { t } = useTranslation();
   const { user, space, members, signOut, updateSpace } = useAuth();
   const { preference, setPreference } = useLanguagePreference();
@@ -85,7 +88,8 @@ export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> 
   };
 
   const shareInvite = () => {
-    if (invite.kind === 'valid') Share.share({ message: t('profile.inviteShareMessage', { code: invite.code }) });
+    if (invite.kind === 'valid')
+      Share.share({ message: t('profile.inviteShareMessage', { code: invite.code }) });
   };
 
   const confirmSignOut = () =>
@@ -94,103 +98,135 @@ export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> 
       { text: t('profile.signOut'), style: 'destructive', onPress: () => signOut() },
     ]);
 
-  const toggle = (row: 'appearance' | 'language') => setOpen((current) => (current === row ? null : row));
-  const languageName = preference === 'en' ? 'English' : preference === 'pt-PT' ? 'Português' : t('profile.languageSystem');
+  const toggle = (row: 'appearance' | 'language') =>
+    setOpen((current) => (current === row ? null : row));
+  const languageName =
+    preference === 'en'
+      ? 'English'
+      : preference === 'pt-PT'
+        ? 'Português'
+        : t('profile.languageSystem');
   const version = Constants.expoConfig?.version;
 
   return (
-    <Sheet visible={visible} onClose={onClose} title={t('profile.title')} closeLabel={t('profile.close')}>
-          <View className="flex-row items-center mb-8">
-            <View className="w-16 h-16 rounded-full bg-action items-center justify-center mr-4">
-              <Text className="text-3xl leading-10 font-bold text-on-action">{userInitial(user?.displayName, user?.email)}</Text>
-            </View>
-            <View className="flex-1">
-              {user?.displayName ? (
-                <Text className="text-title-3 font-bold text-ink" numberOfLines={1}>{user.displayName}</Text>
-              ) : null}
-              <Text className="text-sm leading-5 text-ink-muted" numberOfLines={1}>{user?.email}</Text>
-            </View>
-          </View>
-
-          <SectionLabel>{t('profile.sectionUs')}</SectionLabel>
-          <Group>
-            {partner ? (
-              <View className="flex-row items-center min-h-[56px] px-4 py-2">
-                <View className="w-10 h-10 rounded-full bg-brand-mint items-center justify-center mr-3">
-                  <Text className="text-base font-semibold text-brand-deep">{userInitial(partner.displayName)}</Text>
-                </View>
-                <Text className="flex-1 text-base font-semibold text-ink" numberOfLines={1}>{partner.displayName}</Text>
-              </View>
-            ) : (
-              <View className="flex-row items-center min-h-[72px] px-4 py-3">
-                <View className="w-10 h-10 rounded-full border border-dashed border-border-strong items-center justify-center mr-3">
-                  <Icon name="plus" size={sizes['icon-md']} color={inkMuted} />
-                </View>
-                <View className="flex-1 mr-3">
-                  <Text className="text-base font-semibold text-ink">{t('profile.invitePartner')}</Text>
-                  {invite.kind === 'valid' ? (
-                    <>
-                      <Text selectable className="text-sm text-ink-muted mt-0.5">
-                        {invite.code}
-                        {invite.expiresAt ? ` · ${t('today.inviteValidUntil', { date: invite.expiresAt.toLocaleDateString() })}` : ''}
-                      </Text>
-                      <Pressable
-                        onPress={generateInvite}
-                        disabled={generating}
-                        accessibilityRole="button"
-                        hitSlop={8}
-                        className="mt-1 active:opacity-70"
-                      >
-                        <Text className="text-sm font-semibold text-action">{t('profile.inviteNew')}</Text>
-                      </Pressable>
-                    </>
-                  ) : (
-                    <Text className="text-sm text-ink-muted mt-0.5">{t('profile.inviteExpired')}</Text>
-                  )}
-                </View>
-                {invite.kind === 'valid' ? (
-                  <Button small label={t('profile.inviteShare')} onPress={shareInvite} />
-                ) : (
-                  <Button small label={t('profile.inviteNew')} onPress={generateInvite} disabled={generating} />
-                )}
-              </View>
-            )}
-            <SettingRow label={t('googleCalendar.manage')} onPress={() => setCalendarOpen(true)} />
-          </Group>
-
-          <SectionLabel>{t('profile.sectionYou')}</SectionLabel>
-          <Group>
-            <SettingRow
-              label={t('theme.appearance')}
-              value={t(`theme.${themePreference}`)}
-              expanded={open === 'appearance'}
-              onPress={() => toggle('appearance')}
-            >
-              <ThemeToggle />
-            </SettingRow>
-            <SettingRow
-              label={t('profile.language')}
-              value={languageName}
-              expanded={open === 'language'}
-              onPress={() => toggle('language')}
-            >
-              <Segmented<LanguagePreference>
-                value={preference}
-                onChange={setPreference}
-                options={[
-                  { value: 'system', label: t('profile.languageSystem') },
-                  // Language names are shown in their own language so they can always be found.
-                  { value: 'en', label: 'English' },
-                  { value: 'pt-PT', label: 'Português' },
-                ]}
-              />
-            </SettingRow>
-          </Group>
-
-          <Button label={t('profile.signOut')} variant="danger" onPress={confirmSignOut} />
-          {version ? (
-            <Text className="text-xs leading-4 text-ink-muted text-center mt-4">{t('profile.version', { version })}</Text>
+    <Sheet
+      visible={visible}
+      onClose={onClose}
+      title={t('profile.title')}
+      closeLabel={t('profile.close')}
+    >
+      <View className="flex-row items-center mb-8">
+        <View className="w-16 h-16 rounded-full bg-action items-center justify-center mr-4">
+          <Text className="text-3xl leading-10 font-bold text-on-action">
+            {userInitial(user?.displayName, user?.email)}
+          </Text>
+        </View>
+        <View className="flex-1">
+          {user?.displayName ? (
+            <Text className="text-title-3 font-bold text-ink" numberOfLines={1}>
+              {user.displayName}
+            </Text>
           ) : null}
+          <Text className="text-sm leading-5 text-ink-muted" numberOfLines={1}>
+            {user?.email}
+          </Text>
+        </View>
+      </View>
+
+      <SectionLabel>{t('profile.sectionUs')}</SectionLabel>
+      <Group>
+        {partner ? (
+          <View className="flex-row items-center min-h-[56px] px-4 py-2">
+            <View className="w-10 h-10 rounded-full bg-brand-mint items-center justify-center mr-3">
+              <Text className="text-base font-semibold text-brand-deep">
+                {userInitial(partner.displayName)}
+              </Text>
+            </View>
+            <Text className="flex-1 text-base font-semibold text-ink" numberOfLines={1}>
+              {partner.displayName}
+            </Text>
+          </View>
+        ) : (
+          <View className="flex-row items-center min-h-[72px] px-4 py-3">
+            <View className="w-10 h-10 rounded-full border border-dashed border-border-strong items-center justify-center mr-3">
+              <Icon name="plus" size={sizes['icon-md']} color={inkMuted} />
+            </View>
+            <View className="flex-1 mr-3">
+              <Text className="text-base font-semibold text-ink">{t('profile.invitePartner')}</Text>
+              {invite.kind === 'valid' ? (
+                <>
+                  <Text selectable className="text-sm text-ink-muted mt-0.5">
+                    {invite.code}
+                    {invite.expiresAt
+                      ? ` · ${t('today.inviteValidUntil', { date: invite.expiresAt.toLocaleDateString() })}`
+                      : ''}
+                  </Text>
+                  <Pressable
+                    onPress={generateInvite}
+                    disabled={generating}
+                    accessibilityRole="button"
+                    hitSlop={8}
+                    className="mt-1 active:opacity-70"
+                  >
+                    <Text className="text-sm font-semibold text-action">
+                      {t('profile.inviteNew')}
+                    </Text>
+                  </Pressable>
+                </>
+              ) : (
+                <Text className="text-sm text-ink-muted mt-0.5">{t('profile.inviteExpired')}</Text>
+              )}
+            </View>
+            {invite.kind === 'valid' ? (
+              <Button small label={t('profile.inviteShare')} onPress={shareInvite} />
+            ) : (
+              <Button
+                small
+                label={t('profile.inviteNew')}
+                onPress={generateInvite}
+                disabled={generating}
+              />
+            )}
+          </View>
+        )}
+        <SettingRow label={t('googleCalendar.manage')} onPress={() => setCalendarOpen(true)} />
+      </Group>
+
+      <SectionLabel>{t('profile.sectionYou')}</SectionLabel>
+      <Group>
+        <SettingRow
+          label={t('theme.appearance')}
+          value={t(`theme.${themePreference}`)}
+          expanded={open === 'appearance'}
+          onPress={() => toggle('appearance')}
+        >
+          <ThemeToggle />
+        </SettingRow>
+        <SettingRow
+          label={t('profile.language')}
+          value={languageName}
+          expanded={open === 'language'}
+          onPress={() => toggle('language')}
+        >
+          <Segmented<LanguagePreference>
+            value={preference}
+            onChange={setPreference}
+            options={[
+              { value: 'system', label: t('profile.languageSystem') },
+              // Language names are shown in their own language so they can always be found.
+              { value: 'en', label: 'English' },
+              { value: 'pt-PT', label: 'Português' },
+            ]}
+          />
+        </SettingRow>
+      </Group>
+
+      <Button label={t('profile.signOut')} variant="danger" onPress={confirmSignOut} />
+      {version ? (
+        <Text className="text-xs leading-4 text-ink-muted text-center mt-4">
+          {t('profile.version', { version })}
+        </Text>
+      ) : null}
       <CalendarSettingsScreen visible={calendarOpen} onClose={() => setCalendarOpen(false)} />
     </Sheet>
   );

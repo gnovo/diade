@@ -10,9 +10,14 @@ interface InviteSpace {
 }
 
 /** An invite only matters while the space has fewer than two members. */
-export function inviteState(space: InviteSpace | null | undefined, memberCount: number, now: Date): InviteState {
+export function inviteState(
+  space: InviteSpace | null | undefined,
+  memberCount: number,
+  now: Date,
+): InviteState {
   if (!space || memberCount >= 2) return { kind: 'none' };
   const expiresAt = space.inviteExpiresAt ? new Date(space.inviteExpiresAt) : null;
-  if (!space.inviteCode || (expiresAt && expiresAt.getTime() <= now.getTime())) return { kind: 'expired' };
+  if (!space.inviteCode || (expiresAt && expiresAt.getTime() <= now.getTime()))
+    return { kind: 'expired' };
   return { kind: 'valid', code: space.inviteCode, expiresAt };
 }

@@ -4,8 +4,8 @@
  * the writes that create the list. `newListActions.ts` hands the writes to `writeBatch`.
  */
 import {
-  groceryAmount,
   type GroceryRow,
+  groceryAmount,
   type ListTemplate,
   type ListTemplateId,
   type MealPlan,
@@ -13,8 +13,8 @@ import {
   type PlanPeriod,
   type SharedList,
 } from '@diade/domain';
-import type { BatchWrite } from './repository';
 import { generationWrites } from './mealPlanWrites';
+import type { BatchWrite } from './repository';
 
 /** Empty is the old new-list sheet (2 steps); a meal plan adds recipes and a review (4 steps). */
 export type StartFrom = 'empty' | 'plan';
@@ -34,7 +34,11 @@ export function planForPeriod<T extends Pick<MealPlan, 'startsOn' | 'endsOn' | '
   plans: T[],
   period: PlanPeriod,
 ): T | null {
-  return plans.find((p) => !p.deletedAt && p.startsOn === period.startsOn && p.endsOn === period.endsOn) ?? null;
+  return (
+    plans.find(
+      (p) => !p.deletedAt && p.startsOn === period.startsOn && p.endsOn === period.endsOn,
+    ) ?? null
+  );
 }
 
 /**
@@ -66,7 +70,10 @@ export function chosenRows(
   unticked: ReadonlySet<string>,
   addedStaples: ReadonlySet<string>,
 ): GroceryRow[] {
-  return [...rows.filter((row) => !unticked.has(row.key)), ...staples.filter((row) => addedStaples.has(row.key))];
+  return [
+    ...rows.filter((row) => !unticked.has(row.key)),
+    ...staples.filter((row) => addedStaples.has(row.key)),
+  ];
 }
 
 /** The writes for a list started empty: the list, then the template's starter items the member kept. */
@@ -77,12 +84,19 @@ export function emptyListWrites(
   starterNames: string[],
 ): BatchWrite[] {
   return [
-    { op: 'insert', entity: 'lists', id: listId, input: { name, category: template.category, icon: template.icon } },
-    ...starterNames.map((starter): BatchWrite => ({
+    {
       op: 'insert',
-      entity: 'list_items',
-      input: { listId, name: starter, quantity: null, isChecked: false },
-    })),
+      entity: 'lists',
+      id: listId,
+      input: { name, category: template.category, icon: template.icon },
+    },
+    ...starterNames.map(
+      (starter): BatchWrite => ({
+        op: 'insert',
+        entity: 'list_items',
+        input: { listId, name: starter, quantity: null, isChecked: false },
+      }),
+    ),
   ];
 }
 

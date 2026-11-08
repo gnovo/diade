@@ -2,10 +2,17 @@
  * Creates the list a new-list wizard describes, in one transaction so a failure leaves no half list.
  * What gets written is decided in `newListFlow.ts`.
  */
-import type { GroceryRow, ListTemplate, MealPlan, MealPlanRecipe, PlanPeriod, SharedList } from '@diade/domain';
+import type {
+  GroceryRow,
+  ListTemplate,
+  MealPlan,
+  MealPlanRecipe,
+  PlanPeriod,
+  SharedList,
+} from '@diade/domain';
 import { newId } from './ids';
-import { writeBatch, type WriteContext } from './repository';
 import { emptyListWrites, planListWrites, planToReuse } from './newListFlow';
+import { type WriteContext, writeBatch } from './repository';
 
 /** A list started empty (the old sheet): the template's category and icon, plus the starters kept. */
 export async function createEmptyList(

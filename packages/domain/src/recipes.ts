@@ -47,7 +47,8 @@ export function normalizeIngredientName(text: string): string {
   return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
-const capitalizeFirst = (text: string): string => text.charAt(0).toLocaleUpperCase() + text.slice(1);
+const capitalizeFirst = (text: string): string =>
+  text.charAt(0).toLocaleUpperCase() + text.slice(1);
 
 // --- Units ---
 
@@ -89,7 +90,15 @@ const UNIT_ALIASES: UnitAlias[] = [
   {
     unit: 'ml',
     factor: 1,
-    words: ['ml', 'mililitro', 'mililitros', 'milliliter', 'milliliters', 'millilitre', 'millilitres'],
+    words: [
+      'ml',
+      'mililitro',
+      'mililitros',
+      'milliliter',
+      'milliliters',
+      'millilitre',
+      'millilitres',
+    ],
   },
   { unit: 'ml', factor: 10, words: ['cl', 'centilitro', 'centilitros'] },
   { unit: 'ml', factor: 100, words: ['dl', 'decilitro', 'decilitros'] },
@@ -97,7 +106,16 @@ const UNIT_ALIASES: UnitAlias[] = [
   {
     unit: 'tbsp',
     factor: 1,
-    words: ['tbsp', 'tbs', 'tablespoon', 'tablespoons', 'colher de sopa', 'colheres de sopa', 'c. de sopa', 'c. sopa'],
+    words: [
+      'tbsp',
+      'tbs',
+      'tablespoon',
+      'tablespoons',
+      'colher de sopa',
+      'colheres de sopa',
+      'c. de sopa',
+      'c. sopa',
+    ],
   },
   {
     unit: 'tsp',
@@ -139,7 +157,8 @@ export function parseQuantityNumber(text: string): number | null {
   const value = text.trim();
   if (value in VULGAR) return VULGAR[value];
   const mixed = /^(\d+)\s+(\d+)\/(\d+)$/.exec(value);
-  if (mixed) return Number(mixed[3]) === 0 ? null : Number(mixed[1]) + Number(mixed[2]) / Number(mixed[3]);
+  if (mixed)
+    return Number(mixed[3]) === 0 ? null : Number(mixed[1]) + Number(mixed[2]) / Number(mixed[3]);
   const fraction = /^(\d+)\s*\/\s*(\d+)$/.exec(value);
   if (fraction) return Number(fraction[2]) === 0 ? null : Number(fraction[1]) / Number(fraction[2]);
   const withVulgar = /^(\d+)([¼½¾])$/.exec(value);
@@ -150,7 +169,8 @@ export function parseQuantityNumber(text: string): number | null {
 
 /** Metric amounts do not need fractions of a gram; spoons and counts keep up to two decimals. */
 function round(quantity: number, unit: RecipeUnit): number {
-  if (unit === 'g' || unit === 'ml') return quantity >= 10 ? Math.round(quantity) : Math.round(quantity * 10) / 10;
+  if (unit === 'g' || unit === 'ml')
+    return quantity >= 10 ? Math.round(quantity) : Math.round(quantity * 10) / 10;
   return Math.round(quantity * 100) / 100;
 }
 

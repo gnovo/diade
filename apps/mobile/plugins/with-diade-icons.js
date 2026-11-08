@@ -21,7 +21,11 @@ module.exports = function withDiadeIcons(config) {
     async (cfg) => {
       const { projectRoot, platformProjectRoot, projectName } = cfg.modRequest;
       const src = path.join(projectRoot, 'assets/native-icons/ios/AppIcon.appiconset');
-      const dest = path.join(platformProjectRoot, projectName, 'Images.xcassets/AppIcon.appiconset');
+      const dest = path.join(
+        platformProjectRoot,
+        projectName,
+        'Images.xcassets/AppIcon.appiconset',
+      );
       fs.rmSync(dest, { recursive: true, force: true });
       copyDir(src, dest);
       return cfg;

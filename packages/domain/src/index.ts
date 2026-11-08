@@ -2,18 +2,18 @@
  * Díade Domain Model & Core Types
  */
 
-export * from './recurrence';
 export * from './datetime';
-export * from './importantDates';
 export * from './externalCalendar';
+export * from './importantDates';
 export * from './listTemplates';
-export * from './recipes';
 export * from './mealPlan';
+export * from './recipes';
+export * from './recurrence';
 
-import type { ImportantDateType, ImportantDateRepeat } from './importantDates';
 import type { ExternalCalendar, ExternalEvent } from './externalCalendar';
+import type { ImportantDateRepeat, ImportantDateType } from './importantDates';
+import type { GroceryContribution, MealPlan } from './mealPlan';
 import type { Recipe } from './recipes';
-import type { MealPlan, GroceryContribution } from './mealPlan';
 
 // --- Identity & Space ---
 
@@ -226,10 +226,7 @@ export function canAccessRecord(
   return record.creatorId === currentUserId;
 }
 
-export function isTaskAssignedToUser(
-  task: { assigneeId: string | null },
-  userId: string,
-): boolean {
+export function isTaskAssignedToUser(task: { assigneeId: string | null }, userId: string): boolean {
   // null means assigned to both members
   return task.assigneeId === null || task.assigneeId === userId;
 }

@@ -44,7 +44,9 @@ export function FilterChips<T extends string>({
               selected ? 'bg-action border-action' : 'bg-surface border-border-strong'
             }`}
           >
-            <Text className={`text-sm leading-5 font-semibold ${selected ? 'text-on-action' : 'text-ink'}`}>
+            <Text
+              className={`text-sm leading-5 font-semibold ${selected ? 'text-on-action' : 'text-ink'}`}
+            >
               {option.label}
             </Text>
           </Pressable>

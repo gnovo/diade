@@ -1,13 +1,19 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-  FULL_SYNC_MAX_AGE_DAYS,
-  WINDOW_REBASE_DAYS,
-  needsFullSync,
-  syncCalendarEvents,
   type EventStore,
+  FULL_SYNC_MAX_AGE_DAYS,
+  needsFullSync,
   type SyncTarget,
+  syncCalendarEvents,
+  WINDOW_REBASE_DAYS,
 } from './engine';
-import { GoogleApiError, type GoogleClient, type GoogleEvent, type GoogleEventsPage, type ListEventsParams } from './google';
+import {
+  GoogleApiError,
+  type GoogleClient,
+  type GoogleEvent,
+  type GoogleEventsPage,
+  type ListEventsParams,
+} from './google';
 import type { EventValues } from './mapper';
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -91,7 +97,11 @@ describe('syncCalendarEvents', () => {
   it('runs a full sync over the window and stores the new sync token', async () => {
     const { client, calls } = script([{ items: [ev('a'), ev('b')], nextSyncToken: 'T1' }]);
     const store = new MemoryStore();
-    const result = await syncCalendarEvents({ google: client, store }, target({ syncToken: null }), NOW);
+    const result = await syncCalendarEvents(
+      { google: client, store },
+      target({ syncToken: null }),
+      NOW,
+    );
 
     expect(result.mode).toBe('full');
     expect(result.state.syncToken).toBe('T1');
@@ -106,7 +116,11 @@ describe('syncCalendarEvents', () => {
       { items: [ev('a')], nextPageToken: 'p2' },
       { items: [ev('b')], nextSyncToken: 'T9' },
     ]);
-    const result = await syncCalendarEvents({ google: client, store: new MemoryStore() }, target({ syncToken: null }), NOW);
+    const result = await syncCalendarEvents(
+      { google: client, store: new MemoryStore() },
+      target({ syncToken: null }),
+      NOW,
+    );
     expect(calls[1]!.pageToken).toBe('p2');
     expect(result.state.syncToken).toBe('T9');
     expect(result.upserted).toBe(2);
@@ -114,20 +128,31 @@ describe('syncCalendarEvents', () => {
 
   it('tombstones stored events a full sync no longer returns', async () => {
     const store = new MemoryStore();
-    await store.upsertEvents('cal1', 'u1', [
-      { ...(await fromEv(ev('keep'))) },
-      { ...(await fromEv(ev('moved-away'))) },
-    ], NOW);
+    await store.upsertEvents(
+      'cal1',
+      'u1',
+      [{ ...(await fromEv(ev('keep'))) }, { ...(await fromEv(ev('moved-away'))) }],
+      NOW,
+    );
     const { client } = script([{ items: [ev('keep')], nextSyncToken: 'T' }]);
 
-    const result = await syncCalendarEvents({ google: client, store }, target({ syncToken: null }), NOW);
+    const result = await syncCalendarEvents(
+      { google: client, store },
+      target({ syncToken: null }),
+      NOW,
+    );
     expect(await store.live()).toEqual(['keep']);
     expect(result.removed).toBe(1);
   });
 
   it('applies incremental changes: updates, additions and cancellations', async () => {
     const store = new MemoryStore();
-    await store.upsertEvents('cal1', 'u1', [await fromEv(ev('old')), await fromEv(ev('edit', 'before'))], NOW);
+    await store.upsertEvents(
+      'cal1',
+      'u1',
+      [await fromEv(ev('old')), await fromEv(ev('edit', 'before'))],
+      NOW,
+    );
     const { client, calls } = script([
       {
         items: [{ id: 'old', status: 'cancelled' }, ev('edit', 'after'), ev('new')],
@@ -175,14 +200,24 @@ describe('syncCalendarEvents', () => {
 
   it('does not write anything when a page fails, so the old token stays valid', async () => {
     const store = new MemoryStore();
-    const { client } = script([{ items: [ev('a')], nextPageToken: 'p2' }, new GoogleApiError('Server error', 500)]);
-    await expect(syncCalendarEvents({ google: client, store }, target(), NOW)).rejects.toThrow('Server error');
+    const { client } = script([
+      { items: [ev('a')], nextPageToken: 'p2' },
+      new GoogleApiError('Server error', 500),
+    ]);
+    await expect(syncCalendarEvents({ google: client, store }, target(), NOW)).rejects.toThrow(
+      'Server error',
+    );
     expect(store.rows.size).toBe(0);
   });
 
   it('forces a full sync when asked', async () => {
     const { client, calls } = script([{ items: [], nextSyncToken: 'T' }]);
-    const result = await syncCalendarEvents({ google: client, store: new MemoryStore() }, target(), NOW, { forceFull: true });
+    const result = await syncCalendarEvents(
+      { google: client, store: new MemoryStore() },
+      target(),
+      NOW,
+      { forceFull: true },
+    );
     expect(result.mode).toBe('full');
     expect(calls[0]!.syncToken).toBeUndefined();
   });

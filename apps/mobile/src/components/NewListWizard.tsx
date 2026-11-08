@@ -1,40 +1,50 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import {
-  LIST_TEMPLATES,
   buildGroceryList,
   defaultPlanPeriod,
-  getListTemplate,
-  periodChoice,
-  weekPeriod,
   type GroceryRow,
+  getListTemplate,
+  LIST_TEMPLATES,
   type ListTemplateId,
   type MealPlan,
   type MealPlanRecipe,
   type PlanPeriod,
+  periodChoice,
   type Recipe,
   type SharedList,
+  weekPeriod,
 } from '@diade/domain';
-import { getActiveMealPlans } from '../data/queries';
-import { useLiveQuery } from '../data/useLiveQuery';
+import type React from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Alert, Pressable, Text, View } from 'react-native';
 import { createEmptyList, createPlanList } from '../data/newListActions';
 import {
   amountText,
   canStartFromPlan,
   chosenRows,
   planForPeriod,
+  type StartFrom,
   stepCount,
   wizardPath,
-  type StartFrom,
 } from '../data/newListFlow';
+import { getActiveMealPlans } from '../data/queries';
+import { useLiveQuery } from '../data/useLiveQuery';
 import { Icon, useColor } from '../design';
 import { BottomSheet } from './BottomSheet';
 import { DateField } from './DateField';
 import { FilterChips } from './FilterChips';
 import { RecipeChoiceList } from './RecipePicker';
 import { FoldingFooter, StepPager, StepProgress } from './StepPager';
-import { Button, Card, Checkbox, EmptyState, SectionLabel, Segmented, TextField, useWriteContext } from './ui';
+import {
+  Button,
+  Card,
+  Checkbox,
+  EmptyState,
+  SectionLabel,
+  Segmented,
+  TextField,
+  useWriteContext,
+} from './ui';
 
 /** Room for the pinned button: 8 above, 48 high, 16 below. */
 const FOOTER_HEIGHT = 72;
@@ -45,12 +55,12 @@ type Step = 1 | 2 | 3 | 4;
 type PeriodChoice = 'thisWeek' | 'nextWeek' | 'custom';
 
 /** One ingredient of the review: ticked means it goes on the list. */
-const ReviewRow: React.FC<{ row: GroceryRow; on: boolean; first: boolean; onToggle: () => void }> = ({
-  row,
-  on,
-  first,
-  onToggle,
-}) => {
+const ReviewRow: React.FC<{
+  row: GroceryRow;
+  on: boolean;
+  first: boolean;
+  onToggle: () => void;
+}> = ({ row, on, first, onToggle }) => {
   const { t } = useTranslation();
   const source = [...new Set(row.contributions.map((c) => c.recipeName))].join(', ');
   const amount = amountText(row);
@@ -64,7 +74,9 @@ const ReviewRow: React.FC<{ row: GroceryRow; on: boolean; first: boolean; onTogg
           label={t(on ? 'lists.wizard.exclude' : 'lists.wizard.include', { name: row.name })}
         />
         <Pressable onPress={onToggle} accessible={false} className="flex-1 mr-2">
-          <Text className={`text-sm font-semibold ${on ? 'text-ink' : 'text-ink-muted'}`}>{row.name}</Text>
+          <Text className={`text-sm font-semibold ${on ? 'text-ink' : 'text-ink-muted'}`}>
+            {row.name}
+          </Text>
           {source ? (
             <Text className="text-xs text-ink-muted mt-0.5" numberOfLines={1}>
               {source}
@@ -98,7 +110,8 @@ export const NewListWizard: React.FC<{
   const ink = useColor('ink');
   const plans = useLiveQuery(getActiveMealPlans, [] as MealPlan[]);
 
-  const defaultName = (id: ListTemplateId) => (id === 'blank' ? '' : t(`lists.template.${id}.name`));
+  const defaultName = (id: ListTemplateId) =>
+    id === 'blank' ? '' : t(`lists.template.${id}.name`);
 
   const [step, setStep] = useState<Step>(1);
   const [templateId, setTemplateId] = useState<ListTemplateId | null>(null);
@@ -162,7 +175,8 @@ export const NewListWizard: React.FC<{
     if (advanceTimer.current) return; // a second tap while advancing
     if (next !== templateId) {
       // Only replace the name when the member has not typed their own.
-      if (name === '' || (templateId && name === defaultName(templateId))) setName(defaultName(next));
+      if (name === '' || (templateId && name === defaultName(templateId)))
+        setName(defaultName(next));
       // Everything that depended on the old type goes with it.
       setSkipped(new Set());
       setStart('empty');
@@ -179,7 +193,8 @@ export const NewListWizard: React.FC<{
     }, ADVANCE_MS);
   };
 
-  const followPlan = (forPeriod: PlanPeriod) => setSelection(planForPeriod(plans.data, forPeriod)?.recipes ?? []);
+  const followPlan = (forPeriod: PlanPeriod) =>
+    setSelection(planForPeriod(plans.data, forPeriod)?.recipes ?? []);
 
   const chooseStart = (next: StartFrom) => {
     setStart(next);
@@ -235,12 +250,17 @@ export const NewListWizard: React.FC<{
               ctx,
               trimmed,
               template,
-              template.starterItems.filter((id) => !skipped.has(id)).map((id) => starterLabel(template.id, id)),
+              template.starterItems
+                .filter((id) => !skipped.has(id))
+                .map((id) => starterLabel(template.id, id)),
             );
       onCreated(listId);
     } catch (err) {
       setSaving(false);
-      Alert.alert(t('lists.couldNotCreate'), err instanceof Error ? err.message : t('common.tryAgain'));
+      Alert.alert(
+        t('lists.couldNotCreate'),
+        err instanceof Error ? err.message : t('common.tryAgain'),
+      );
     }
   };
 
@@ -263,7 +283,9 @@ export const NewListWizard: React.FC<{
             className="flex-row items-center -ml-1 active:opacity-70"
           >
             <Icon name="chevron-left" size={20} color={ink} />
-            <Text className="text-sm font-semibold text-ink">{t(`lists.template.${template.id}.name`)}</Text>
+            <Text className="text-sm font-semibold text-ink">
+              {t(`lists.template.${template.id}.name`)}
+            </Text>
           </Pressable>
         ) : (
           <View />
@@ -330,11 +352,15 @@ export const NewListWizard: React.FC<{
                 ]}
               />
               {start === 'plan' ? (
-                <Text className="text-sm leading-5 text-ink-muted mt-2">{t('lists.wizard.mealPlanHint')}</Text>
+                <Text className="text-sm leading-5 text-ink-muted mt-2">
+                  {t('lists.wizard.mealPlanHint')}
+                </Text>
               ) : null}
             </>
           ) : (
-            <Text className="text-sm leading-5 text-ink-muted">{t('lists.wizard.noRecipesHint')}</Text>
+            <Text className="text-sm leading-5 text-ink-muted">
+              {t('lists.wizard.noRecipesHint')}
+            </Text>
           )}
         </View>
       ) : null}
@@ -361,7 +387,11 @@ export const NewListWizard: React.FC<{
                   <View style={{ width: 16, opacity: on ? 1 : 0 }}>
                     <Icon name="check" size={16} />
                   </View>
-                  <Text className={`ml-1.5 text-sm font-medium ${on ? 'text-ink' : 'text-ink-muted'}`}>{label}</Text>
+                  <Text
+                    className={`ml-1.5 text-sm font-medium ${on ? 'text-ink' : 'text-ink-muted'}`}
+                  >
+                    {label}
+                  </Text>
                 </Pressable>
               );
             })}
@@ -376,7 +406,9 @@ export const NewListWizard: React.FC<{
   const recipesStep =
     path === 'plan' ? (
       <>
-        <Text className="text-title-2 font-bold text-ink mb-4">{t('lists.wizard.recipesHeading')}</Text>
+        <Text className="text-title-2 font-bold text-ink mb-4">
+          {t('lists.wizard.recipesHeading')}
+        </Text>
         <FilterChips
           label={t('plan.periodLabel')}
           value={periodChoiceNow}
@@ -396,7 +428,11 @@ export const NewListWizard: React.FC<{
                   label={t('plan.from')}
                   value={period.startsOn}
                   onChange={(startsOn) =>
-                    changePeriod(startsOn > period.endsOn ? { startsOn, endsOn: startsOn } : { ...period, startsOn })
+                    changePeriod(
+                      startsOn > period.endsOn
+                        ? { startsOn, endsOn: startsOn }
+                        : { ...period, startsOn },
+                    )
                   }
                 />
               </View>
@@ -406,7 +442,11 @@ export const NewListWizard: React.FC<{
                   label={t('plan.to')}
                   value={period.endsOn}
                   onChange={(endsOn) =>
-                    changePeriod(endsOn < period.startsOn ? { startsOn: endsOn, endsOn } : { ...period, endsOn })
+                    changePeriod(
+                      endsOn < period.startsOn
+                        ? { startsOn: endsOn, endsOn }
+                        : { ...period, endsOn },
+                    )
                   }
                 />
               </View>
@@ -421,10 +461,14 @@ export const NewListWizard: React.FC<{
   const reviewStep =
     path === 'plan' && build ? (
       <>
-        <Text className="text-title-2 font-bold text-ink mb-1">{t('lists.wizard.reviewHeading')}</Text>
+        <Text className="text-title-2 font-bold text-ink mb-1">
+          {t('lists.wizard.reviewHeading')}
+        </Text>
         <Text className="text-sm text-ink-muted">
           {t('plan.toBuy', { count: chosen.length })}
-          {staplesLeft.length > 0 ? ` · ${t('plan.staplesLeftOut', { count: staplesLeft.length })}` : ''}
+          {staplesLeft.length > 0
+            ? ` · ${t('plan.staplesLeftOut', { count: staplesLeft.length })}`
+            : ''}
         </Text>
         <Text className="text-xs text-ink-muted mt-0.5 mb-3">{t('lists.wizard.reviewHint')}</Text>
 
@@ -500,7 +544,11 @@ export const NewListWizard: React.FC<{
             disabled={selection.length === 0}
           />
         ) : (
-          <Button label={t('lists.createList')} onPress={create} disabled={chosen.length === 0 || saving} />
+          <Button
+            label={t('lists.createList')}
+            onPress={create}
+            disabled={chosen.length === 0 || saving}
+          />
         )}
       </View>
     </FoldingFooter>

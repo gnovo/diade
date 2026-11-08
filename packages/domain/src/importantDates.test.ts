@@ -1,13 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   anniversaryInYear,
   completedYears,
   daysBetween,
-  IMPORTANT_DATE_GROUPS,
-  IMPORTANT_DATE_TYPES,
-  IMPORTANT_DATE_TYPE_RULES,
   describeImportantDate,
   elapsedDays,
+  IMPORTANT_DATE_GROUPS,
+  IMPORTANT_DATE_TYPE_RULES,
+  IMPORTANT_DATE_TYPES,
+  type ImportantDateTiming,
   importantDateGroup,
   isCoupleDate,
   isThirdPartyDate,
@@ -15,7 +16,6 @@ import {
   parseDateOnly,
   sortImportantDates,
   upcomingAnniversaries,
-  type ImportantDateTiming,
 } from './importantDates';
 
 // Local-time constructor keeps these tests independent of the machine's timezone.
@@ -51,7 +51,9 @@ describe('daysBetween', () => {
 
 describe('anniversaryInYear', () => {
   it('keeps the month and day', () => {
-    expect(anniversaryInYear(local(2020, 8, 18), 2027).getTime()).toBe(new Date(2027, 7, 18).getTime());
+    expect(anniversaryInYear(local(2020, 8, 18), 2027).getTime()).toBe(
+      new Date(2027, 7, 18).getTime(),
+    );
   });
 
   it('moves a 29 February date to 28 February in non-leap years only', () => {
@@ -66,7 +68,7 @@ describe('nextOccurrence', () => {
     expect(nextOccurrence(local(2020, 11, 2), local(2026, 11, 2))).toEqual(new Date(2026, 10, 2));
   });
 
-  it('rolls to next year once this year\'s date has passed', () => {
+  it("rolls to next year once this year's date has passed", () => {
     expect(nextOccurrence(local(1988, 2, 4), local(2026, 11, 2))).toEqual(new Date(2027, 1, 4));
   });
 
@@ -89,11 +91,17 @@ describe('describeImportantDate', () => {
   });
 
   it('counts down for a one-off date in the future', () => {
-    expect(describeImportantDate(item('2026-12-01'), today)).toMatchObject({ kind: 'left', days: 29 });
+    expect(describeImportantDate(item('2026-12-01'), today)).toMatchObject({
+      kind: 'left',
+      days: 29,
+    });
   });
 
   it('reports today for a one-off date that is today', () => {
-    expect(describeImportantDate(item('2026-11-02'), today)).toMatchObject({ kind: 'today', days: 0 });
+    expect(describeImportantDate(item('2026-11-02'), today)).toMatchObject({
+      kind: 'today',
+      days: 0,
+    });
   });
 
   it('counts down to the next occurrence for yearly dates', () => {
@@ -196,7 +204,9 @@ describe('important date type rules', () => {
   });
 
   it('lets only trips and "something else" choose how they repeat', () => {
-    const editable = IMPORTANT_DATE_TYPES.filter((t) => IMPORTANT_DATE_TYPE_RULES[t].repeatEditable);
+    const editable = IMPORTANT_DATE_TYPES.filter(
+      (t) => IMPORTANT_DATE_TYPE_RULES[t].repeatEditable,
+    );
     expect(editable.sort()).toEqual(['other', 'trip']);
   });
 
@@ -218,7 +228,7 @@ describe('important date type rules', () => {
     expect(isThirdPartyDate('partner_birthday')).toBe(false);
   });
 
-  it('counts the couple\'s own dates, but not other people\'s or trips', () => {
+  it("counts the couple's own dates, but not other people's or trips", () => {
     expect(isCoupleDate('first_day')).toBe(true);
     expect(isCoupleDate('my_birthday')).toBe(true);
     expect(isCoupleDate('other')).toBe(true);

@@ -1,7 +1,7 @@
-import React from 'react';
-import { Pressable, Switch, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import type { ExternalCalendar } from '@diade/domain';
+import type React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Pressable, Switch, Text, View } from 'react-native';
 import type { GoogleScope } from '../data/unifiedAgenda';
 import { useColor } from '../design';
 import { BottomSheet } from './BottomSheet';
@@ -23,11 +23,11 @@ export function hasActiveFilters(
   return toggleableCalendars(calendars).some((c) => hidden.has(c.id));
 }
 
-const CalendarToggle: React.FC<{ calendar: ExternalCalendar; visible: boolean; onToggle: () => void }> = ({
-  calendar,
-  visible,
-  onToggle,
-}) => {
+const CalendarToggle: React.FC<{
+  calendar: ExternalCalendar;
+  visible: boolean;
+  onToggle: () => void;
+}> = ({ calendar, visible, onToggle }) => {
   const actionColor = useColor('action');
   const trackOff = useColor('border-strong');
   return (
@@ -38,7 +38,10 @@ const CalendarToggle: React.FC<{ calendar: ExternalCalendar; visible: boolean; o
       accessibilityLabel={calendar.name ?? ''}
       className="flex-row items-center min-h-[52px]"
     >
-      <View style={{ backgroundColor: calendar.color ?? '#64748B' }} className="w-4 h-4 rounded-full mr-3" />
+      <View
+        style={{ backgroundColor: calendar.color ?? '#64748B' }}
+        className="w-4 h-4 rounded-full mr-3"
+      />
       <Text className="flex-1 text-base text-ink mr-3" numberOfLines={1}>
         {calendar.name}
       </Text>
@@ -98,7 +101,9 @@ export const CalendarFiltersSheet: React.FC<{
   const group = (label: string, list: ExternalCalendar[]) =>
     list.length === 0 ? null : (
       <View className="mb-4">
-        <Text className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">{label}</Text>
+        <Text className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
+          {label}
+        </Text>
         {list.map((calendar) => (
           <CalendarToggle
             key={calendar.id}
@@ -145,7 +150,9 @@ export const CalendarFiltersSheet: React.FC<{
         >
           <View className="flex-1 mr-3">
             <Text className="text-base text-ink">{t('calendar.showOthersDates')}</Text>
-            <Text className="text-xs text-ink-muted mt-0.5">{t('calendar.showOthersDatesHint')}</Text>
+            <Text className="text-xs text-ink-muted mt-0.5">
+              {t('calendar.showOthersDatesHint')}
+            </Text>
           </View>
           <Switch
             value={showOthersDates}
@@ -166,7 +173,9 @@ export const CalendarFiltersSheet: React.FC<{
           accessibilityRole="button"
           className="min-h-[48px] justify-center border-t border-border mt-1"
         >
-          <Text className="text-base font-semibold text-action">{t('calendar.manageCalendars')}</Text>
+          <Text className="text-base font-semibold text-action">
+            {t('calendar.manageCalendars')}
+          </Text>
         </Pressable>
       ) : null}
     </BottomSheet>

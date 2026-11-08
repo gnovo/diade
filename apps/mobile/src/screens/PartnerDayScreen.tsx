@@ -1,14 +1,14 @@
-import React from 'react';
-import { Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { externalEventTitle, formatTime, startOfLocalDay } from '@diade/domain';
 import { sizes } from '@diade/design-tokens';
-import { Icon, useColor } from '../design';
+import { externalEventTitle, formatTime, startOfLocalDay } from '@diade/domain';
+import type React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Text, View } from 'react-native';
 import { Sheet } from '../components/Sheet';
 import { Card, EmptyState, SectionLabel } from '../components/ui';
-import { userInitial } from './ProfileScreen';
-import { useFormat } from '../i18n';
 import type { PartnerDay } from '../data/partnerDay';
+import { Icon, useColor } from '../design';
+import { useFormat } from '../i18n';
+import { userInitial } from './ProfileScreen';
 
 /**
  * The partner's day, read-only: their open tasks and Google events. Never editable here, and it shows
@@ -29,12 +29,19 @@ export const PartnerDayScreen: React.FC<{
   const isOverdue = (due: string) => startOfLocalDay(new Date(due)).getTime() < dayStart.getTime();
 
   return (
-    <Sheet visible={visible} onClose={onClose} title={t('partnerDay.title', { name: firstName })} closeLabel={t('partnerDay.close')}>
+    <Sheet
+      visible={visible}
+      onClose={onClose}
+      title={t('partnerDay.title', { name: firstName })}
+      closeLabel={t('partnerDay.close')}
+    >
       <View className="flex-row items-center mb-6">
         <View className="w-10 h-10 rounded-full bg-brand-mint items-center justify-center mr-3">
           <Text className="text-base font-semibold text-brand-deep">{userInitial(name)}</Text>
         </View>
-        <Text className="flex-1 text-sm leading-5 text-ink-muted">{t('partnerDay.note', { name: firstName })}</Text>
+        <Text className="flex-1 text-sm leading-5 text-ink-muted">
+          {t('partnerDay.note', { name: firstName })}
+        </Text>
       </View>
 
       <Card>
@@ -47,11 +54,16 @@ export const PartnerDayScreen: React.FC<{
               className={`text-base font-semibold ${entry.event.redacted ? 'text-ink-muted' : 'text-ink'}`}
               numberOfLines={1}
             >
-              {externalEventTitle(entry.event, { busy: t('calendar.busy'), untitled: t('calendar.untitled') })}
+              {externalEventTitle(entry.event, {
+                busy: t('calendar.busy'),
+                untitled: t('calendar.untitled'),
+              })}
             </Text>
             <Text className="text-sm text-ink-muted mt-0.5">
               {format.dayLabel(entry.day, now)} ·{' '}
-              {entry.isAllDay ? t('format.allDay') : `${formatTime(entry.startAt!)}–${formatTime(entry.endAt!)}`}
+              {entry.isAllDay
+                ? t('format.allDay')
+                : `${formatTime(entry.startAt!)}–${formatTime(entry.endAt!)}`}
             </Text>
           </View>
         ))}
@@ -65,7 +77,9 @@ export const PartnerDayScreen: React.FC<{
             {index > 0 ? <View className="h-px bg-border my-3" /> : null}
             <View className="flex-row items-center">
               <View className="flex-1 mr-2">
-                <Text className="text-base font-semibold text-ink" numberOfLines={2}>{task.title}</Text>
+                <Text className="text-base font-semibold text-ink" numberOfLines={2}>
+                  {task.title}
+                </Text>
                 {task.dueDate ? (
                   <Text className="text-sm text-ink-muted mt-0.5">
                     {isOverdue(task.dueDate) ? `${t('today.overdue')} · ` : ''}
@@ -74,7 +88,13 @@ export const PartnerDayScreen: React.FC<{
                 ) : null}
               </View>
               {task.priority === 'important' ? (
-                <Icon name="star" size={sizes['icon-sm']} color={starColor} fill={starColor} title={t('today.importantTask')} />
+                <Icon
+                  name="star"
+                  size={sizes['icon-sm']}
+                  color={starColor}
+                  fill={starColor}
+                  title={t('today.importantTask')}
+                />
               ) : null}
             </View>
           </View>

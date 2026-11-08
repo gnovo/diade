@@ -1,12 +1,12 @@
-import React from 'react';
+import type React from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 /** A snackbar pinned to the bottom of the screen with one action. */
-export const UndoToast: React.FC<{ message: string; actionLabel: string; onAction: () => void }> = ({
-  message,
-  actionLabel,
-  onAction,
-}) => (
+export const UndoToast: React.FC<{
+  message: string;
+  actionLabel: string;
+  onAction: () => void;
+}> = ({ message, actionLabel, onAction }) => (
   <View pointerEvents="box-none" className="absolute left-4 right-4 bottom-4">
     <View
       accessibilityLiveRegion="polite"
@@ -15,7 +15,11 @@ export const UndoToast: React.FC<{ message: string; actionLabel: string; onActio
       <Text className="flex-1 mr-2 text-sm text-bg" numberOfLines={2}>
         {message}
       </Text>
-      <Pressable onPress={onAction} accessibilityRole="button" className="px-3 min-h-[48px] items-center justify-center">
+      <Pressable
+        onPress={onAction}
+        accessibilityRole="button"
+        className="px-3 min-h-[48px] items-center justify-center"
+      >
         <Text className="text-sm font-semibold text-bg underline">{actionLabel}</Text>
       </Pressable>
     </View>

@@ -7,9 +7,6 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", "build/**", ".wrangler/**"]
     },
-    "lint": {
-      "dependsOn": ["^build"]
-    },
     "typecheck": {
       "dependsOn": ["^build"]
     },

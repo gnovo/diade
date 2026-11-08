@@ -1,9 +1,18 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import type React from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { AppState } from 'react-native';
-import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import { onLocalWrite } from '../data/changes';
-import { runSync, subscribeSyncState, getSyncState, type SyncState } from './engine';
+import { getSyncState, runSync, type SyncState, subscribeSyncState } from './engine';
 
 interface SyncContextValue extends SyncState {
   syncNow: () => Promise<void>;
@@ -47,7 +56,10 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const status = await runSync();
       // Google events show on Today, so a pull also asks the server for fresh ones (best effort).
-      if (status === 'idle' && Date.now() - lastManualCalendarRefresh.current > MANUAL_CALENDAR_REFRESH_MIN_MS) {
+      if (
+        status === 'idle' &&
+        Date.now() - lastManualCalendarRefresh.current > MANUAL_CALENDAR_REFRESH_MIN_MS
+      ) {
         lastManualCalendarRefresh.current = Date.now();
         try {
           const result = await apiClient.syncCalendars();

@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
 import type { CalendarEvent } from '@diade/domain';
 import { createI18n } from '@diade/i18n';
+import { describe, expect, it } from 'vitest';
 import { buildAgenda, formatAgendaTime } from './agenda';
 
 const base = (overrides: Partial<CalendarEvent>): CalendarEvent => ({
@@ -28,7 +28,11 @@ describe('buildAgenda', () => {
     const to = new Date(2026, 11, 1);
     const items = buildAgenda(
       [
-        base({ id: 'later', startAt: new Date(2026, 10, 20, 9).toISOString(), endAt: new Date(2026, 10, 20, 10).toISOString() }),
+        base({
+          id: 'later',
+          startAt: new Date(2026, 10, 20, 9).toISOString(),
+          endAt: new Date(2026, 10, 20, 10).toISOString(),
+        }),
         base({ id: 'weekly', recurrenceRule: 'FREQ=WEEKLY;COUNT=2' }),
       ],
       from,
@@ -43,7 +47,11 @@ describe('buildAgenda', () => {
   it('formats times as a range or All day', () => {
     const [item] = buildAgenda([base({})], new Date(2026, 10, 1), new Date(2026, 10, 30));
     expect(formatAgendaTime(createI18n('en').t, item)).toBe('19:30–21:00');
-    const [allDay] = buildAgenda([base({ isAllDay: true })], new Date(2026, 10, 1), new Date(2026, 10, 30));
+    const [allDay] = buildAgenda(
+      [base({ isAllDay: true })],
+      new Date(2026, 10, 1),
+      new Date(2026, 10, 30),
+    );
     expect(formatAgendaTime(createI18n('en').t, allDay)).toBe('All day');
     expect(formatAgendaTime(createI18n('pt-PT').t, allDay)).toBe('Dia inteiro');
   });

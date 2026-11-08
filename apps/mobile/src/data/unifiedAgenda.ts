@@ -6,17 +6,17 @@
 import {
   addLocalDays,
   anniversaryInYear,
-  isSameLocalDay,
-  isThirdPartyDate,
-  parseDateOnly,
-  startOfLocalDay,
   type CalendarEvent,
   type ExternalCalendar,
   type ExternalEvent,
   type ImportantDate,
+  isSameLocalDay,
+  isThirdPartyDate,
+  parseDateOnly,
+  startOfLocalDay,
   type Task,
 } from '@diade/domain';
-import { buildAgenda, type AgendaItem } from './agenda';
+import { type AgendaItem, buildAgenda } from './agenda';
 
 /** Whose Google calendars to show. Díade's own events, tasks and dates always show. */
 export type GoogleScope = 'both' | 'me' | 'partner';
@@ -74,7 +74,14 @@ const dayKey = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
 /** Display order inside a day. Lower comes first; timed items follow by start time. */
-const RANK = { importantDate: 0, importantTask: 1, allDay: 2, task: 3, timed: 4, doneTask: 5 } as const;
+const RANK = {
+  importantDate: 0,
+  importantTask: 1,
+  allDay: 2,
+  task: 3,
+  timed: 4,
+  doneTask: 5,
+} as const;
 
 function rankOf(entry: AgendaEntry): number {
   switch (entry.kind) {
@@ -106,8 +113,11 @@ export function compareEntries(a: AgendaEntry, b: AgendaEntry): number {
  * (no title, no iCal id) is dropped when the viewer has an event at exactly the same time.
  */
 export function dedupeExternalEvents(events: ExternalEvent[], userId: string): ExternalEvent[] {
-  const when = (e: ExternalEvent) => (e.isAllDay ? `d:${e.startDate}:${e.endDate}` : `t:${e.startAt}:${e.endAt}`);
-  const mineByUid = new Set(events.filter((e) => e.userId === userId && e.icalUid).map((e) => `${e.icalUid}|${when(e)}`));
+  const when = (e: ExternalEvent) =>
+    e.isAllDay ? `d:${e.startDate}:${e.endDate}` : `t:${e.startAt}:${e.endAt}`;
+  const mineByUid = new Set(
+    events.filter((e) => e.userId === userId && e.icalUid).map((e) => `${e.icalUid}|${when(e)}`),
+  );
   const mineByTime = new Set(events.filter((e) => e.userId === userId).map(when));
   const seenPartnerUid = new Set<string>();
 
@@ -129,7 +139,10 @@ const fold = (text: string): string =>
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
 
-const wordsOf = (text: string): string[] => fold(text).split(/[^a-z0-9]+/).filter(Boolean);
+const wordsOf = (text: string): string[] =>
+  fold(text)
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
 
 /**
  * Drops all-day Google events (typically the Birthdays calendar) that repeat a date the
@@ -137,7 +150,10 @@ const wordsOf = (text: string): string[] => fold(text).split(/[^a-z0-9]+/).filte
  * in the event title. Matching on the first name keeps "Marta" and "Marta Silva's birthday"
  * together, and the day check keeps an unrelated "Marta" meeting out of it.
  */
-export function dropGoogleDuplicatesOfDates(events: ExternalEvent[], dates: ImportantDate[]): ExternalEvent[] {
+export function dropGoogleDuplicatesOfDates(
+  events: ExternalEvent[],
+  dates: ImportantDate[],
+): ExternalEvent[] {
   const people = dates
     .filter((d) => !d.deletedAt && isThirdPartyDate(d.type) && d.personName)
     .map((d) => ({ first: wordsOf(d.personName!)[0], monthDay: d.date.slice(5) }))
@@ -176,7 +192,12 @@ export function buildUnifiedAgenda(input: UnifiedAgendaInput): UnifiedAgenda {
 
   // Díade events (recurring ones expanded by the existing agenda builder).
   for (const item of buildAgenda(input.events, from, to)) {
-    entries.push({ kind: 'event', key: `event:${item.key}`, day: startOfLocalDay(item.startAt), item });
+    entries.push({
+      kind: 'event',
+      key: `event:${item.key}`,
+      day: startOfLocalDay(item.startAt),
+      item,
+    });
   }
 
   // Google events.
@@ -279,9 +300,13 @@ export function pickHighlights(agenda: UnifiedAgenda, now: Date, limit: number =
     for (const entry of group.entries) {
       let ahead: boolean;
       if (entry.kind === 'event' && entry.item.highlighted) {
-        ahead = entry.item.isAllDay ? group.day.getTime() >= today : entry.item.endAt.getTime() >= now.getTime();
+        ahead = entry.item.isAllDay
+          ? group.day.getTime() >= today
+          : entry.item.endAt.getTime() >= now.getTime();
       } else if (entry.kind === 'external' && entry.event.highlighted) {
-        ahead = entry.isAllDay ? group.day.getTime() >= today : (entry.endAt?.getTime() ?? 0) >= now.getTime();
+        ahead = entry.isAllDay
+          ? group.day.getTime() >= today
+          : (entry.endAt?.getTime() ?? 0) >= now.getTime();
       } else {
         continue;
       }

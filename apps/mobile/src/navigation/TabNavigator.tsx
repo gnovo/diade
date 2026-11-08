@@ -1,16 +1,16 @@
-import React from 'react';
+import { sizes } from '@diade/design-tokens';
+import { type BottomTabBarProps, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import type React from 'react';
 import { useTranslation } from 'react-i18next';
-import { createBottomTabNavigator, type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TodayScreen } from '../screens/TodayScreen';
-import { CalendarScreen } from '../screens/CalendarScreen';
 import { SyncOverlay } from '../components/SyncOverlay';
-import { ListsScreen } from '../screens/ListsScreen';
-import { HomeScreen } from '../screens/HomeScreen';
-import { DatesScreen } from '../screens/DatesScreen';
 import { Icon, type IconName, useThemeColors } from '../design';
-import { sizes } from '@diade/design-tokens';
+import { CalendarScreen } from '../screens/CalendarScreen';
+import { DatesScreen } from '../screens/DatesScreen';
+import { HomeScreen } from '../screens/HomeScreen';
+import { ListsScreen } from '../screens/ListsScreen';
+import { TodayScreen } from '../screens/TodayScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -70,11 +70,27 @@ export const TabNavigator: React.FC = () => {
           ),
         })}
       >
-        <Tab.Screen name="Today" component={TodayScreen} options={{ tabBarLabel: t('nav.today') }} />
-        <Tab.Screen name="Calendar" component={CalendarScreen} options={{ tabBarLabel: t('nav.calendar') }} />
-        <Tab.Screen name="Lists" component={ListsScreen} options={{ tabBarLabel: t('nav.lists') }} />
+        <Tab.Screen
+          name="Today"
+          component={TodayScreen}
+          options={{ tabBarLabel: t('nav.today') }}
+        />
+        <Tab.Screen
+          name="Calendar"
+          component={CalendarScreen}
+          options={{ tabBarLabel: t('nav.calendar') }}
+        />
+        <Tab.Screen
+          name="Lists"
+          component={ListsScreen}
+          options={{ tabBarLabel: t('nav.lists') }}
+        />
         <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: t('nav.home') }} />
-        <Tab.Screen name="Dates" component={DatesScreen} options={{ tabBarLabel: t('nav.dates') }} />
+        <Tab.Screen
+          name="Dates"
+          component={DatesScreen}
+          options={{ tabBarLabel: t('nav.dates') }}
+        />
       </Tab.Navigator>
       <SyncOverlay />
     </View>

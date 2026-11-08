@@ -186,16 +186,16 @@ export const en = {
     partnerEvents_one: '{{count}} event today',
     partnerEvents_other: '{{count}} events today',
     partnerClear: 'Nothing on today',
-    openPartnerDay: 'Open {{name}}\'s day',
+    openPartnerDay: "Open {{name}}'s day",
     statusClear: 'Nothing planned today',
     statusCount_one: '{{count}} thing today',
     statusCount_other: '{{count}} things today',
   },
 
   partnerDay: {
-    title: '{{name}}\'s day',
+    title: "{{name}}'s day",
     close: 'Close',
-    note: 'What you can see of {{name}}\'s day. Anything personal stays private.',
+    note: "What you can see of {{name}}'s day. Anything personal stays private.",
     comingUp: 'Coming up',
     tasks: 'Tasks',
     noEvents: 'Nothing in the next two days.',
@@ -216,14 +216,16 @@ export const en = {
     showing: 'Google calendars',
     scopeBoth: 'Both',
     setupTitle: 'Finish setting up Google Calendar',
-    setupBody: 'Choose which calendars to bring in and who can see them. Nothing syncs and nothing is shared until you do.',
+    setupBody:
+      'Choose which calendars to bring in and who can see them. Nothing syncs and nothing is shared until you do.',
     setupAction: 'Choose calendars',
     filters: 'Filters',
     filtersOn: 'Filters, active',
     highlight: 'Highlight',
     highlighted: 'Highlighted',
     highlightHint: 'Shows on the Today screen for both of you.',
-    highlightBusyNote: 'Your partner will not see this highlight, because this event is not fully shared with them.',
+    highlightBusyNote:
+      'Your partner will not see this highlight, because this event is not fully shared with them.',
     viewSchedule: 'Schedule',
     viewDay: 'Day',
     viewWeek: 'Week',
@@ -245,7 +247,8 @@ export const en = {
     noCalendarsToToggle: 'No calendars to show yet.',
     datesSection: 'Dates',
     showOthersDates: 'Birthdays and anniversaries of others',
-    showOthersDatesHint: 'Dates you added for friends and family. Google birthdays for the same people are hidden so nothing shows twice.',
+    showOthersDatesHint:
+      'Dates you added for friends and family. Google birthdays for the same people are hidden so nothing shows twice.',
     hideFilters: 'Hide filters',
     task: 'Task',
     importantTask: 'Important',
@@ -283,7 +286,8 @@ export const en = {
     connectFailed: 'Could not connect',
     connectCancelled: 'Google Calendar was not connected.',
     pickerTitle: 'Choose your calendars',
-    pickerNote: 'Shared by default: your partner will see these events. Change it for any calendar below.',
+    pickerNote:
+      'Shared by default: your partner will see these events. Change it for any calendar below.',
     startSyncing: 'Start syncing',
     starting: 'Starting…',
     calendarsTitle: 'Your calendars',
@@ -580,7 +584,8 @@ export const en = {
   plan: {
     title: 'Plan',
     newPlan: 'New plan',
-    empty: 'Plan the week: choose the recipes you want to cook and build the grocery list from them.',
+    empty:
+      'Plan the week: choose the recipes you want to cook and build the grocery list from them.',
     startPlan: 'Plan a week',
     periodLabel: 'Period',
     thisWeek: 'This week',
@@ -613,7 +618,8 @@ export const en = {
     couldNotGenerate: 'Could not create the grocery list',
     deletePlan: 'Delete plan',
     deleteTitle: 'Delete this plan?',
-    deleteBody: 'The plan for {{range}} will be removed for both of you. Grocery lists made from it are kept.',
+    deleteBody:
+      'The plan for {{range}} will be removed for both of you. Grocery lists made from it are kept.',
     picker: {
       title: 'Add recipes',
       search: 'Search recipes or ingredients',

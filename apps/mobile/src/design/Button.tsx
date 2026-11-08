@@ -1,7 +1,7 @@
-import React from 'react';
-import { ActivityIndicator, Pressable, Text, type PressableProps } from 'react-native';
-import { Icon, type IconName } from './Icon';
 import { sizes } from '@diade/design-tokens';
+import type React from 'react';
+import { ActivityIndicator, Pressable, type PressableProps, Text } from 'react-native';
+import { Icon, type IconName } from './Icon';
 import { useColor } from './theme';
 
 export type ButtonVariant = 'primary' | 'soft' | 'outline' | 'ghost' | 'danger';
@@ -45,7 +45,15 @@ export const Button: React.FC<ButtonProps> = ({
   ...rest
 }) => {
   const isDisabled = disabled || loading;
-  const iconColor = useColor(variant === 'primary' ? 'on-action' : variant === 'soft' ? 'on-action-soft' : variant === 'danger' ? 'danger' : 'ink');
+  const iconColor = useColor(
+    variant === 'primary'
+      ? 'on-action'
+      : variant === 'soft'
+        ? 'on-action-soft'
+        : variant === 'danger'
+          ? 'danger'
+          : 'ink',
+  );
   const heightClass = size === 'md' ? 'h-12 px-5' : 'h-9 px-4';
   const hitSlop = size === 'sm' ? { top: 6, bottom: 6, left: 4, right: 4 } : undefined;
 

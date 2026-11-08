@@ -1,18 +1,18 @@
-import { z } from 'zod';
 import {
+  DEFAULT_SERVINGS,
   EXTERNAL_VISIBILITIES,
-  TASK_PRIORITIES,
   IMPORTANT_DATE_REPEATS,
   IMPORTANT_DATE_TYPES,
-  RECIPE_UNITS,
-  MIN_SERVINGS,
-  MAX_SERVINGS,
-  DEFAULT_SERVINGS,
   MAX_PLAN_RECIPES,
-  parseDateOnly,
-  type SyncEntityName,
+  MAX_SERVINGS,
+  MIN_SERVINGS,
   type MutationOperation,
+  parseDateOnly,
+  RECIPE_UNITS,
+  type SyncEntityName,
+  TASK_PRIORITIES,
 } from '@diade/domain';
+import { z } from 'zod';
 
 // --- Identity & Space Schemas ---
 
@@ -200,7 +200,10 @@ export const recipeIngredientSchema = z.object({
 const recipeIngredientsSchema = z
   .array(recipeIngredientSchema)
   .max(100)
-  .refine((rows) => new Set(rows.map((row) => row.id)).size === rows.length, 'Ingredient ids must be unique');
+  .refine(
+    (rows) => new Set(rows.map((row) => row.id)).size === rows.length,
+    'Ingredient ids must be unique',
+  );
 
 const servingsSchema = z.number().int().min(MIN_SERVINGS).max(MAX_SERVINGS);
 
@@ -231,7 +234,10 @@ export const mealPlanRecipeSchema = z.object({
 const mealPlanRecipesSchema = z
   .array(mealPlanRecipeSchema)
   .max(MAX_PLAN_RECIPES)
-  .refine((rows) => new Set(rows.map((row) => row.recipeId)).size === rows.length, 'A recipe can be in a plan once');
+  .refine(
+    (rows) => new Set(rows.map((row) => row.recipeId)).size === rows.length,
+    'A recipe can be in a plan once',
+  );
 
 const periodNotBackwards = (value: { startsOn?: string; endsOn?: string }) =>
   value.startsOn === undefined || value.endsOn === undefined || value.endsOn >= value.startsOn;
@@ -242,7 +248,10 @@ export const createMealPlanSchema = z
     endsOn: dateOnlySchema,
     recipes: mealPlanRecipesSchema.default([]),
   })
-  .refine(periodNotBackwards, { message: 'The plan cannot end before it starts', path: ['endsOn'] });
+  .refine(periodNotBackwards, {
+    message: 'The plan cannot end before it starts',
+    path: ['endsOn'],
+  });
 
 export const updateMealPlanSchema = z
   .object({
@@ -250,7 +259,10 @@ export const updateMealPlanSchema = z
     endsOn: dateOnlySchema.optional(),
     recipes: mealPlanRecipesSchema.optional(),
   })
-  .refine(periodNotBackwards, { message: 'The plan cannot end before it starts', path: ['endsOn'] });
+  .refine(periodNotBackwards, {
+    message: 'The plan cannot end before it starts',
+    path: ['endsOn'],
+  });
 
 // --- Google Calendar sync (REST, not the outbox) ---
 
@@ -270,7 +282,10 @@ export const updateExternalEventSchema = z
     /** Star the event so it is featured on the Today screen. */
     highlighted: z.boolean().optional(),
   })
-  .refine((v) => v.visibilityOverride !== undefined || v.highlighted !== undefined, 'Nothing to update');
+  .refine(
+    (v) => v.visibilityOverride !== undefined || v.highlighted !== undefined,
+    'Nothing to update',
+  );
 
 export const confirmExternalCalendarsSchema = z.object({
   calendars: z
@@ -402,6 +417,8 @@ export function parseSyncPayload(
   if (result.success) return { success: true, data: result.data as Record<string, unknown> };
   return {
     success: false,
-    message: result.error.issues.map((i) => `${i.path.join('.') || 'payload'}: ${i.message}`).join('; '),
+    message: result.error.issues
+      .map((i) => `${i.path.join('.') || 'payload'}: ${i.message}`)
+      .join('; '),
   };
 }

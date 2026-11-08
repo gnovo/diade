@@ -1,7 +1,7 @@
 import i18next, { type i18n } from 'i18next';
+import { DEFAULT_LANGUAGE, type Language } from './languages';
 import { en } from './locales/en';
 import { ptPT } from './locales/pt-PT';
-import { DEFAULT_LANGUAGE, type Language } from './languages';
 
 export const resources = {
   en: { translation: en },

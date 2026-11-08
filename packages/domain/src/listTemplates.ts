@@ -39,7 +39,14 @@ export const LIST_TEMPLATES: readonly ListTemplate[] = [
     id: 'household',
     category: 'household',
     icon: 'house',
-    starterItems: ['toiletPaper', 'dishSoap', 'laundryDetergent', 'binBags', 'batteries', 'lightBulbs'],
+    starterItems: [
+      'toiletPaper',
+      'dishSoap',
+      'laundryDetergent',
+      'binBags',
+      'batteries',
+      'lightBulbs',
+    ],
   },
   { id: 'blank', category: 'other', icon: 'sticky-note', starterItems: [] },
 ];
@@ -53,7 +60,10 @@ export function isListTemplateIcon(value: string | null): value is ListTemplateI
 }
 
 /** The icon a list shows: its own if it has a known one, else its category's default. */
-export function listIconFor(list: { icon: string | null; category: ListCategory }): ListTemplateIcon {
+export function listIconFor(list: {
+  icon: string | null;
+  category: ListCategory;
+}): ListTemplateIcon {
   if (isListTemplateIcon(list.icon)) return list.icon;
   return LIST_TEMPLATES.find((tpl) => tpl.category === list.category)?.icon ?? 'sticky-note';
 }

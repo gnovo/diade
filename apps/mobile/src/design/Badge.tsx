@@ -1,10 +1,17 @@
-import React from 'react';
+import { sizes } from '@diade/design-tokens';
+import type React from 'react';
 import { Text, View } from 'react-native';
 import { Icon, type IconName } from './Icon';
-import { sizes } from '@diade/design-tokens';
-import { useColor, type ColorToken } from './theme';
+import { type ColorToken, useColor } from './theme';
 
-export type BadgeTone = 'shared' | 'personal' | 'neutral' | 'success' | 'warning' | 'danger' | 'info';
+export type BadgeTone =
+  | 'shared'
+  | 'personal'
+  | 'neutral'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'info';
 
 interface ToneStyle {
   container: string;
@@ -15,12 +22,36 @@ interface ToneStyle {
 }
 
 const tones: Record<BadgeTone, ToneStyle> = {
-  shared: { container: 'bg-surface-tint', text: 'text-on-action-soft', token: 'on-action-soft', icon: 'users' },
-  personal: { container: 'bg-personal-soft', text: 'text-on-personal', token: 'on-personal', icon: 'lock' },
-  neutral: { container: 'bg-surface border border-border', text: 'text-ink-muted', token: 'ink-muted' },
-  success: { container: 'bg-success-soft', text: 'text-success', token: 'success', icon: 'circle-check' },
+  shared: {
+    container: 'bg-surface-tint',
+    text: 'text-on-action-soft',
+    token: 'on-action-soft',
+    icon: 'users',
+  },
+  personal: {
+    container: 'bg-personal-soft',
+    text: 'text-on-personal',
+    token: 'on-personal',
+    icon: 'lock',
+  },
+  neutral: {
+    container: 'bg-surface border border-border',
+    text: 'text-ink-muted',
+    token: 'ink-muted',
+  },
+  success: {
+    container: 'bg-success-soft',
+    text: 'text-success',
+    token: 'success',
+    icon: 'circle-check',
+  },
   warning: { container: 'bg-warning-soft', text: 'text-warning', token: 'warning', icon: 'clock' },
-  danger: { container: 'bg-danger-soft', text: 'text-danger', token: 'danger', icon: 'triangle-alert' },
+  danger: {
+    container: 'bg-danger-soft',
+    text: 'text-danger',
+    token: 'danger',
+    icon: 'triangle-alert',
+  },
   info: { container: 'bg-info-soft', text: 'text-info', token: 'info', icon: 'info' },
 };
 

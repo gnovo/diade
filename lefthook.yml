@@ -1,0 +1,32 @@
+# Git hooks (installed via `pnpm install` -> prepare). Skip once with LEFTHOOK=0 or --no-verify.
+pre-commit:
+  jobs:
+    - name: biome (staged, autofix)
+      glob: "*.{js,jsx,ts,tsx,mjs,cjs,json,jsonc,css}"
+      run: pnpm exec biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      stage_fixed: true
+
+commit-msg:
+  jobs:
+    - name: conventional commit
+      run: pnpm exec commitlint --edit {1}
+
+pre-push:
+  parallel: true
+  jobs:
+    - name: biome
+      run: pnpm exec biome ci .
+    - name: typecheck
+      run: pnpm typecheck
+    - name: test
+      run: pnpm test
+    - name: lockfile
+      run: pnpm install --frozen-lockfile --lockfile-only --ignore-scripts
+    - name: drizzle migrations
+      run: pnpm --filter @diade/api exec drizzle-kit check
+    - name: design tokens drift
+      run: bash scripts/check-tokens-drift.sh
+    - name: i18n keys
+      run: node scripts/check-i18n.mjs
+    - name: gitleaks
+      run: bash scripts/check-secrets.sh

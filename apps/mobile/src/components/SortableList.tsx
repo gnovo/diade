@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, PanResponder, View, type PanResponderInstance } from 'react-native';
+import type React from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Animated, Easing, PanResponder, type PanResponderInstance, View } from 'react-native';
 import { Icon, useColor, useShadow } from '../design';
 
 const SHIFT_MS = 160;
@@ -80,8 +81,10 @@ export function SortableList<T extends SortableItem>({
   // The data has caught up with (or moved past) the order we were holding.
   useEffect(() => {
     if (!localOrder) return undefined;
-    const sameOrder = items.length === localOrder.length && items.every((item, i) => item.id === localOrder[i]);
-    const sameSet = items.length === localOrder.length && items.every((item) => localOrder.includes(item.id));
+    const sameOrder =
+      items.length === localOrder.length && items.every((item, i) => item.id === localOrder[i]);
+    const sameSet =
+      items.length === localOrder.length && items.every((item) => localOrder.includes(item.id));
     if (sameOrder || !sameSet) {
       setLocalOrder(null);
       return undefined;

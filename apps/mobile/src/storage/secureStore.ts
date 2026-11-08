@@ -1,5 +1,5 @@
+import type { Space, User } from '@diade/domain';
 import * as SecureStore from 'expo-secure-store';
-import type { User, Space } from '@diade/domain';
 
 const KEYS = {
   SESSION_TOKEN: 'diade_session_token',

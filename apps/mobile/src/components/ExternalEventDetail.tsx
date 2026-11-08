@@ -1,15 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import { sizes, space as spacing } from '@diade/design-tokens';
+import {
+  type ExternalEvent,
+  type ExternalVisibility,
+  externalEventTitle,
+  formatTime,
+  parseDateOnly,
+} from '@diade/domain';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Linking, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
-import { sizes, space as spacing } from '@diade/design-tokens';
-import { externalEventTitle, formatTime, parseDateOnly, type ExternalEvent, type ExternalVisibility } from '@diade/domain';
 import { apiClient } from '../api/client';
+import type { AgendaEntry } from '../data/unifiedAgenda';
 import { Icon, useColor } from '../design';
 import { useFormat } from '../i18n';
 import { useSync } from '../sync/SyncProvider';
-import type { AgendaEntry } from '../data/unifiedAgenda';
-import { Button, Card, Segmented, SectionLabel, type SegmentOption } from './ui';
+import { Button, Card, SectionLabel, Segmented, type SegmentOption } from './ui';
 
 type ExternalEntry = Extract<AgendaEntry, { kind: 'external' }>;
 type Override = 'inherit' | 'busy_only' | 'private';
@@ -19,10 +26,10 @@ type Override = 'inherit' | 'busy_only' | 'private';
  * who sees one event (never widen it past its calendar). A partner's busy-only block shows
  * nothing beyond the fact that they are busy.
  */
-export const ExternalEventDetail: React.FC<{ entry: ExternalEntry | null; onClose: () => void }> = ({
-  entry,
-  onClose,
-}) => {
+export const ExternalEventDetail: React.FC<{
+  entry: ExternalEntry | null;
+  onClose: () => void;
+}> = ({ entry, onClose }) => {
   const { t } = useTranslation();
   const format = useFormat();
   const { syncNow } = useSync();
@@ -47,7 +54,9 @@ export const ExternalEventDetail: React.FC<{ entry: ExternalEntry | null; onClos
       const end = e.endDate ? parseDateOnly(e.endDate) : null;
       if (!start) return t('format.allDay');
       const first = format.longDate(start);
-      return end && end.getTime() !== start.getTime() ? `${first} – ${format.longDate(end)}` : `${first} · ${t('format.allDay')}`;
+      return end && end.getTime() !== start.getTime()
+        ? `${first} – ${format.longDate(end)}`
+        : `${first} · ${t('format.allDay')}`;
     }
     if (!e.startAt || !e.endAt) return '';
     const start = new Date(e.startAt);
@@ -58,8 +67,12 @@ export const ExternalEventDetail: React.FC<{ entry: ExternalEntry | null; onClos
   const calendarVisibility: ExternalVisibility = entry?.calendar?.visibility ?? 'shared';
   const overrideOptions: SegmentOption<Override>[] = [
     { value: 'inherit', label: t('calendar.detail.sameAsCalendar') },
-    ...(calendarVisibility === 'shared' ? [{ value: 'busy_only' as const, label: t('googleCalendar.busyOnly') }] : []),
-    ...(calendarVisibility !== 'private' ? [{ value: 'private' as const, label: t('googleCalendar.private') }] : []),
+    ...(calendarVisibility === 'shared'
+      ? [{ value: 'busy_only' as const, label: t('googleCalendar.busyOnly') }]
+      : []),
+    ...(calendarVisibility !== 'private'
+      ? [{ value: 'private' as const, label: t('googleCalendar.private') }]
+      : []),
   ];
 
   const toggleStar = async () => {
@@ -71,23 +84,34 @@ export const ExternalEventDetail: React.FC<{ entry: ExternalEntry | null; onClos
       syncNow();
     } catch (err) {
       setStarred(!next);
-      Alert.alert(t('calendar.detail.couldNotSave'), err instanceof Error ? err.message : t('googleCalendar.needsConnection'));
+      Alert.alert(
+        t('calendar.detail.couldNotSave'),
+        err instanceof Error ? err.message : t('googleCalendar.needsConnection'),
+      );
     }
   };
 
   // The partner only ever sees the event as "busy", so a star on it would mean nothing to them.
-  const starNote = starred && entry?.mine && entry.event.effectiveVisibility !== 'shared' ? t('calendar.highlightBusyNote') : null;
+  const starNote =
+    starred && entry?.mine && entry.event.effectiveVisibility !== 'shared'
+      ? t('calendar.highlightBusyNote')
+      : null;
 
   const changeOverride = async (next: Override) => {
     if (!event) return;
     const previous = override;
     setOverride(next);
     try {
-      await apiClient.updateExternalEvent(event.id, { visibilityOverride: next === 'inherit' ? null : next });
+      await apiClient.updateExternalEvent(event.id, {
+        visibilityOverride: next === 'inherit' ? null : next,
+      });
       syncNow();
     } catch (err) {
       setOverride(previous);
-      Alert.alert(t('calendar.detail.couldNotSave'), err instanceof Error ? err.message : t('googleCalendar.needsConnection'));
+      Alert.alert(
+        t('calendar.detail.couldNotSave'),
+        err instanceof Error ? err.message : t('googleCalendar.needsConnection'),
+      );
     }
   };
 
@@ -113,7 +137,12 @@ export const ExternalEventDetail: React.FC<{ entry: ExternalEntry | null; onClos
               hitSlop={8}
               className="flex-row items-center h-11 px-4 rounded-full bg-surface-sunken"
             >
-              <Icon name="star" size={sizes['icon-md']} color={starred ? starColor : undefined} fill={starred ? starColor : undefined} />
+              <Icon
+                name="star"
+                size={sizes['icon-md']}
+                color={starred ? starColor : undefined}
+                fill={starred ? starColor : undefined}
+              />
               <Text className="ml-2 text-sm font-semibold text-ink">
                 {starred ? t('calendar.highlighted') : t('calendar.highlight')}
               </Text>
@@ -123,7 +152,11 @@ export const ExternalEventDetail: React.FC<{ entry: ExternalEntry | null; onClos
 
         {entry && event ? (
           <ScrollView
-            contentContainerStyle={{ paddingHorizontal: spacing[4], paddingTop: spacing[2], paddingBottom: spacing[8] }}
+            contentContainerStyle={{
+              paddingHorizontal: spacing[4],
+              paddingTop: spacing[2],
+              paddingBottom: spacing[8],
+            }}
           >
             <View className="flex-row items-center mb-1">
               <View
@@ -137,7 +170,9 @@ export const ExternalEventDetail: React.FC<{ entry: ExternalEntry | null; onClos
                   : (entry.calendar?.name ?? t('calendar.partnerCalendar'))}
               </Text>
             </View>
-            <Text className="text-title-1 font-bold text-ink mb-4">{externalEventTitle(event, labels)}</Text>
+            <Text className="text-title-1 font-bold text-ink mb-4">
+              {externalEventTitle(event, labels)}
+            </Text>
 
             {event.status === 'tentative' ? (
               <Text className="text-sm text-ink-muted mb-2">{t('calendar.detail.tentative')}</Text>
@@ -168,13 +203,19 @@ export const ExternalEventDetail: React.FC<{ entry: ExternalEntry | null; onClos
             </Card>
 
             {starred ? (
-              <Text className="text-sm leading-5 text-ink-muted mb-2">{starNote ?? t('calendar.highlightHint')}</Text>
+              <Text className="text-sm leading-5 text-ink-muted mb-2">
+                {starNote ?? t('calendar.highlightHint')}
+              </Text>
             ) : null}
 
             {event.redacted ? (
-              <Text className="text-sm leading-5 text-ink-muted">{t('calendar.detail.partnerBusy')}</Text>
+              <Text className="text-sm leading-5 text-ink-muted">
+                {t('calendar.detail.partnerBusy')}
+              </Text>
             ) : (
-              <Text className="text-sm leading-5 text-ink-muted mb-4">{t('calendar.detail.readOnly')}</Text>
+              <Text className="text-sm leading-5 text-ink-muted mb-4">
+                {t('calendar.detail.readOnly')}
+              </Text>
             )}
 
             {entry.mine ? (
@@ -182,7 +223,11 @@ export const ExternalEventDetail: React.FC<{ entry: ExternalEntry | null; onClos
                 {overrideOptions.length > 1 ? (
                   <Card>
                     <SectionLabel>{t('calendar.detail.visibility')}</SectionLabel>
-                    <Segmented<Override> value={override} onChange={changeOverride} options={overrideOptions} />
+                    <Segmented<Override>
+                      value={override}
+                      onChange={changeOverride}
+                      options={overrideOptions}
+                    />
                   </Card>
                 ) : null}
                 {event.htmlLink ? (

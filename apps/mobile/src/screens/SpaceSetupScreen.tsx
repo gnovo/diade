@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
+import type React from 'react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
   ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
-import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import { useColor } from '../design';
 
 export const SpaceSetupScreen: React.FC = () => {
@@ -36,7 +37,10 @@ export const SpaceSetupScreen: React.FC = () => {
       setIsCreating(true);
       const res = await apiClient.createSpace({ name: spaceName.trim() });
       await updateSpace(res.space);
-      Alert.alert(t('spaceSetup.created'), t('spaceSetup.createdBody', { code: res.space.inviteCode }));
+      Alert.alert(
+        t('spaceSetup.created'),
+        t('spaceSetup.createdBody', { code: res.space.inviteCode }),
+      );
     } catch (err: any) {
       Alert.alert(t('spaceSetup.couldNotCreate'), err?.message || t('common.checkConnection'));
     } finally {
@@ -68,17 +72,13 @@ export const SpaceSetupScreen: React.FC = () => {
         {/* Header */}
         <View className="mb-8">
           <Text className="text-2xl font-bold text-ink mb-1">{t('spaceSetup.title')}</Text>
-          <Text className="text-sm text-ink-muted">
-            {t('spaceSetup.subtitle')}
-          </Text>
+          <Text className="text-sm text-ink-muted">{t('spaceSetup.subtitle')}</Text>
         </View>
 
         {/* Option 1: Create a Space */}
         <View className="bg-surface rounded-2xl p-6 border border-border mb-6 shadow-sm">
           <Text className="text-lg font-bold text-ink mb-1">{t('spaceSetup.createTitle')}</Text>
-          <Text className="text-sm text-ink-muted mb-4">
-            {t('spaceSetup.createBody')}
-          </Text>
+          <Text className="text-sm text-ink-muted mb-4">{t('spaceSetup.createBody')}</Text>
 
           <Text className="text-sm font-semibold text-ink-muted mb-2 tracking-wider">
             {t('spaceSetup.spaceName')}
@@ -100,7 +100,9 @@ export const SpaceSetupScreen: React.FC = () => {
             {isCreating ? (
               <ActivityIndicator color={onAction} />
             ) : (
-              <Text className="text-on-action font-semibold text-sm">{t('spaceSetup.createButton')}</Text>
+              <Text className="text-on-action font-semibold text-sm">
+                {t('spaceSetup.createButton')}
+              </Text>
             )}
           </TouchableOpacity>
         </View>
@@ -115,9 +117,7 @@ export const SpaceSetupScreen: React.FC = () => {
         {/* Option 2: Join a Space */}
         <View className="bg-surface rounded-2xl p-6 border border-border mb-8 shadow-sm">
           <Text className="text-lg font-bold text-ink mb-1">{t('spaceSetup.joinTitle')}</Text>
-          <Text className="text-sm text-ink-muted mb-4">
-            {t('spaceSetup.joinBody')}
-          </Text>
+          <Text className="text-sm text-ink-muted mb-4">{t('spaceSetup.joinBody')}</Text>
 
           <Text className="text-sm font-semibold text-ink-muted mb-2 tracking-wider">
             {t('spaceSetup.inviteCode')}
@@ -141,7 +141,9 @@ export const SpaceSetupScreen: React.FC = () => {
             {isJoining ? (
               <ActivityIndicator color={action} />
             ) : (
-              <Text className="text-action font-semibold text-sm">{t('spaceSetup.joinButton')}</Text>
+              <Text className="text-action font-semibold text-sm">
+                {t('spaceSetup.joinButton')}
+              </Text>
             )}
           </TouchableOpacity>
         </View>

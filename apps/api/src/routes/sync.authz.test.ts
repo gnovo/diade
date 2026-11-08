@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest';
-import { getTableName } from 'drizzle-orm';
 import type { ClientMutation } from '@diade/domain';
-import { authorizeMutation } from './sync';
+import { getTableName } from 'drizzle-orm';
+import { describe, expect, it } from 'vitest';
 import type { DbClient } from '../db';
+import { authorizeMutation } from './sync';
 
 // Minimal fake of the select().from(table).where(...).limit(1) chain used by authorizeMutation.
 function fakeDb(fixtures: Record<string, Array<Record<string, unknown>>>): DbClient {
@@ -38,12 +38,16 @@ const mutation = (
 describe('sync mutation authorisation', () => {
   it('blocks a member from editing a personal task created by their partner', async () => {
     const db = fakeDb({ tasks: [{ visibility: 'personal', creatorId: PARTNER }] });
-    expect(await authorizeMutation(db, mutation('tasks', 'UPDATE'), {}, SPACE, ME)).toBe('forbidden');
+    expect(await authorizeMutation(db, mutation('tasks', 'UPDATE'), {}, SPACE, ME)).toBe(
+      'forbidden',
+    );
   });
 
   it('blocks a member from deleting a personal event created by their partner', async () => {
     const db = fakeDb({ events: [{ visibility: 'personal', creatorId: PARTNER }] });
-    expect(await authorizeMutation(db, mutation('events', 'DELETE'), {}, SPACE, ME)).toBe('forbidden');
+    expect(await authorizeMutation(db, mutation('events', 'DELETE'), {}, SPACE, ME)).toBe(
+      'forbidden',
+    );
   });
 
   it('allows editing a shared event created by the partner', async () => {
@@ -58,7 +62,9 @@ describe('sync mutation authorisation', () => {
 
   it('keeps capture items private to their creator', async () => {
     const db = fakeDb({ capture_items: [{ creatorId: PARTNER }] });
-    expect(await authorizeMutation(db, mutation('capture_items', 'UPDATE'), {}, SPACE, ME)).toBe('forbidden');
+    expect(await authorizeMutation(db, mutation('capture_items', 'UPDATE'), {}, SPACE, ME)).toBe(
+      'forbidden',
+    );
   });
 
   it('rejects list item inserts into a list outside the caller space', async () => {
@@ -70,30 +76,42 @@ describe('sync mutation authorisation', () => {
 
   it('rejects updates to a list item whose list belongs to another space', async () => {
     const db = fakeDb({ list_items: [{ listId: LIST }], lists: [] });
-    expect(await authorizeMutation(db, mutation('list_items', 'UPDATE'), {}, SPACE, ME)).toBe('forbidden');
+    expect(await authorizeMutation(db, mutation('list_items', 'UPDATE'), {}, SPACE, ME)).toBe(
+      'forbidden',
+    );
   });
 
   it('treats missing records as already converged rather than an error', async () => {
     const db = fakeDb({});
-    expect(await authorizeMutation(db, mutation('tasks', 'DELETE'), {}, SPACE, ME)).toBe('not_found');
+    expect(await authorizeMutation(db, mutation('tasks', 'DELETE'), {}, SPACE, ME)).toBe(
+      'not_found',
+    );
   });
 });
 
 describe('important dates authorisation', () => {
   it('lets either member edit or delete a date in their space (always shared)', async () => {
     const db = fakeDb({ important_dates: [{ id: RECORD }] });
-    expect(await authorizeMutation(db, mutation('important_dates', 'UPDATE'), {}, SPACE, ME)).toBe('ok');
-    expect(await authorizeMutation(db, mutation('important_dates', 'DELETE'), {}, SPACE, PARTNER)).toBe('ok');
+    expect(await authorizeMutation(db, mutation('important_dates', 'UPDATE'), {}, SPACE, ME)).toBe(
+      'ok',
+    );
+    expect(
+      await authorizeMutation(db, mutation('important_dates', 'DELETE'), {}, SPACE, PARTNER),
+    ).toBe('ok');
   });
 
-  it('reports not_found when the date is not in the caller\'s space', async () => {
+  it("reports not_found when the date is not in the caller's space", async () => {
     // The lookup is scoped to the caller's space, so another space's row yields no result.
     const db = fakeDb({});
-    expect(await authorizeMutation(db, mutation('important_dates', 'UPDATE'), {}, SPACE, ME)).toBe('not_found');
+    expect(await authorizeMutation(db, mutation('important_dates', 'UPDATE'), {}, SPACE, ME)).toBe(
+      'not_found',
+    );
   });
 
   it('allows inserts', async () => {
-    expect(await authorizeMutation(fakeDb({}), mutation('important_dates', 'INSERT'), {}, SPACE, ME)).toBe('ok');
+    expect(
+      await authorizeMutation(fakeDb({}), mutation('important_dates', 'INSERT'), {}, SPACE, ME),
+    ).toBe('ok');
   });
 });
 
@@ -101,15 +119,21 @@ describe('recipes authorisation', () => {
   it('lets either member edit or delete a recipe in their space (always shared)', async () => {
     const db = fakeDb({ recipes: [{ id: RECORD }] });
     expect(await authorizeMutation(db, mutation('recipes', 'UPDATE'), {}, SPACE, ME)).toBe('ok');
-    expect(await authorizeMutation(db, mutation('recipes', 'DELETE'), {}, SPACE, PARTNER)).toBe('ok');
+    expect(await authorizeMutation(db, mutation('recipes', 'DELETE'), {}, SPACE, PARTNER)).toBe(
+      'ok',
+    );
   });
 
   it("reports not_found when the recipe is not in the caller's space", async () => {
-    expect(await authorizeMutation(fakeDb({}), mutation('recipes', 'UPDATE'), {}, SPACE, ME)).toBe('not_found');
+    expect(await authorizeMutation(fakeDb({}), mutation('recipes', 'UPDATE'), {}, SPACE, ME)).toBe(
+      'not_found',
+    );
   });
 
   it('allows inserts', async () => {
-    expect(await authorizeMutation(fakeDb({}), mutation('recipes', 'INSERT'), {}, SPACE, ME)).toBe('ok');
+    expect(await authorizeMutation(fakeDb({}), mutation('recipes', 'INSERT'), {}, SPACE, ME)).toBe(
+      'ok',
+    );
   });
 });
 
@@ -117,15 +141,21 @@ describe('meal plans authorisation', () => {
   it('lets either member edit or delete a plan in their space (always shared)', async () => {
     const db = fakeDb({ meal_plans: [{ id: RECORD }] });
     expect(await authorizeMutation(db, mutation('meal_plans', 'UPDATE'), {}, SPACE, ME)).toBe('ok');
-    expect(await authorizeMutation(db, mutation('meal_plans', 'DELETE'), {}, SPACE, PARTNER)).toBe('ok');
+    expect(await authorizeMutation(db, mutation('meal_plans', 'DELETE'), {}, SPACE, PARTNER)).toBe(
+      'ok',
+    );
   });
 
   it("reports not_found when the plan is not in the caller's space", async () => {
-    expect(await authorizeMutation(fakeDb({}), mutation('meal_plans', 'UPDATE'), {}, SPACE, ME)).toBe('not_found');
+    expect(
+      await authorizeMutation(fakeDb({}), mutation('meal_plans', 'UPDATE'), {}, SPACE, ME),
+    ).toBe('not_found');
   });
 
   it('allows inserts', async () => {
-    expect(await authorizeMutation(fakeDb({}), mutation('meal_plans', 'INSERT'), {}, SPACE, ME)).toBe('ok');
+    expect(
+      await authorizeMutation(fakeDb({}), mutation('meal_plans', 'INSERT'), {}, SPACE, ME),
+    ).toBe('ok');
   });
 });
 
@@ -134,17 +164,27 @@ describe('a list generated from a plan', () => {
 
   it('may point at a plan of its own space', async () => {
     const db = fakeDb({ meal_plans: [{ id: PLAN }] });
-    expect(await authorizeMutation(db, mutation('lists', 'INSERT'), { planId: PLAN }, SPACE, ME)).toBe('ok');
+    expect(
+      await authorizeMutation(db, mutation('lists', 'INSERT'), { planId: PLAN }, SPACE, ME),
+    ).toBe('ok');
   });
 
   it("is refused when the plan is not in the caller's space", async () => {
-    expect(await authorizeMutation(fakeDb({}), mutation('lists', 'INSERT'), { planId: PLAN }, SPACE, ME)).toBe('forbidden');
+    expect(
+      await authorizeMutation(fakeDb({}), mutation('lists', 'INSERT'), { planId: PLAN }, SPACE, ME),
+    ).toBe('forbidden');
     const db = fakeDb({ lists: [{ id: RECORD }] });
-    expect(await authorizeMutation(db, mutation('lists', 'UPDATE'), { planId: PLAN }, SPACE, ME)).toBe('forbidden');
+    expect(
+      await authorizeMutation(db, mutation('lists', 'UPDATE'), { planId: PLAN }, SPACE, ME),
+    ).toBe('forbidden');
   });
 
   it('needs no plan lookup when planId is absent or null', async () => {
-    expect(await authorizeMutation(fakeDb({}), mutation('lists', 'INSERT'), {}, SPACE, ME)).toBe('ok');
-    expect(await authorizeMutation(fakeDb({}), mutation('lists', 'INSERT'), { planId: null }, SPACE, ME)).toBe('ok');
+    expect(await authorizeMutation(fakeDb({}), mutation('lists', 'INSERT'), {}, SPACE, ME)).toBe(
+      'ok',
+    );
+    expect(
+      await authorizeMutation(fakeDb({}), mutation('lists', 'INSERT'), { planId: null }, SPACE, ME),
+    ).toBe('ok');
   });
 });

@@ -1,4 +1,5 @@
-import React, { useLayoutEffect, useRef } from 'react';
+import type React from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { Animated, Easing, type StyleProp, type ViewStyle } from 'react-native';
 
 const DURATION_MS = 260;
@@ -41,7 +42,14 @@ export const ViewTransition: React.FC<{
         style,
         {
           opacity: progress,
-          transform: [{ translateX: progress.interpolate({ inputRange: [0, 1], outputRange: [dir.current * SLIDE_PX, 0] }) }],
+          transform: [
+            {
+              translateX: progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [dir.current * SLIDE_PX, 0],
+              }),
+            },
+          ],
         },
       ]}
     >

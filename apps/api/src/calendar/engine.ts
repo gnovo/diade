@@ -4,7 +4,7 @@
  * tombstoning) is testable without a network or a database.
  */
 import { GoogleApiError, type GoogleClient } from './google';
-import { mapGoogleEvent, type EventValues } from './mapper';
+import { type EventValues, mapGoogleEvent } from './mapper';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 

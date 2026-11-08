@@ -1,12 +1,15 @@
-import React from 'react';
-import { View } from 'react-native';
 import { sizes } from '@diade/design-tokens';
 import type { ImportantDateType } from '@diade/domain';
-import { Icon, useColor } from '../design';
+import type React from 'react';
+import { View } from 'react-native';
 import { IMPORTANT_DATE_TYPE_ICONS } from '../data/importantDateDisplay';
+import { Icon, useColor } from '../design';
 
 /** Round type icon on the shared-space tint, the same treatment as dashboard tiles. */
-export const ImportantDateIcon: React.FC<{ type: ImportantDateType; large?: boolean }> = ({ type, large }) => {
+export const ImportantDateIcon: React.FC<{ type: ImportantDateType; large?: boolean }> = ({
+  type,
+  large,
+}) => {
   const tint = useColor('on-action-soft');
   return (
     <View

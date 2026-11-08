@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { inclusiveEndDate, mapGoogleCalendar, mapGoogleEvent } from './mapper';
+import { describe, expect, it } from 'vitest';
 import type { GoogleEvent } from './google';
+import { inclusiveEndDate, mapGoogleCalendar, mapGoogleEvent } from './mapper';
 
 const timed = (over: Partial<GoogleEvent> = {}): GoogleEvent => ({
   id: 'ev1',
@@ -28,7 +28,12 @@ describe('mapGoogleEvent', () => {
 
   it('keeps wall-clock correctness across a DST change', () => {
     // Lisbon leaves summer time on 2026-10-25: 00:30 is +01:00 and 03:00 is +00:00.
-    const v = upsert(timed({ start: { dateTime: '2026-10-25T00:30:00+01:00' }, end: { dateTime: '2026-10-25T03:00:00+00:00' } }));
+    const v = upsert(
+      timed({
+        start: { dateTime: '2026-10-25T00:30:00+01:00' },
+        end: { dateTime: '2026-10-25T03:00:00+00:00' },
+      }),
+    );
     expect(v.startAt?.toISOString()).toBe('2026-10-24T23:30:00.000Z');
     expect(v.endAt?.toISOString()).toBe('2026-10-25T03:00:00.000Z');
   });
@@ -56,7 +61,10 @@ describe('mapGoogleEvent', () => {
   });
 
   it('reports cancelled events as removals', () => {
-    expect(mapGoogleEvent({ id: 'gone', status: 'cancelled' })).toEqual({ kind: 'cancelled', googleEventId: 'gone' });
+    expect(mapGoogleEvent({ id: 'gone', status: 'cancelled' })).toEqual({
+      kind: 'cancelled',
+      googleEventId: 'gone',
+    });
   });
 
   it('marks tentative events', () => {
@@ -69,7 +77,9 @@ describe('mapGoogleEvent', () => {
 
   it('reads the owner response from the self attendee', () => {
     const v = upsert(
-      timed({ attendees: [{ responseStatus: 'accepted' }, { self: true, responseStatus: 'declined' }] }),
+      timed({
+        attendees: [{ responseStatus: 'accepted' }, { self: true, responseStatus: 'declined' }],
+      }),
     );
     expect(v.myResponse).toBe('declined');
     expect(upsert(timed()).myResponse).toBeNull();
@@ -81,7 +91,9 @@ describe('mapGoogleEvent', () => {
   });
 
   it('keeps recurring instances identifiable and carries Google visibility', () => {
-    const v = upsert(timed({ recurringEventId: 'series', visibility: 'private', iCalUID: 'u@google.com' }));
+    const v = upsert(
+      timed({ recurringEventId: 'series', visibility: 'private', iCalUID: 'u@google.com' }),
+    );
     expect(v.isRecurringInstance).toBe(true);
     expect(v.googleVisibility).toBe('private');
     expect(v.icalUid).toBe('u@google.com');
@@ -95,7 +107,7 @@ describe('mapGoogleEvent', () => {
 });
 
 describe('mapGoogleCalendar', () => {
-  it('prefers the member\'s own name for a calendar and follows Google\'s selected flag', () => {
+  it("prefers the member's own name for a calendar and follows Google's selected flag", () => {
     const c = mapGoogleCalendar({
       id: 'cal@group',
       summary: 'Family',

@@ -48,7 +48,9 @@ export function createDrizzleEventStore(db: DbClient): EventStore {
           .onConflictDoUpdate({
             target: [externalEvents.calendarId, externalEvents.googleEventId],
             set: {
-              ...Object.fromEntries(CONTENT_COLUMNS.map(([name, col]) => [keyOf(col), sql.raw(`excluded.${name}`)])),
+              ...Object.fromEntries(
+                CONTENT_COLUMNS.map(([name, col]) => [keyOf(col), sql.raw(`excluded.${name}`)]),
+              ),
               deletedAt: null,
               updatedAt: now,
             },
@@ -57,7 +59,9 @@ export function createDrizzleEventStore(db: DbClient): EventStore {
               CONTENT_COLUMNS.map(([, col]) => sql`${col}`),
               sql`, `,
             )}) IS DISTINCT FROM (${sql.join(
-              CONTENT_COLUMNS.map(([name]) => (name === 'deleted_at' ? sql`NULL::timestamp` : sql.raw(`excluded.${name}`))),
+              CONTENT_COLUMNS.map(([name]) =>
+                name === 'deleted_at' ? sql`NULL::timestamp` : sql.raw(`excluded.${name}`),
+              ),
               sql`, `,
             )})`,
           });
@@ -69,7 +73,14 @@ export function createDrizzleEventStore(db: DbClient): EventStore {
         await db
           .update(externalEvents)
           // Content is blanked too: a tombstone only has to say "gone".
-          .set({ deletedAt: now, updatedAt: now, title: null, description: null, location: null, htmlLink: null })
+          .set({
+            deletedAt: now,
+            updatedAt: now,
+            title: null,
+            description: null,
+            location: null,
+            htmlLink: null,
+          })
           .where(
             and(
               eq(externalEvents.calendarId, calendarId),

@@ -1,15 +1,16 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { User, Space } from '@diade/domain';
-import {
-  getSessionToken,
-  setSessionToken,
-  getStoredUser,
-  setStoredUser,
-  getStoredSpace,
-  setStoredSpace,
-  clearAllSessionData,
-} from '../storage/secureStore';
+import type { Space, User } from '@diade/domain';
+import type React from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { apiClient } from '../api/client';
+import {
+  clearAllSessionData,
+  getSessionToken,
+  getStoredSpace,
+  getStoredUser,
+  setSessionToken,
+  setStoredSpace,
+  setStoredUser,
+} from '../storage/secureStore';
 import { resetLocalDb } from '../storage/sqlite';
 
 export interface SpaceMemberSummary {
@@ -19,7 +20,8 @@ export interface SpaceMemberSummary {
 
 const toMemberSummaries = (
   members: Array<{ user: { id: string; displayName: string } }>,
-): SpaceMemberSummary[] => members.map((m) => ({ userId: m.user.id, displayName: m.user.displayName }));
+): SpaceMemberSummary[] =>
+  members.map((m) => ({ userId: m.user.id, displayName: m.user.displayName }));
 
 interface AuthContextType {
   user: User | null;
