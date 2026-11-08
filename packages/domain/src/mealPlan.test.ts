@@ -711,3 +711,95 @@ describe('pantry staples: the household call wins, the recipe line decides other
     );
   });
 });
+
+describe('a line with no amount joins the ingredient row in any unit', () => {
+  const sauce = recipe('a', 1, [ing('Yoghurt', null, 'unit'), ing('Garlic', null, 'unit')]);
+  const bowl = recipe('b', 1, [ing('Yoghurt', 200, 'g'), ing('Garlic', 2, 'unit')]);
+  const both = [
+    { recipeId: 'a', servings: 1 },
+    { recipeId: 'b', servings: 1 },
+  ];
+
+  it('is one row with the amount, not a second row for the bare line', () => {
+    const { rows } = buildGroceryList(both, [sauce, bowl]);
+    expect(rows.map((r) => [r.name, r.quantity, r.contributions.length]).sort()).toEqual([
+      ['Garlic', 2, 2],
+      ['Yoghurt', 200, 2],
+    ]);
+  });
+
+  it('keeps a row of its own when no recipe gives the ingredient an amount', () => {
+    const { rows } = buildGroceryList([both[0]], [sauce, bowl]);
+    expect(rows.map((r) => [r.name, r.quantity]).sort()).toEqual([
+      ['Garlic', null],
+      ['Yoghurt', null],
+    ]);
+  });
+
+  it('joins the first row with an amount when the ingredient has several', () => {
+    const many = recipe('c', 1, [ing('Garlic', 3, 'g'), ing('Garlic', 100, 'ml')]);
+    const { rows } = buildGroceryList([{ recipeId: 'c', servings: 1 }, both[0]], [sauce, many]);
+    const garlic = rows.filter((r) => r.name === 'Garlic');
+    expect(garlic.map((r) => [r.family, r.quantity, r.contributions.length]).sort()).toEqual([
+      ['mass', 3, 2],
+      ['volume', 100, 1],
+    ]);
+  });
+
+  it('is a staple only when every line that feeds it is', () => {
+    const salty = recipe('d', 1, [ing('Salt', null, 'unit', true)]);
+    const bought = recipe('e', 1, [ing('Salt', 5, 'g', false)]);
+    const result = buildGroceryList(
+      [
+        { recipeId: 'd', servings: 1 },
+        { recipeId: 'e', servings: 1 },
+      ],
+      [salty, bought],
+    );
+    expect(result.staples).toEqual([]);
+    expect(result.rows.map((r) => r.name)).toEqual(['Salt']);
+  });
+
+  it('turns a list made before the fix into one row: the bare duplicate is proposed for removal', () => {
+    const items = [
+      {
+        id: 'amount',
+        name: 'Yoghurt',
+        quantity: '200',
+        unit: 'g',
+        isChecked: false,
+        editedByHand: false,
+        contributions: [
+          {
+            recipeId: 'b',
+            recipeName: 'Recipe b',
+            key: 'yoghurt|mass',
+            quantity: 200,
+            unit: 'g' as const,
+          },
+        ],
+      },
+      {
+        id: 'bare',
+        name: 'Yoghurt',
+        quantity: null,
+        unit: null,
+        isChecked: false,
+        editedByHand: false,
+        contributions: [
+          {
+            recipeId: 'a',
+            recipeName: 'Recipe a',
+            key: 'yoghurt|count',
+            quantity: null,
+            unit: 'unit' as const,
+          },
+        ],
+      },
+    ];
+    const diff = diffPlanAgainstList(buildGroceryList(both, [sauce, bowl]), items);
+    expect(diff.removed.map((i) => i.id)).toEqual(['bare']);
+    expect(diff.added.map((r) => r.name)).toEqual(['Garlic']);
+    expect(diff.changed).toEqual([]);
+  });
+});
