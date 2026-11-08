@@ -48,8 +48,15 @@ unset APP_VARIANT                # a dev variant must never be released
 bash scripts/release-android.sh apk "Notes for the release"
 ```
 
-It bumps `android.versionCode`, builds the signed production APK, commits `chore(mobile): release v<version>-<code>`, tags, pushes and publishes a GitHub Release.
-Obtainium follows that release. Requires `gh auth login` and the signing setup `build-android-prod.sh` needs.
+`main` is protected, so the script bumps `android.versionCode`, builds the signed production APK, commits `chore(mobile): release v<version>-<code>` on a
+`chore/release-v<version>-<code>` branch, pushes it and creates a **draft** GitHub Release (Obtainium ignores drafts). Then:
+
+```bash
+# open and merge the PR from that branch (squash is fine), then:
+bash scripts/release-android.sh publish v<version>-<code>
+```
+
+`publish` finds the merged bump commit on `main` and publishes the draft with the tag on that commit, which is when Obtainium starts offering it. Requires `gh auth login` and the signing setup `build-android-prod.sh` needs.
 
 - [ ] The release exists on GitHub with the APK attached.
 - [ ] Obtainium offers it on both phones; update both. The APK is release-signed, so it installs over the existing app (a debug build with the same id never would).
