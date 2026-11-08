@@ -439,6 +439,7 @@ async function applyMutation(
             matchKey: d.matchKey,
             aliases: d.aliases ?? [],
             mergedIntoId: d.mergedIntoId ?? null,
+            staple: d.staple ?? null,
             createdAt: now,
             updatedAt: now,
           })
@@ -454,6 +455,7 @@ async function applyMutation(
       if (d.name !== undefined) changes.name = d.name;
       if (d.aliases !== undefined) changes.aliases = d.aliases;
       if (d.mergedIntoId !== undefined) changes.mergedIntoId = d.mergedIntoId;
+      if (d.staple !== undefined) changes.staple = d.staple;
       await db.update(ingredients).set(changes).where(where);
       return;
     }

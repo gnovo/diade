@@ -644,6 +644,16 @@ def ingredients_screen(s):
     s.line(16, 480, 359, 480)
     s.text(32, 510, 'Also written "Queijo"', 14, fill='#666')
     s.text(343, 510, 'Separate', 14, 'end', bold=True)
+    s.text(16, 566, 'PANTRY STAPLES', 12, fill='#666')
+    s.text(16, 586, 'Left out of lists made from recipes. Applies to every recipe.', 11, fill='#666')
+    input_box(s, 16, 596, 343, 'Search names', 40)
+    card(s, 16, 648, 343, 104)
+    for i, (n, on) in enumerate([('Olive oil', True), ('Paprika', True)]):
+        y = 648 + i * 52
+        if i:
+            s.line(16, y, 359, y)
+        s.text(32, y + 31, n, 14)
+        pill(s, 280, y + 14, 'Pantry', on)
 
 
 def s17():
@@ -653,6 +663,8 @@ def s17():
     s.callout(343, 192)
     s.callout(343, 296)
     s.callout(343, 342)
+    s.callout(343, 566)
+    s.callout(343, 700)
     s.finish('17-ingredients.svg')
 
 

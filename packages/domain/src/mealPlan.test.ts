@@ -669,3 +669,45 @@ describe('a row takes the name the household gave an ingredient', () => {
     expect(without.rows.map((r) => r.name).sort()).toEqual(['Meat', 'Meet']);
   });
 });
+
+describe('pantry staples: the household call wins, the recipe line decides otherwise', () => {
+  const stew = recipe('s', 1, [
+    ing('Salt', 5, 'g', false),
+    ing('Paprika', 2, 'g', true),
+    ing('Beef', 500),
+  ]);
+  const plan = [{ recipeId: 's', servings: 1 }];
+  const entry = (matchKey: string, staple: boolean | null) => ({
+    id: matchKey,
+    name: matchKey.charAt(0).toUpperCase() + matchKey.slice(1),
+    matchKey,
+    aliases: [],
+    mergedIntoId: null,
+    deletedAt: null,
+    staple,
+  });
+
+  it('follows the recipe lines when the household has decided nothing', () => {
+    const { rows, staples } = buildGroceryList(plan, [stew]);
+    expect(rows.map((r) => r.name).sort()).toEqual(['Beef', 'Salt']);
+    expect(staples.map((r) => r.name)).toEqual(['Paprika']);
+  });
+
+  it('lets the household make an ingredient a staple, or not one, whatever the lines say', () => {
+    const resolver = createIngredientResolver([entry('salt', true), entry('paprika', false)]);
+    const { rows, staples } = buildGroceryList(plan, [stew], { resolver });
+    expect(rows.map((r) => r.name).sort()).toEqual(['Beef', 'Paprika']);
+    expect(staples.map((r) => r.name)).toEqual(['Salt']);
+  });
+
+  it('a name merged into another shares its setting', () => {
+    const resolver = createIngredientResolver([
+      entry('sal', true),
+      { ...entry('salt', null), mergedIntoId: 'sal' },
+    ]);
+    // Salt resolves to the kept entry "Sal", which the household marked a staple: its name is used on the row.
+    expect(buildGroceryList(plan, [stew], { resolver }).staples.map((r) => r.name)).toContain(
+      'Sal',
+    );
+  });
+});

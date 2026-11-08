@@ -663,6 +663,10 @@ export const ptPT: Shape<Catalog> = {
     rename: 'Renomear',
     renameTitle: 'Renomear ingrediente',
     renamePlaceholder: 'O nome que as listas devem usar',
+    staplesHeading: 'Itens de despensa',
+    staplesHint:
+      'Ficam de fora das listas de compras feitas a partir de receitas (sal, azeite). O que definir aqui vale para todas as receitas.',
+    staplesEmpty: 'Ainda sem ingredientes.',
     separate: 'Separar',
     alsoWritten: 'Também escrito "{{name}}"',
     merge: {

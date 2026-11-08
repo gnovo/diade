@@ -173,6 +173,8 @@ async function openLocalDb(): Promise<SQLite.SQLiteDatabase> {
       -- A JSON array of other names (match keys); see Ingredient in @diade/domain.
       aliases TEXT NOT NULL DEFAULT '[]',
       merged_into_id TEXT,
+      -- The household's own call on pantry staples (1, 0, or NULL for undecided).
+      staple INTEGER,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       deleted_at TEXT
@@ -265,6 +267,7 @@ async function migrateLocalSchema(db: SQLite.SQLiteDatabase): Promise<void> {
   await addColumn('local_lists', 'plan_id', 'TEXT');
   await addColumn('local_list_items', 'contributions', 'TEXT');
   await addColumn('local_list_items', 'edited_by_hand', 'INTEGER NOT NULL DEFAULT 0');
+  await addColumn('local_ingredients', 'staple', 'INTEGER');
 }
 
 // --- Transactions ---

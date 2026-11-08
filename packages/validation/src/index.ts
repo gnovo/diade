@@ -235,12 +235,14 @@ export const createIngredientSchema = z.object({
   matchKey: z.string().trim().min(1).max(120),
   aliases: ingredientAliasesSchema.default([]),
   mergedIntoId: z.string().uuid().nullable().optional(),
+  staple: z.boolean().nullable().optional(),
 });
 
 export const updateIngredientSchema = z.object({
   name: ingredientNameSchema.optional(),
   aliases: ingredientAliasesSchema.optional(),
   mergedIntoId: z.string().uuid().nullable().optional(),
+  staple: z.boolean().nullable().optional(),
 });
 
 // --- Meal Plans Schemas ---

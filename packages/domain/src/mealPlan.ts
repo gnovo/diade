@@ -118,7 +118,8 @@ export interface GroceryBuild {
  *   the built-in dictionary, so `aubergine` and `eggplant` are one row; a name nobody knows is matched by
  *   accent, case and plural only. `1 onion` and `200 g onion` stay two rows; we do not guess.
  * - A null quantity ("to taste") joins any row of the same name and adds nothing.
- * - A row is a staple only when every ingredient that feeds it is flagged as one.
+ * - A row is a staple only when every ingredient that feeds it is one. Whether an ingredient is one is the household's own
+ *   setting for it (its catalog entry) when it has made one, else the flag on the recipe line.
  * - Entries whose recipe no longer exists are skipped.
  */
 export function buildGroceryList(
@@ -137,7 +138,10 @@ export function buildGroceryList(
     for (const ingredient of recipe.ingredients) {
       const family = unitFamily(ingredient.unit);
       const unit = FAMILY_BASE_UNIT[family];
-      const key = `${resolver.key(ingredient.name)}|${family}`;
+      const ingredientKey = resolver.key(ingredient.name);
+      const key = `${ingredientKey}|${family}`;
+      // The household's own call wins; where it has made none, the recipe line decides.
+      const staple = resolver.staple(ingredientKey) ?? ingredient.staple;
       const quantity =
         ingredient.quantity === null
           ? null
@@ -152,19 +156,19 @@ export function buildGroceryList(
       const group = groups.get(key);
       if (group) {
         group.row.contributions.push(contribution);
-        group.allStaples &&= ingredient.staple;
+        group.allStaples &&= staple;
       } else {
         groups.set(key, {
           row: {
             key,
             // The household's own name for it, when it gave one (a merge or a rename), else as the first recipe wrote it.
-            name: resolver.name(resolver.key(ingredient.name)) ?? ingredient.name,
+            name: resolver.name(ingredientKey) ?? ingredient.name,
             family,
             quantity: null,
             unit,
             contributions: [contribution],
           },
-          allStaples: ingredient.staple,
+          allStaples: staple,
         });
       }
     }

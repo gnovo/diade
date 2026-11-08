@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { createIngredientResolver, ingredientId } from './ingredientCatalog';
-import { mergedGroups, planMerge, planRename, planSeparate } from './ingredientMerges';
+import {
+  mergedGroups,
+  planMerge,
+  planRename,
+  planSeparate,
+  planSetStaple,
+} from './ingredientMerges';
 
 const SPACE = '11111111-1111-4111-8111-111111111111';
 const entry = (
@@ -143,5 +149,48 @@ describe('mergedGroups', () => {
     const orphan = entry('Orphan', 'orphan', undefined, 'missing-id');
     expect(mergedGroups([meat, gone])).toEqual([]);
     expect(mergedGroups([orphan])).toEqual([]);
+  });
+});
+
+describe('planSetStaple', () => {
+  it('makes an entry carrying the setting when the ingredient has none', () => {
+    expect(planSetStaple(SPACE, [], 'Paprika', true)).toEqual([
+      {
+        op: 'insert',
+        id: ingredientId(SPACE, 'paprika'),
+        input: { name: 'Paprika', matchKey: 'paprika', staple: true },
+      },
+    ]);
+  });
+
+  it('updates the entry, and does nothing when it is already so', () => {
+    const salt = { ...entry('Salt', 'salt'), staple: true };
+    expect(planSetStaple(SPACE, [salt], 'Sal', false)).toEqual([
+      { op: 'update', id: salt.id, changes: { staple: false } },
+    ]);
+    expect(planSetStaple(SPACE, [salt], 'Salt', true)).toEqual([]);
+  });
+
+  it('takes the setting back with null, and writes nothing when there is none to take back', () => {
+    const salt = { ...entry('Salt', 'salt'), staple: true };
+    expect(planSetStaple(SPACE, [salt], 'Salt', null)).toEqual([
+      { op: 'update', id: salt.id, changes: { staple: null } },
+    ]);
+    expect(planSetStaple(SPACE, [], 'Salt', null)).toEqual([]);
+  });
+
+  it('keeps the setting on the ingredient a merged name resolves to', () => {
+    const meat = entry('Meat', 'meat');
+    const meet = entry('Meet', 'meet', undefined, meat.id);
+    expect(planSetStaple(SPACE, [meat, meet], 'Meet', true)).toEqual([
+      { op: 'update', id: meat.id, changes: { staple: true } },
+    ]);
+  });
+
+  it('is kept on the dictionary name for a synonym, so the grocery list finds it', () => {
+    const [write] = planSetStaple(SPACE, [], 'Eggplant', true);
+    expect(write).toMatchObject({ op: 'insert', input: { staple: true } });
+    const key = createIngredientResolver([]).key('Eggplant');
+    expect(write.op === 'insert' && write.input.matchKey).toBe(key);
   });
 });

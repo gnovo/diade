@@ -15,6 +15,7 @@ import {
   mergeIngredientNames,
   renameIngredient,
   separateIngredient,
+  setIngredientStaple,
 } from '../data/ingredientActions';
 import { useIngredientCatalog } from '../data/useIngredientCatalog';
 import { Icon } from '../design';
@@ -172,6 +173,104 @@ const MergeNamesSheet: React.FC<{
   );
 };
 
+/** The ingredients the recipes use, each once, with whether lists treat it as a pantry staple right now. */
+function stapleRows(
+  recipes: Recipe[],
+  resolver: IngredientResolver,
+): Array<{ name: string; staple: boolean }> {
+  const byKey = new Map<string, { name: string; lines: boolean[] }>();
+  for (const recipe of recipes) {
+    for (const line of recipe.ingredients) {
+      const key = resolver.key(line.name);
+      if (!key) continue;
+      const group = byKey.get(key) ?? { name: resolver.name(key) ?? line.name, lines: [] };
+      group.lines.push(line.staple);
+      byKey.set(key, group);
+    }
+  }
+  return [...byKey.entries()]
+    .map(([key, { name, lines }]) => ({
+      name,
+      // The household's call when it made one, else what the recipe lines say.
+      staple: resolver.staple(key) ?? lines.every(Boolean),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** Which ingredients are pantry staples (left out of grocery lists made from recipes): one switch each, one write per tap. */
+const StaplesSection: React.FC<{
+  recipes: Recipe[];
+  entries: Ingredient[];
+  resolver: IngredientResolver;
+}> = ({ recipes, entries, resolver }) => {
+  const { t } = useTranslation();
+  const ctx = useWriteContext();
+  const [query, setQuery] = useState('');
+  const rows = useMemo(() => stapleRows(recipes, resolver), [recipes, resolver]);
+  const needle = ingredientMatchKey(query);
+  const shown = rows.filter(({ name }) => !needle || ingredientMatchKey(name).includes(needle));
+
+  const toggle = (name: string, staple: boolean) => {
+    if (!ctx) return;
+    setIngredientStaple(ctx, entries, name, !staple).catch((err) =>
+      Alert.alert(
+        t('common.couldNotSave'),
+        err instanceof Error ? err.message : t('common.tryAgain'),
+      ),
+    );
+  };
+
+  return (
+    <View className="mt-6">
+      <SectionLabel>{t('ingredients.staplesHeading')}</SectionLabel>
+      <Text className="text-sm leading-5 text-ink-muted mb-3">{t('ingredients.staplesHint')}</Text>
+      <TextField
+        value={query}
+        onChangeText={setQuery}
+        placeholder={t('ingredients.merge.search')}
+        accessibilityLabel={t('ingredients.merge.search')}
+        autoCorrect={false}
+      />
+      <Card className="mt-3 mb-0">
+        {shown.length === 0 ? (
+          <EmptyState message={t('ingredients.staplesEmpty')} />
+        ) : (
+          shown.slice(0, 60).map(({ name, staple }, index) => (
+            <View key={name}>
+              {index === 0 ? null : <View className="h-px bg-border" />}
+              <View className="flex-row items-center min-h-[52px]">
+                <Text className="flex-1 text-base text-ink mr-2">{name}</Text>
+                <Pressable
+                  onPress={() => toggle(name, staple)}
+                  accessibilityRole="switch"
+                  accessibilityState={{ checked: staple }}
+                  accessibilityLabel={t(
+                    staple ? 'recipes.form.unmarkStaple' : 'recipes.form.markStaple',
+                    { name },
+                  )}
+                  className="min-h-[48px] justify-center px-1"
+                >
+                  <View
+                    className={`px-3 py-1.5 rounded-full border ${
+                      staple ? 'bg-surface-tint border-action' : 'border-border-strong'
+                    }`}
+                  >
+                    <Text
+                      className={`text-xs font-semibold ${staple ? 'text-action' : 'text-ink-muted'}`}
+                    >
+                      {t('recipes.form.pantry')}
+                    </Text>
+                  </View>
+                </Pressable>
+              </View>
+            </View>
+          ))
+        )}
+      </Card>
+    </View>
+  );
+};
+
 const RenameSheet: React.FC<{
   entry: Pick<Ingredient, 'id' | 'name'> | null;
   entries: Ingredient[];
@@ -305,6 +404,7 @@ export const IngredientsScreen: React.FC<{
               ))
             )}
           </View>
+          <StaplesSection recipes={recipes} entries={entries} resolver={resolver} />
         </ScrollView>
         <MergeNamesSheet
           visible={mergeOpen}

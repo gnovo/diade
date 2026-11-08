@@ -22,7 +22,8 @@ brief for the PR, then `dev-notes.md`. Wireframes: `design/meal-prep/index.html`
 | D | New-list wizard | [pr-d](pr-d-new-list-wizard.md) | merged (#18) |
 | E | Markdown import and export | [pr-e](pr-e-markdown-import.md) | merged (#22); format in [recipe-markdown](../../features/recipe-markdown.md) |
 | F | Ingredient catalog: data, sync, resolver | [pr-f](pr-f-ingredient-catalog.md) | merged (#40) |
-| G | Ingredients screen, remembered merges | [pr-g](pr-g-ingredients-screen.md) | built |
+| G | Ingredients screen, remembered merges | [pr-g](pr-g-ingredients-screen.md) | merged (#42) |
+| G2 | Pantry staples on the catalog | [pr-g](pr-g-ingredients-screen.md) | built |
 
 Follow-ups after E, in order. Full detail, process notes and a starting prompt: [follow-ups-handover.md](follow-ups-handover.md).
 
@@ -81,7 +82,7 @@ These extend the list above. Full reasoning and the slicing are in [v2-ux-and-ca
     sync mutation, so a recipe with ten ingredients would push eleven for no visible benefit. (An earlier version of this note blamed the
     Worker's CPU limit; that failure was actually the `postgres` 4.0 bump, fixed by pinning 3.x. The decision stands on its own.)
     Brief: [pr-f-ingredient-catalog.md](pr-f-ingredient-catalog.md).
-12. **Staples live on the catalog entry** (a default), and a recipe line may override it. This revises decision 7.
+12. **Staples: the household's call lives on the catalog entry and wins** over the flag on a recipe line; an ingredient the household has not set follows its recipe lines. (This revises decision 7. The first idea, a catalog default that a line overrides, would have left the default doing nothing for every existing recipe, whose lines all carry an explicit flag.)
 13. **Recipe lines carry no ingredient id** (revised from "lazy ids"). A line is matched to its ingredient by name, through the resolver, so no backfill and no rewrite of the JSON is needed.
 14. **A plan stays a weekly pool** (decision 5 holds). A plan always exists for a week; there is no "New plan" or "Delete plan".
 15. **Recipe structure is markdown in `notes`**: `## Steps`, `## Notes`, `## Source`, with a structured editor over it. Unknown

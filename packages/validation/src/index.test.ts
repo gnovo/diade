@@ -453,6 +453,17 @@ describe('ingredient catalog sync payloads', () => {
     ).toBe(false);
   });
 
+  it('accepts the household staple call as true, false or null, and nothing else', () => {
+    for (const staple of [true, false, null]) {
+      expect(
+        parseSyncPayload('ingredients', 'INSERT', { name: 'Salt', matchKey: 'salt', staple })
+          .success,
+      ).toBe(true);
+      expect(parseSyncPayload('ingredients', 'UPDATE', { staple }).success).toBe(true);
+    }
+    expect(parseSyncPayload('ingredients', 'UPDATE', { staple: 'yes' }).success).toBe(false);
+  });
+
   it('lets an update change the name, aliases or merge, but not the match key', () => {
     expect(parseSyncPayload('ingredients', 'UPDATE', { name: 'Beef' }).success).toBe(true);
     expect(
