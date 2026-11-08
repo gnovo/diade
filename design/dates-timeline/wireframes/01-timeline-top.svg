@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812" font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
+<!-- 01 Dates, top of the screen: hero, birthdays strip, then the timeline starts · mobile 375x812 · 8px grid -->
+<rect x="0" y="0" width="375" height="812" fill="#fff"/>
+<text x="16" y="32" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">9:41</text>
+<rect x="311" y="22" width="32" height="12" rx="3" fill="#fff"/>
+<text x="16" y="96" font-size="28" text-anchor="start" stroke="none" fill="#000" font-weight="700">Dates</text>
+<circle cx="335" cy="80" r="24" fill="#000"/>
+<line x1="327" y1="80" x2="343" y2="80" stroke="#fff" stroke-width="2.5"/>
+<line x1="335" y1="72" x2="335" y2="88" stroke="#fff" stroke-width="2.5"/>
+<rect x="16" y="120" width="56" height="40" rx="20" fill="#000"/>
+<text x="44.0" y="145" font-size="14" text-anchor="middle" stroke="none" fill="#fff">All</text>
+<rect x="80" y="120" width="80" height="40" rx="20" fill="#fff"/>
+<text x="120.0" y="145" font-size="14" text-anchor="middle" stroke="none" fill="#000">Couple</text>
+<rect x="168" y="120" width="104" height="40" rx="20" fill="#fff"/>
+<text x="220.0" y="145" font-size="14" text-anchor="middle" stroke="none" fill="#000">Birthdays</text>
+<rect x="280" y="120" width="72" height="40" rx="20" fill="#fff"/>
+<text x="316.0" y="145" font-size="14" text-anchor="middle" stroke="none" fill="#000">Trips</text>
+<rect x="360" y="120" width="72" height="40" rx="20" fill="#fff"/>
+<text x="396.0" y="145" font-size="14" text-anchor="middle" stroke="none" fill="#000">Other</text>
+<rect x="16" y="176" width="343" height="144" rx="8" fill="#fff"/>
+<text x="187.5" y="204" font-size="12" text-anchor="middle" stroke="none" fill="#666">First Date</text>
+<text x="187.5" y="240" font-size="28" text-anchor="middle" stroke="none" fill="#000" font-weight="700">2274 days</text>
+<text x="187.5" y="264" font-size="14" text-anchor="middle" stroke="none" fill="#666">6 years · 2 months · 21 days</text>
+<rect x="32" y="280" width="311" height="4" rx="2" fill="#e6e6e6" stroke-width="0"/>
+<rect x="32" y="280" width="243" height="4" rx="2" fill="#000"/>
+<text x="32" y="308" font-size="12" text-anchor="start" stroke="none" fill="#666">Next: 7 years together</text>
+<text x="343" y="308" font-size="12" text-anchor="end" stroke="none" fill="#000" font-weight="700">283 days to go</text>
+<text x="16" y="344" font-size="12" text-anchor="start" stroke="none" fill="#666">BIRTHDAYS</text>
+<rect x="16" y="360" width="167" height="88" rx="8" fill="#fff"/>
+<circle cx="44" cy="388" r="16" fill="#e6e6e6"/>
+<text x="44" y="392" font-size="12" text-anchor="middle" stroke="none" fill="#666">cak</text>
+<text x="68" y="393" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Gonçalo</text>
+<text x="32" y="424" font-size="12" text-anchor="start" stroke="none" fill="#666">turns 39</text>
+<text x="32" y="440" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">in 88 days</text>
+<rect x="192" y="360" width="167" height="88" rx="8" fill="#fff"/>
+<circle cx="220" cy="388" r="16" fill="#e6e6e6"/>
+<text x="220" y="392" font-size="12" text-anchor="middle" stroke="none" fill="#666">cak</text>
+<text x="244" y="393" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Mónica</text>
+<text x="208" y="424" font-size="12" text-anchor="start" stroke="none" fill="#666">turns 36</text>
+<text x="208" y="440" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">in 223 days</text>
+<text x="16" y="480" font-size="12" text-anchor="start" stroke="none" fill="#666">OUR STORY</text>
+<line x1="40" y1="504" x2="40" y2="528" stroke="#000" stroke-dasharray="4 4"/>
+<line x1="40" y1="540" x2="40" y2="748" stroke="#000"/>
+<circle cx="40" cy="504" r="5" fill="#fff" stroke-dasharray="3 3"/>
+<text x="72" y="509" font-size="14" text-anchor="start" stroke="none" fill="#666">7 years together</text>
+<text x="359" y="509" font-size="12" text-anchor="end" stroke="none" fill="#666">in 283 days</text>
+<circle cx="40" cy="540" r="8" fill="#000"/>
+<rect x="72" y="528" width="72" height="24" rx="12" fill="#000"/>
+<text x="108" y="544" font-size="12" text-anchor="middle" stroke="none" fill="#fff" font-weight="700">TODAY</text>
+<text x="156" y="544" font-size="12" text-anchor="start" stroke="none" fill="#666">8 Nov 2026</text>
+<text x="72" y="576" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">2026</text>
+<line x1="112" y1="572" x2="359" y2="572" stroke="#e6e6e6" stroke-width="1.5"/>
+<circle cx="40" cy="600" r="5" fill="#fff"/>
+<text x="72" y="605" font-size="14" text-anchor="start" stroke="none" fill="#000">6 years together</text>
+<text x="359" y="605" font-size="12" text-anchor="end" stroke="none" fill="#666">18 Aug 2026</text>
+<text x="72" y="640" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">2025</text>
+<line x1="112" y1="636" x2="359" y2="636" stroke="#e6e6e6" stroke-width="1.5"/>
+<circle cx="40" cy="664" r="5" fill="#fff"/>
+<text x="72" y="669" font-size="14" text-anchor="start" stroke="none" fill="#000">5 years together</text>
+<text x="359" y="669" font-size="12" text-anchor="end" stroke="none" fill="#666">18 Aug 2025</text>
+<text x="72" y="704" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">2024</text>
+<line x1="112" y1="700" x2="359" y2="700" stroke="#e6e6e6" stroke-width="1.5"/>
+<circle cx="40" cy="728" r="5" fill="#fff"/>
+<text x="72" y="733" font-size="14" text-anchor="start" stroke="none" fill="#000">4 years together</text>
+<text x="359" y="733" font-size="12" text-anchor="end" stroke="none" fill="#666">18 Aug 2024</text>
+<line x1="0" y1="748" x2="375" y2="748" stroke="#000"/>
+<rect x="9.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="37.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="37.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Today</text>
+<rect x="84.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="112.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="112.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Calendar</text>
+<rect x="159.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="187.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="187.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Lists</text>
+<rect x="234.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="262.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="262.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Home</text>
+<rect x="309.5" y="756" width="56" height="32" rx="16" fill="#000"/>
+<text x="337.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#fff">▫</text>
+<text x="337.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#000">Dates</text>
+<g><circle cx="8" cy="80" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="84" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">1</text></g>
+<g><circle cx="8" cy="144" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="148" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">2</text></g>
+<g><circle cx="8" cy="240" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="244" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">3</text></g>
+<g><circle cx="8" cy="284" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="288" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">4</text></g>
+<g><circle cx="8" cy="404" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="408" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">5</text></g>
+<g><circle cx="8" cy="504" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="508" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">6</text></g>
+<g><circle cx="8" cy="540" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="544" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">7</text></g>
+<g><circle cx="8" cy="600" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="604" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">8</text></g>
+</svg>

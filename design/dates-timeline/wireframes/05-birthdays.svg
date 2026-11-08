@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812" font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
+<!-- 05 Birthdays filter: the soonest first, with the age they are turning · mobile 375x812 · 8px grid -->
+<rect x="0" y="0" width="375" height="812" fill="#fff"/>
+<text x="16" y="32" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">9:41</text>
+<rect x="311" y="22" width="32" height="12" rx="3" fill="#fff"/>
+<text x="16" y="96" font-size="28" text-anchor="start" stroke="none" fill="#000" font-weight="700">Dates</text>
+<circle cx="335" cy="80" r="24" fill="#000"/>
+<line x1="327" y1="80" x2="343" y2="80" stroke="#fff" stroke-width="2.5"/>
+<line x1="335" y1="72" x2="335" y2="88" stroke="#fff" stroke-width="2.5"/>
+<rect x="16" y="120" width="56" height="40" rx="20" fill="#fff"/>
+<text x="44.0" y="145" font-size="14" text-anchor="middle" stroke="none" fill="#000">All</text>
+<rect x="80" y="120" width="80" height="40" rx="20" fill="#fff"/>
+<text x="120.0" y="145" font-size="14" text-anchor="middle" stroke="none" fill="#000">Couple</text>
+<rect x="168" y="120" width="104" height="40" rx="20" fill="#000"/>
+<text x="220.0" y="145" font-size="14" text-anchor="middle" stroke="none" fill="#fff">Birthdays</text>
+<rect x="280" y="120" width="72" height="40" rx="20" fill="#fff"/>
+<text x="316.0" y="145" font-size="14" text-anchor="middle" stroke="none" fill="#000">Trips</text>
+<rect x="360" y="120" width="72" height="40" rx="20" fill="#fff"/>
+<text x="396.0" y="145" font-size="14" text-anchor="middle" stroke="none" fill="#000">Other</text>
+<text x="16" y="192" font-size="12" text-anchor="start" stroke="none" fill="#666">BIRTHDAYS · 2</text>
+<rect x="16" y="208" width="343" height="112" rx="8" fill="#fff"/>
+<circle cx="56" cy="264" r="24" fill="#e6e6e6"/>
+<text x="56" y="268" font-size="12" text-anchor="middle" stroke="none" fill="#666">cak</text>
+<text x="96" y="252" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Gonçalo</text>
+<text x="96" y="272" font-size="12" text-anchor="start" stroke="none" fill="#666">4 Feb 1988</text>
+<text x="96" y="292" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">turns 39</text>
+<line x1="255" y1="232" x2="255" y2="296" stroke="#e6e6e6" stroke-width="1.5"/>
+<text x="307" y="268" font-size="28" text-anchor="middle" stroke="none" fill="#000" font-weight="700">88</text>
+<text x="307" y="288" font-size="12" text-anchor="middle" stroke="none" fill="#666">days</text>
+<rect x="16" y="336" width="343" height="112" rx="8" fill="#fff"/>
+<circle cx="56" cy="392" r="24" fill="#e6e6e6"/>
+<text x="56" y="396" font-size="12" text-anchor="middle" stroke="none" fill="#666">cak</text>
+<text x="96" y="380" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Mónica</text>
+<text x="96" y="400" font-size="12" text-anchor="start" stroke="none" fill="#666">19 Jun 1991</text>
+<text x="96" y="420" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">turns 36</text>
+<line x1="255" y1="360" x2="255" y2="424" stroke="#e6e6e6" stroke-width="1.5"/>
+<text x="307" y="396" font-size="28" text-anchor="middle" stroke="none" fill="#000" font-weight="700">223</text>
+<text x="307" y="416" font-size="12" text-anchor="middle" stroke="none" fill="#666">days</text>
+<line x1="0" y1="748" x2="375" y2="748" stroke="#000"/>
+<rect x="9.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="37.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="37.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Today</text>
+<rect x="84.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="112.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="112.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Calendar</text>
+<rect x="159.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="187.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="187.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Lists</text>
+<rect x="234.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="262.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="262.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Home</text>
+<rect x="309.5" y="756" width="56" height="32" rx="16" fill="#000"/>
+<text x="337.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#fff">▫</text>
+<text x="337.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#000">Dates</text>
+<g><circle cx="8" cy="144" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="148" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">1</text></g>
+<g><circle cx="8" cy="264" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="268" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">2</text></g>
+<g><circle cx="8" cy="324" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="328" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">3</text></g>
+</svg>

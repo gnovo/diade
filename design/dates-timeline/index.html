@@ -1,0 +1,144 @@
+<title>Dates Timeline Wireframes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: sticky section nav on top, flow overview, then one row per screen: phone wireframe left, numbered notes right. */
+:root{--bg:#fafaf8;--panel:#fff;--ink:#111;--muted:#666;--line:#e5e5e0;--accent:#d33;--wire:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141412;--panel:#1d1d1a;--ink:#f1f1ec;--muted:#a3a39c;--line:#33332f;--accent:#ff6b5e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141412;--panel:#1d1d1a;--ink:#f1f1ec;--muted:#a3a39c;--line:#33332f;--accent:#ff6b5e;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,system-ui,"Segoe UI",sans-serif;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1080px;margin:0 auto;padding-block:32px 96px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:4px;overflow-x:auto;padding:8px 0;margin-bottom:32px;z-index:5}
+nav a{white-space:nowrap;font-size:13px;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:6px}
+nav a:hover{background:var(--panel);color:var(--ink)}
+.crumb{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+h1{font-size:34px;line-height:1.15;margin:8px 0 12px;text-wrap:balance}
+.lede{color:var(--muted);max-width:680px;margin:0 0 20px}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:40px}
+.pill{font-size:12px;border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:4px 10px;border-radius:999px}
+h2{font-size:24px;margin:0 0 4px;text-wrap:balance}
+.sub{color:var(--muted);margin:0 0 20px;max-width:640px}
+section{scroll-margin-top:72px;margin-bottom:72px}
+.flow{background:var(--wire);border:1px solid var(--line);border-radius:8px;overflow-x:auto;cursor:zoom-in}
+.flow img{display:block;min-width:900px;width:100%}
+.row{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:32px;align-items:start}
+@media(max-width:760px){.row{grid-template-columns:1fr}.row .wire{max-width:340px}}
+.wire{background:var(--wire);border:1px solid var(--line);border-radius:8px;overflow:hidden;cursor:zoom-in}
+.wire img{display:block;width:100%}
+ol.notes{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+ol.notes li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:12px}
+.n{width:22px;height:22px;border:1.5px solid var(--accent);color:var(--accent);border-radius:50%;font-size:12px;font-weight:700;display:grid;place-items:center}
+.why{margin-top:20px;border:1px dashed var(--accent);border-radius:8px;padding:12px 16px;font-size:14px}
+.why b{color:var(--accent)}
+table{border-collapse:collapse;font-size:14px;min-width:560px}
+.tw{overflow-x:auto}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;overflow:auto;z-index:50;padding:24px;cursor:zoom-out}
+#lb.on{display:block}#lb img{display:block;margin:0 auto;background:#fff;max-width:100%;max-height:none;height:auto;width:min(480px,100%)}
+#lb.wide img{width:min(1200px,100%)}
+</style>
+<div class="wrap">
+<nav>
+<a href="#flow">Flow</a><a href="#top">1 Top</a><a href="#origin">2 Origin</a><a href="#parts">3 Parts</a><a href="#trips">4 Trips</a><a href="#birthdays">5 Birthdays</a><a href="#rules">Rules</a><a href="#open">Open questions</a>
+</nav>
+<header>
+<div class="crumb">Díade mobile · Dates tab</div>
+<h1>Dates tab: the timeline</h1>
+<p class="lede">Today the tab is a list of countdowns, sorted by two different rules, with birthdays mixed in. It becomes one scrolling story: the day counter, then birthdays on their own, then a rail that runs from today back to the first date. The sample data is your real prod data.</p>
+<div class="pills"><span class="pill">5 screens</span><span class="pill">Lo-fi · monochrome</span><span class="pill">Mobile 375×812</span><span class="pill">Tap any wireframe to zoom</span></div>
+</header>
+
+<section id="flow">
+<h2>Flow</h2>
+<p class="sub">One screen, scrolled. Birthdays move to a strip at the top and to their own list under the Birthdays chip. Everything else lives on the rail.</p>
+<div class="flow" data-zoom="wide"><img src="wireframes/flow.svg" alt="Overview of all five screens"></div>
+</section>
+
+<section id="top"><h2>1 · Top of the screen</h2>
+<p class="sub">The first screenful answers "where are we" and "what's next" before any scrolling.</p>
+<div class="row"><div class="wire" data-zoom><img src="wireframes/01-timeline-top.svg" alt="Timeline, top"></div>
+<div><ol class="notes">
+<li><span class="n">1</span><span>Header and plus button are unchanged, so the add flow from the dates redesign still applies.</span></li>
+<li><span class="n">2</span><span>The same filter chips as today. Each one filters the rail (see screens 4 and 5).</span></li>
+<li><span class="n">3</span><span>The day counter stays, and gains the elapsed time in years, months and days. This is the "how far we've come" line.</span></li>
+<li><span class="n">4</span><span>A progress bar shows how far through the current year of the relationship you are, with the next anniversary named underneath.</span></li>
+<li><span class="n">5</span><span>Birthdays get a compact strip of two cards, each with the age they are turning and the days left. More than two scroll sideways.</span></li>
+<li><span class="n">6</span><span>The rail starts in the future: the next anniversary, with a dashed node and a dashed rail above Today.</span></li>
+<li><span class="n">7</span><span>The Today marker splits future from past. The rail turns solid below it.</span></li>
+<li><span class="n">8</span><span>Anniversary ticks, one per year, under a year divider. They are small on purpose, so milestones stay the loudest thing on the rail.</span></li>
+</ol>
+<div class="why"><b>Why:</b> the old screen led with a three-row cluster of birthdays and the anniversary, then past events in a different order. Now the page reads top to bottom as "next, now, then, before".</div></div></div></section>
+
+<section id="origin"><h2>2 · Scrolled to the origin</h2>
+<p class="sub">Newest at the top, so the story reads backwards in time and ends where it began.</p>
+<div class="row"><div class="wire" data-zoom><img src="wireframes/02-timeline-origin.svg" alt="Timeline, origin"></div>
+<div><ol class="notes">
+<li><span class="n">1</span><span>An anniversary tick sits in its year, between the milestones around it.</span></li>
+<li><span class="n">2</span><span>Milestones are cards on the rail. The node carries the type icon you already have. Tapping opens the existing detail screen, unchanged.</span></li>
+<li><span class="n">3</span><span>The gap between two milestones is written on the rail ("1 week", "3 months"). This is what turns a list into a trajectory.</span></li>
+<li><span class="n">4</span><span>"1 year together" is the first tick. A gap is not shown across a tick, because the tick already marks the time.</span></li>
+<li><span class="n">5</span><span>Trips and "other" dates share one card style. The icon tells them apart.</span></li>
+<li><span class="n">6</span><span>The origin is the pinned First Date: a filled node and a taller card with a heavier border. It closes the story.</span></li>
+</ol>
+<div class="why"><b>Why:</b> six years in, the trip to Porto Santo and the move-in are "when" and "how long after". Gaps make that visible without counting.</div></div></div></section>
+
+<section id="parts"><h2>3 · Parts</h2>
+<p class="sub">Every element the rail is built from, so the build is a handful of components.</p>
+<div class="row"><div class="wire" data-zoom><img src="wireframes/03-timeline-parts.svg" alt="Timeline parts"></div>
+<div><ol class="notes">
+<li><span class="n">1</span><span><b>Origin.</b> The pinned date. If nothing is pinned, the oldest couple date takes this role.</span></li>
+<li><span class="n">2</span><span><b>Milestone.</b> Any stored date that is not a birthday. Past ones show "x ago".</span></li>
+<li><span class="n">3</span><span><b>Anniversary tick.</b> Computed from the origin, one per year, never stored, not tappable.</span></li>
+<li><span class="n">4</span><span><b>Planned.</b> A stored date that is still ahead: dashed card and node, "in 124 days". The Madeira trip here is invented, to show the state. Your data has none yet.</span></li>
+<li><span class="n">5</span><span><b>Gap.</b> Duration between two adjacent milestones, in the largest sensible unit.</span></li>
+<li><span class="n">6</span><span><b>Today.</b> Always present. The rail is dashed above it and solid below.</span></li>
+<li><span class="n">7</span><span><b>Year divider.</b> A label and a hairline.</span></li>
+<li><span class="n">8</span><span><b>Rail.</b> Dashed means "not yet", solid means "has happened".</span></li>
+</ol></div></div></section>
+
+<section id="trips"><h2>4 · Filter: Trips</h2>
+<p class="sub">A filter keeps the rail but drops the hero, the birthdays strip, the ticks and the Today marker.</p>
+<div class="row"><div class="wire" data-zoom><img src="wireframes/04-timeline-trips.svg" alt="Trips filter"></div>
+<div><ol class="notes">
+<li><span class="n">1</span><span>Trips chip active. Couple and Other work the same way.</span></li>
+<li><span class="n">2</span><span>A one-line summary replaces the hero: how many, and which came first.</span></li>
+<li><span class="n">3</span><span>Same milestone cards and year dividers.</span></li>
+<li><span class="n">4</span><span>Gaps are measured between the trips shown, so "1 year 4 months" here spans the move-in that the filter hides.</span></li>
+</ol></div></div></section>
+
+<section id="birthdays"><h2>5 · Filter: Birthdays</h2>
+<p class="sub">Birthdays are about the next time, not the past, so this is a list and not a rail.</p>
+<div class="row"><div class="wire" data-zoom><img src="wireframes/05-birthdays.svg" alt="Birthdays filter"></div>
+<div><ol class="notes">
+<li><span class="n">1</span><span>Birthdays chip active.</span></li>
+<li><span class="n">2</span><span>Name, birth date and the age they turn, with the countdown as the big number on the right.</span></li>
+<li><span class="n">3</span><span>Sorted by next occurrence, so the soonest is always first. Birthdays of friends and family sit here too, once the third-party types ship.</span></li>
+</ol></div></div></section>
+
+<section id="rules">
+<h2>Rules</h2>
+<div class="tw"><table>
+<tr><th>Element</th><th>Where it comes from</th><th>Shown when</th></tr>
+<tr><td>Hero</td><td>The pinned date, or the oldest couple date</td><td>All and Couple filters</td></tr>
+<tr><td>Birthdays strip</td><td>Dates of birthday type, by next occurrence</td><td>All filter only</td></tr>
+<tr><td>Milestone cards</td><td>Every other stored date</td><td>All, plus the matching filter</td></tr>
+<tr><td>Anniversary ticks</td><td>Computed from the origin date, one per year up to the next</td><td>All and Couple filters</td></tr>
+<tr><td>Gaps</td><td>Computed between adjacent milestones</td><td>Always, except across a tick</td></tr>
+<tr><td>Planned (dashed)</td><td>Stored one-off dates with a future date</td><td>Always above Today</td></tr>
+</table></div></section>
+
+<section id="open">
+<h2>Open questions</h2>
+<ol class="notes">
+<li><span class="n">1</span><span>Ticks: with many years, the rail gets long. Should ticks beyond the fifth collapse into "Years 6 to 10"? Not needed at 6 years.</span></li>
+<li><span class="n">2</span><span>Recurring non-birthday dates (a recurring "Other" date) are ticks or cards? These wireframes treat only the first-date anniversary as ticks.</span></li>
+<li><span class="n">3</span><span>Does the Today tab's "Us" strip want the same next-anniversary line as the hero?</span></li>
+</ol></section>
+</div>
+<div id="lb"><img alt=""></div>
+<script>
+var lb=document.getElementById('lb'),li=lb.querySelector('img');
+document.querySelectorAll('[data-zoom]').forEach(function(e){e.addEventListener('click',function(){li.src=e.querySelector('img').src;lb.className='on'+(e.dataset.zoom==='wide'?' wide':'')})});
+lb.addEventListener('click',function(){lb.className=''});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')lb.className=''});
+</script>

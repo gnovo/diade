@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812" font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
+<!-- 03 Timeline parts: every element the rail is built from · mobile 375x812 · 8px grid -->
+<rect x="0" y="0" width="375" height="812" fill="#fff"/>
+<text x="16" y="32" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">9:41</text>
+<rect x="311" y="22" width="32" height="12" rx="3" fill="#fff"/>
+<text x="16" y="96" font-size="28" text-anchor="start" stroke="none" fill="#000" font-weight="700">Parts</text>
+<line x1="40" y1="136" x2="40" y2="704" stroke="#000"/>
+<text x="72" y="136" font-size="12" text-anchor="start" stroke="none" fill="#666">ORIGIN · the pinned first date</text>
+<line x1="56" y1="192" x2="72" y2="192" stroke="#000"/>
+<rect x="72" y="144" width="287" height="96" rx="8" fill="#fff" stroke-width="3"/>
+<circle cx="40" cy="192" r="16" fill="#000"/>
+<text x="40" y="196" font-size="12" text-anchor="middle" stroke="none" fill="#fff">hea</text>
+<text x="88" y="172" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">First Date</text>
+<text x="88" y="192" font-size="12" text-anchor="start" stroke="none" fill="#666">Tue 18 Aug 2020</text>
+<text x="88" y="216" font-size="12" text-anchor="start" stroke="none" fill="#666">Where it began · 2274 days ago</text>
+<text x="343" y="197" font-size="20" text-anchor="middle" stroke="none" fill="#000">›</text>
+<text x="72" y="264" font-size="12" text-anchor="start" stroke="none" fill="#666">MILESTONE · any entry that is not a birthday</text>
+<line x1="56" y1="304" x2="72" y2="304" stroke="#000"/>
+<rect x="72" y="272" width="287" height="64" rx="8" fill="#fff"/>
+<circle cx="40" cy="304" r="16" fill="#e6e6e6"/>
+<text x="40" y="308" font-size="12" text-anchor="middle" stroke="none" fill="#666">bag</text>
+<text x="88" y="300" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">First trip to Porto</text>
+<text x="88" y="320" font-size="12" text-anchor="start" stroke="none" fill="#666">23 Apr 2022 · 4 years 6 months ago</text>
+<text x="343" y="309" font-size="20" text-anchor="middle" stroke="none" fill="#000">›</text>
+<text x="72" y="352" font-size="12" text-anchor="start" stroke="none" fill="#666">ANNIVERSARY TICK · computed, not stored</text>
+<circle cx="40" cy="376" r="5" fill="#fff"/>
+<text x="72" y="381" font-size="14" text-anchor="start" stroke="none" fill="#000">2 years together</text>
+<text x="359" y="381" font-size="12" text-anchor="end" stroke="none" fill="#666">18 Aug 2022</text>
+<text x="72" y="408" font-size="12" text-anchor="start" stroke="none" fill="#666">PLANNED · a date still ahead (dashed)</text>
+<line x1="56" y1="448" x2="72" y2="448" stroke="#000" stroke-dasharray="4 4"/>
+<rect x="72" y="416" width="287" height="64" rx="8" fill="#fff" stroke-dasharray="6 4"/>
+<circle cx="40" cy="448" r="16" fill="#e6e6e6" stroke-dasharray="3 3"/>
+<text x="40" y="452" font-size="12" text-anchor="middle" stroke="none" fill="#666">bag</text>
+<text x="88" y="444" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Trip to Madeira</text>
+<text x="88" y="464" font-size="12" text-anchor="start" stroke="none" fill="#666">12 Mar 2027 · in 124 days</text>
+<text x="343" y="453" font-size="20" text-anchor="middle" stroke="none" fill="#000">›</text>
+<text x="72" y="496" font-size="12" text-anchor="start" stroke="none" fill="#666">GAP · time between two milestones</text>
+<text x="72" y="520" font-size="12" text-anchor="start" stroke="none" fill="#666">↕ 3 months</text>
+<text x="72" y="544" font-size="12" text-anchor="start" stroke="none" fill="#666">TODAY · splits future from past</text>
+<circle cx="40" cy="564" r="8" fill="#000"/>
+<rect x="72" y="552" width="72" height="24" rx="12" fill="#000"/>
+<text x="108" y="568" font-size="12" text-anchor="middle" stroke="none" fill="#fff" font-weight="700">TODAY</text>
+<text x="156" y="568" font-size="12" text-anchor="start" stroke="none" fill="#666">8 Nov 2026</text>
+<text x="72" y="600" font-size="12" text-anchor="start" stroke="none" fill="#666">YEAR · divider</text>
+<text x="72" y="624" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">2022</text>
+<line x1="112" y1="620" x2="359" y2="620" stroke="#e6e6e6" stroke-width="1.5"/>
+<text x="72" y="648" font-size="12" text-anchor="start" stroke="none" fill="#666">RAIL · dashed ahead, solid behind</text>
+<line x1="40" y1="656" x2="40" y2="704" stroke="#000" stroke-dasharray="4 4"/>
+<text x="72" y="684" font-size="12" text-anchor="start" stroke="none" fill="#666">dashed</text>
+<line x1="0" y1="748" x2="375" y2="748" stroke="#000"/>
+<rect x="9.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="37.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="37.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Today</text>
+<rect x="84.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="112.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="112.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Calendar</text>
+<rect x="159.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="187.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="187.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Lists</text>
+<rect x="234.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="262.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="262.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Home</text>
+<rect x="309.5" y="756" width="56" height="32" rx="16" fill="#000"/>
+<text x="337.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#fff">▫</text>
+<text x="337.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#000">Dates</text>
+<g><circle cx="8" cy="212" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="216" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">1</text></g>
+<g><circle cx="8" cy="300" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="304" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">2</text></g>
+<g><circle cx="8" cy="376" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="380" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">3</text></g>
+<g><circle cx="8" cy="448" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="452" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">4</text></g>
+<g><circle cx="8" cy="512" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="516" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">5</text></g>
+<g><circle cx="8" cy="564" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="568" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">6</text></g>
+<g><circle cx="8" cy="620" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="624" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">7</text></g>
+<g><circle cx="8" cy="684" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="688" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">8</text></g>
+</svg>
