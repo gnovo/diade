@@ -437,17 +437,15 @@ def s10():
     ghost(s, recipes_screen)
     top = 96
     sheet(s, top, 'Import recipes', footer='Preview')
-    button(s, 16, top + 64, 343, 'Choose a .md file', False, 56)
-    s.text(W / 2, top + 148, 'or paste', 12, 'middle', '#666')
-    s.rect(16, top + 168, 343, 280, 8)
+    s.text(16, top + 76, 'PASTE MARKDOWN', 12, bold=True, fill='#666')
+    s.rect(16, top + 92, 343, 280, 8)
     for i, line in enumerate(['# Spaghetti carbonara', 'servings: 4', '', '## Ingredients', '- 400 g spaghetti', '- 200 g guanciale',
                               '- 4 eggs', '- 1 tsp salt']):
-        s.text(28, top + 196 + i * 24, line, 12, fill='#000' if line else '#666')
-    s.text(16, top + 480, 'One file can hold several recipes: each', 12, fill='#666')
-    s.text(16, top + 498, 'starts at a # heading. Nothing is saved yet.', 12, fill='#666')
-    s.callout(343, top + 92)
-    s.callout(343, top + 300)
-    s.callout(343, top + 490)
+        s.text(28, top + 120 + i * 24, line, 12, fill='#000' if line else '#666')
+    s.text(16, top + 404, 'One note can hold several recipes: each', 12, fill='#666')
+    s.text(16, top + 422, 'starts at a # heading. Nothing is saved yet.', 12, fill='#666')
+    s.callout(343, top + 224)
+    s.callout(343, top + 414)
     s.finish('10-import-entry.svg')
 
 
@@ -458,7 +456,8 @@ def s11():
     sheet(s, top, 'Import recipes', back='Edit text', footer='Import 2 recipes')
     s.text(16, top + 120, '2 recipes found', 20, bold=True)
     card(s, 16, top + 144, 343, 240)
-    s.text(32, top + 172, 'Spaghetti carbonara', 14, bold=True)
+    s.rect(30, top + 160, 20, 20, 4)
+    s.text(60, top + 172, 'Spaghetti carbonara', 14, bold=True)
     s.text(343, top + 172, '4 servings', 12, 'end', '#666')
     rows = [('400 g', 'Spaghetti', False), ('454 g', 'Guanciale  (from 1 lb)', False), ('4', 'Eggs', False),
             ('1 tsp', 'Salt  · pantry', False), ('?', '1 knob butter', True)]
@@ -471,8 +470,9 @@ def s11():
         if flag:
             s.text(335, y + 17, 'Fix', 12, 'end', bold=True)
     card(s, 16, top + 400, 343, 64)
-    s.text(32, top + 430, 'Chicken curry', 14, bold=True)
-    s.text(32, top + 450, '9 ingredients · all read', 12, fill='#666')
+    s.rect(30, top + 418, 20, 20, 4)
+    s.text(60, top + 430, 'Chicken curry', 14, bold=True)
+    s.text(60, top + 450, '9 ingredients · all read', 12, fill='#666')
     s.text(335, top + 440, '⌄', 14, 'end')
     s.callout(343, top + 120)
     s.callout(343, top + 340)

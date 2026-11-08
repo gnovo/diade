@@ -188,6 +188,29 @@ const CONNECTOR = /^(?:(?:de|do|da|of)\s+|d['’])/i;
 
 const clean = (value: string) => value.trim().replace(/\s+/g, ' ');
 
+interface UnitMatch {
+  alias: UnitAlias;
+  /** The matched spelling from the table (lowercase). */
+  word: string;
+  /** What follows the unit, with a leading "of" / "de" removed. Empty for "400 g". */
+  name: string;
+}
+
+/** Every unit spelling that starts `rest` (the text after the number), longest first. */
+function unitMatches(rest: string): UnitMatch[] {
+  const afterNumber = rest.toLowerCase().replace(/^\s*/, '');
+  const matches: UnitMatch[] = [];
+  for (const { word, alias } of UNIT_LOOKUP) {
+    if (!afterNumber.startsWith(word)) continue;
+    const tail = afterNumber.slice(word.length);
+    // The unit must end at a word boundary: "g" must not be the start of "garlic".
+    if (/^\p{L}/u.test(tail)) continue;
+    const originalTail = rest.slice(rest.length - tail.length).replace(/^\.?\s*/, '');
+    matches.push({ alias, word, name: clean(originalTail.replace(CONNECTOR, '')) });
+  }
+  return matches;
+}
+
 /**
  * Reads one ingredient line in English or Portuguese and converts it to metric:
  * "400 g spaghetti", "1 lb beef" (454 g), "2 colheres de sopa de azeite", "1½ tsp salt",
@@ -213,21 +236,21 @@ export function parseIngredientLine(input: string): ParsedIngredient {
   if (!numberMatch || quantity === null) return asName(text);
 
   const rest = text.slice(numberMatch[0].length);
-  const lowerRest = rest.toLowerCase();
-
-  for (const { word, alias } of UNIT_LOOKUP) {
-    const afterNumber = lowerRest.replace(/^\s*/, '');
-    if (!afterNumber.startsWith(word)) continue;
-    const tail = afterNumber.slice(word.length);
-    // The unit must end at a word boundary: "g" must not be the start of "garlic".
-    if (/^\p{L}/u.test(tail)) continue;
-    const originalTail = rest.slice(rest.length - tail.length).replace(/^\.?\s*/, '');
-    const name = clean(originalTail.replace(CONNECTOR, ''));
-    if (!name) continue;
+  // "2 x eggs", "3× tomatoes": a count, whatever the name starts with ("2 x Cup noodles").
+  const times = /^\s*[x×]\s+(?!\d)(\S.*)$/i.exec(rest);
+  if (times) {
     return {
-      name: capitalizeFirst(name),
-      quantity: round(quantity * alias.factor, alias.unit),
-      unit: alias.unit,
+      name: capitalizeFirst(clean(times[1])),
+      quantity: toTaste ? null : round(quantity, 'unit'),
+      unit: 'unit',
+    };
+  }
+  const withUnit = unitMatches(rest).find((match) => match.name);
+  if (withUnit) {
+    return {
+      name: capitalizeFirst(withUnit.name),
+      quantity: round(quantity * withUnit.alias.factor, withUnit.alias.unit),
+      unit: withUnit.alias.unit,
     };
   }
 
@@ -240,6 +263,131 @@ export function parseIngredientLine(input: string): ParsedIngredient {
     quantity: toTaste ? null : round(quantity, 'unit'),
     unit: 'unit',
   };
+}
+
+// --- How sure the parser is ---
+
+/**
+ * Why a line should be looked at before it is trusted. `parseIngredientLine` always returns
+ * something; this says when that something is a guess.
+ * - `looseMeasure`: counted in a non-metric measure ("1 knob butter", "1 lata de atum"), so the
+ *   quantity does not mean what it says.
+ * - `unknownUnit`: a token after the number that looks like a unit the table does not know
+ *   ("2 pcs chicken", "1 jar of pesto").
+ * - `noName`: a quantity with nothing to count ("400 g", "2").
+ * - `outOfRange`: a quantity that cannot be stored (zero, or beyond 100000).
+ * - `similarName`: one typo away from a name used more often ("meet" for "meat"). Set when importing, where
+ *   the names already in use are known; `assessIngredientLine` itself never returns it.
+ */
+export type IngredientFlag =
+  | 'looseMeasure'
+  | 'unknownUnit'
+  | 'noName'
+  | 'outOfRange'
+  | 'similarName';
+
+export interface AssessedIngredient {
+  ingredient: ParsedIngredient;
+  flag: IngredientFlag | null;
+  /** The amount as written when it was converted to metric ("1 lb"), else null. */
+  convertedFrom: string | null;
+}
+
+/** Measure words that are not metric. Singular and plural, English and Portuguese. */
+const LOOSE_MEASURES = new Set([
+  'knob',
+  'knobs',
+  'handful',
+  'handfuls',
+  'bunch',
+  'bunches',
+  'dash',
+  'dashes',
+  'splash',
+  'splashes',
+  'can',
+  'cans',
+  'tin',
+  'tins',
+  'slice',
+  'slices',
+  'packet',
+  'packets',
+  'clove',
+  'cloves',
+  'sprig',
+  'sprigs',
+  'stick',
+  'sticks',
+  'molho',
+  'molhos',
+  'lata',
+  'latas',
+  'fatia',
+  'fatias',
+  'ramo',
+  'ramos',
+  'punhado',
+  'punhados',
+  'dente',
+  'dentes',
+  'pacote',
+  'pacotes',
+  'raminho',
+  'raminhos',
+  'fio',
+  'fios',
+]);
+
+/** Abbreviations that read as a unit but are not in the table. */
+const UNIT_ABBREVIATIONS = new Set(['pcs', 'pc', 'pkt', 'pkg', 'pk', 'ct', 'cs', 'cc']);
+
+const MAX_QUANTITY = 100000;
+
+/** `parseIngredientLine`, plus a signal for the lines it can only guess at. */
+export function assessIngredientLine(input: string): AssessedIngredient {
+  const ingredient = parseIngredientLine(input);
+  const result = (flag: IngredientFlag | null, convertedFrom: string | null = null) => ({
+    ingredient,
+    flag,
+    convertedFrom,
+  });
+  if (!ingredient.name) return result('noName');
+
+  let text = clean(input.replace(BULLET, ''));
+  text = clean(text.replace(TO_TASTE, ''));
+  const numberMatch = LEADING_NUMBER.exec(text);
+  const quantity = numberMatch ? parseQuantityNumber(numberMatch[1]) : null;
+  // No number: a name, with "to taste" as its amount. Nothing to doubt.
+  if (!numberMatch || quantity === null) return result(null);
+
+  const outOfRange =
+    ingredient.quantity !== null &&
+    (ingredient.quantity <= 0 || ingredient.quantity > MAX_QUANTITY);
+  const rest = text.slice(numberMatch[0].length);
+  const afterNumber = rest.trimStart();
+
+  const units = unitMatches(rest);
+  if (units.length > 0) {
+    const named = units.find((match) => match.name);
+    if (!named) return result('noName');
+    if (outOfRange) return result('outOfRange');
+    const written = afterNumber.slice(0, named.word.length);
+    return result(null, named.alias.factor === 1 ? null : `${numberMatch[0]} ${written}`);
+  }
+
+  if (!afterNumber) return result('noName');
+  // "7up", "2%": the number is part of the name.
+  if (!/^\s/.test(rest)) return result(null);
+  if (outOfRange) return result('outOfRange');
+
+  const [first = '', second = ''] = afterNumber.split(/\s+/);
+  const word = first.toLowerCase().replace(/[.,;:]+$/, '');
+  if (LOOSE_MEASURES.has(word)) return result('looseMeasure');
+  const abbreviated = first.endsWith('.') || UNIT_ABBREVIATIONS.has(word);
+  // "2 jars of pesto": a word standing between the number and "of" is a measure.
+  const measuring = /^(?:de|do|da|dos|das|of)$/i.test(second);
+  return result(abbreviated || measuring ? 'unknownUnit' : null);
 }
 
 // --- Showing a quantity ---

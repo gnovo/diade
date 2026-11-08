@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, BackHandler, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { ImportRecipesSheet } from '../components/ImportRecipesSheet';
 import { ItemSuggestions } from '../components/ItemSuggestions';
 import { NewListWizard } from '../components/NewListWizard';
 import { PlanListSection } from '../components/PlanListSection';
@@ -70,6 +71,7 @@ export const ListsScreen: React.FC = () => {
     open: false,
     recipe: null,
   });
+  const [importOpen, setImportOpen] = useState(false);
   const [openListId, setOpenListId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [newItemText, setNewItemText] = useState('');
@@ -239,10 +241,18 @@ export const ListsScreen: React.FC = () => {
   const openRecipe = recipes.data.find((r) => r.id === openRecipeId) ?? null;
   const recipeSheet = (
     <RecipeForm
+      library={recipes.data}
       visible={recipeForm.open}
       recipe={recipeForm.recipe}
       onClose={() => setRecipeForm((f) => ({ ...f, open: false }))}
       onSaved={(id) => setOpenRecipeId(id)}
+    />
+  );
+  const importSheet = (
+    <ImportRecipesSheet
+      visible={importOpen}
+      existing={recipes.data}
+      onClose={() => setImportOpen(false)}
     />
   );
 
@@ -406,6 +416,7 @@ export const ListsScreen: React.FC = () => {
             <RecipesLibrary
               recipes={recipes.data}
               onOpen={(recipe) => setOpenRecipeId(recipe.id)}
+              onImport={() => setImportOpen(true)}
             />
           ) : section === 'plan' ? (
             <PlanView
@@ -482,6 +493,7 @@ export const ListsScreen: React.FC = () => {
         }}
       />
       {recipeSheet}
+      {importSheet}
     </>
   );
 };
