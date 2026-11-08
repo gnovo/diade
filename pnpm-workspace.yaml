@@ -1,3 +1,10 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+# Security: force patched versions of transitive dev-tooling deps (Dependabot #2, #6, #7).
+# Remove each once drizzle-kit / @expo/cli ship releases that depend on a patched version.
+overrides:
+  "esbuild@<0.25.0": "^0.25.12"
+  "glob@>=9.0.0 <14.0.2": "^14.0.2"
+  "minimatch@>=7.0.0 <11.0.1": "^11.0.1"
