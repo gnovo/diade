@@ -38,7 +38,7 @@ th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute
 #lb.wide img{width:min(1464px,100%)}
 </style>
 <div class="wrap">
-<nav><a href="#flow">Flow</a><a href="#s1">1 Library</a><a href="#s2">2 Recipe sheet</a><a href="#s3">3 Plan</a><a href="#s4">4 Pick</a><a href="#s5">5 Grocery list</a><a href="#s6">6 Wizard type</a><a href="#s7">7 Name</a><a href="#s8">8 Recipes</a><a href="#s9">9 Review</a><a href="#s10">10 Import</a><a href="#s11">11 Review</a><a href="#s12">12 Add recipe</a><a href="#s13">13 Empty week</a><a href="#s14">14 Recipe detail</a><a href="#s15">15 Cooking</a><a href="#s17">17 Ingredients</a><a href="#s18">18 Merge names</a><a href="#s19">19 By aisle</a><a href="#rules">Rules</a><a href="#open">Open questions</a></nav>
+<nav><a href="#flow">Flow</a><a href="#s1">1 Library</a><a href="#s2">2 Recipe sheet</a><a href="#s3">3 Plan</a><a href="#s4">4 Pick</a><a href="#s5">5 Grocery list</a><a href="#s6">6 Wizard type</a><a href="#s7">7 Name</a><a href="#s8">8 Recipes</a><a href="#s9">9 Review</a><a href="#s10">10 Import</a><a href="#s11">11 Review</a><a href="#s12">12 Add recipe</a><a href="#s13">13 Empty week</a><a href="#s14">14 Recipe detail</a><a href="#s15">15 Cooking</a><a href="#s17">17 Ingredients</a><a href="#s18">18 Merge names</a><a href="#s19">19 By aisle</a><a href="#s20">20 Recipe menu</a><a href="#rules">Rules</a><a href="#open">Open questions</a></nav>
 <header>
 <div class="crumb">Díade mobile · Lists tab</div>
 <h1>Meal prep: recipes, a weekly plan, and smarter lists</h1>
@@ -118,9 +118,9 @@ th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute
 <div><ol class="notes"><li><span class="n">1</span><span><b>Write a recipe</b> opens the recipe sheet (02).</span></li><li><span class="n">2</span><span><b>Import</b> opens the paste step (10). The word markdown never appears; a link or a photo can become further rows here later.</span></li></ol></div></div></section>
 
 <section id="s14"><h2>14 · Recipe detail with sections</h2>
-<p class="sub">What a recipe looks like when you open it. Edit, share and delete are unchanged.</p>
+<p class="sub">What a recipe looks like when you open it. Edit, share and delete live in a menu (20), so the title gets the width.</p>
 <div class="row"><div class="wire" data-zoom><img src="wireframes/14-recipe-detail.svg" alt="Recipe detail"></div>
-<div><ol class="notes"><li><span class="n">1</span><span>Ingredients, with pantry staples set apart.</span></li><li><span class="n">2</span><span>Steps, numbered. A recipe with no steps shows no Steps card.</span></li><li><span class="n">3</span><span>Notes, as typed.</span></li><li><span class="n">4</span><span>Source. A web address opens in the browser; anything else is shown as text.</span></li></ol><div class="why"><b>Start cooking</b> (below Ingredients, Steps, Notes and Source) opens the cooking view (15, 16). It is shown only for a recipe that has steps.</div></div></div></section>
+<div><ol class="notes"><li><span class="n">1</span><span><b>&#8942;</b> replaces the Edit button and opens the actions menu (20). The title now wraps in fewer lines.</span></li><li><span class="n">2</span><span>The servings moved from above the title to the Ingredients header, where they describe the quantities: "1 dose", "2 doses".</span></li><li><span class="n">3</span><span>Ingredients, with pantry staples set apart.</span></li><li><span class="n">4</span><span>Steps, numbered. A recipe with no steps shows no Steps card.</span></li><li><span class="n">5</span><span>Notes, as typed.</span></li><li><span class="n">6</span><span>Source. A web address opens in the browser; anything else is shown as text.</span></li><li><span class="n">7</span><span><b>Start cooking</b> opens the cooking view (15, 16). It is shown only for a recipe that has steps, and is now the only button on the page.</span></li></ol></div></div></section>
 
 <section id="s15"><h2>15 · Cooking view</h2>
 <p class="sub">Full screen, hands-free: one big step at a time, the ingredients to tick off, and the screen kept awake while it is open.</p>
@@ -146,6 +146,11 @@ th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute
 <p class="sub">A Compras list reads in the order of the shop. Other list types are unchanged.</p>
 <div class="row"><div class="wire" data-zoom><img src="wireframes/19-groceries-by-aisle.svg" alt="Groceries by aisle"></div>
 <div><ol class="notes"><li><span class="n">1</span><span><b>By aisle | Manual order.</b> Shown on groceries lists only. By aisle is the default; Manual order is the drag-to-sort list as before.</span></li><li><span class="n">2</span><span>One heading per aisle with a count: produce, bakery, meat, fish, dairy and eggs, frozen, pantry, other. Empty aisles are hidden and checked items stay below, as today. The aisle comes from the name through a built-in en/pt-PT dictionary, so nothing is stored or synced; a name it does not know goes under Other.</span></li></ol></div></div></section>
+
+<section id="s20"><h2>20 · Recipe actions menu</h2>
+<p class="sub">Opened by the &#8942; on the recipe detail (14). A bottom sheet, like the other pickers.</p>
+<div class="row"><div class="wire" data-zoom><img src="wireframes/20-recipe-menu.svg" alt="Recipe actions menu"></div>
+<div><ol class="notes"><li><span class="n">1</span><span><b>Edit</b> opens the recipe sheet (02).</span></li><li><span class="n">2</span><span><b>Share</b> opens the system share sheet with the recipe as text. It was "Share as markdown"; the format is a detail.</span></li><li><span class="n">3</span><span><b>Delete recipe</b>, in red, still asks for confirmation.</span></li></ol></div></div></section>
 
 <section id="rules"><h2>Rules that cut across screens</h2>
 <p class="sub">Decided in the brainstorm; each is a few lines of code but easy to get wrong later.</p>

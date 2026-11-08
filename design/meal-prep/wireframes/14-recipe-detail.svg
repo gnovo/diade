@@ -5,35 +5,35 @@
 <rect x="311" y="22" width="32" height="12" rx="3" fill="#fff"/>
 <text x="16" y="72" font-size="14" text-anchor="start" stroke="none" fill="#000">‹ Recipes</text>
 <text x="16" y="96" font-size="28" text-anchor="start" stroke="none" fill="#000" font-weight="700">Spaghetti carbonara</text>
-<text x="335" y="72" font-size="14" text-anchor="end" stroke="none" fill="#000" font-weight="700">Edit</text>
-<text x="16" y="120" font-size="12" text-anchor="start" stroke="none" fill="#666">4 servings</text>
-<rect x="16" y="136" width="343" height="136" rx="8" fill="#fff"/>
-<text x="32" y="162" font-size="12" text-anchor="start" stroke="none" fill="#666">INGREDIENTS</text>
-<text x="32" y="190" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Spaghetti</text>
-<text x="343" y="190" font-size="14" text-anchor="end" stroke="none" fill="#666">400 g</text>
-<text x="32" y="222" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Guanciale</text>
-<text x="343" y="222" font-size="14" text-anchor="end" stroke="none" fill="#666">200 g</text>
-<text x="32" y="254" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Eggs</text>
-<text x="343" y="254" font-size="14" text-anchor="end" stroke="none" fill="#666">4</text>
-<rect x="16" y="284" width="343" height="128" rx="8" fill="#fff"/>
-<text x="32" y="310" font-size="12" text-anchor="start" stroke="none" fill="#666">STEPS</text>
-<text x="32" y="338" font-size="14" text-anchor="start" stroke="none" fill="#666" font-weight="700">1.</text>
-<text x="60" y="338" font-size="14" text-anchor="start" stroke="none" fill="#000">Boil the pasta.</text>
-<text x="32" y="366" font-size="14" text-anchor="start" stroke="none" fill="#666" font-weight="700">2.</text>
-<text x="60" y="366" font-size="14" text-anchor="start" stroke="none" fill="#000">Fry the guanciale.</text>
-<text x="32" y="394" font-size="14" text-anchor="start" stroke="none" fill="#666" font-weight="700">3.</text>
-<text x="60" y="394" font-size="14" text-anchor="start" stroke="none" fill="#000">Toss with the egg and cheese.</text>
+<circle cx="343" cy="72" r="2" fill="#000"/>
+<circle cx="343" cy="80" r="2" fill="#000"/>
+<circle cx="343" cy="88" r="2" fill="#000"/>
+<rect x="16" y="120" width="343" height="144" rx="8" fill="#fff"/>
+<text x="32" y="146" font-size="12" text-anchor="start" stroke="none" fill="#666">INGREDIENTS</text>
+<text x="343" y="146" font-size="12" text-anchor="end" stroke="none" fill="#666">4 servings</text>
+<text x="32" y="182" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Spaghetti</text>
+<text x="343" y="182" font-size="14" text-anchor="end" stroke="none" fill="#666">400 g</text>
+<text x="32" y="214" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Guanciale</text>
+<text x="343" y="214" font-size="14" text-anchor="end" stroke="none" fill="#666">200 g</text>
+<text x="32" y="246" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Eggs</text>
+<text x="343" y="246" font-size="14" text-anchor="end" stroke="none" fill="#666">4</text>
+<rect x="16" y="280" width="343" height="128" rx="8" fill="#fff"/>
+<text x="32" y="306" font-size="12" text-anchor="start" stroke="none" fill="#666">STEPS</text>
+<text x="32" y="334" font-size="14" text-anchor="start" stroke="none" fill="#666" font-weight="700">1.</text>
+<text x="60" y="334" font-size="14" text-anchor="start" stroke="none" fill="#000">Boil the pasta.</text>
+<text x="32" y="362" font-size="14" text-anchor="start" stroke="none" fill="#666" font-weight="700">2.</text>
+<text x="60" y="362" font-size="14" text-anchor="start" stroke="none" fill="#000">Fry the guanciale.</text>
+<text x="32" y="390" font-size="14" text-anchor="start" stroke="none" fill="#666" font-weight="700">3.</text>
+<text x="60" y="390" font-size="14" text-anchor="start" stroke="none" fill="#000">Toss with the egg and cheese.</text>
 <rect x="16" y="424" width="343" height="72" rx="8" fill="#fff"/>
 <text x="32" y="450" font-size="12" text-anchor="start" stroke="none" fill="#666">NOTES</text>
 <text x="32" y="474" font-size="14" text-anchor="start" stroke="none" fill="#000">Never add cream.</text>
-<rect x="16" y="508" width="343" height="72" rx="8" fill="#fff"/>
-<text x="32" y="534" font-size="12" text-anchor="start" stroke="none" fill="#666">SOURCE</text>
-<text x="32" y="558" font-size="14" text-anchor="start" stroke="none" fill="#000">https://example.test/carbonara</text>
-<line x1="32" y1="562" x2="262" y2="562" stroke="#000"/>
-<rect x="16" y="600" width="343" height="48" rx="8" fill="#fff"/>
-<text x="187.5" y="629.0" font-size="14" text-anchor="middle" stroke="none" fill="#000">Share</text>
-<rect x="16" y="656" width="343" height="48" rx="8" fill="#fff"/>
-<text x="187.5" y="685.0" font-size="14" text-anchor="middle" stroke="none" fill="#000">Delete recipe</text>
+<rect x="16" y="512" width="343" height="72" rx="8" fill="#fff"/>
+<text x="32" y="538" font-size="12" text-anchor="start" stroke="none" fill="#666">SOURCE</text>
+<text x="32" y="562" font-size="14" text-anchor="start" stroke="none" fill="#000">https://example.test/carbonara</text>
+<line x1="32" y1="566" x2="262" y2="566" stroke="#000"/>
+<rect x="16" y="600" width="343" height="48" rx="8" fill="#000"/>
+<text x="187.5" y="629.0" font-size="14" text-anchor="middle" stroke="none" fill="#fff" font-weight="700">Start cooking</text>
 <line x1="0" y1="748" x2="375" y2="748" stroke="#000"/>
 <rect x="9.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
 <text x="37.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
@@ -50,8 +50,11 @@
 <rect x="309.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
 <text x="337.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
 <text x="337.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Dates</text>
-<g><circle cx="8" cy="180" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="184" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">1</text></g>
-<g><circle cx="8" cy="340" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="344" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">2</text></g>
-<g><circle cx="8" cy="474" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="478" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">3</text></g>
-<g><circle cx="8" cy="558" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="562" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">4</text></g>
+<g><circle cx="8" cy="80" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="84" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">1</text></g>
+<g><circle cx="8" cy="146" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="150" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">2</text></g>
+<g><circle cx="8" cy="200" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="204" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">3</text></g>
+<g><circle cx="8" cy="340" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="344" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">4</text></g>
+<g><circle cx="8" cy="474" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="478" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">5</text></g>
+<g><circle cx="8" cy="562" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="566" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">6</text></g>
+<g><circle cx="8" cy="624" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="628" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">7</text></g>
 </svg>
