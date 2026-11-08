@@ -640,3 +640,32 @@ describe('ingredients that are one thing under two names', () => {
     expect(diff.unchanged.map((i) => i.name)).toEqual(['Eggplant']);
   });
 });
+
+describe('a row takes the name the household gave an ingredient', () => {
+  const x = recipe('x', 1, [ing('Meet', 250)]);
+  const y = recipe('y', 1, [ing('Meat', 500)]);
+  const entries = [
+    {
+      id: 'm',
+      name: 'Beef mince',
+      matchKey: 'meat',
+      aliases: [],
+      mergedIntoId: null,
+      deletedAt: null,
+    },
+    { id: 't', name: 'Meet', matchKey: 'meet', aliases: [], mergedIntoId: 'm', deletedAt: null },
+  ];
+
+  it('shows the catalog name for the merged row, and the written name when there is no entry', () => {
+    const plan = [
+      { recipeId: 'x', servings: 1 },
+      { recipeId: 'y', servings: 1 },
+    ];
+    const withCatalog = buildGroceryList(plan, [x, y], {
+      resolver: createIngredientResolver(entries),
+    });
+    expect(withCatalog.rows.map((r) => [r.name, r.quantity])).toEqual([['Beef mince', 750]]);
+    const without = buildGroceryList(plan, [x, y]);
+    expect(without.rows.map((r) => r.name).sort()).toEqual(['Meat', 'Meet']);
+  });
+});

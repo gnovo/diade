@@ -31,7 +31,10 @@ export interface Ingredient {
 export type CatalogEntry = Pick<
   Ingredient,
   'id' | 'matchKey' | 'aliases' | 'mergedIntoId' | 'deletedAt'
->;
+> & {
+  /** The name shown; entries that only redirect (tests, older callers) may leave it out. */
+  name?: string;
+};
 
 export interface IngredientResolver {
   /** The match key a written name resolves to: what grocery rows are grouped by. */
@@ -40,6 +43,8 @@ export interface IngredientResolver {
   canonicalKey(matchKey: string): string;
   /** A stored row key, `matchKey|family`, with its match key resolved. */
   canonicalRowKey(rowKey: string): string;
+  /** The name the household gave an ingredient (its catalog entry), or null when it has none: then the written name is used. */
+  name(matchKey: string): string | null;
 }
 
 /** Dictionary: every spelling's match key to the match key of its group's first name. */
@@ -78,6 +83,11 @@ export function createIngredientResolver(
   entries: readonly CatalogEntry[] = [],
 ): IngredientResolver {
   const redirects = catalogRedirects(entries);
+  const names = new Map(
+    entries.flatMap((entry) =>
+      !entry.deletedAt && entry.name ? [[entry.matchKey, entry.name] as [string, string]] : [],
+    ),
+  );
   const canonicalKey = (matchKey: string): string => {
     const once = redirects.get(matchKey) ?? matchKey;
     const named = DICTIONARY.get(once) ?? once;
@@ -92,6 +102,7 @@ export function createIngredientResolver(
         ? canonicalKey(rowKey)
         : `${canonicalKey(rowKey.slice(0, bar))}${rowKey.slice(bar)}`;
     },
+    name: (matchKey) => names.get(matchKey) ?? null,
   };
 }
 

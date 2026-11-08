@@ -7,6 +7,7 @@ import { Alert, BackHandler, Pressable, Text, TouchableOpacity, View } from 'rea
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { AddRecipeChooser } from '../components/AddRecipeChooser';
 import { ImportRecipesSheet } from '../components/ImportRecipesSheet';
+import { IngredientsScreen } from '../components/IngredientsScreen';
 import { ItemSuggestions } from '../components/ItemSuggestions';
 import { NewListWizard } from '../components/NewListWizard';
 import { PlanListSection } from '../components/PlanListSection';
@@ -74,6 +75,7 @@ export const ListsScreen: React.FC = () => {
   });
   const [importOpen, setImportOpen] = useState(false);
   const [chooserOpen, setChooserOpen] = useState(false);
+  const [ingredientsOpen, setIngredientsOpen] = useState(false);
   const [openListId, setOpenListId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [newItemText, setNewItemText] = useState('');
@@ -423,6 +425,7 @@ export const ListsScreen: React.FC = () => {
             <RecipesLibrary
               recipes={recipes.data}
               onOpen={(recipe) => setOpenRecipeId(recipe.id)}
+              onOpenIngredients={() => setIngredientsOpen(true)}
             />
           ) : section === 'plan' ? (
             <PlanView
@@ -502,6 +505,11 @@ export const ListsScreen: React.FC = () => {
       {recipeSheet}
       {chooserSheet}
       {importSheet}
+      <IngredientsScreen
+        visible={ingredientsOpen}
+        onClose={() => setIngredientsOpen(false)}
+        recipes={recipes.data}
+      />
     </>
   );
 };

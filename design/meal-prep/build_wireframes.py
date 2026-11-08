@@ -463,19 +463,20 @@ def s09():
         s.text(72, y + 44, src, 12, fill='#666')
         s.text(343, y + 33, q, 14, 'end', '#666')
     # Possible duplicate: a suggestion under the rows, never applied until the member taps Merge.
-    s.rect(16, top + 412, 343, 92, 8, '#e6e6e6', dash=True)
+    s.rect(16, top + 412, 343, 120, 8, '#e6e6e6', dash=True)
     s.text(32, top + 436, 'POSSIBLE DUPLICATE', 11, fill='#666', bold=True)
     s.text(32, top + 458, 'Meat \u2194 Meet', 14, bold=True)
-    button(s, 32, top + 466, 140, 'Merge', h=30)
-    button(s, 184, top + 466, 160, 'Keep separate', filled=False, h=30)
-    s.rect(16, top + 516, 343, 56, 8, '#e6e6e6')
-    s.text(32, top + 549, 'Pantry staples · 7 left out', 14, bold=True)
-    s.text(343, top + 549, '\u2304', 14, 'end')
+    s.text(32, top + 476, 'Merging is remembered for your next lists.', 11, fill='#666')
+    button(s, 32, top + 484, 140, 'Merge', h=30)
+    button(s, 184, top + 484, 160, 'Keep separate', filled=False, h=30)
+    s.rect(16, top + 544, 343, 56, 8, '#e6e6e6')
+    s.text(32, top + 577, 'Pantry staples · 7 left out', 14, bold=True)
+    s.text(343, top + 577, '\u2304', 14, 'end')
     s.callout(343, top + 160)
     s.callout(343, top + 200)
     s.callout(343, top + 340)
     s.callout(343, top + 458)
-    s.callout(343, top + 544)
+    s.callout(343, top + 572)
     s.finish('09-wizard-review.svg')
 
 
@@ -618,6 +619,63 @@ def s12():
     s.finish('12-add-recipe.svg')
 
 
+def ingredients_screen(s):
+    """The Ingredients screen: the names merged into one, with a way to merge more."""
+    status_bar(s)
+    s.circle(40, 76, 22, '#e6e6e6')
+    s.text(40, 82, '\u00d7', 22, 'middle')
+    s.text(80, 83, 'Ingredients', 20, bold=True)
+    s.text(16, 130, 'When two names are the same ingredient (Meat and', 12, fill='#666')
+    s.text(16, 148, 'Meet), merge them once and every list adds them up.', 12, fill='#666')
+    button(s, 16, 168, 343, 'Merge two names', True, 48)
+    s.text(16, 252, 'MERGED NAMES', 12, fill='#666')
+    card(s, 16, 264, 343, 156)
+    s.text(32, 296, 'Meat', 16, bold=True)
+    s.text(343, 296, 'Rename', 14, 'end', bold=True)
+    s.line(16, 312, 359, 312)
+    s.text(32, 342, 'Also written "Meet"', 14, fill='#666')
+    s.text(343, 342, 'Separate', 14, 'end', bold=True)
+    s.line(16, 364, 359, 364)
+    s.text(32, 394, 'Also written "Mince"', 14, fill='#666')
+    s.text(343, 394, 'Separate', 14, 'end', bold=True)
+    card(s, 16, 432, 343, 104)
+    s.text(32, 464, 'Cheese', 16, bold=True)
+    s.text(343, 464, 'Rename', 14, 'end', bold=True)
+    s.line(16, 480, 359, 480)
+    s.text(32, 510, 'Also written "Queijo"', 14, fill='#666')
+    s.text(343, 510, 'Separate', 14, 'end', bold=True)
+
+
+def s17():
+    s = Svg('17 Ingredients screen')
+    ingredients_screen(s)
+    s.callout(343, 156)
+    s.callout(343, 192)
+    s.callout(343, 296)
+    s.callout(343, 342)
+    s.finish('17-ingredients.svg')
+
+
+def s18():
+    s = Svg('18 Merge two names')
+    ghost(s, ingredients_screen)
+    top = 200
+    sheet(s, top, 'Merge two names', footer=None)
+    s.text(16, top + 76, 'Which name should lists use?', 14, fill='#666')
+    input_box(s, 16, top + 92, 343, 'Search names')
+    for i, (n, c) in enumerate([('Chicken', '3 recipes'), ('Meat', '2 recipes'), ('Meet', '1 recipe'), ('Onion', '1 recipe')]):
+        y = top + 160 + i * 52
+        if i:
+            s.line(16, y, 359, y)
+        s.text(16, y + 31, n, 16)
+        s.text(359, y + 31, c, 14, 'end', '#666')
+    s.text(16, top + 392, 'Then: Which name is also "Meat"?  \u2192  Merge "Meet" into "Meat"', 12, fill='#666')
+    s.callout(343, top + 76)
+    s.callout(343, top + 196)
+    s.callout(343, top + 392)
+    s.finish('18-merge-names.svg')
+
+
 def flow():
     s = Svg('Flow: five PRs, left to right')
     s.add('<rect x="0" y="0" width="375" height="812" fill="#fff" stroke="none"/>')
@@ -650,6 +708,6 @@ def flow():
 
 
 if __name__ == '__main__':
-    for fn in (s01, s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, s12, s13, s14, s15, s16, flow):
+    for fn in (s01, s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, s12, s13, s14, s15, s16, s17, s18, flow):
         fn()
     print('wrote', len(os.listdir(OUT)), 'files to', OUT)
