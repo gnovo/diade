@@ -28,7 +28,7 @@ export async function decryptToken(value: string | null, secret: string): Promis
   return symmetricDecrypt({ key: secret, data: value });
 }
 
-export async function encryptToken(value: string, secret: string): Promise<string> {
+async function encryptToken(value: string, secret: string): Promise<string> {
   return symmetricEncrypt({ key: secret, data: value });
 }
 

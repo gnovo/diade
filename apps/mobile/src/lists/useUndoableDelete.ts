@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-export const UNDO_WINDOW_MS = 5000;
+const UNDO_WINDOW_MS = 5000;
 
 export interface PendingDelete {
   ids: string[];

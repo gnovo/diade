@@ -5,7 +5,7 @@ import { createSerialQueue } from './serialQueue';
 let dbInstance: SQLite.SQLiteDatabase | null = null;
 let openPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
-export const LOCAL_TABLES = [
+const LOCAL_TABLES = [
   'local_events',
   'local_tasks',
   'local_lists',
@@ -275,22 +275,6 @@ export function inTransaction<T>(work: (db: SQLite.SQLiteDatabase) => Promise<T>
 }
 
 // --- Outbox Management Helpers ---
-
-export async function queueLocalMutation(mutation: ClientMutation): Promise<void> {
-  const db = await getLocalDb();
-  await db.runAsync(
-    `INSERT OR REPLACE INTO local_outbox (id, entity, operation, record_id, payload, client_timestamp)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [
-      mutation.id,
-      mutation.entity,
-      mutation.operation,
-      mutation.recordId,
-      JSON.stringify(mutation.payload),
-      mutation.clientTimestamp,
-    ],
-  );
-}
 
 export async function getPendingMutations(): Promise<ClientMutation[]> {
   const db = await getLocalDb();

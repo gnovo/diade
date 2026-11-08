@@ -8,7 +8,7 @@ import { BottomSheet } from './BottomSheet';
 import { Segmented } from './ui';
 
 /** Calendars that are worth a toggle: the member's own enabled ones and the partner's shared ones. */
-export function toggleableCalendars(calendars: ExternalCalendar[]): ExternalCalendar[] {
+function toggleableCalendars(calendars: ExternalCalendar[]): ExternalCalendar[] {
   return calendars.filter((c) => c.syncEnabled && c.name);
 }
 

@@ -13,7 +13,7 @@ import {
 } from '../storage/secureStore';
 import { resetLocalDb } from '../storage/sqlite';
 
-export interface SpaceMemberSummary {
+interface SpaceMemberSummary {
   userId: string;
   displayName: string;
 }

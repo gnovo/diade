@@ -19,7 +19,7 @@ import {
 } from '@diade/domain';
 import { type AgendaEntry, buildUnifiedAgenda } from './unifiedAgenda';
 
-export type PartnerEventEntry = Extract<AgendaEntry, { kind: 'external' }>;
+type PartnerEventEntry = Extract<AgendaEntry, { kind: 'external' }>;
 
 export interface PartnerDay {
   /** Their open tasks: overdue first, then by due date, undated last. */

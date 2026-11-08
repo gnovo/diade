@@ -24,7 +24,7 @@ import { BottomSheet } from './BottomSheet';
 import { Button, Card, SectionLabel, useWriteContext } from './ui';
 
 /** The items that came from the plan: only those carry contributions. */
-export function planItemsOf(items: ListItem[]): PlanListItem[] {
+function planItemsOf(items: ListItem[]): PlanListItem[] {
   return items.flatMap((item) =>
     item.contributions && item.contributions.length > 0
       ? [

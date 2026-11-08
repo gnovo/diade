@@ -24,14 +24,6 @@ export async function setSessionToken(token: string): Promise<void> {
   }
 }
 
-export async function clearSessionToken(): Promise<void> {
-  try {
-    await SecureStore.deleteItemAsync(KEYS.SESSION_TOKEN);
-  } catch (error) {
-    console.error('Failed to delete session token from SecureStore:', error);
-  }
-}
-
 export async function getStoredUser(): Promise<User | null> {
   try {
     const raw = await SecureStore.getItemAsync(KEYS.USER_DATA);

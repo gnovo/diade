@@ -24,7 +24,7 @@ import type { externalCalendars } from '../db/schema';
 
 const iso = (d: Date | null): string | null => (d ? d.toISOString() : null);
 
-export function toCalendarDto(row: typeof externalCalendars.$inferSelect): ExternalCalendar {
+function toCalendarDto(row: typeof externalCalendars.$inferSelect): ExternalCalendar {
   return {
     id: row.id,
     userId: row.userId,

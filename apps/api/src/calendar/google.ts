@@ -53,7 +53,7 @@ export interface GoogleCalendarListEntry {
   primary?: boolean;
 }
 
-export interface GoogleDateTime {
+interface GoogleDateTime {
   date?: string;
   dateTime?: string;
   timeZone?: string;

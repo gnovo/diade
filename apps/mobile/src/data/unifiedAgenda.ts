@@ -37,7 +37,7 @@ export type AgendaEntry =
   | { kind: 'task'; key: string; day: Date; task: Task }
   | { kind: 'important_date'; key: string; day: Date; item: ImportantDate };
 
-export interface AgendaDay {
+interface AgendaDay {
   day: Date;
   entries: AgendaEntry[];
 }
@@ -103,7 +103,7 @@ const timeOf = (entry: AgendaEntry): number => {
   return 0;
 };
 
-export function compareEntries(a: AgendaEntry, b: AgendaEntry): number {
+function compareEntries(a: AgendaEntry, b: AgendaEntry): number {
   return rankOf(a) - rankOf(b) || timeOf(a) - timeOf(b) || a.key.localeCompare(b.key);
 }
 

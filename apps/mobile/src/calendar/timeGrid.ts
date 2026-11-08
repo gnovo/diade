@@ -4,7 +4,7 @@
  */
 import { addLocalDays } from '@diade/domain';
 
-export const MINUTES_PER_DAY = 1440;
+const MINUTES_PER_DAY = 1440;
 /** Events shorter than this are drawn this tall, so a 10 minute call is still tappable. */
 export const MIN_BLOCK_MINUTES = 30;
 

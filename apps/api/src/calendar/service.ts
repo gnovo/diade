@@ -34,7 +34,7 @@ export interface CalendarDeps {
 }
 
 /** Values stored in `external_calendars.last_error`. Never contain event content. */
-export const SYNC_ERRORS = {
+const SYNC_ERRORS = {
   needsReauth: 'needs_reauth',
   rateLimited: 'rate_limited',
   failed: 'sync_failed',
@@ -42,9 +42,9 @@ export const SYNC_ERRORS = {
 
 const LEASE_MS = 2 * 60_000;
 /** A calendar synced this recently is skipped by on-demand syncs. */
-export const MIN_SYNC_INTERVAL_MS = 60_000;
+const MIN_SYNC_INTERVAL_MS = 60_000;
 /** Calendars handled per cron run, so a single invocation stays well inside Worker limits. */
-export const CRON_CALENDAR_BATCH = 20;
+const CRON_CALENDAR_BATCH = 20;
 
 const nowOf = (deps: CalendarDeps) => (deps.now ? deps.now() : new Date());
 
@@ -57,7 +57,7 @@ async function googleAccountOf(db: DbClient, userId: string) {
   return account ?? null;
 }
 
-export function accountHasCalendarAccess(
+function accountHasCalendarAccess(
   account: { scope: string | null; refreshToken: string | null } | null,
 ): boolean {
   return Boolean(account?.refreshToken && hasScopes(account.scope, GOOGLE_CALENDAR_SCOPES));

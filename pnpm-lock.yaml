@@ -242,9 +242,6 @@ importers:
       '@diade/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@diade/domain':
-        specifier: workspace:*
-        version: link:../domain
     devDependencies:
       '@diade/config':
         specifier: workspace:*
@@ -260,9 +257,6 @@ importers:
       '@diade/domain':
         specifier: workspace:*
         version: link:../domain
-      '@diade/validation':
-        specifier: workspace:*
-        version: link:../validation
     devDependencies:
       '@diade/config':
         specifier: workspace:*

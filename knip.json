@@ -1,18 +1,28 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ignoreDependencies": ["@neon/env", "@babel/plugin-transform-react-jsx"],
   "workspaces": {
     ".": {
       "entry": ["scripts/*.mjs", "neon.ts"]
     },
     "apps/api": {
-      "entry": ["src/index.ts", "drizzle.config.ts", "src/**/*.test.ts"]
+      "entry": ["scripts/*.mjs", "src/**/*.test.ts"]
     },
     "apps/mobile": {
-      "entry": ["index.js", "app.config.ts", "plugins/*", "src/**/*.test.{ts,tsx}"],
+      "entry": ["metro.config.js", "plugins/*", "src/**/*.test.{ts,tsx}"],
       "metro": false
     },
-    "packages/*": {
-      "entry": ["src/index.ts", "scripts/*", "src/**/*.test.ts"]
+    "packages/domain": {
+      "entry": ["src/**/*.test.ts"]
+    },
+    "packages/i18n": {
+      "entry": ["src/**/*.test.ts"]
+    },
+    "packages/validation": {
+      "entry": ["src/**/*.test.ts"]
     }
+  },
+  "ignoreIssues": {
+    "apps/mobile/src/design/**": ["exports", "types"]
   }
 }

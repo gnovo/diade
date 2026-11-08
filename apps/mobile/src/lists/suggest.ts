@@ -7,7 +7,7 @@ export interface HistoryEntry {
   lastUsedAt: string;
 }
 
-export interface ExistingItem {
+interface ExistingItem {
   id: string;
   name: string;
   isChecked: boolean;

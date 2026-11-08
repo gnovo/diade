@@ -28,7 +28,7 @@ import Animated, {
 export const STEP_EASING = Easing.bezier(0.32, 0.72, 0, 1);
 export const STEP_MS = 460;
 /** Growing or shrinking inside one step (a section opening) is quicker than changing step. */
-export const RESIZE_MS = 260;
+const RESIZE_MS = 260;
 /** The outgoing step travels this fraction of the distance while the incoming one travels all of it. */
 const PARALLAX = 0.3;
 
@@ -49,7 +49,7 @@ function glide(value: SharedValue<number>, to: number, reduceMotion: boolean, ms
 }
 
 /** The step index as an animated number: 0, then 1, then 2, easing between each. */
-export function useStepProgress(index: number): SharedValue<number> {
+function useStepProgress(index: number): SharedValue<number> {
   const reduceMotion = useReduceMotion();
   const progress = useSharedValue(index);
   useEffect(() => {

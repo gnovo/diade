@@ -1,5 +1,5 @@
 import { sizes } from '@diade/design-tokens';
-import { type BottomTabBarProps, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import type React from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -96,5 +96,3 @@ export const TabNavigator: React.FC = () => {
     </View>
   );
 };
-
-export type { BottomTabBarProps };
