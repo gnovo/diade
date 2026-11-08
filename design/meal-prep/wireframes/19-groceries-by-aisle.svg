@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812" font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
+<!-- 19 Groceries by aisle · mobile 375x812 · 8px grid -->
+<rect x="0" y="0" width="375" height="812" fill="#fff"/>
+<text x="16" y="32" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">9:41</text>
+<rect x="311" y="22" width="32" height="12" rx="3" fill="#fff"/>
+<circle cx="40" cy="76" r="22" fill="#e6e6e6"/>
+<text x="40" y="82" font-size="22" text-anchor="middle" stroke="none" fill="#000">×</text>
+<text x="80" y="83" font-size="20" text-anchor="start" stroke="none" fill="#000" font-weight="700">Groceries</text>
+<rect x="16" y="112" width="343" height="44" rx="8" fill="#fff"/>
+<text x="28" y="139.0" font-size="14" text-anchor="start" stroke="none" fill="#666">Add an item, e.g. 2 milks</text>
+<text x="16" y="190" font-size="12" text-anchor="start" stroke="none" fill="#666">ITEMS</text>
+<text x="359" y="190" font-size="12" text-anchor="end" stroke="none" fill="#666">6 to buy</text>
+<rect x="16" y="204" width="343" height="48" rx="8" fill="#e6e6e6"/>
+<rect x="20" y="208" width="167" height="40" rx="6" fill="#000"/>
+<text x="103.5" y="233" font-size="14" text-anchor="middle" stroke="none" fill="#fff" font-weight="700">By aisle</text>
+<rect x="187" y="208" width="167" height="40" rx="6" fill="#e6e6e6" stroke-width="0"/>
+<text x="270.5" y="233" font-size="14" text-anchor="middle" stroke="none" fill="#000">Manual order</text>
+<text x="16" y="272" font-size="11" text-anchor="start" stroke="none" fill="#666">PRODUCE</text>
+<text x="359" y="272" font-size="11" text-anchor="end" stroke="none" fill="#666">1</text>
+<rect x="16" y="284" width="24" height="24" rx="4" fill="#fff"/>
+<text x="56" y="304" font-size="16" text-anchor="start" stroke="none" fill="#000">Tomato</text>
+<text x="359" y="304" font-size="14" text-anchor="end" stroke="none" fill="#666">1 kg</text>
+<text x="16" y="346" font-size="11" text-anchor="start" stroke="none" fill="#666">MEAT</text>
+<text x="359" y="346" font-size="11" text-anchor="end" stroke="none" fill="#666">1</text>
+<rect x="16" y="358" width="24" height="24" rx="4" fill="#fff"/>
+<text x="56" y="378" font-size="16" text-anchor="start" stroke="none" fill="#000">Beef</text>
+<text x="359" y="378" font-size="14" text-anchor="end" stroke="none" fill="#666">454 g</text>
+<text x="16" y="420" font-size="11" text-anchor="start" stroke="none" fill="#666">DAIRY AND EGGS</text>
+<text x="359" y="420" font-size="11" text-anchor="end" stroke="none" fill="#666">2</text>
+<rect x="16" y="432" width="24" height="24" rx="4" fill="#fff"/>
+<text x="56" y="452" font-size="16" text-anchor="start" stroke="none" fill="#000">Eggs</text>
+<text x="359" y="452" font-size="14" text-anchor="end" stroke="none" fill="#666">4</text>
+<rect x="16" y="480" width="24" height="24" rx="4" fill="#fff"/>
+<text x="56" y="500" font-size="16" text-anchor="start" stroke="none" fill="#000">Butter</text>
+<text x="359" y="500" font-size="14" text-anchor="end" stroke="none" fill="#666">15 g</text>
+<text x="16" y="542" font-size="11" text-anchor="start" stroke="none" fill="#666">PANTRY</text>
+<text x="359" y="542" font-size="11" text-anchor="end" stroke="none" fill="#666">1</text>
+<rect x="16" y="554" width="24" height="24" rx="4" fill="#fff"/>
+<text x="56" y="574" font-size="16" text-anchor="start" stroke="none" fill="#000">Pasta</text>
+<text x="359" y="574" font-size="14" text-anchor="end" stroke="none" fill="#666">800 g</text>
+<text x="16" y="616" font-size="11" text-anchor="start" stroke="none" fill="#666">OTHER</text>
+<text x="359" y="616" font-size="11" text-anchor="end" stroke="none" fill="#666">1</text>
+<rect x="16" y="628" width="24" height="24" rx="4" fill="#fff"/>
+<text x="56" y="648" font-size="16" text-anchor="start" stroke="none" fill="#000">Meat</text>
+<text x="359" y="648" font-size="14" text-anchor="end" stroke="none" fill="#666">1.5 kg</text>
+<g><circle cx="8" cy="220" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="224" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">1</text></g>
+<g><circle cx="8" cy="272" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="276" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">2</text></g>
+</svg>

@@ -688,6 +688,39 @@ def s18():
     s.finish('18-merge-names.svg')
 
 
+def s19():
+    s = Svg('19 Groceries by aisle')
+    status_bar(s)
+    s.circle(40, 76, 22, '#e6e6e6')
+    s.text(40, 82, '\u00d7', 22, 'middle')
+    s.text(80, 83, 'Groceries', 20, bold=True)
+    input_box(s, 16, 112, 343, 'Add an item, e.g. 2 milks', 44)
+    s.text(16, 190, 'ITEMS', 12, fill='#666')
+    s.text(359, 190, '6 to buy', 12, 'end', '#666')
+    segmented(s, 204, ['By aisle', 'Manual order'], 0)
+    rows = [
+        ('PRODUCE', [('Tomato', '1 kg')]),
+        ('MEAT', [('Beef', '454 g')]),
+        ('DAIRY AND EGGS', [('Eggs', '4'), ('Butter', '15 g')]),
+        ('PANTRY', [('Pasta', '800 g')]),
+        ('OTHER', [('Meat', '1.5 kg')]),
+    ]
+    y = 272
+    for label, items in rows:
+        s.text(16, y, label, 11, fill='#666')
+        s.text(359, y, str(len(items)), 11, 'end', '#666')
+        y += 12
+        for n, q in items:
+            checkbox(s, 16, y, False)
+            s.text(56, y + 20, n, 16)
+            s.text(359, y + 20, q, 14, 'end', '#666')
+            y += 48
+        y += 14
+    s.callout(343, 220)
+    s.callout(343, 272)
+    s.finish('19-groceries-by-aisle.svg')
+
+
 def flow():
     s = Svg('Flow: five PRs, left to right')
     s.add('<rect x="0" y="0" width="375" height="812" fill="#fff" stroke="none"/>')
@@ -720,6 +753,6 @@ def flow():
 
 
 if __name__ == '__main__':
-    for fn in (s01, s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, s12, s13, s14, s15, s16, s17, s18, flow):
+    for fn in (s01, s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, s12, s13, s14, s15, s16, s17, s18, s19, flow):
         fn()
     print('wrote', len(os.listdir(OUT)), 'files to', OUT)

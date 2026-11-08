@@ -356,6 +356,20 @@ export const ptPT: Shape<Catalog> = {
     starterItems: 'Itens sugeridos',
     toggleStarter: 'Incluir {{name}}',
     createList: 'Criar lista',
+    view: {
+      aisle: 'Por corredor',
+      manual: 'Ordem manual',
+    },
+    aisle: {
+      produce: 'Fruta e legumes',
+      bakery: 'Padaria',
+      meat: 'Talho',
+      fish: 'Peixaria',
+      dairy: 'Lacticínios e ovos',
+      frozen: 'Congelados',
+      pantry: 'Mercearia',
+      other: 'Outros',
+    },
     wizard: {
       step: 'Passo {{step}} de {{total}}',
       typeHeading: 'Que tipo de lista?',

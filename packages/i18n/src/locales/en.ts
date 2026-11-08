@@ -355,6 +355,20 @@ export const en = {
     starterItems: 'Suggested items',
     toggleStarter: 'Include {{name}}',
     createList: 'Create list',
+    view: {
+      aisle: 'By aisle',
+      manual: 'My order',
+    },
+    aisle: {
+      produce: 'Fruit and vegetables',
+      bakery: 'Bakery',
+      meat: 'Meat',
+      fish: 'Fish',
+      dairy: 'Dairy and eggs',
+      frozen: 'Frozen',
+      pantry: 'Pantry',
+      other: 'Other',
+    },
     wizard: {
       step: 'Step {{step}} of {{total}}',
       typeHeading: 'What kind of list?',
