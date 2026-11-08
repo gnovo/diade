@@ -18,8 +18,8 @@ brief for the PR, then `dev-notes.md`. Wireframes: `design/meal-prep/index.html`
 |---|---|---|---|
 | A | Wizard motion on the UI thread | [pr-a](pr-a-wizard-motion.md) | merged (#15) |
 | B | Recipes: library, CRUD, metric parser, pantry flag | [pr-b](pr-b-recipes.md) | merged (#16) |
-| C | Plan + grocery generation + merge rules | [pr-c](pr-c-plan-and-groceries.md) | built, not yet committed |
-| D | New-list wizard | [pr-d](pr-d-new-list-wizard.md) | not started |
+| C | Plan + grocery generation + merge rules | [pr-c](pr-c-plan-and-groceries.md) | merged (#17) |
+| D | New-list wizard | [pr-d](pr-d-new-list-wizard.md) | built, not yet committed |
 | E | Markdown import and export | [pr-e](pr-e-markdown-import.md) | not started |
 
 Dependencies: C needs B. D needs B and C (it reuses the recipe picker and the generator). E needs B

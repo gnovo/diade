@@ -7,29 +7,18 @@ import { Stepper } from './RecipeForm';
 import { Button, Checkbox, EmptyState, TextField } from './ui';
 
 /**
- * Choose recipes, each with the servings to cook. A standalone sheet: it knows nothing about plans, so
- * the new-list wizard can reuse it. It edits a draft and hands the whole selection back on confirm.
+ * The recipes to choose from, each with a servings stepper once ticked, and a search. Controlled: it holds
+ * no selection of its own, so a sheet (below) and a wizard step can both put it where they need it.
  */
-export const RecipePicker: React.FC<{
-  visible: boolean;
-  onClose: () => void;
+export const RecipeChoiceList: React.FC<{
   recipes: Recipe[];
-  /** The selection when the sheet opens. */
   selected: MealPlanRecipe[];
-  onConfirm: (next: MealPlanRecipe[]) => void;
-}> = ({ visible, onClose, recipes, selected, onConfirm }) => {
+  onChange: (next: MealPlanRecipe[]) => void;
+}> = ({ recipes, selected, onChange }) => {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
-  const [draft, setDraft] = useState<Map<string, number>>(new Map());
 
-  // Each opening starts from what is selected now, with an empty search.
-  useEffect(() => {
-    if (!visible) return;
-    setQuery('');
-    setDraft(new Map(selected.map((entry) => [entry.recipeId, entry.servings])));
-    // Only reset when the sheet opens, not while the selection changes underneath it.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible]);
+  const servingsById = useMemo(() => new Map(selected.map((entry) => [entry.recipeId, entry.servings])), [selected]);
 
   const matches = useMemo(() => {
     const needle = normalizeIngredientName(query);
@@ -43,35 +32,19 @@ export const RecipePicker: React.FC<{
   }, [recipes, query]);
 
   const toggle = (recipe: Recipe) =>
-    setDraft((current) => {
-      const next = new Map(current);
-      if (next.has(recipe.id)) next.delete(recipe.id);
-      else next.set(recipe.id, clampServings(recipe.servings));
-      return next;
-    });
+    onChange(
+      servingsById.has(recipe.id)
+        ? selected.filter((entry) => entry.recipeId !== recipe.id)
+        : [...selected, { recipeId: recipe.id, servings: clampServings(recipe.servings) }],
+    );
 
   const setServings = (recipeId: string, servings: number) =>
-    setDraft((current) => new Map(current).set(recipeId, clampServings(servings)));
-
-  const confirm = () => {
-    // Keep the order the recipes were chosen in, and drop any that were deleted meanwhile.
-    const known = new Set(recipes.map((r) => r.id));
-    onConfirm([...draft].filter(([id]) => known.has(id)).map(([recipeId, servings]) => ({ recipeId, servings })));
-    onClose();
-  };
+    onChange(
+      selected.map((entry) => (entry.recipeId === recipeId ? { ...entry, servings: clampServings(servings) } : entry)),
+    );
 
   return (
-    <BottomSheet
-      visible={visible}
-      onClose={onClose}
-      title={t('plan.picker.title')}
-      footer={
-        <Button
-          label={draft.size > 0 ? t('plan.picker.add', { count: draft.size }) : t('plan.picker.done')}
-          onPress={confirm}
-        />
-      }
-    >
+    <>
       <View className="mb-3">
         <TextField
           value={query}
@@ -85,7 +58,7 @@ export const RecipePicker: React.FC<{
       </View>
       {matches.length === 0 ? <EmptyState message={t('plan.picker.noMatches', { query: query.trim() })} /> : null}
       {matches.map((recipe, index) => {
-        const servings = draft.get(recipe.id);
+        const servings = servingsById.get(recipe.id);
         const checked = servings !== undefined;
         return (
           <View key={recipe.id}>
@@ -114,6 +87,53 @@ export const RecipePicker: React.FC<{
           </View>
         );
       })}
+    </>
+  );
+};
+
+/**
+ * Choose recipes, each with the servings to cook. A standalone sheet: it knows nothing about plans. It edits a
+ * draft and hands the whole selection back on confirm.
+ */
+export const RecipePicker: React.FC<{
+  visible: boolean;
+  onClose: () => void;
+  recipes: Recipe[];
+  /** The selection when the sheet opens. */
+  selected: MealPlanRecipe[];
+  onConfirm: (next: MealPlanRecipe[]) => void;
+}> = ({ visible, onClose, recipes, selected, onConfirm }) => {
+  const { t } = useTranslation();
+  const [draft, setDraft] = useState<MealPlanRecipe[]>([]);
+
+  // Each opening starts from what is selected now. The list inside remounts with the sheet, so its search is empty.
+  useEffect(() => {
+    if (!visible) return;
+    setDraft(selected);
+    // Only reset when the sheet opens, not while the selection changes underneath it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
+
+  const confirm = () => {
+    // Keep the order the recipes were chosen in, and drop any that were deleted meanwhile.
+    const known = new Set(recipes.map((r) => r.id));
+    onConfirm(draft.filter((entry) => known.has(entry.recipeId)));
+    onClose();
+  };
+
+  return (
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      title={t('plan.picker.title')}
+      footer={
+        <Button
+          label={draft.length > 0 ? t('plan.picker.add', { count: draft.length }) : t('plan.picker.done')}
+          onPress={confirm}
+        />
+      }
+    >
+      <RecipeChoiceList recipes={recipes} selected={draft} onChange={setDraft} />
     </BottomSheet>
   );
 };
