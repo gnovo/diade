@@ -4,6 +4,7 @@ import {
   planMerge,
   planRename,
   planSeparate,
+  planSetStaple,
 } from '@diade/domain';
 import { type BatchWrite, type WriteContext, writeBatch } from './repository';
 
@@ -72,6 +73,7 @@ function applyPlanned(
         matchKey: write.input.matchKey,
         aliases: [],
         mergedIntoId: write.input.mergedIntoId ?? null,
+        staple: write.input.staple ?? null,
         createdAt: now,
         updatedAt: now,
         deletedAt: null,
@@ -99,4 +101,14 @@ export async function renameIngredient(
   name: string,
 ): Promise<void> {
   await writeBatch(ctx, toBatch(planRename(entries, id, name)));
+}
+
+/** Sets (or, with null, takes back) the household's call on whether an ingredient is a pantry staple. One write. */
+export async function setIngredientStaple(
+  ctx: WriteContext,
+  entries: readonly Ingredient[],
+  name: string,
+  staple: boolean | null,
+): Promise<void> {
+  await writeBatch(ctx, toBatch(planSetStaple(ctx.spaceId, entries, name, staple)));
 }

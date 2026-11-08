@@ -23,6 +23,8 @@ export interface Ingredient {
   aliases: string[];
   /** Set when a member merged this one into another: it then resolves to that ingredient. */
   mergedIntoId: string | null;
+  /** The household's own call on whether it is a pantry staple; null means it has not decided and recipe lines decide. */
+  staple: boolean | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -34,6 +36,7 @@ export type CatalogEntry = Pick<
 > & {
   /** The name shown; entries that only redirect (tests, older callers) may leave it out. */
   name?: string;
+  staple?: boolean | null;
 };
 
 export interface IngredientResolver {
@@ -45,6 +48,8 @@ export interface IngredientResolver {
   canonicalRowKey(rowKey: string): string;
   /** The name the household gave an ingredient (its catalog entry), or null when it has none: then the written name is used. */
   name(matchKey: string): string | null;
+  /** Whether the household decided this ingredient is (true) or is not (false) a pantry staple; null when it has not decided. */
+  staple(matchKey: string): boolean | null;
 }
 
 /** Dictionary: every spelling's match key to the match key of its group's first name. */
@@ -88,6 +93,13 @@ export function createIngredientResolver(
       !entry.deletedAt && entry.name ? [[entry.matchKey, entry.name] as [string, string]] : [],
     ),
   );
+  const staples = new Map(
+    entries.flatMap((entry) =>
+      !entry.deletedAt && typeof entry.staple === 'boolean'
+        ? [[entry.matchKey, entry.staple] as [string, boolean]]
+        : [],
+    ),
+  );
   const canonicalKey = (matchKey: string): string => {
     const once = redirects.get(matchKey) ?? matchKey;
     const named = DICTIONARY.get(once) ?? once;
@@ -103,6 +115,7 @@ export function createIngredientResolver(
         : `${canonicalKey(rowKey.slice(0, bar))}${rowKey.slice(bar)}`;
     },
     name: (matchKey) => names.get(matchKey) ?? null,
+    staple: (matchKey) => staples.get(matchKey) ?? null,
   };
 }
 

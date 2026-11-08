@@ -656,6 +656,10 @@ export const en = {
     rename: 'Rename',
     renameTitle: 'Rename ingredient',
     renamePlaceholder: 'The name lists should use',
+    staplesHeading: 'Pantry staples',
+    staplesHint:
+      'Left out of grocery lists made from recipes (salt, olive oil). What you set here applies to every recipe.',
+    staplesEmpty: 'No ingredients yet.',
     separate: 'Separate',
     alsoWritten: 'Also written "{{name}}"',
     merge: {

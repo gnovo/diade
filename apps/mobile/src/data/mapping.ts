@@ -16,6 +16,9 @@ const BOOLEAN_KEYS = new Set([
   'editedByHand',
 ]);
 
+/** Booleans that may also be unset: stored as 1, 0 or NULL, and read back as true, false or null. */
+const NULLABLE_BOOLEAN_KEYS = new Set(['staple']);
+
 /** Stored as JSON text locally; arrays and objects in the domain. */
 const JSON_KEYS = new Set(['ingredients', 'recipes', 'contributions', 'aliases']);
 
@@ -35,13 +38,19 @@ export function toColumns(record: Row): { columns: string[]; values: unknown[] }
     columns.push(toColumn(key));
     // A null JSON column stays SQL NULL ("not from a plan") rather than the text 'null'.
     values.push(
-      BOOLEAN_KEYS.has(key)
-        ? value
-          ? 1
-          : 0
-        : JSON_KEYS.has(key) && value !== null
-          ? JSON.stringify(value)
-          : value,
+      NULLABLE_BOOLEAN_KEYS.has(key) && (value === null || typeof value === 'boolean')
+        ? value === null
+          ? null
+          : value
+            ? 1
+            : 0
+        : BOOLEAN_KEYS.has(key)
+          ? value
+            ? 1
+            : 0
+          : JSON_KEYS.has(key) && value !== null
+            ? JSON.stringify(value)
+            : value,
     );
   }
   return { columns, values };
@@ -62,11 +71,15 @@ export function fromRow(row: Row): Row {
   const result: Row = {};
   for (const [column, value] of Object.entries(row)) {
     const key = toKey(column);
-    result[key] = BOOLEAN_KEYS.has(key)
-      ? value === 1
-      : JSON_KEYS.has(key)
-        ? parseJson(value)
-        : value;
+    result[key] = NULLABLE_BOOLEAN_KEYS.has(key)
+      ? value === null || value === undefined
+        ? null
+        : value === 1
+      : BOOLEAN_KEYS.has(key)
+        ? value === 1
+        : JSON_KEYS.has(key)
+          ? parseJson(value)
+          : value;
   }
   return result;
 }

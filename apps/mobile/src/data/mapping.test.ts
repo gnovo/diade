@@ -10,6 +10,16 @@ describe('row mapping', () => {
     expect(toKey('is_all_day')).toBe('isAllDay');
   });
 
+  it('keeps an undecided ingredient staple null, and round-trips true and false', () => {
+    const stored = (staple: boolean | null) => toColumns({ id: 'a', staple }).values[1];
+    expect(stored(true)).toBe(1);
+    expect(stored(false)).toBe(0);
+    expect(stored(null)).toBeNull();
+    expect(fromRow({ id: 'a', staple: 1 }).staple).toBe(true);
+    expect(fromRow({ id: 'a', staple: 0 }).staple).toBe(false);
+    expect(fromRow({ id: 'a', staple: null }).staple).toBeNull();
+  });
+
   it('stores booleans as 0/1 and reads them back as booleans', () => {
     const { columns, values } = toColumns({ id: 'a', isChecked: true, isAllDay: false });
     expect(columns).toEqual(['id', 'is_checked', 'is_all_day']);

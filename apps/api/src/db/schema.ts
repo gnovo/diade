@@ -215,6 +215,8 @@ export const ingredients = pgTable(
     matchKey: text('match_key').notNull(),
     aliases: jsonb('aliases').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
     mergedIntoId: uuid('merged_into_id'),
+    /** The household's own call on whether it is a pantry staple; null means it has not decided (recipe lines decide). */
+    staple: boolean('staple'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
     deletedAt: timestamp('deleted_at'),

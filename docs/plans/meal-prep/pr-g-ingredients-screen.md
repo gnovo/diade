@@ -25,3 +25,12 @@ Built on the catalog from [PR F](pr-f-ingredient-catalog.md). Wireframes 17 and 
 
 Merge two names, see it on the screen and on the server (two catalog rows from a two-mutation push), restart the app (it stays), rename, separate, and confirm a merge at the
 review and create the list (the catalog row is updated; a push of nine mutations succeeded). With the merge in place the review shows one row and no suggestion.
+
+## G2: pantry staples on the catalog
+
+- Migration `0010_ingredient_staple`: a nullable `staple` boolean on `ingredients` (true, false, or null for "not decided"). Synced like the other columns; locally `local_ingredients.staple` is added to
+  existing installs by `migrateLocalSchema`, and `null` survives the round trip (`NULLABLE_BOOLEAN_KEYS` in the row mapping).
+- **The household's call wins.** `buildGroceryList` treats an ingredient as a staple when its catalog entry says so, else by the flag on the recipe line; a name merged into another shares its setting.
+  (Decision 12 as first written, a catalog default with a per-line override, was dropped: every existing recipe line already carries an explicit flag, so the default would have done nothing.)
+- The Ingredients screen gets a **Pantry staples** section: every ingredient the recipes use once, with a Pantry switch; one tap is one write (`planSetStaple`, tested). Nothing is rewritten in recipes.
+- Rollout: migration 0010 before the Worker, the Worker before the app. An old Worker rejects the `staple` field (zod strips it), so a staple change would be silently dropped until the Worker is updated.

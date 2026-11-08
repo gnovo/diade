@@ -10,15 +10,24 @@ import { ingredientMatchKey } from './ingredientKeys';
 type Entry = Pick<
   Ingredient,
   'id' | 'name' | 'matchKey' | 'aliases' | 'mergedIntoId' | 'deletedAt'
->;
+> & { staple?: boolean | null };
 
 export type CatalogWrite =
   | {
       op: 'insert';
       id: string;
-      input: { name: string; matchKey: string; mergedIntoId?: string | null };
+      input: {
+        name: string;
+        matchKey: string;
+        mergedIntoId?: string | null;
+        staple?: boolean | null;
+      };
     }
-  | { op: 'update'; id: string; changes: { name?: string; mergedIntoId?: string | null } };
+  | {
+      op: 'update';
+      id: string;
+      changes: { name?: string; mergedIntoId?: string | null; staple?: boolean | null };
+    };
 
 export type MergeResult = { writes: CatalogWrite[] } | { error: 'empty' | 'same' };
 
@@ -99,6 +108,35 @@ export function planRename(entries: readonly Entry[], id: string, name: string):
   return entry && next && next !== entry.name
     ? [{ op: 'update', id, changes: { name: next } }]
     : [];
+}
+
+/**
+ * Sets the household's own call on whether an ingredient is a pantry staple (null takes it back, so the recipe lines
+ * decide again). The call is kept on the ingredient the name resolves to, so a name merged into another shares its
+ * setting. One write; nothing when it is already so, or when there is nothing to take back.
+ */
+export function planSetStaple(
+  spaceId: string,
+  entries: readonly Entry[],
+  name: string,
+  staple: boolean | null,
+): CatalogWrite[] {
+  const key = createIngredientResolver(entries).key(name);
+  if (!key) return [];
+  const entry = entries.find((e) => !e.deletedAt && e.matchKey === key);
+  if (entry) {
+    return (entry.staple ?? null) === staple
+      ? []
+      : [{ op: 'update', id: entry.id, changes: { staple } }];
+  }
+  if (staple === null) return [];
+  return [
+    {
+      op: 'insert',
+      id: ingredientId(spaceId, key),
+      input: { name: name.trim(), matchKey: key, staple },
+    },
+  ];
 }
 
 export interface MergedGroup {

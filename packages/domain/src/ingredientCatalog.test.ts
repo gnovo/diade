@@ -136,3 +136,44 @@ describe('ingredientId', () => {
     expect(ids.size).toBe(new Set(INGREDIENT_SYNONYMS.flat().map(ingredientMatchKey)).size);
   });
 });
+
+describe('the household staple setting', () => {
+  const salt = {
+    id: 's',
+    matchKey: 'salt',
+    aliases: [],
+    mergedIntoId: null,
+    deletedAt: null,
+    staple: true,
+  };
+  const wine = {
+    id: 'w',
+    matchKey: 'wine',
+    aliases: [],
+    mergedIntoId: null,
+    deletedAt: null,
+    staple: false,
+  };
+  const open = {
+    id: 'o',
+    matchKey: 'oil',
+    aliases: [],
+    mergedIntoId: null,
+    deletedAt: null,
+    staple: null,
+  };
+
+  it('reports what the household decided, and null where it has not', () => {
+    const resolver = createIngredientResolver([salt, wine, open]);
+    expect(resolver.staple('salt')).toBe(true);
+    expect(resolver.staple('wine')).toBe(false);
+    expect(resolver.staple('oil')).toBeNull();
+    expect(resolver.staple('flour')).toBeNull();
+  });
+
+  it('ignores a deleted entry', () => {
+    expect(
+      createIngredientResolver([{ ...salt, deletedAt: '2026-11-01T00:00:00Z' }]).staple('salt'),
+    ).toBeNull();
+  });
+});
