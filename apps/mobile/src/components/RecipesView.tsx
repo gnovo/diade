@@ -3,17 +3,20 @@ import {
   formatRecipeMarkdown,
   normalizeIngredientName,
   parseRecipeNotes,
+  RECIPE_TYPES,
   type Recipe,
   type RecipeIngredient,
+  type RecipeType,
 } from '@diade/domain';
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, BackHandler, Linking, Pressable, Share, Text, View } from 'react-native';
 import { deleteRecord } from '../data/repository';
-import { Icon, useColor } from '../design';
+import { Icon, type IconName, useColor } from '../design';
 import { BottomSheet } from './BottomSheet';
 import { CookingView } from './CookingView';
+import { FilterChips } from './FilterChips';
 import { decimalFor } from './RecipeForm';
 import { Button, Card, EmptyState, ScreenScaffold, SectionLabel, TextField } from './ui';
 
@@ -36,6 +39,14 @@ const IngredientLine: React.FC<{
 
 /** A source that is a single web address opens in the browser; anything else is just text. */
 const isLink = (source: string): boolean => /^https?:\/\/\S+$/i.test(source);
+
+/** The icon on a recipe's row. A recipe with no type keeps the plain utensils, the same as a meal. */
+const TYPE_ICON: Record<RecipeType, IconName> = {
+  breakfast: 'coffee',
+  meal: 'utensils',
+  snack: 'apple',
+  prep: 'cooking-pot',
+};
 
 /** One action in the recipe menu. */
 const MenuRow: React.FC<{
@@ -237,17 +248,26 @@ export const RecipesLibrary: React.FC<{
 }> = ({ recipes, onOpen, onOpenIngredients }) => {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState<RecipeType | 'all'>('all');
+
+  // Only the types some recipe has get a chip, and none show until one does: no empty filters.
+  const usedTypes = useMemo(
+    () => RECIPE_TYPES.filter((type) => recipes.some((r) => r.type === type)),
+    [recipes],
+  );
+  const activeType = typeFilter !== 'all' && usedTypes.includes(typeFilter) ? typeFilter : 'all';
 
   const matches = useMemo(() => {
     const needle = normalizeIngredientName(query);
-    if (!needle) return recipes;
+    const ofType = activeType === 'all' ? recipes : recipes.filter((r) => r.type === activeType);
+    if (!needle) return ofType;
     // Searching "salmon" also finds the recipes that use it, not only ones named after it.
-    return recipes.filter(
+    return ofType.filter(
       (r) =>
         normalizeIngredientName(r.name).includes(needle) ||
         r.ingredients.some((row) => normalizeIngredientName(row.name).includes(needle)),
     );
-  }, [recipes, query]);
+  }, [recipes, query, activeType]);
 
   if (recipes.length === 0) {
     return (
@@ -281,6 +301,17 @@ export const RecipesLibrary: React.FC<{
           clearButtonMode="while-editing"
         />
       </View>
+      {usedTypes.length > 0 ? (
+        <FilterChips
+          label={t('recipes.typeFilter')}
+          value={activeType}
+          onChange={setTypeFilter}
+          options={[
+            { value: 'all', label: t('recipes.typeAll') },
+            ...usedTypes.map((type) => ({ value: type, label: t(`recipes.types.${type}`) })),
+          ]}
+        />
+      ) : null}
       {matches.length === 0 ? (
         <Card>
           <EmptyState message={t('recipes.noMatches', { query: query.trim() })} />
@@ -295,11 +326,12 @@ export const RecipesLibrary: React.FC<{
         >
           <View className="flex-row items-center">
             <View className="w-10 h-10 rounded-full bg-surface-tint items-center justify-center mr-3">
-              <Icon name="utensils" />
+              <Icon name={recipe.type ? TYPE_ICON[recipe.type] : 'utensils'} />
             </View>
             <View className="flex-1">
               <Text className="text-base font-semibold text-ink">{recipe.name}</Text>
               <Text className="text-sm text-ink-muted mt-0.5">
+                {recipe.type ? `${t(`recipes.types.${recipe.type}`)} · ` : ''}
                 {t('recipes.ingredients', { count: recipe.ingredients.length })}
                 {' · '}
                 {t('recipes.servings', { count: recipe.servings })}

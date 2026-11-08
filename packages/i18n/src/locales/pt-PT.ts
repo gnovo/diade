@@ -573,6 +573,14 @@ export const ptPT: Shape<Catalog> = {
     deleteRecipe: 'Apagar receita',
     share: 'Partilhar',
     moreActions: 'Mais ações',
+    typeFilter: 'Filtrar por tipo',
+    typeAll: 'Todas',
+    types: {
+      breakfast: 'Pequeno-almoço',
+      meal: 'Refeição',
+      snack: 'Lanche',
+      prep: 'Preparação',
+    },
     shareFailed: 'Não foi possível partilhar',
     cook: {
       start: 'Começar a cozinhar',
@@ -636,6 +644,7 @@ export const ptPT: Shape<Catalog> = {
       editTitle: 'Editar receita',
       name: 'Nome',
       namePlaceholder: 'Esparguete à carbonara',
+      type: 'Tipo',
       servings: 'Doses',
       lessServings: 'Menos doses',
       moreServings: 'Mais doses',

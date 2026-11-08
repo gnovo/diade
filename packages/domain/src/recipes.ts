@@ -22,6 +22,13 @@ export interface RecipeIngredient {
   staple: boolean;
 }
 
+/**
+ * What a recipe is for: a short fixed list, one per recipe, and optional. `prep` is a batch cooked ahead that
+ * feeds other meals ("shredded chicken"). Not free-form tags: those drift and would need a merge screen.
+ */
+export const RECIPE_TYPES = ['breakfast', 'meal', 'snack', 'prep'] as const;
+export type RecipeType = (typeof RECIPE_TYPES)[number];
+
 export interface Recipe {
   id: string;
   spaceId: string;
@@ -29,6 +36,8 @@ export interface Recipe {
   name: string;
   /** How many people the quantities feed. */
   servings: number;
+  /** Null when the member has not said. */
+  type: RecipeType | null;
   notes: string | null;
   ingredients: RecipeIngredient[];
   createdAt: string;

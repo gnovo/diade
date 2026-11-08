@@ -35,6 +35,7 @@ const recipe = (id: string, servings: number, ingredients: RecipeIngredient[]): 
   creatorId: 'u',
   name: `Recipe ${id.slice(0, 1)}`,
   servings,
+  type: null,
   notes: null,
   ingredients,
   createdAt: '',

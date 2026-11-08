@@ -1,5 +1,6 @@
 import { memoryIconSvg, sizes } from '@diade/design-tokens';
 import {
+  Apple,
   ArrowLeft,
   Baby,
   Bell,
@@ -17,6 +18,8 @@ import {
   CircleCheck,
   Clock,
   CloudOff,
+  Coffee,
+  CookingPot,
   Cross,
   EllipsisVertical,
   Gem,
@@ -116,6 +119,9 @@ const lucideIcons = {
   minus: Minus,
   'ellipsis-vertical': EllipsisVertical,
   'share-2': Share2,
+  coffee: Coffee,
+  apple: Apple,
+  'cooking-pot': CookingPot,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof lucideIcons | 'memory';

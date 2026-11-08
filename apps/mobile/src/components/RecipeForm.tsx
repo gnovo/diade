@@ -11,8 +11,10 @@ import {
   MIN_SERVINGS,
   normalizeRecipeNotes,
   parseRecipeNotes,
+  RECIPE_TYPES,
   type Recipe,
   type RecipeIngredient,
+  type RecipeType,
   suggestIngredientNames,
 } from '@diade/domain';
 import type React from 'react';
@@ -158,6 +160,7 @@ export const RecipeForm: React.FC<{
 
   const [name, setName] = useState('');
   const [servings, setServings] = useState(DEFAULT_SERVINGS);
+  const [type, setType] = useState<RecipeType | null>(null);
   const [ingredients, setIngredients] = useState<RecipeIngredient[]>([]);
   const [line, setLine] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -177,6 +180,7 @@ export const RecipeForm: React.FC<{
     if (!visible) return;
     setName(recipe?.name ?? '');
     setServings(recipe?.servings ?? DEFAULT_SERVINGS);
+    setType(recipe?.type ?? null);
     setIngredients(recipe?.ingredients ?? []);
     const sections = parseRecipeNotes(recipe?.notes);
     setSteps(sections.steps);
@@ -255,6 +259,7 @@ export const RecipeForm: React.FC<{
       const next = {
         name: name.trim(),
         servings,
+        type,
         notes: notesText,
         ingredients: finalIngredients,
       };
@@ -265,6 +270,7 @@ export const RecipeForm: React.FC<{
         const changes: Record<string, unknown> = {};
         if (next.name !== recipe.name) changes.name = next.name;
         if (next.servings !== recipe.servings) changes.servings = next.servings;
+        if (next.type !== (recipe.type ?? null)) changes.type = next.type;
         // Old free text is compared in its current form, so saving only a new name leaves it alone.
         if (next.notes !== normalizeRecipeNotes(recipe.notes)) changes.notes = next.notes;
         if (JSON.stringify(next.ingredients) !== JSON.stringify(recipe.ingredients))
@@ -303,6 +309,33 @@ export const RecipeForm: React.FC<{
             autoCapitalize="sentences"
             returnKeyType="next"
           />
+        </View>
+
+        <View>
+          <SectionLabel>{t('recipes.form.type')}</SectionLabel>
+          <View className="flex-row flex-wrap gap-2" accessibilityRole="radiogroup">
+            {RECIPE_TYPES.map((option) => {
+              const selected = option === type;
+              return (
+                <Pressable
+                  key={option}
+                  // Tapping the chosen type again clears it: a type is optional.
+                  onPress={() => setType(selected ? null : option)}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
+                  className={`min-h-[44px] px-4 rounded-full border items-center justify-center ${
+                    selected ? 'bg-action border-action' : 'bg-surface border-border-strong'
+                  }`}
+                >
+                  <Text
+                    className={`text-sm leading-5 font-semibold ${selected ? 'text-on-action' : 'text-ink'}`}
+                  >
+                    {t(`recipes.types.${option}`)}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
 
         <View className="flex-row items-center justify-between">

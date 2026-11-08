@@ -150,9 +150,11 @@ def pill(s, x, y, label, on=False):
     return w
 
 
-def recipe_card(s, y, name, meta, h=88):
+def recipe_card(s, y, name, meta, h=88, icon=None):
     card(s, 16, y, 343, h)
     s.circle(52, y + h / 2, 20, '#e6e6e6')
+    if icon:  # the glyph is named, not drawn: a lucide icon of that name sits in the circle
+        s.text(52, y + h / 2 + 4, icon[:3], 11, 'middle', '#666')
     s.text(84, y + h / 2 - 4, name, 14, bold=True)
     s.text(84, y + h / 2 + 16, meta, 12, fill='#666')
     s.text(335, y + h / 2 + 5, '›', 20, 'middle')
@@ -234,9 +236,12 @@ def recipes_screen(s):
     header(s, 'Recipes')
     segmented(s, 128, ['Lists', 'Recipes', 'Plan'], 1)
     input_box(s, 16, 192, 343, 'Search recipes')
-    recipe_card(s, 256, 'Spaghetti carbonara', '4 ingredients · 4 servings')
-    recipe_card(s, 352, 'Chicken curry', '9 ingredients · 4 servings')
-    recipe_card(s, 448, 'Lentil soup', '7 ingredients · 2 servings')
+    x = 16  # one chip per type in use, and none at all until a recipe has a type
+    for label, on in [('All', True), ('Breakfast', False), ('Meal', False), ('Snack', False)]:
+        x += chip(s, x, 256, label, on) + 8
+    recipe_card(s, 312, 'Spaghetti carbonara', 'Meal \u00b7 4 ingredients \u00b7 4 servings', icon='utensils')
+    recipe_card(s, 408, 'Overnight oats', 'Breakfast \u00b7 5 ingredients \u00b7 1 serving', icon='coffee')
+    recipe_card(s, 504, 'Yoghurt and berries', 'Snack \u00b7 2 ingredients \u00b7 1 serving', icon='apple')
     tab_bar(s, 2)
 
 
@@ -248,46 +253,45 @@ def s01():
     recipes_screen(s)
     s.callout(343, 152)
     s.callout(343, 216)
-    s.callout(343, 300)
+    s.callout(343, 276)
+    s.callout(343, 356)
     s.finish('01-recipes-library.svg')
 
 
 def s02():
-    s = Svg('02 Recipe sheet (PR B; steps, notes and source added; import moved to screen 12)')
+    s = Svg('02 Recipe sheet (PR B; steps, notes and source added; import moved to screen 12; type added)')
     ghost(s, recipes_screen)
     sheet(s, 96, 'New recipe', footer='Save')
     s.text(16, 160, 'NAME', 12, fill='#666')
     input_box(s, 16, 168, 343, 'Spaghetti carbonara', 48, True)
-    s.text(16, 256, 'SERVINGS', 12, fill='#666')
-    stepper(s, 263, 240, 4)
-    s.text(16, 304, 'INGREDIENTS', 12, fill='#666')
-    input_box(s, 16, 312, 343, 'Add an ingredient, e.g. 400 g spaghetti')
-    card(s, 16, 376, 343, 96)
+    s.text(16, 240, 'TYPE', 12, fill='#666')
+    x = 16
+    for label, on in [('Breakfast', False), ('Meal', True), ('Snack', False), ('Prep', False)]:
+        x += chip(s, x, 248, label, on) + 8
+    s.text(16, 328, 'SERVINGS', 12, fill='#666')
+    stepper(s, 263, 312, 4)
+    s.text(16, 376, 'INGREDIENTS', 12, fill='#666')
+    input_box(s, 16, 384, 343, 'Add an ingredient, e.g. 400 g spaghetti')
+    card(s, 16, 448, 343, 96)
     for i, (n, q, p) in enumerate([('Spaghetti', '400 g', False), ('Salt', '1 tsp', True)]):
-        y = 376 + i * 48
+        y = 448 + i * 48
         if i:
             s.line(16, y, 359, y)
         s.text(32, y + 29, n, 14, bold=True)
         s.text(160, y + 29, q, 14, fill='#666')
         pill(s, 232, y + 12, 'Pantry', p)
         s.text(341, y + 29, '\u00d7', 20, 'middle')
-    s.text(16, 496, 'STEPS', 12, fill='#666')
-    s.rect(16, 504, 343, 56, 8)
-    s.text(28, 536, 'Add a step, e.g. Boil the pasta for 10 minutes', 12, fill='#666')
-    button(s, 16, 568, 120, 'Add step', False, 32)
-    card(s, 16, 612, 343, 104)
-    s.text(32, 640, '1.', 14, bold=True, fill='#666')
-    s.text(60, 640, 'Boil the pasta.', 14)
-    s.line(16, 664, 359, 664)
-    s.rect(16, 664, 343, 52, 8, '#e6e6e6')
-    s.text(32, 694, '2.', 14, bold=True, fill='#666')
-    s.text(60, 694, 'Fry the guanciale.', 14)
-    s.text(W / 2, 730, 'Notes and Source continue below', 11, 'middle', '#666')
+    s.text(16, 568, 'STEPS', 12, fill='#666')
+    s.rect(16, 576, 343, 56, 8)
+    s.text(28, 608, 'Add a step, e.g. Boil the pasta for 10 minutes', 12, fill='#666')
+    button(s, 16, 640, 120, 'Add step', False, 32)
+    s.text(W / 2, 722, 'Steps, Notes and Source continue below', 11, 'middle', '#666')
     s.callout(343, 128)
-    s.callout(343, 336)
-    s.callout(343, 400)
-    s.callout(343, 532)
-    s.callout(343, 690)
+    s.callout(343, 268)
+    s.callout(343, 408)
+    s.callout(343, 472)
+    s.callout(343, 604)
+    s.callout(343, 720)
     s.finish('02-recipe-sheet.svg')
 
 

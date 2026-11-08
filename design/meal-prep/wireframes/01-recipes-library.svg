@@ -16,21 +16,32 @@
 <text x="297.5" y="157" font-size="14" text-anchor="middle" stroke="none" fill="#000">Plan</text>
 <rect x="16" y="192" width="343" height="48" rx="8" fill="#fff"/>
 <text x="28" y="221.0" font-size="14" text-anchor="start" stroke="none" fill="#666">Search recipes</text>
-<rect x="16" y="256" width="343" height="88" rx="8" fill="#fff"/>
-<circle cx="52" cy="300.0" r="20" fill="#e6e6e6"/>
-<text x="84" y="296.0" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Spaghetti carbonara</text>
-<text x="84" y="316.0" font-size="12" text-anchor="start" stroke="none" fill="#666">4 ingredients · 4 servings</text>
-<text x="335" y="305.0" font-size="20" text-anchor="middle" stroke="none" fill="#000">›</text>
-<rect x="16" y="352" width="343" height="88" rx="8" fill="#fff"/>
-<circle cx="52" cy="396.0" r="20" fill="#e6e6e6"/>
-<text x="84" y="392.0" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Chicken curry</text>
-<text x="84" y="412.0" font-size="12" text-anchor="start" stroke="none" fill="#666">9 ingredients · 4 servings</text>
-<text x="335" y="401.0" font-size="20" text-anchor="middle" stroke="none" fill="#000">›</text>
-<rect x="16" y="448" width="343" height="88" rx="8" fill="#fff"/>
-<circle cx="52" cy="492.0" r="20" fill="#e6e6e6"/>
-<text x="84" y="488.0" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Lentil soup</text>
-<text x="84" y="508.0" font-size="12" text-anchor="start" stroke="none" fill="#666">7 ingredients · 2 servings</text>
-<text x="335" y="497.0" font-size="20" text-anchor="middle" stroke="none" fill="#000">›</text>
+<rect x="16" y="256" width="56" height="40" rx="20" fill="#000"/>
+<text x="44.0" y="281" font-size="14" text-anchor="middle" stroke="none" fill="#fff">All</text>
+<rect x="80" y="256" width="104" height="40" rx="20" fill="#fff"/>
+<text x="132.0" y="281" font-size="14" text-anchor="middle" stroke="none" fill="#000">Breakfast</text>
+<rect x="192" y="256" width="64" height="40" rx="20" fill="#fff"/>
+<text x="224.0" y="281" font-size="14" text-anchor="middle" stroke="none" fill="#000">Meal</text>
+<rect x="264" y="256" width="72" height="40" rx="20" fill="#fff"/>
+<text x="300.0" y="281" font-size="14" text-anchor="middle" stroke="none" fill="#000">Snack</text>
+<rect x="16" y="312" width="343" height="88" rx="8" fill="#fff"/>
+<circle cx="52" cy="356.0" r="20" fill="#e6e6e6"/>
+<text x="52" y="360.0" font-size="11" text-anchor="middle" stroke="none" fill="#666">ute</text>
+<text x="84" y="352.0" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Spaghetti carbonara</text>
+<text x="84" y="372.0" font-size="12" text-anchor="start" stroke="none" fill="#666">Meal · 4 ingredients · 4 servings</text>
+<text x="335" y="361.0" font-size="20" text-anchor="middle" stroke="none" fill="#000">›</text>
+<rect x="16" y="408" width="343" height="88" rx="8" fill="#fff"/>
+<circle cx="52" cy="452.0" r="20" fill="#e6e6e6"/>
+<text x="52" y="456.0" font-size="11" text-anchor="middle" stroke="none" fill="#666">cof</text>
+<text x="84" y="448.0" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Overnight oats</text>
+<text x="84" y="468.0" font-size="12" text-anchor="start" stroke="none" fill="#666">Breakfast · 5 ingredients · 1 serving</text>
+<text x="335" y="457.0" font-size="20" text-anchor="middle" stroke="none" fill="#000">›</text>
+<rect x="16" y="504" width="343" height="88" rx="8" fill="#fff"/>
+<circle cx="52" cy="548.0" r="20" fill="#e6e6e6"/>
+<text x="52" y="552.0" font-size="11" text-anchor="middle" stroke="none" fill="#666">app</text>
+<text x="84" y="544.0" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Yoghurt and berries</text>
+<text x="84" y="564.0" font-size="12" text-anchor="start" stroke="none" fill="#666">Snack · 2 ingredients · 1 serving</text>
+<text x="335" y="553.0" font-size="20" text-anchor="middle" stroke="none" fill="#000">›</text>
 <line x1="0" y1="748" x2="375" y2="748" stroke="#000"/>
 <rect x="9.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
 <text x="37.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
@@ -49,5 +60,6 @@
 <text x="337.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Dates</text>
 <g><circle cx="8" cy="152" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="156" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">1</text></g>
 <g><circle cx="8" cy="216" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="220" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">2</text></g>
-<g><circle cx="8" cy="300" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="304" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">3</text></g>
+<g><circle cx="8" cy="276" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="280" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">3</text></g>
+<g><circle cx="8" cy="356" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="360" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">4</text></g>
 </svg>

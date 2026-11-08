@@ -143,6 +143,8 @@ async function openLocalDb(): Promise<SQLite.SQLiteDatabase> {
       creator_id TEXT NOT NULL,
       name TEXT NOT NULL,
       servings INTEGER NOT NULL DEFAULT 4,
+      -- One of RECIPE_TYPES, or NULL when unset.
+      type TEXT,
       notes TEXT,
       -- A JSON array of ingredients; see RecipeIngredient in @diade/domain.
       ingredients TEXT NOT NULL DEFAULT '[]',
@@ -268,6 +270,7 @@ async function migrateLocalSchema(db: SQLite.SQLiteDatabase): Promise<void> {
   await addColumn('local_list_items', 'contributions', 'TEXT');
   await addColumn('local_list_items', 'edited_by_hand', 'INTEGER NOT NULL DEFAULT 0');
   await addColumn('local_ingredients', 'staple', 'INTEGER');
+  await addColumn('local_recipes', 'type', 'TEXT');
 }
 
 // --- Transactions ---
