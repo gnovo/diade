@@ -27,12 +27,9 @@ case "$MODE" in
   ota)
     MESSAGE="${2:-$(git log -1 --pretty=%s)}"
     # An OTA bundle is exported locally, so it must get the same production env as the APK build.
-    DSN_LINE="$(grep '^EXPO_PUBLIC_SENTRY_DSN=' "$APP_DIR/.env.local" || true)"
-    if [ -z "$DSN_LINE" ]; then
-      echo "error: EXPO_PUBLIC_SENTRY_DSN missing from apps/mobile/.env.local" >&2
-      exit 1
-    fi
-    export EXPO_PUBLIC_SENTRY_DSN="${DSN_LINE#EXPO_PUBLIC_SENTRY_DSN=}"
+    # shellcheck source=op-secrets.sh
+    . "$APP_DIR/scripts/op-secrets.sh"
+    load_secret EXPO_PUBLIC_SENTRY_DSN
     export EXPO_PUBLIC_API_URL="https://diade-api.diade.workers.dev"
     # The update only applies to installed builds with the same native fingerprint (runtimeVersion);
     # if native code changed, use `apk` instead.

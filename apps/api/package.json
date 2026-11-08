@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "CLOUDFLARE_INCLUDE_PROCESS_ENV=true op run --env-file=.dev.vars.tpl -- wrangler dev",
+    "dev:plain": "wrangler dev",
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --no-cache",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:migrate": "op run --env-file=.dev.vars.tpl -- drizzle-kit migrate",
+    "db:studio": "op run --env-file=.dev.vars.tpl -- drizzle-kit studio"
   },
   "dependencies": {
     "@better-auth/expo": "1.7.17",
