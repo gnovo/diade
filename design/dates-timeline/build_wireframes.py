@@ -172,10 +172,15 @@ def today_marker(s, y):
     s.text(CX + 84, y + 16, '8 Nov 2026', 12, fill='#666')
 
 
-def birthday_card(s, x, y, name, turns, when):
+def person(s, cx, cy, r, initial, me):
+    """A couple member's round initial: filled for the signed-in user, grey for their partner."""
+    s.circle(cx, cy, r, '#000' if me else '#e6e6e6')
+    s.text(cx, cy + 4, initial, 14, 'middle', '#fff' if me else '#000', bold=True)
+
+
+def birthday_card(s, x, y, name, turns, when, initial, me):
     s.rect(x, y, 167, 88, 8)
-    s.circle(x + 28, y + 28, 16, '#e6e6e6')
-    s.text(x + 28, y + 32, 'cak', 12, 'middle', '#666')
+    person(s, x + 28, y + 28, 16, initial, me)
     s.text(x + 52, y + 33, name, 14, bold=True)
     s.text(x + 16, y + 64, turns, 12, fill='#666')
     s.text(x + 16, y + 80, when, 12, bold=True)
@@ -200,8 +205,8 @@ def s01():
     s.text(343, 308, '283 days to go', 12, 'end', bold=True)
     # birthdays strip
     label(s, 16, 344, 'BIRTHDAYS')
-    birthday_card(s, 16, 360, 'Gonçalo', 'turns 39', 'in 88 days')
-    birthday_card(s, 192, 360, 'Mónica', 'turns 36', 'in 223 days')
+    birthday_card(s, 16, 360, 'Gonçalo', 'turns 39', 'in 88 days', 'G', True)
+    birthday_card(s, 176, 360, 'Mónica', 'turns 36', 'in 223 days', 'M', False)
     # the story
     label(s, 16, 480, 'OUR STORY')
     y0 = 488
@@ -331,8 +336,7 @@ def s05():
     ):
         y = 208 + i * 128
         s.rect(16, y, 343, 112, 8)
-        s.circle(56, y + 56, 24, '#e6e6e6')
-        s.text(56, y + 60, 'cak', 12, 'middle', '#666')
+        person(s, 56, y + 56, 24, name[0], i == 0)
         s.text(96, y + 44, name, 14, bold=True)
         s.text(96, y + 64, born, 12, fill='#666')
         s.text(96, y + 84, turns, 12, bold=True)

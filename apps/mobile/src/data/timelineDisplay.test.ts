@@ -16,9 +16,12 @@ describe('timeline wording', () => {
       expect(spanLabel(t, { years: 6, months: 0, days: 3 }, 2192)).toBe('6 years');
     });
 
-    it('rounds spare days up to the next month, rolling a year over', () => {
-      expect(spanLabel(t, { years: 0, months: 1, days: 29 }, 60)).toBe('2 months');
-      expect(spanLabel(t, { years: 1, months: 11, days: 25 }, 755)).toBe('2 years');
+    it('rounds spare days up to the next month only when asked, rolling a year over', () => {
+      expect(spanLabel(t, { years: 0, months: 1, days: 29 }, 60, true)).toBe('2 months');
+      expect(spanLabel(t, { years: 1, months: 11, days: 25 }, 755, true)).toBe('2 years');
+      // "How long ago" stays exact, so it agrees with the elapsed count in the hero.
+      expect(spanLabel(t, { years: 0, months: 1, days: 29 }, 60)).toBe('1 month');
+      expect(spanLabel(t, { years: 6, months: 2, days: 21 }, 2300)).toBe('6 years 2 months');
     });
 
     it('lists every non-zero part of the time together', () => {

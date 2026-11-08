@@ -1,3 +1,4 @@
+export { Avatar } from './Avatar';
 export { AvatarPair } from './AvatarPair';
 export { Badge, type BadgeTone } from './Badge';
 export { Button, type ButtonProps, type ButtonVariant } from './Button';

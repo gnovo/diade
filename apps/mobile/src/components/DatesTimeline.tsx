@@ -126,7 +126,7 @@ export const DatesTimeline: React.FC<{
             return (
               <RailRow key={entry.key} first={first} last={last}>
                 <Text className="text-xs leading-4 text-ink-muted py-1">
-                  {spanLabel(t, entry.duration, entry.days)}
+                  {spanLabel(t, entry.duration, entry.days, true)}
                 </Text>
               </RailRow>
             );
