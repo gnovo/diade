@@ -550,6 +550,52 @@ export const ptPT: Shape<Catalog> = {
     noIngredients: 'Ainda sem ingredientes.',
     notes: 'Notas',
     deleteRecipe: 'Apagar receita',
+    shareMarkdown: 'Partilhar em markdown',
+    shareFailed: 'Não foi possível partilhar',
+    import: {
+      or: 'ou',
+      entry: 'Importar de markdown',
+      title: 'Importar receitas',
+      pasteLabel: 'Cole o markdown',
+      placeholder:
+        '# Esparguete à carbonara\ndoses: 4\n\n## Ingredientes\n- 400 g esparguete\n- 200 g guanciale',
+      pasteHint:
+        'Uma nota pode ter várias receitas: cada uma começa num título #. Ainda nada é guardado.',
+      nothingFound:
+        'Nenhuma receita encontrada. Comece cada receita com um título # e liste os ingredientes sob ## Ingredientes.',
+      preview: 'Pré-visualizar',
+      editText: 'Editar texto',
+      found_one: '{{count}} receita encontrada',
+      found_other: '{{count}} receitas encontradas',
+      importCount_one: 'Importar {{count}} receita',
+      importCount_other: 'Importar {{count}} receitas',
+      allRead_one: '{{count}} ingrediente · tudo lido',
+      allRead_other: '{{count}} ingredientes · tudo lido',
+      toCheck_one: '{{count}} linha para verificar',
+      toCheck_other: '{{count}} linhas para verificar',
+      noIngredients: 'sem ingredientes',
+      needsName: 'falta o nome',
+      unnamed: 'Receita sem título',
+      alreadyHave: 'Já existe nas suas receitas: fica de fora, a menos que a selecione.',
+      include: 'Importar {{name}}',
+      convertedFrom: 'de {{amount}}',
+      fix: 'Corrigir',
+      fixLabel: 'Corrigir "{{line}}"',
+      fixPlaceholder: 'ex.: 15 g manteiga',
+      flag: {
+        looseMeasure:
+          'Medida não métrica, por isso conta como está escrita. Use g ou ml, se puder.',
+        unknownUnit: 'Unidade não reconhecida. Verifique a quantidade.',
+        noName: 'Uma quantidade sem ingrediente. Fica de fora, a menos que a corrija.',
+        outOfRange: 'Esta quantidade não pode ser guardada. Fica de fora, a menos que a corrija.',
+        similarName:
+          'Parece um erro de escrita de “{{name}}”, que já usa. Duas grafias ficam em duas linhas numa lista de compras.',
+      },
+      warning: {
+        ingredientsTruncated: 'Só os primeiros 100 ingredientes são mantidos.',
+        notesTruncated: 'As notas foram cortadas aos 5000 caracteres.',
+      },
+    },
     deleteTitle: 'Apagar esta receita?',
     deleteBody: '"{{name}}" vai ser removida para os dois.',
     form: {
@@ -564,6 +610,8 @@ export const ptPT: Shape<Catalog> = {
       addPlaceholder: 'Adicionar ingrediente, p. ex. 400 g de esparguete',
       addHint:
         'Quantidades métricas: g, kg, ml, l, colher de sopa, colher de chá. Libras, onças e chávenas são convertidas.',
+      suggestHeading: 'Das suas receitas',
+      useName: 'Usar {{name}}',
       updateIngredient: 'Atualizar ingrediente',
       editIngredient: 'Editar {{name}}',
       removeIngredient: 'Remover {{name}}',

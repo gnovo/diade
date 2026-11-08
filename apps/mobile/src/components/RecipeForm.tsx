@@ -1,18 +1,21 @@
 import {
+  applyNameSuggestion,
   DEFAULT_SERVINGS,
   formatAmount,
   formatIngredient,
   ingredientFromLine,
   isLikelyStaple,
+  knownIngredientNames,
   MAX_SERVINGS,
   MIN_SERVINGS,
   type Recipe,
   type RecipeIngredient,
+  suggestIngredientNames,
 } from '@diade/domain';
 import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, Text, type TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, type TextInput, View } from 'react-native';
 import { newId } from '../data/ids';
 import { insertRecord, updateRecord } from '../data/repository';
 import { Icon, useColor } from '../design';
@@ -138,7 +141,11 @@ export const RecipeForm: React.FC<{
   recipe: Recipe | null;
   /** Called with the id of the recipe once it has been saved. */
   onSaved?: (id: string) => void;
-}> = ({ visible, onClose, recipe, onSaved }) => {
+  /** Every recipe, so ingredient names already in use can be offered while typing. */
+  library: Recipe[];
+  /** Shown under the notes of a new recipe: closes this form and opens the markdown import. */
+  onImport?: () => void;
+}> = ({ visible, onClose, recipe, onSaved, library, onImport }) => {
   const { t, i18n } = useTranslation();
   const ctx = useWriteContext();
   const decimal = decimalFor(i18n.language);
@@ -152,6 +159,8 @@ export const RecipeForm: React.FC<{
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const lineRef = useRef<React.ComponentRef<typeof TextInput>>(null);
+  const known = useMemo(() => knownIngredientNames(library), [library]);
+  const suggestions = useMemo(() => suggestIngredientNames(line, known), [line, known]);
 
   // Start from the recipe (or a blank one) each time the form opens, so a draft never leaks across.
   // biome-ignore lint/correctness/useExhaustiveDependencies: Only `visible` starts a fresh form; the recipe is read at that moment
@@ -305,6 +314,30 @@ export const RecipeForm: React.FC<{
             autoCorrect={false}
             autoCapitalize="sentences"
           />
+          {suggestions.length > 0 ? (
+            <View className="mt-3">
+              <Text className="text-xs leading-4 font-semibold text-ink-muted tracking-wider uppercase mb-2">
+                {t('recipes.form.suggestHeading')}
+              </Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+              >
+                {suggestions.map((name) => (
+                  <Pressable
+                    key={name}
+                    onPress={() => setLine(applyNameSuggestion(line, name))}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('recipes.form.useName', { name })}
+                    className="justify-center min-h-[48px] px-4 mr-2 rounded-full border border-border-strong bg-surface active:bg-surface-sunken"
+                  >
+                    <Text className="text-sm font-medium text-ink">{name}</Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </View>
+          ) : null}
           <Text className="text-sm leading-5 text-ink-muted mt-2">{t('recipes.form.addHint')}</Text>
           {ingredients.length > 0 ? (
             <Card className="mt-3 mb-0">
@@ -336,6 +369,24 @@ export const RecipeForm: React.FC<{
             style={{ minHeight: 96, paddingTop: 12 }}
           />
         </View>
+
+        {!editing && onImport ? (
+          <View>
+            <View className="flex-row items-center mb-2" accessible={false}>
+              <View className="flex-1 h-px bg-border" />
+              <Text className="mx-3 text-sm text-ink-muted">{t('recipes.import.or')}</Text>
+              <View className="flex-1 h-px bg-border" />
+            </View>
+            <Button
+              label={t('recipes.import.entry')}
+              variant="outline"
+              onPress={() => {
+                onClose();
+                onImport();
+              }}
+            />
+          </View>
+        ) : null}
       </View>
     </BottomSheet>
   );

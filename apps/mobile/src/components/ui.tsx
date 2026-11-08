@@ -194,7 +194,7 @@ export const TextField: React.FC<
 export const Button: React.FC<{
   label: string;
   onPress: () => void;
-  variant?: 'primary' | 'ghost' | 'danger';
+  variant?: 'primary' | 'soft' | 'outline' | 'ghost' | 'danger';
   disabled?: boolean;
   small?: boolean;
 }> = ({ small, ...props }) => <DSButton size={small ? 'sm' : 'md'} {...props} />;
