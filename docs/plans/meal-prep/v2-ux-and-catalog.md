@@ -44,10 +44,11 @@ Model:
 - `ingredients` per space, synced like recipes: `id, space_id, creator_id, name, match_key, aliases (jsonb), staple (default),
   aisle (nullable), default_unit_family (nullable), merged_into_id (nullable), created_at, updated_at, deleted_at`.
   Unique `(space_id, match_key)`.
-- Built-in en/pt-PT dictionary in code (synonyms, staples, aisles). A space's row is created on first use, from the dictionary
-  when it matches; so there is no per-space seed and the dictionary improves over the air.
-- A recipe line: `{ id, name (as written), ingredientId?, quantity, unit, staple (override, null = inherit) }`. Display and markdown stay
-  name-based; no id marker in the markdown. Import resolves a name through aliases to an id.
+- Built-in en/pt-PT dictionary in code (synonyms, plurals; later staples and aisles). It improves over the air and needs no per-space data.
+- A row is made only when a member does something that needs one (a merge, a rename, a staple default), not on every recipe save: each row is a
+  sync mutation, and creating one per ingredient made a normal save too expensive for the Worker's CPU limit (see PR F).
+- A recipe line stays `{ id, name (as written), quantity, unit, staple }`. It is matched to its ingredient by name through the resolver, so there is
+  no id on the line and no backfill. Display and markdown stay name-based.
 - Merging is first-class: set `merged_into_id`, add the alias, repoint recipe lines. The duplicate suggestion in the grocery review
   (follow-up 2) becomes "merge and remember".
 

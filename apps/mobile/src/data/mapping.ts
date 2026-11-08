@@ -17,7 +17,7 @@ const BOOLEAN_KEYS = new Set([
 ]);
 
 /** Stored as JSON text locally; arrays and objects in the domain. */
-const JSON_KEYS = new Set(['ingredients', 'recipes', 'contributions']);
+const JSON_KEYS = new Set(['ingredients', 'recipes', 'contributions', 'aliases']);
 
 export type Row = Record<string, unknown>;
 

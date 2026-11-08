@@ -6,8 +6,8 @@
  * text it was read from and says when the parser was guessing (see `assessIngredientLine`).
  */
 
+import { ingredientMatchKey } from './ingredientKeys';
 import { type KnownName, knownIngredientNames, similarKnownName } from './ingredientNames';
-import { ingredientMatchKey } from './mealPlan';
 import {
   formatRecipeNotes,
   levelTwoTitle,

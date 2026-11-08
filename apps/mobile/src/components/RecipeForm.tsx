@@ -250,14 +250,14 @@ export const RecipeForm: React.FC<{
           )
         : [...ingredients, pending];
     }
-    const next = {
-      name: name.trim(),
-      servings,
-      notes: notesText,
-      ingredients: finalIngredients,
-    };
     try {
       setSaving(true);
+      const next = {
+        name: name.trim(),
+        servings,
+        notes: notesText,
+        ingredients: finalIngredients,
+      };
       let id: string;
       if (recipe) {
         id = recipe.id;

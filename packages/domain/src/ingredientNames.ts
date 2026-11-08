@@ -4,7 +4,8 @@
  * points out a name that is one typo away from one it uses more.
  */
 
-import { type GroceryRow, ingredientMatchKey } from './mealPlan';
+import { ingredientMatchKey } from './ingredientKeys';
+import type { GroceryRow } from './mealPlan';
 import {
   assessIngredientLine,
   formatIngredient,

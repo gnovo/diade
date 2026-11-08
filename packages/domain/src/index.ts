@@ -5,6 +5,9 @@
 export * from './datetime';
 export * from './externalCalendar';
 export * from './importantDates';
+export * from './ingredientCatalog';
+export * from './ingredientDictionary';
+export * from './ingredientKeys';
 export * from './ingredientNames';
 export * from './listTemplates';
 export * from './mealPlan';
@@ -15,6 +18,7 @@ export * from './recurrence';
 
 import type { ExternalCalendar, ExternalEvent } from './externalCalendar';
 import type { ImportantDateRepeat, ImportantDateType } from './importantDates';
+import type { Ingredient } from './ingredientCatalog';
 import type { GroceryContribution, MealPlan } from './mealPlan';
 import type { Recipe } from './recipes';
 
@@ -170,7 +174,8 @@ export type SyncEntityName =
   | 'capture_items'
   | 'important_dates'
   | 'recipes'
-  | 'meal_plans';
+  | 'meal_plans'
+  | 'ingredients';
 export type MutationOperation = 'INSERT' | 'UPDATE' | 'DELETE';
 
 export interface ClientMutation {
@@ -212,6 +217,8 @@ export interface SyncPullResult {
   recipes?: Recipe[];
   /** Absent from an API that predates meal plans. */
   mealPlans?: MealPlan[];
+  /** Absent from an API that predates the ingredient catalog. */
+  ingredients?: Ingredient[];
   /** Absent from an API that predates Google Calendar sync. */
   externalCalendars?: ExternalCalendar[];
   externalEvents?: ExternalEvent[];

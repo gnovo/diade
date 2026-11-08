@@ -14,6 +14,7 @@ const LOCAL_TABLES = [
   'local_important_dates',
   'local_recipes',
   'local_meal_plans',
+  'local_ingredients',
   'local_external_calendars',
   'local_external_events',
   'local_outbox',
@@ -158,6 +159,20 @@ async function openLocalDb(): Promise<SQLite.SQLiteDatabase> {
       ends_on TEXT NOT NULL,
       -- A JSON array of { recipeId, servings }; see MealPlanRecipe in @diade/domain.
       recipes TEXT NOT NULL DEFAULT '[]',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS local_ingredients (
+      id TEXT PRIMARY KEY NOT NULL,
+      space_id TEXT NOT NULL,
+      creator_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      match_key TEXT NOT NULL,
+      -- A JSON array of other names (match keys); see Ingredient in @diade/domain.
+      aliases TEXT NOT NULL DEFAULT '[]',
+      merged_into_id TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       deleted_at TEXT
