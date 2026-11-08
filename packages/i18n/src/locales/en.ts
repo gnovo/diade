@@ -568,6 +568,14 @@ export const en = {
     deleteRecipe: 'Delete recipe',
     share: 'Share',
     moreActions: 'More actions',
+    typeFilter: 'Filter by type',
+    typeAll: 'All',
+    types: {
+      breakfast: 'Breakfast',
+      meal: 'Meal',
+      snack: 'Snack',
+      prep: 'Prep',
+    },
     shareFailed: 'Could not share',
     cook: {
       start: 'Start cooking',
@@ -630,6 +638,7 @@ export const en = {
       editTitle: 'Edit recipe',
       name: 'Name',
       namePlaceholder: 'Spaghetti carbonara',
+      type: 'Type',
       servings: 'Servings',
       lessServings: 'Fewer servings',
       moreServings: 'More servings',

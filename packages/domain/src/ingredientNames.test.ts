@@ -101,6 +101,7 @@ describe('findPossibleDuplicates', () => {
     creatorId: 'u',
     name: `Recipe ${id}`,
     servings: 1,
+    type: null,
     notes: null,
     ingredients: lines.map(([name, unit], i) => ({
       id: `${id}${i}`,

@@ -8,6 +8,7 @@ import {
   MIN_SERVINGS,
   type MutationOperation,
   parseDateOnly,
+  RECIPE_TYPES,
   RECIPE_UNITS,
   type SyncEntityName,
   TASK_PRIORITIES,
@@ -207,9 +208,12 @@ const recipeIngredientsSchema = z
 
 const servingsSchema = z.number().int().min(MIN_SERVINGS).max(MAX_SERVINGS);
 
+const recipeTypeSchema = z.enum(RECIPE_TYPES).nullable();
+
 export const createRecipeSchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(120),
   servings: servingsSchema.default(DEFAULT_SERVINGS),
+  type: recipeTypeSchema.optional(),
   notes: z.string().max(5000).nullable().optional(),
   ingredients: recipeIngredientsSchema.default([]),
 });
@@ -217,6 +221,7 @@ export const createRecipeSchema = z.object({
 export const updateRecipeSchema = z.object({
   name: z.string().trim().min(1).max(120).optional(),
   servings: servingsSchema.optional(),
+  type: recipeTypeSchema.optional(),
   notes: z.string().max(5000).nullable().optional(),
   ingredients: recipeIngredientsSchema.optional(),
 });

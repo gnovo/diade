@@ -1,4 +1,9 @@
-import type { GroceryContribution, MealPlanRecipe, RecipeIngredient } from '@diade/domain';
+import type {
+  GroceryContribution,
+  MealPlanRecipe,
+  RecipeIngredient,
+  RecipeType,
+} from '@diade/domain';
 import { sql } from 'drizzle-orm';
 import {
   bigint,
@@ -186,6 +191,8 @@ export const recipes = pgTable('recipes', {
     .references(() => users.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   servings: integer('servings').notNull().default(4),
+  /** One of RECIPE_TYPES, or null when unset; validated at the API, like `lists.category`. */
+  type: text('type').$type<RecipeType>(),
   notes: text('notes'),
   ingredients: jsonb('ingredients').$type<RecipeIngredient[]>().notNull().default(sql`'[]'::jsonb`),
   createdAt: timestamp('created_at').notNull().defaultNow(),

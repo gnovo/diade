@@ -404,6 +404,7 @@ async function applyMutation(
           creatorId: userId,
           name: d.name,
           servings: d.servings ?? 4,
+          type: d.type ?? null,
           notes: d.notes ?? null,
           ingredients: d.ingredients ?? [],
           createdAt: now,
@@ -419,6 +420,7 @@ async function applyMutation(
       const changes: Partial<typeof recipes.$inferInsert> = { updatedAt: now };
       if (d.name !== undefined) changes.name = d.name;
       if (d.servings !== undefined) changes.servings = d.servings;
+      if (d.type !== undefined) changes.type = d.type;
       if (d.notes !== undefined) changes.notes = d.notes;
       if (d.ingredients !== undefined) changes.ingredients = d.ingredients;
       await db.update(recipes).set(changes).where(where);

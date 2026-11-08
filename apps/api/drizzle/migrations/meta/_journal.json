@@ -78,6 +78,13 @@
       "when": 1794163823716,
       "tag": "0010_ingredient_staple",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794176288702,
+      "tag": "0011_recipe_type",
+      "breakpoints": true
     }
   ]
 }

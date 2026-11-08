@@ -280,6 +280,15 @@ describe('recipes sync payloads', () => {
     if (result.success) expect(result.data).toEqual({ name: 'Renamed' });
   });
 
+  it('takes one of the fixed types, or null to clear it, and refuses any other', () => {
+    for (const type of ['breakfast', 'meal', 'snack', 'prep', null]) {
+      expect(parseSyncPayload('recipes', 'INSERT', { name: 'x', type }).success).toBe(true);
+      expect(parseSyncPayload('recipes', 'UPDATE', { type }).success).toBe(true);
+    }
+    expect(parseSyncPayload('recipes', 'UPDATE', { type: 'dessert' }).success).toBe(false);
+    expect(parseSyncPayload('recipes', 'INSERT', { name: 'x', type: 'Snack' }).success).toBe(false);
+  });
+
   it('accepts ingredients with a null quantity (to taste)', () => {
     expect(
       parseSyncPayload('recipes', 'INSERT', {
