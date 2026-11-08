@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  assessIngredientLine,
   formatAmount,
   formatIngredient,
   ingredientFromLine,
@@ -300,5 +301,112 @@ describe('ingredientFromLine', () => {
 
   it('returns null for an empty line', () => {
     expect(ingredientFromLine('c', '  ')).toBeNull();
+  });
+});
+
+describe('assessIngredientLine', () => {
+  const flagOf = (line: string) => assessIngredientLine(line).flag;
+
+  it('trusts metric, counted and to-taste lines', () => {
+    for (const line of [
+      '400 g spaghetti',
+      '2 eggs',
+      '3 ovos',
+      '2 colheres de sopa de azeite',
+      '1 kg batata',
+      '1½ tsp salt',
+      'sal q.b.',
+      'black pepper to taste',
+      '7up',
+      '2% milk',
+      '- 1 onion',
+    ]) {
+      expect(flagOf(line), line).toBeNull();
+    }
+  });
+
+  it('flags a non-metric measure word, in English and Portuguese', () => {
+    for (const line of [
+      '1 knob butter',
+      '1 handful spinach',
+      '2 bunches parsley',
+      '1 dash vinegar',
+      '2 cans tomatoes',
+      '3 slices bread',
+      '1 packet yeast',
+      '1 molho de salsa',
+      '2 latas de tomate',
+      '3 fatias de fiambre',
+      '1 ramo de coentros',
+      '1 punhado de nozes',
+      '2 dentes de alho',
+      '1 pacote de massa',
+    ]) {
+      expect(flagOf(line), line).toBe('looseMeasure');
+    }
+  });
+
+  it('flags a number with no name', () => {
+    for (const line of ['400 g', '2', '½ cup', '2 colheres de sopa']) {
+      expect(flagOf(line), line).toBe('noName');
+    }
+  });
+
+  it('flags a unit-looking token the table does not know', () => {
+    expect(flagOf('2 pcs chicken breast')).toBe('unknownUnit');
+    expect(flagOf('1 jar of pesto')).toBe('unknownUnit');
+    expect(flagOf('2 caixas de leite')).toBe('unknownUnit');
+    expect(flagOf('3 pkt. noodles')).toBe('unknownUnit');
+  });
+
+  it('flags a quantity that cannot be stored', () => {
+    expect(flagOf('0 eggs')).toBe('outOfRange');
+    expect(flagOf('999999 g flour')).toBe('outOfRange');
+  });
+
+  it('reports a conversion to metric with what was written', () => {
+    expect(assessIngredientLine('1 lb beef')).toMatchObject({
+      ingredient: { name: 'Beef', quantity: 454, unit: 'g' },
+      flag: null,
+      convertedFrom: '1 lb',
+    });
+    expect(assessIngredientLine('1/2 cup milk').convertedFrom).toBe('1/2 cup');
+    expect(assessIngredientLine('2 Pounds beef').convertedFrom).toBe('2 Pounds');
+    expect(assessIngredientLine('400 g beef').convertedFrom).toBeNull();
+    expect(assessIngredientLine('1 kg beef').convertedFrom).toBeNull();
+  });
+
+  it('leaves the parse of a line as parseIngredientLine reads it', () => {
+    for (const line of [
+      '400 g spaghetti',
+      '1 knob butter',
+      '2 eggs',
+      'sal q.b.',
+      '2 pcs chicken',
+    ]) {
+      expect(assessIngredientLine(line).ingredient).toEqual(parseIngredientLine(line));
+    }
+  });
+});
+
+describe('"x" counts', () => {
+  it('reads "2 x eggs" and "3× tomatoes" as a count, whatever the name starts with', () => {
+    expect(parseIngredientLine('2 x eggs')).toEqual({ name: 'Eggs', quantity: 2, unit: 'unit' });
+    expect(parseIngredientLine('3× tomatoes')).toEqual({
+      name: 'Tomatoes',
+      quantity: 3,
+      unit: 'unit',
+    });
+    expect(parseIngredientLine('2 x Cup noodles')).toEqual({
+      name: 'Cup noodles',
+      quantity: 2,
+      unit: 'unit',
+    });
+    expect(parseIngredientLine('2x eggs')).toEqual({ name: 'Eggs', quantity: 2, unit: 'unit' });
+  });
+
+  it('leaves "2 x 400 g tins" and words that merely start with x alone', () => {
+    expect(parseIngredientLine('2 x 400 g tins').name).toBe('X 400 g tins');
+    expect(parseIngredientLine('2 xanthan gum').name).toBe('Xanthan gum');
   });
 });

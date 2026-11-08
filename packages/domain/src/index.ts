@@ -5,8 +5,10 @@
 export * from './datetime';
 export * from './externalCalendar';
 export * from './importantDates';
+export * from './ingredientNames';
 export * from './listTemplates';
 export * from './mealPlan';
+export * from './recipeMarkdown';
 export * from './recipes';
 export * from './recurrence';
 

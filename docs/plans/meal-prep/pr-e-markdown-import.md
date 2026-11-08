@@ -1,5 +1,7 @@
 # PR E: markdown import and export
 
+Built. The format as shipped is documented in [docs/features/recipe-markdown.md](../../features/recipe-markdown.md); where it differs from this brief (no file picker, tags `#pantry`/`#fresh`, a `similarName` flag), that document wins.
+
 Wireframes 10 and 11. Depends on B only, so it can ship before C and D if wanted.
 
 ## The constraint that shapes it
