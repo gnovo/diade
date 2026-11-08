@@ -38,7 +38,7 @@ th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute
 #lb.wide img{width:min(1464px,100%)}
 </style>
 <div class="wrap">
-<nav><a href="#flow">Flow</a><a href="#s1">1 Library</a><a href="#s2">2 Recipe sheet</a><a href="#s3">3 Plan</a><a href="#s4">4 Pick</a><a href="#s5">5 Grocery list</a><a href="#s6">6 Wizard type</a><a href="#s7">7 Name</a><a href="#s8">8 Recipes</a><a href="#s9">9 Review</a><a href="#s10">10 Import</a><a href="#s11">11 Review</a><a href="#s12">12 Add recipe</a><a href="#s13">13 Empty week</a><a href="#s14">14 Recipe detail</a><a href="#rules">Rules</a><a href="#open">Open questions</a></nav>
+<nav><a href="#flow">Flow</a><a href="#s1">1 Library</a><a href="#s2">2 Recipe sheet</a><a href="#s3">3 Plan</a><a href="#s4">4 Pick</a><a href="#s5">5 Grocery list</a><a href="#s6">6 Wizard type</a><a href="#s7">7 Name</a><a href="#s8">8 Recipes</a><a href="#s9">9 Review</a><a href="#s10">10 Import</a><a href="#s11">11 Review</a><a href="#s12">12 Add recipe</a><a href="#s13">13 Empty week</a><a href="#s14">14 Recipe detail</a><a href="#s15">15 Cooking</a><a href="#rules">Rules</a><a href="#open">Open questions</a></nav>
 <header>
 <div class="crumb">Díade mobile · Lists tab</div>
 <h1>Meal prep: recipes, a weekly plan, and smarter lists</h1>
@@ -120,7 +120,17 @@ th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute
 <section id="s14"><h2>14 · Recipe detail with sections</h2>
 <p class="sub">What a recipe looks like when you open it. Edit, share and delete are unchanged.</p>
 <div class="row"><div class="wire" data-zoom><img src="wireframes/14-recipe-detail.svg" alt="Recipe detail"></div>
-<div><ol class="notes"><li><span class="n">1</span><span>Ingredients, with pantry staples set apart.</span></li><li><span class="n">2</span><span>Steps, numbered. A recipe with no steps shows no Steps card.</span></li><li><span class="n">3</span><span>Notes, as typed.</span></li><li><span class="n">4</span><span>Source. A web address opens in the browser; anything else is shown as text.</span></li></ol><div class="why"><b>Next:</b> a cooking view (large step text, tick off ingredients, screen kept awake) is its own PR; it needs the keep-awake native module checked first.</div></div></div></section>
+<div><ol class="notes"><li><span class="n">1</span><span>Ingredients, with pantry staples set apart.</span></li><li><span class="n">2</span><span>Steps, numbered. A recipe with no steps shows no Steps card.</span></li><li><span class="n">3</span><span>Notes, as typed.</span></li><li><span class="n">4</span><span>Source. A web address opens in the browser; anything else is shown as text.</span></li></ol><div class="why"><b>Start cooking</b> (below Ingredients, Steps, Notes and Source) opens the cooking view (15, 16). It is shown only for a recipe that has steps.</div></div></div></section>
+
+<section id="s15"><h2>15 · Cooking view</h2>
+<p class="sub">Full screen, hands-free: one big step at a time, the ingredients to tick off, and the screen kept awake while it is open.</p>
+<div class="row"><div class="wire" data-zoom><img src="wireframes/15-cooking-steps.svg" alt="Cooking steps"></div>
+<div><ol class="notes"><li><span class="n">1</span><span>Close, the recipe name, and a Steps / Ingredients switch. The step you are on and what you have ticked are kept when you switch.</span></li><li><span class="n">2</span><span>"Step 2 of 4" and a thin progress bar.</span></li><li><span class="n">3</span><span>The step in large type (26 pt, and it still follows the system font size). Long steps scroll.</span></li><li><span class="n">4</span><span>Back and Next step, 56 px high. On the last step Next reads Done and closes the view. The system back button closes it too.</span></li></ol><div class="why"><b>Screen kept awake</b> only while this view is open (expo-keep-awake, already part of the native build, so no new APK). Nothing is saved: ticks and the step start fresh each time.</div></div></div></section>
+
+<section id="s16"><h2>16 · Cooking view: ingredients</h2>
+<p class="sub">Every ingredient, pantry staples included, as one list to tick off while you gather them.</p>
+<div class="row"><div class="wire" data-zoom><img src="wireframes/16-cooking-ingredients.svg" alt="Cooking ingredients"></div>
+<div><ol class="notes"><li><span class="n">1</span><span>How many are ready.</span></li><li><span class="n">2</span><span>Tap anywhere on a row to tick it; a ticked row is struck through and dimmed. Quantities are the recipe's, not scaled: scaling servings while cooking is a later idea.</span></li></ol></div></div></section>
 
 <section id="rules"><h2>Rules that cut across screens</h2>
 <p class="sub">Decided in the brainstorm; each is a few lines of code but easy to get wrong later.</p>
