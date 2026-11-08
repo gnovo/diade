@@ -10,8 +10,11 @@ base=$(git merge-base HEAD origin/main 2>/dev/null) || exit 0
 changed=$(git diff --name-only "$base"..HEAD)
 echo "$changed" | grep -q '^design/' && exit 0
 
+BIOME=node_modules/.bin/biome
+[ -x "$BIOME" ] || exit 0
+
 normalize() {
-  pnpm exec biome check --write --stdin-file-path="$1" 2>/dev/null |
+  "$BIOME" check --write --stdin-file-path="$1" 2>/dev/null |
     perl -0pe 's{/\*.*?\*/}{}gs; s{^\s*//.*\n}{}gm; s{^import\b.*?;\n}{}gms; s{\n\s*\n}{\n}g'
 }
 
