@@ -1,9 +1,11 @@
-import type { BirthdayEntry, ImportantDate } from '@diade/domain';
+import type { BirthdayEntry, ImportantDate, ImportantDateType } from '@diade/domain';
 import type { TFunction } from '@diade/i18n';
 import type React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
+import { useAuth } from '../context/AuthContext';
 import { statusLabel } from '../data/importantDateDisplay';
+import { Avatar } from '../design';
 import { useFormat } from '../i18n';
 import { ImportantDateIcon } from './ImportantDateIcon';
 import { Card } from './ui';
@@ -17,6 +19,30 @@ const countdown = (t: TFunction, entry: Birthday): string =>
   });
 
 /**
+ * The couple's own birthdays show the person (the same round initial as the Today header);
+ * everyone else's keeps the cake icon. Falls back to the icon until the partner has joined.
+ */
+const BirthdayAvatar: React.FC<{ type: ImportantDateType; large?: boolean }> = ({
+  type,
+  large,
+}) => {
+  const { user, members } = useAuth();
+  const partner = members.find((m) => m.userId !== user?.id);
+  const person =
+    type === 'my_birthday'
+      ? { name: user?.displayName || user?.email, tone: 'me' as const }
+      : type === 'partner_birthday'
+        ? { name: partner?.displayName, tone: 'partner' as const }
+        : null;
+  if (!person?.name) return <ImportantDateIcon type={type} large={large} />;
+  return <Avatar name={person.name} tone={person.tone} size={large ? 56 : 40} />;
+};
+
+/** Space between cards, and the page's side padding the strip bleeds through. */
+const STRIP_GAP = 12;
+const PAGE_PADDING = 16;
+
+/**
  * Birthdays as a strip of compact cards, soonest first. They are about the next time, not the
  * past, so they stay out of the timeline.
  */
@@ -25,13 +51,15 @@ export const BirthdayStrip: React.FC<{
   onOpen: (id: string) => void;
 }> = ({ entries, onOpen }) => {
   const { t } = useTranslation();
+  // Two cards fill the same width as the card above; a third scrolls in from the right.
+  const cardWidth = (useWindowDimensions().width - PAGE_PADDING * 2 - STRIP_GAP) / 2;
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       // Bleeds to the screen edges so it reads as scrollable; the content padding puts the margin back.
-      style={{ marginHorizontal: -16, flexGrow: 0, marginBottom: 20 }}
-      contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
+      style={{ marginHorizontal: -PAGE_PADDING, flexGrow: 0, marginBottom: 20 }}
+      contentContainerStyle={{ paddingHorizontal: PAGE_PADDING, gap: STRIP_GAP }}
     >
       {entries.map((entry) => (
         <Pressable
@@ -39,10 +67,11 @@ export const BirthdayStrip: React.FC<{
           onPress={() => onOpen(entry.item.id)}
           accessibilityRole="button"
           accessibilityLabel={`${entry.item.title}, ${countdown(t, entry)}`}
-          className="w-[176px] rounded-lg border border-border bg-surface p-3 active:opacity-70"
+          style={{ width: cardWidth }}
+          className="rounded-lg border border-border bg-surface p-3 active:opacity-70"
         >
           <View className="flex-row items-center gap-2">
-            <ImportantDateIcon type={entry.item.type} />
+            <BirthdayAvatar type={entry.item.type} />
             <Text className="flex-1 text-base leading-6 font-semibold text-ink" numberOfLines={2}>
               {entry.item.title}
             </Text>
@@ -81,7 +110,7 @@ export const BirthdayList: React.FC<{
           className="active:opacity-70"
         >
           <Card className="flex-row items-center gap-3">
-            <ImportantDateIcon type={entry.item.type} large />
+            <BirthdayAvatar type={entry.item.type} large />
             <View className="flex-1">
               <Text className="text-base leading-6 font-semibold text-ink" numberOfLines={2}>
                 {entry.item.title}

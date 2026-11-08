@@ -27,17 +27,17 @@
 <text x="343" y="308" font-size="12" text-anchor="end" stroke="none" fill="#000" font-weight="700">283 days to go</text>
 <text x="16" y="344" font-size="12" text-anchor="start" stroke="none" fill="#666">BIRTHDAYS</text>
 <rect x="16" y="360" width="167" height="88" rx="8" fill="#fff"/>
-<circle cx="44" cy="388" r="16" fill="#e6e6e6"/>
-<text x="44" y="392" font-size="12" text-anchor="middle" stroke="none" fill="#666">cak</text>
+<circle cx="44" cy="388" r="16" fill="#000"/>
+<text x="44" y="392" font-size="14" text-anchor="middle" stroke="none" fill="#fff" font-weight="700">G</text>
 <text x="68" y="393" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Gonçalo</text>
 <text x="32" y="424" font-size="12" text-anchor="start" stroke="none" fill="#666">turns 39</text>
 <text x="32" y="440" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">in 88 days</text>
-<rect x="192" y="360" width="167" height="88" rx="8" fill="#fff"/>
-<circle cx="220" cy="388" r="16" fill="#e6e6e6"/>
-<text x="220" y="392" font-size="12" text-anchor="middle" stroke="none" fill="#666">cak</text>
-<text x="244" y="393" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Mónica</text>
-<text x="208" y="424" font-size="12" text-anchor="start" stroke="none" fill="#666">turns 36</text>
-<text x="208" y="440" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">in 223 days</text>
+<rect x="176" y="360" width="167" height="88" rx="8" fill="#fff"/>
+<circle cx="204" cy="388" r="16" fill="#e6e6e6"/>
+<text x="204" y="392" font-size="14" text-anchor="middle" stroke="none" fill="#000" font-weight="700">M</text>
+<text x="228" y="393" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Mónica</text>
+<text x="192" y="424" font-size="12" text-anchor="start" stroke="none" fill="#666">turns 36</text>
+<text x="192" y="440" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">in 223 days</text>
 <text x="16" y="480" font-size="12" text-anchor="start" stroke="none" fill="#666">OUR STORY</text>
 <line x1="40" y1="504" x2="40" y2="528" stroke="#000" stroke-dasharray="4 4"/>
 <line x1="40" y1="540" x2="40" y2="748" stroke="#000"/>

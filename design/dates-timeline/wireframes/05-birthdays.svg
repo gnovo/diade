@@ -19,8 +19,8 @@
 <text x="396.0" y="145" font-size="14" text-anchor="middle" stroke="none" fill="#000">Other</text>
 <text x="16" y="192" font-size="12" text-anchor="start" stroke="none" fill="#666">BIRTHDAYS · 2</text>
 <rect x="16" y="208" width="343" height="112" rx="8" fill="#fff"/>
-<circle cx="56" cy="264" r="24" fill="#e6e6e6"/>
-<text x="56" y="268" font-size="12" text-anchor="middle" stroke="none" fill="#666">cak</text>
+<circle cx="56" cy="264" r="24" fill="#000"/>
+<text x="56" y="268" font-size="14" text-anchor="middle" stroke="none" fill="#fff" font-weight="700">G</text>
 <text x="96" y="252" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Gonçalo</text>
 <text x="96" y="272" font-size="12" text-anchor="start" stroke="none" fill="#666">4 Feb 1988</text>
 <text x="96" y="292" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">turns 39</text>
@@ -29,7 +29,7 @@
 <text x="307" y="288" font-size="12" text-anchor="middle" stroke="none" fill="#666">days</text>
 <rect x="16" y="336" width="343" height="112" rx="8" fill="#fff"/>
 <circle cx="56" cy="392" r="24" fill="#e6e6e6"/>
-<text x="56" y="396" font-size="12" text-anchor="middle" stroke="none" fill="#666">cak</text>
+<text x="56" y="396" font-size="14" text-anchor="middle" stroke="none" fill="#000" font-weight="700">M</text>
 <text x="96" y="380" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Mónica</text>
 <text x="96" y="400" font-size="12" text-anchor="start" stroke="none" fill="#666">19 Jun 1991</text>
 <text x="96" y="420" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">turns 36</text>
