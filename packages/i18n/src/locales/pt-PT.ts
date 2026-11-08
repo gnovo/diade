@@ -571,7 +571,8 @@ export const ptPT: Shape<Catalog> = {
     steps: 'Passos',
     source: 'Fonte',
     deleteRecipe: 'Apagar receita',
-    shareMarkdown: 'Partilhar em markdown',
+    share: 'Partilhar',
+    moreActions: 'Mais ações',
     shareFailed: 'Não foi possível partilhar',
     cook: {
       start: 'Começar a cozinhar',

@@ -11,7 +11,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, BackHandler, Linking, Pressable, Share, Text, View } from 'react-native';
 import { deleteRecord } from '../data/repository';
-import { Icon } from '../design';
+import { Icon, useColor } from '../design';
+import { BottomSheet } from './BottomSheet';
 import { CookingView } from './CookingView';
 import { decimalFor } from './RecipeForm';
 import { Button, Card, EmptyState, ScreenScaffold, SectionLabel, TextField } from './ui';
@@ -36,7 +37,27 @@ const IngredientLine: React.FC<{
 /** A source that is a single web address opens in the browser; anything else is just text. */
 const isLink = (source: string): boolean => /^https?:\/\/\S+$/i.test(source);
 
-/** One recipe on its own screen: ingredients (pantry staples set apart), notes, edit and delete. */
+/** One action in the recipe menu. */
+const MenuRow: React.FC<{
+  icon: 'pencil' | 'share-2' | 'trash-2';
+  label: string;
+  onPress: () => void;
+  danger?: boolean;
+}> = ({ icon, label, onPress, danger }) => {
+  const color = useColor(danger ? 'danger' : 'ink');
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      className="flex-row items-center min-h-[52px] px-2 rounded-md active:bg-surface-sunken"
+    >
+      <Icon name={icon} size={20} color={color} />
+      <Text className={`ml-3 text-base ${danger ? 'text-danger' : 'text-ink'}`}>{label}</Text>
+    </Pressable>
+  );
+};
+
+/** One recipe on its own screen: ingredients (pantry staples set apart), notes, and an actions menu (edit, share, delete). */
 export const RecipeDetailScreen: React.FC<{
   recipe: Recipe;
   onBack: () => void;
@@ -58,6 +79,11 @@ export const RecipeDetailScreen: React.FC<{
 
   // The system share sheet carries the text to any app, and has its own Copy action: no clipboard module needed.
   const [cooking, setCooking] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const runFromMenu = (action: () => void) => {
+    setMenuOpen(false);
+    action();
+  };
   const sections = useMemo(() => parseRecipeNotes(recipe.notes), [recipe.notes]);
   // Identical steps get distinct keys: the text plus how many came before it.
   const stepRows = useMemo(() => {
@@ -95,14 +121,30 @@ export const RecipeDetailScreen: React.FC<{
 
   return (
     <ScreenScaffold
-      eyebrow={t('recipes.servings', { count: recipe.servings })}
       title={recipe.name}
       onBack={onBack}
       backLabel={t('common.back')}
-      right={<Button label={t('common.edit')} variant="ghost" small onPress={onEdit} />}
+      right={
+        <Pressable
+          onPress={() => setMenuOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('recipes.moreActions')}
+          className="w-12 h-12 -mr-3 rounded-full items-center justify-center active:bg-surface-sunken"
+        >
+          <Icon name="ellipsis-vertical" />
+        </Pressable>
+      }
     >
       <Card>
-        <SectionLabel>{t('recipes.ingredientsHeading')}</SectionLabel>
+        <SectionLabel
+          right={
+            <Text className="text-xs leading-4 text-ink-muted">
+              {t('recipes.servings', { count: recipe.servings })}
+            </Text>
+          }
+        >
+          {t('recipes.ingredientsHeading')}
+        </SectionLabel>
         {recipe.ingredients.length === 0 ? (
           <EmptyState message={t('recipes.noIngredients')} />
         ) : null}
@@ -162,9 +204,22 @@ export const RecipeDetailScreen: React.FC<{
           <View className="h-3" />
         </>
       ) : null}
-      <Button label={t('recipes.shareMarkdown')} variant="outline" onPress={share} />
-      <View className="h-3" />
-      <Button label={t('recipes.deleteRecipe')} variant="danger" onPress={confirmDelete} />
+      <BottomSheet
+        visible={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        title={t('recipes.moreActions')}
+      >
+        <View className="pb-2">
+          <MenuRow icon="pencil" label={t('common.edit')} onPress={() => runFromMenu(onEdit)} />
+          <MenuRow icon="share-2" label={t('recipes.share')} onPress={() => runFromMenu(share)} />
+          <MenuRow
+            icon="trash-2"
+            label={t('recipes.deleteRecipe')}
+            danger
+            onPress={() => runFromMenu(confirmDelete)}
+          />
+        </View>
+      </BottomSheet>
       <CookingView recipe={recipe} visible={cooking} onClose={() => setCooking(false)} />
     </ScreenScaffold>
   );

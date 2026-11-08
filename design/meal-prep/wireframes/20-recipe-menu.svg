@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812" font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
+<!-- 20 Recipe actions menu · mobile 375x812 · 8px grid -->
+<rect x="0" y="0" width="375" height="812" fill="#fff"/>
+<g opacity="0.25">
+<text x="16" y="32" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">9:41</text>
+<rect x="311" y="22" width="32" height="12" rx="3" fill="#fff"/>
+<text x="16" y="72" font-size="14" text-anchor="start" stroke="none" fill="#000">‹ Recipes</text>
+<text x="16" y="96" font-size="28" text-anchor="start" stroke="none" fill="#000" font-weight="700">Spaghetti carbonara</text>
+<circle cx="343" cy="72" r="2" fill="#000"/>
+<circle cx="343" cy="80" r="2" fill="#000"/>
+<circle cx="343" cy="88" r="2" fill="#000"/>
+<rect x="16" y="120" width="343" height="144" rx="8" fill="#fff"/>
+<text x="32" y="146" font-size="12" text-anchor="start" stroke="none" fill="#666">INGREDIENTS</text>
+<text x="343" y="146" font-size="12" text-anchor="end" stroke="none" fill="#666">4 servings</text>
+<text x="32" y="182" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Spaghetti</text>
+<text x="343" y="182" font-size="14" text-anchor="end" stroke="none" fill="#666">400 g</text>
+<text x="32" y="214" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Guanciale</text>
+<text x="343" y="214" font-size="14" text-anchor="end" stroke="none" fill="#666">200 g</text>
+<text x="32" y="246" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Eggs</text>
+<text x="343" y="246" font-size="14" text-anchor="end" stroke="none" fill="#666">4</text>
+<rect x="16" y="280" width="343" height="128" rx="8" fill="#fff"/>
+<text x="32" y="306" font-size="12" text-anchor="start" stroke="none" fill="#666">STEPS</text>
+<text x="32" y="334" font-size="14" text-anchor="start" stroke="none" fill="#666" font-weight="700">1.</text>
+<text x="60" y="334" font-size="14" text-anchor="start" stroke="none" fill="#000">Boil the pasta.</text>
+<text x="32" y="362" font-size="14" text-anchor="start" stroke="none" fill="#666" font-weight="700">2.</text>
+<text x="60" y="362" font-size="14" text-anchor="start" stroke="none" fill="#000">Fry the guanciale.</text>
+<text x="32" y="390" font-size="14" text-anchor="start" stroke="none" fill="#666" font-weight="700">3.</text>
+<text x="60" y="390" font-size="14" text-anchor="start" stroke="none" fill="#000">Toss with the egg and cheese.</text>
+<rect x="16" y="424" width="343" height="72" rx="8" fill="#fff"/>
+<text x="32" y="450" font-size="12" text-anchor="start" stroke="none" fill="#666">NOTES</text>
+<text x="32" y="474" font-size="14" text-anchor="start" stroke="none" fill="#000">Never add cream.</text>
+<rect x="16" y="512" width="343" height="72" rx="8" fill="#fff"/>
+<text x="32" y="538" font-size="12" text-anchor="start" stroke="none" fill="#666">SOURCE</text>
+<text x="32" y="562" font-size="14" text-anchor="start" stroke="none" fill="#000">https://example.test/carbonara</text>
+<line x1="32" y1="566" x2="262" y2="566" stroke="#000"/>
+<rect x="16" y="600" width="343" height="48" rx="8" fill="#000"/>
+<text x="187.5" y="629.0" font-size="14" text-anchor="middle" stroke="none" fill="#fff" font-weight="700">Start cooking</text>
+<line x1="0" y1="748" x2="375" y2="748" stroke="#000"/>
+<rect x="9.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="37.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="37.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Today</text>
+<rect x="84.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="112.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="112.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Calendar</text>
+<rect x="159.5" y="756" width="56" height="32" rx="16" fill="#000"/>
+<text x="187.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#fff">▫</text>
+<text x="187.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#000">Lists</text>
+<rect x="234.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="262.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="262.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Home</text>
+<rect x="309.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="337.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="337.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Dates</text>
+</g>
+<rect x="0" y="0" width="375" height="812" fill="#000" opacity="0.35" stroke="none"/>
+<rect x="0" y="520" width="375" height="308" rx="16" fill="#fff"/>
+<rect x="168" y="528" width="40" height="4" rx="2" fill="#000"/>
+<text x="187.5" y="560" font-size="14" text-anchor="middle" stroke="none" fill="#000" font-weight="700">More actions</text>
+<text x="32" y="604" font-size="14" text-anchor="middle" stroke="none" fill="#000">✎</text>
+<text x="56" y="604" font-size="14" text-anchor="start" stroke="none" fill="#000">Edit</text>
+<line x1="16" y1="624" x2="359" y2="624" stroke="#000"/>
+<text x="32" y="660" font-size="14" text-anchor="middle" stroke="none" fill="#000">↗</text>
+<text x="56" y="660" font-size="14" text-anchor="start" stroke="none" fill="#000">Share</text>
+<line x1="16" y1="680" x2="359" y2="680" stroke="#000"/>
+<text x="32" y="716" font-size="14" text-anchor="middle" stroke="none" fill="#000">✕</text>
+<text x="56" y="716" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Delete recipe</text>
+<g><circle cx="8" cy="600" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="604" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">1</text></g>
+<g><circle cx="8" cy="656" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="660" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">2</text></g>
+<g><circle cx="8" cy="712" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="716" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">3</text></g>
+</svg>

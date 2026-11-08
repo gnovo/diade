@@ -18,6 +18,7 @@ import {
   Clock,
   CloudOff,
   Cross,
+  EllipsisVertical,
   Gem,
   GripVertical,
   Heart,
@@ -41,6 +42,7 @@ import {
   Repeat,
   Search,
   Settings,
+  Share2,
   ShoppingBasket,
   SlidersHorizontal,
   SquareCheck,
@@ -112,6 +114,8 @@ const lucideIcons = {
   'sliders-horizontal': SlidersHorizontal,
   utensils: Utensils,
   minus: Minus,
+  'ellipsis-vertical': EllipsisVertical,
+  'share-2': Share2,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof lucideIcons | 'memory';

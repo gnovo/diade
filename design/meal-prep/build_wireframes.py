@@ -528,39 +528,63 @@ def s11():
     s.finish('11-import-review.svg')
 
 
-def s14():
-    s = Svg('14 Recipe detail with sections')
+def recipe_detail(s):
     status_bar(s)
-    header(s, 'Spaghetti carbonara', plus=False, back='Recipes')
-    s.text(335, 72, 'Edit', 14, 'end', bold=True)
-    s.text(16, 120, '4 servings', 12, fill='#666')
-    card(s, 16, 136, 343, 136)
-    s.text(32, 162, 'INGREDIENTS', 12, fill='#666')
+    s.text(16, 72, '\u2039 Recipes', 14)
+    s.text(16, 96, 'Spaghetti carbonara', 28, bold=True)
+    for dy in (-8, 0, 8):  # vertical ellipsis
+        s.circle(343, 80 + dy, 2, '#000')
+    card(s, 16, 120, 343, 144)
+    s.text(32, 146, 'INGREDIENTS', 12, fill='#666')
+    s.text(343, 146, '4 servings', 12, 'end', '#666')
     for i, (n, q) in enumerate([('Spaghetti', '400 g'), ('Guanciale', '200 g'), ('Eggs', '4')]):
-        y = 176 + i * 32
+        y = 168 + i * 32
         s.text(32, y + 14, n, 14, bold=True)
         s.text(343, y + 14, q, 14, 'end', '#666')
-    card(s, 16, 284, 343, 128)
-    s.text(32, 310, 'STEPS', 12, fill='#666')
+    card(s, 16, 280, 343, 128)
+    s.text(32, 306, 'STEPS', 12, fill='#666')
     for i, step in enumerate(['Boil the pasta.', 'Fry the guanciale.', 'Toss with the egg and cheese.']):
-        y = 324 + i * 28
+        y = 320 + i * 28
         s.text(32, y + 14, f'{i + 1}.', 14, bold=True, fill='#666')
         s.text(60, y + 14, step, 14)
     card(s, 16, 424, 343, 72)
     s.text(32, 450, 'NOTES', 12, fill='#666')
     s.text(32, 474, 'Never add cream.', 14)
-    card(s, 16, 508, 343, 72)
-    s.text(32, 534, 'SOURCE', 12, fill='#666')
-    s.text(32, 558, 'https://example.test/carbonara', 14)
-    s.line(32, 562, 262, 562)
-    button(s, 16, 600, 343, 'Share', False, 48)
-    button(s, 16, 656, 343, 'Delete recipe', False, 48)
+    card(s, 16, 512, 343, 72)
+    s.text(32, 538, 'SOURCE', 12, fill='#666')
+    s.text(32, 562, 'https://example.test/carbonara', 14)
+    s.line(32, 566, 262, 566)
+    button(s, 16, 600, 343, 'Start cooking', True, 48)
     tab_bar(s, 2)
-    s.callout(343, 180)
+
+
+def s14():
+    s = Svg('14 Recipe detail with sections')
+    recipe_detail(s)
+    s.callout(343, 80)
+    s.callout(343, 146)
+    s.callout(343, 200)
     s.callout(343, 340)
     s.callout(343, 474)
-    s.callout(343, 558)
+    s.callout(343, 562)
+    s.callout(343, 624)
     s.finish('14-recipe-detail.svg')
+
+
+def s20():
+    s = Svg('20 Recipe actions menu')
+    ghost(s, recipe_detail)
+    sheet(s, 520, 'More actions')
+    for i, (icon, label, red) in enumerate([('\u270e', 'Edit', False), ('\u2197', 'Share', False), ('\u2715', 'Delete recipe', True)]):
+        y = 576 + i * 56
+        s.text(32, y + 28, icon, 14, 'middle')
+        s.text(56, y + 28, label, 14, bold=red)
+        if i < 2:
+            s.line(16, y + 48, 359, y + 48)
+    s.callout(343, 600)
+    s.callout(343, 656)
+    s.callout(343, 712)
+    s.finish('20-recipe-menu.svg')
 
 
 def cooking_frame(s, active):
@@ -753,6 +777,6 @@ def flow():
 
 
 if __name__ == '__main__':
-    for fn in (s01, s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, s12, s13, s14, s15, s16, s17, s18, s19, flow):
+    for fn in (s01, s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, s12, s13, s14, s15, s16, s17, s18, s19, s20, flow):
         fn()
     print('wrote', len(os.listdir(OUT)), 'files to', OUT)

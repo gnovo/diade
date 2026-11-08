@@ -566,7 +566,8 @@ export const en = {
     steps: 'Steps',
     source: 'Source',
     deleteRecipe: 'Delete recipe',
-    shareMarkdown: 'Share as markdown',
+    share: 'Share',
+    moreActions: 'More actions',
     shareFailed: 'Could not share',
     cook: {
       start: 'Start cooking',
