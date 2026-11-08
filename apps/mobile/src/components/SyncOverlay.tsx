@@ -55,6 +55,7 @@ function usePresence(state: SyncState, label: string, refreshing: boolean) {
 
   // When a pull finishes, confirm it briefly, so the spinner vanishing is not the only signal.
   const wasRefreshing = useRef(false);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only the end of a refresh matters here
   useEffect(() => {
     if (wasRefreshing.current && !refreshing && state === 'synced') {
       setShown({ state: 'synced', label });
@@ -62,7 +63,6 @@ function usePresence(state: SyncState, label: string, refreshing: boolean) {
     }
     wasRefreshing.current = refreshing;
     // Only the end of a refresh matters here.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshing]);
 
   useEffect(() => {

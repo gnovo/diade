@@ -20,9 +20,9 @@ export function onLocalWrite(listener: Listener): () => void {
 }
 
 export function emitDataChanged(): void {
-  dataListeners.forEach((listener) => listener());
+  for (const listener of dataListeners) listener();
 }
 
 export function emitLocalWrite(): void {
-  writeListeners.forEach((listener) => listener());
+  for (const listener of writeListeners) listener();
 }

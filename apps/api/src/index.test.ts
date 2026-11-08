@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import type { AuthInstance } from './auth';
+import type { DbClient } from './db';
 import app from './index';
 import { createSpacesRouter, generateInviteCode } from './routes/spaces';
 import { createSyncRouter } from './routes/sync';
@@ -8,7 +10,7 @@ describe('Díade API - Foundation & Health Endpoints', () => {
     const res = await app.request('/health');
     expect(res.status).toBe(200);
 
-    const data = (await res.json()) as any;
+    const data = (await res.json()) as Record<string, unknown>;
     expect(data).toMatchObject({
       status: 'ok',
       version: '0.1.0',
@@ -32,12 +34,12 @@ describe('Díade API - Foundation & Health Endpoints', () => {
 });
 
 describe('Space & Sync Security Middleware', () => {
-  const mockDb = {} as any;
+  const mockDb = {} as unknown as DbClient;
   const mockAuthUnauthorized = {
     api: {
       getSession: async () => null,
     },
-  };
+  } as unknown as AuthInstance;
 
   it('rejects unauthenticated requests to spaces router with 401', async () => {
     const spacesRouter = createSpacesRouter(

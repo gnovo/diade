@@ -89,6 +89,7 @@ export const ListsScreen: React.FC = () => {
     ? { name: newItemText.trim(), quantity: null, unit: null }
     : parseQuantity(newItemText);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: itemsFor closes over items and hiddenIds, so list them instead of the function
   const suggestions = useMemo(() => {
     if (!openList) return [];
     return suggest({
@@ -98,7 +99,6 @@ export const ListsScreen: React.FC = () => {
       existing: itemsFor(openList.id),
     });
     // itemsFor closes over items and hiddenIds, so list them instead of the function.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openList, parsed.name, history.data, items.data, hiddenIds, i18n.language]);
 
   const resetAdder = () => {

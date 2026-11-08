@@ -38,10 +38,12 @@ export const ExternalEventDetail: React.FC<{
   const [starred, setStarred] = useState(false);
   const starColor = useColor('warning');
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: event?.id re-syncs the override when another event with the same value is opened
   useEffect(() => {
     setOverride((event?.visibilityOverride as Override | null) ?? 'inherit');
   }, [event?.id, event?.visibilityOverride]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: event?.id re-syncs the star when another event with the same value is opened
   useEffect(() => {
     setStarred(event?.highlighted ?? false);
   }, [event?.id, event?.highlighted]);

@@ -1,7 +1,9 @@
 import { createInviteSchema, createSpaceSchema, joinSpaceSchema } from '@diade/validation';
 import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
+import type { Context } from 'hono';
 import { Hono } from 'hono';
+import type { AuthInstance } from '../auth';
 import type { DbClient } from '../db';
 import { spaceMembers, spaces, users } from '../db/schema';
 
@@ -15,7 +17,10 @@ export function generateInviteCode(): string {
   return result;
 }
 
-export function createSpacesRouter(getDb: (c: any) => DbClient, getAuth: (c: any) => any) {
+export function createSpacesRouter(
+  getDb: (c: Context) => DbClient,
+  getAuth: (c: Context) => AuthInstance,
+) {
   const router = new Hono<{
     Variables: {
       user: { id: string; email: string; name: string };
@@ -29,7 +34,7 @@ export function createSpacesRouter(getDb: (c: any) => DbClient, getAuth: (c: any
       headers: c.req.raw.headers,
     });
 
-    if (!session || !session.user) {
+    if (!session?.user) {
       return c.json(
         {
           success: false,

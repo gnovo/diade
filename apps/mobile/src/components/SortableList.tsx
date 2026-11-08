@@ -75,7 +75,7 @@ export function SortableList<T extends SortableItem>({
   }, []);
 
   const resetTransforms = useCallback(() => {
-    shifts.current.forEach((value) => value.setValue(0));
+    for (const value of shifts.current.values()) value.setValue(0);
   }, []);
 
   // The data has caught up with (or moved past) the order we were holding.
@@ -94,6 +94,7 @@ export function SortableList<T extends SortableItem>({
   }, [items, localOrder]);
 
   // Clear the drag offsets only after the reordered rows have been laid out, so nothing flashes.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: localOrder is a trigger: transforms reset after every committed reorder
   useLayoutEffect(() => {
     resetTransforms();
   }, [localOrder, resetTransforms]);

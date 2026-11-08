@@ -19,12 +19,12 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile --ignore-scripts
-      - run: pnpm exec biome ci .
+      - run: pnpm exec biome ci --error-on-warnings .
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm --filter @diade/api exec drizzle-kit check
       - run: bash scripts/check-tokens-drift.sh
-      - run: node scripts/check-i18n.mjs
+      - run: pnpm i18n:check
       - run: pnpm knip
       - uses: gitleaks/gitleaks-action@v2
         env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }

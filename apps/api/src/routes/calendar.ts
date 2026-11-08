@@ -6,6 +6,7 @@ import {
 } from '@diade/validation';
 import { zValidator } from '@hono/zod-validator';
 import { type Context, Hono } from 'hono';
+import type { AuthInstance } from '../auth';
 import { GoogleApiError, GoogleAuthError } from '../calendar/google';
 import {
   type CalendarDeps,
@@ -55,9 +56,9 @@ const fail = (
  * on the caller's own calendars; nothing here can touch the partner's.
  */
 export function createCalendarRouter(
-  getDb: (c: any) => DbClient,
-  getAuth: (c: any) => any,
-  getEnv: (c: any) => TokenEnv,
+  getDb: (c: Context) => DbClient,
+  getAuth: (c: Context) => AuthInstance,
+  getEnv: (c: Context) => TokenEnv,
 ) {
   const router = new Hono<{ Variables: { user: { id: string; email: string; name: string } } }>();
 
@@ -68,7 +69,7 @@ export function createCalendarRouter(
     await next();
   });
 
-  const deps = (c: any): CalendarDeps => ({ db: getDb(c), env: getEnv(c) });
+  const deps = (c: Context): CalendarDeps => ({ db: getDb(c), env: getEnv(c) });
 
   /** Maps Google failures to a response the app can act on. */
   const googleFailure = (c: Context, err: unknown) => {

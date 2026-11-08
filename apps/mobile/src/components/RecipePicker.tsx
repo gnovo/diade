@@ -122,11 +122,11 @@ export const RecipePicker: React.FC<{
   const [draft, setDraft] = useState<MealPlanRecipe[]>([]);
 
   // Each opening starts from what is selected now. The list inside remounts with the sheet, so its search is empty.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only reset when the sheet opens, not while the selection changes underneath it
   useEffect(() => {
     if (!visible) return;
     setDraft(selected);
     // Only reset when the sheet opens, not while the selection changes underneath it.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   const confirm = () => {

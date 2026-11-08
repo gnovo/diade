@@ -15,7 +15,7 @@ pre-push:
   parallel: true
   jobs:
     - name: biome
-      run: pnpm exec biome ci .
+      run: pnpm exec biome ci --error-on-warnings .
     - name: typecheck
       run: pnpm typecheck
     - name: test
@@ -27,6 +27,8 @@ pre-push:
     - name: design tokens drift
       run: bash scripts/check-tokens-drift.sh
     - name: i18n keys
-      run: node scripts/check-i18n.mjs
+      run: pnpm i18n:check
     - name: gitleaks
       run: bash scripts/check-secrets.sh
+    - name: wireframes (reminder, non-blocking)
+      run: bash scripts/check-wireframes.sh

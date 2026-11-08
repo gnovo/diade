@@ -154,6 +154,7 @@ export const RecipeForm: React.FC<{
   const lineRef = useRef<React.ComponentRef<typeof TextInput>>(null);
 
   // Start from the recipe (or a blank one) each time the form opens, so a draft never leaks across.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only `visible` starts a fresh form; the recipe is read at that moment
   useEffect(() => {
     if (!visible) return;
     setName(recipe?.name ?? '');
@@ -164,7 +165,6 @@ export const RecipeForm: React.FC<{
     setEditingId(null);
     setSaving(false);
     // Only `visible` starts a fresh form; the recipe is read at that moment.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   const submitLine = () => {

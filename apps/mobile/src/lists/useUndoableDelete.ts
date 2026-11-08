@@ -23,10 +23,10 @@ export function useUndoableDelete(
   const commitRef = useRef(commit);
   commitRef.current = commit;
 
-  const clearTimer = () => {
+  const clearTimer = useCallback(() => {
     if (timer.current) clearTimeout(timer.current);
     timer.current = null;
-  };
+  }, []);
 
   const flush = useCallback(() => {
     clearTimer();
@@ -34,7 +34,7 @@ export function useUndoableDelete(
     pendingRef.current = null;
     setPending(null);
     if (current) void commitRef.current(current.ids);
-  }, []);
+  }, [clearTimer]);
 
   const schedule = useCallback(
     (ids: string[], message: string) => {
@@ -52,7 +52,7 @@ export function useUndoableDelete(
     clearTimer();
     pendingRef.current = null;
     setPending(null);
-  }, []);
+  }, [clearTimer]);
 
   useEffect(() => flush, [flush]);
 

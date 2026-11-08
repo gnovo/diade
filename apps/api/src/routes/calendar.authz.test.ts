@@ -8,7 +8,7 @@ function fakeDb(fixtures: Record<string, Array<Record<string, unknown>>>): DbCli
   return {
     select: () => ({
       from: (table: object) => ({
-        where: async () => fixtures[getTableName(table as any)] ?? [],
+        where: async () => fixtures[getTableName(table as never)] ?? [],
       }),
     }),
   } as unknown as DbClient;

@@ -14,7 +14,7 @@ export const AvatarPair: React.FC<{ people: [string, string | null]; size?: numb
   const avatar = (name: string | null, index: number) =>
     name === null ? (
       <View
-        key={'pending' + index}
+        key={`pending${index}`}
         style={{
           width: size,
           height: size,

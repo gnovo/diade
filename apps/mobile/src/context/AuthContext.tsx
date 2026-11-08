@@ -1,6 +1,6 @@
 import type { Space, User } from '@diade/domain';
 import type React from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { apiClient } from '../api/client';
 import {
   clearAllSessionData,
@@ -42,6 +42,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [members, setMembers] = useState<SpaceMemberSummary[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // Removes the session and every local record. Used on sign-out and on an invalid token.
+  const clearLocalSession = useCallback(async () => {
+    try {
+      await resetLocalDb();
+    } catch (err) {
+      console.warn('Could not clear local data:', err);
+    }
+    await clearAllSessionData();
+    setUser(null);
+    setSpace(null);
+    setMembers([]);
+  }, []);
+
   // Initialize auth state from SecureStore, then confirm the token is still valid.
   useEffect(() => {
     async function loadStoredAuth() {
@@ -62,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               return;
             }
             const current = await apiClient.getCurrentSpace();
-            if (current && current.space) {
+            if (current?.space) {
               setSpace(current.space);
               setMembers(toMemberSummaries(current.members));
               await setStoredSpace(current.space);
@@ -79,20 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     loadStoredAuth();
-  }, []);
-
-  // Removes the session and every local record. Used on sign-out and on an invalid token.
-  const clearLocalSession = async () => {
-    try {
-      await resetLocalDb();
-    } catch (err) {
-      console.warn('Could not clear local data:', err);
-    }
-    await clearAllSessionData();
-    setUser(null);
-    setSpace(null);
-    setMembers([]);
-  };
+  }, [clearLocalSession]);
 
   const signInWithToken = async (token: string, newUser: User) => {
     await setSessionToken(token);
@@ -102,7 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Check if user has an existing space
     try {
       const current = await apiClient.getCurrentSpace();
-      if (current && current.space) {
+      if (current?.space) {
         setSpace(current.space);
         setMembers(toMemberSummaries(current.members));
         await setStoredSpace(current.space);
@@ -121,7 +121,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshSpace = async () => {
     try {
       const current = await apiClient.getCurrentSpace();
-      if (current && current.space) {
+      if (current?.space) {
         setSpace(current.space);
         setMembers(toMemberSummaries(current.members));
         await setStoredSpace(current.space);

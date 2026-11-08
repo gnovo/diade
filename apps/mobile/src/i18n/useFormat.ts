@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 /** Date formatters bound to the current language. Re-created when the language changes. */
 export function useFormat() {
   const { t, i18n } = useTranslation();
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `t` changes identity with the language; `i18n.language` makes that dependency explicit
   return useMemo(
     () => ({
       /** "Today", "Tomorrow", or "Mon 3 Nov". */
@@ -15,7 +16,6 @@ export function useFormat() {
       monthYear: (date: Date) => formatMonthYear(t, date),
     }),
     // `t` changes identity with the language; `i18n.language` makes that dependency explicit.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [t, i18n.language],
   );
 }

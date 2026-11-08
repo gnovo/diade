@@ -91,6 +91,7 @@ export const BottomSheet: React.FC<{
     [translateY],
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only `visible` drives this; the rest are stable refs or values read at call time
   useEffect(() => {
     wantOpen.current = visible;
     if (visible) {
@@ -115,7 +116,6 @@ export const BottomSheet: React.FC<{
       });
     }
     // Only `visible` drives this; the rest are stable refs or values read at call time.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   const onSheetLayout = (height: number) => {

@@ -132,7 +132,7 @@ writeFileSync(resolve(root, '../../apps/mobile/global.css'), css);
 // Tailwind reads this JSON directly (tailwind.config.js is CommonJS).
 writeFileSync(
   resolve(root, 'src/tailwind-tokens.json'),
-  JSON.stringify(
+  `${JSON.stringify(
     {
       colorNames,
       fontSizes: typography,
@@ -146,7 +146,7 @@ writeFileSync(
     },
     null,
     2,
-  ) + '\n',
+  )}\n`,
 );
 
 console.log(

@@ -290,8 +290,8 @@ export async function getPendingMutations(): Promise<ClientMutation[]> {
 
   return rows.map((r) => ({
     id: r.id,
-    entity: r.entity as any,
-    operation: r.operation as any,
+    entity: r.entity as ClientMutation['entity'],
+    operation: r.operation as ClientMutation['operation'],
     recordId: r.record_id,
     payload: JSON.parse(r.payload),
     clientTimestamp: r.client_timestamp,

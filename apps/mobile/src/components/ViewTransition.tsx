@@ -22,6 +22,7 @@ export const ViewTransition: React.FC<{
   dir.current = direction;
 
   // Layout effect, so the new content never shows at full opacity for a frame before it fades in.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: transitionKey is the trigger that restarts the animation
   useLayoutEffect(() => {
     if (first.current) {
       first.current = false;

@@ -41,8 +41,11 @@ export const SpaceSetupScreen: React.FC = () => {
         t('spaceSetup.created'),
         t('spaceSetup.createdBody', { code: res.space.inviteCode }),
       );
-    } catch (err: any) {
-      Alert.alert(t('spaceSetup.couldNotCreate'), err?.message || t('common.checkConnection'));
+    } catch (err) {
+      Alert.alert(
+        t('spaceSetup.couldNotCreate'),
+        (err instanceof Error && err.message) || t('common.checkConnection'),
+      );
     } finally {
       setIsCreating(false);
     }
@@ -59,8 +62,11 @@ export const SpaceSetupScreen: React.FC = () => {
       const res = await apiClient.joinSpace({ inviteCode: inviteCode.trim().toUpperCase() });
       await updateSpace(res.space);
       Alert.alert(t('spaceSetup.joined'), t('spaceSetup.joinedBody', { name: res.space.name }));
-    } catch (err: any) {
-      Alert.alert(t('spaceSetup.joinError'), err?.message || t('spaceSetup.invalidCode'));
+    } catch (err) {
+      Alert.alert(
+        t('spaceSetup.joinError'),
+        (err instanceof Error && err.message) || t('spaceSetup.invalidCode'),
+      );
     } finally {
       setIsJoining(false);
     }

@@ -104,10 +104,10 @@ export const CalendarScreen: React.FC = () => {
     hiddenCalendarIds: prefs.hiddenCalendarIds,
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `today` changes only at midnight; the data and the filters are the real dependencies
   const agenda = useMemo(
     () => buildUnifiedAgenda({ ...agendaInput, from: today, to: addLocalDays(today, AGENDA_DAYS) }),
     // `today` changes only at midnight; the data and the filters are the real dependencies.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       events.data,
       externalEvents.data,
@@ -130,6 +130,7 @@ export const CalendarScreen: React.FC = () => {
   );
 
   // What the month grid or the day/week columns need, by day. Schedule builds its own list above.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `today` changes only at midnight; the agenda inputs and view bounds are the real dependencies
   const entriesByDay = useMemo(() => {
     const map = new Map<string, AgendaEntry[]>();
     let from: Date;
@@ -146,7 +147,6 @@ export const CalendarScreen: React.FC = () => {
     const built = buildUnifiedAgenda({ ...agendaInput, from, to: addLocalDays(from, days), today });
     for (const group of built.days) map.set(dayKey(group.day), group.entries);
     return map;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     prefs.view,
     month,

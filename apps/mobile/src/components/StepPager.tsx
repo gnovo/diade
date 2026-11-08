@@ -67,6 +67,7 @@ export const StepProgress: React.FC<{ step: number; total: number }> = ({ step, 
   return (
     <View className="flex-row gap-2" accessible={false}>
       {Array.from({ length: total }, (_, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: segments are positional and stateless
         <Segment key={i} filled={i < step} reduceMotion={reduceMotion} />
       ))}
     </View>
@@ -198,6 +199,7 @@ export const StepPager: React.FC<{ index: number; steps: React.ReactNode[] }> = 
       >
         {steps.map((step, i) => (
           <PagerStep
+            // biome-ignore lint/suspicious/noArrayIndexKey: steps are positional; the index is their identity
             key={i}
             i={i}
             count={count}

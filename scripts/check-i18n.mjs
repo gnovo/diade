@@ -1,6 +1,6 @@
 // Checks translation-key usage in the mobile app against the English catalog.
 //   error:   t('some.key') used in source but not defined in en.ts  (would render the raw key)
-//   warning: key defined in en.ts but never referenced in source    (dead copy)
+//   error:   key defined in en.ts but never referenced in source    (dead copy)
 // en/pt-PT key parity and placeholders are covered by packages/i18n/src/catalog.test.ts.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -25,8 +25,12 @@ const walk = (dir) =>
 // Plural/context suffixes resolve to a base key at runtime.
 const base = (key) => key.replace(/_(zero|one|two|few|many|other)$/, '');
 const defined = new Set(flatten(en).map(base));
-const source = walk('apps/mobile/src')
-  .map((f) => readFileSync(f, 'utf8'))
+const stripComments = (text) => text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+const source = [
+  ...walk('apps/mobile/src'),
+  ...walk('packages/i18n/src').filter((f) => !f.includes('/locales/')),
+]
+  .map((f) => stripComments(readFileSync(f, 'utf8')))
   .join('\n');
 
 const used = new Set([...source.matchAll(/\bt\(\s*['"`]([\w.-]+)['"`]/g)].map((m) => m[1]));
@@ -39,7 +43,7 @@ const unused = [...defined].filter(
     !used.has(k) && !dynamicPrefixes.some((p) => k.startsWith(p)) && !source.includes(`'${k}'`),
 );
 
-for (const k of unused) console.warn(`warn  unused key: ${k}`);
+for (const k of unused) console.error(`error unused key: ${k}`);
 for (const k of missing) console.error(`error missing key: ${k}`);
 console.log(`i18n: ${defined.size} keys, ${missing.length} missing, ${unused.length} unused`);
-process.exit(missing.length ? 1 : 0);
+process.exit(missing.length || unused.length ? 1 : 0);

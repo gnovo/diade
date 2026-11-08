@@ -75,11 +75,13 @@ export class DiadeApiClient {
     });
 
     const contentType = response.headers.get('content-type');
-    const isJson = contentType && contentType.includes('application/json');
+    const isJson = contentType?.includes('application/json');
     const body = isJson ? await response.json() : await response.text();
 
     if (!response.ok) {
-      const errorData = isJson ? (body as any).error : null;
+      const errorData = isJson
+        ? (body as { error?: { message?: string; code?: string; details?: unknown } }).error
+        : null;
       throw new ApiError(
         errorData?.message || response.statusText || 'API request failed',
         response.status,

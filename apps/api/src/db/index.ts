@@ -31,6 +31,3 @@ export function createDb(env?: DatabaseEnv) {
 }
 
 export type DbClient = ReturnType<typeof createDb>;
-{
-  schema;
-}

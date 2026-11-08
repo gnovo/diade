@@ -11,7 +11,7 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "biome check --write .",
     "prepare": "lefthook install",
-    "i18n:check": "node scripts/check-i18n.mjs",
+    "i18n:check": "NODE_NO_WARNINGS=1 node scripts/check-i18n.mjs",
     "knip": "knip"
   },
   "devDependencies": {

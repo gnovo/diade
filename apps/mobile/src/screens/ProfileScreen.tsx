@@ -20,6 +20,7 @@ export const userInitial = (name?: string | null, email?: string | null) =>
 const Group: React.FC<{ children: React.ReactNode[] }> = ({ children }) => (
   <View className="bg-surface rounded-lg border border-border mb-5 overflow-hidden">
     {React.Children.toArray(children).map((child, index) => (
+      // biome-ignore lint/suspicious/noArrayIndexKey: toArray() output is static and positional
       <View key={index}>
         {index > 0 ? <View className="h-px bg-border mx-4" /> : null}
         {child}
@@ -80,8 +81,11 @@ export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> 
       setGenerating(true);
       const res = await apiClient.createInviteCode();
       await updateSpace({ ...space, inviteCode: res.inviteCode, inviteExpiresAt: res.expiresAt });
-    } catch (err: any) {
-      Alert.alert(t('profile.inviteError'), err?.message || t('common.checkConnection'));
+    } catch (err) {
+      Alert.alert(
+        t('profile.inviteError'),
+        (err instanceof Error && err.message) || t('common.checkConnection'),
+      );
     } finally {
       setGenerating(false);
     }

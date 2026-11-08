@@ -7,7 +7,9 @@ import {
 import { parseSyncPayload, syncPullQuerySchema, syncPushSchema } from '@diade/validation';
 import { zValidator } from '@hono/zod-validator';
 import { and, eq, gt, isNull, ne, or } from 'drizzle-orm';
+import type { Context } from 'hono';
 import { Hono } from 'hono';
+import type { AuthInstance } from '../auth';
 import { buildExternalPull } from '../calendar/pull';
 import type { DbClient } from '../db';
 import {
@@ -156,6 +158,7 @@ async function applyMutation(
 ): Promise<void> {
   const { entity, operation, recordId } = mutation;
   const { spaceId, userId, now } = ctx;
+  // biome-ignore lint/suspicious/noExplicitAny: payload is validated by the per-entity zod schemas before it reaches here
   const d = data as Record<string, any>;
 
   switch (entity) {
@@ -456,7 +459,10 @@ async function applyMutation(
   }
 }
 
-export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) => any) {
+export function createSyncRouter(
+  getDb: (c: Context) => DbClient,
+  getAuth: (c: Context) => AuthInstance,
+) {
   const router = new Hono<{
     Variables: {
       user: { id: string; email: string; name: string };
@@ -471,7 +477,7 @@ export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) 
       headers: c.req.raw.headers,
     });
 
-    if (!session || !session.user) {
+    if (!session?.user) {
       return c.json(
         {
           success: false,

@@ -12,7 +12,7 @@ import {
   startOfLocalDay,
   type Task,
 } from '@diade/domain';
-import { useNavigation } from '@react-navigation/native';
+import { type NavigationProp, type ParamListBase, useNavigation } from '@react-navigation/native';
 import type React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -71,7 +71,7 @@ export const TodayScreen: React.FC = () => {
   const now = new Date();
   const starColor = useColor('warning');
   const onAction = useColor('on-action');
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const dayStart = startOfLocalDay(now);
   const tomorrowEnd = addLocalDays(dayStart, 2);
 

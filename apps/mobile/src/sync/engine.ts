@@ -59,7 +59,7 @@ export function subscribeSyncState(listener: (s: SyncState) => void): () => void
 
 function setState(patch: Partial<SyncState>): void {
   state = { ...state, ...patch };
-  stateListeners.forEach((listener) => listener(state));
+  for (const listener of stateListeners) listener(state);
 }
 
 let inFlight: Promise<SyncStatus> | null = null;

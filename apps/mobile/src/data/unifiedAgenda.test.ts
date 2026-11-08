@@ -325,9 +325,9 @@ describe('tasks', () => {
       ],
     });
     expect(agenda.overdue.map((t) => t.id)).toEqual(['older', 'old']);
-    expect(agenda.days.flatMap((d) => d.entries).map((e) => (e as any).task?.id)).toEqual([
-      'today',
-    ]);
+    expect(
+      agenda.days.flatMap((d) => d.entries).map((e) => (e as { task?: { id: string } }).task?.id),
+    ).toEqual(['today']);
   });
 
   it('does not report completed tasks as overdue', () => {
