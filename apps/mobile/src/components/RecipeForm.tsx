@@ -3,11 +3,14 @@ import {
   DEFAULT_SERVINGS,
   formatAmount,
   formatIngredient,
+  formatRecipeNotes,
   ingredientFromLine,
   isLikelyStaple,
   knownIngredientNames,
   MAX_SERVINGS,
   MIN_SERVINGS,
+  normalizeRecipeNotes,
+  parseRecipeNotes,
   type Recipe,
   type RecipeIngredient,
   suggestIngredientNames,
@@ -20,6 +23,7 @@ import { newId } from '../data/ids';
 import { insertRecord, updateRecord } from '../data/repository';
 import { Icon, useColor } from '../design';
 import { BottomSheet } from './BottomSheet';
+import { RecipeStepsEditor, stepsWithDraft } from './RecipeStepsEditor';
 import { Button, Card, SectionLabel, TextField, useWriteContext } from './ui';
 
 /** The decimal separator a member of this language writes. */
@@ -133,7 +137,10 @@ const IngredientRow: React.FC<{
   );
 };
 
-/** Create or edit a recipe: name, servings, ingredients typed one per line, notes. */
+/** The longest `notes` the API stores (steps, notes and source are written into it). */
+const MAX_NOTES_TEXT = 5000;
+
+/** Create or edit a recipe: name, servings, ingredients typed one per line, steps, notes, source. */
 export const RecipeForm: React.FC<{
   visible: boolean;
   onClose: () => void;
@@ -154,7 +161,11 @@ export const RecipeForm: React.FC<{
   const [ingredients, setIngredients] = useState<RecipeIngredient[]>([]);
   const [line, setLine] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [steps, setSteps] = useState<string[]>([]);
+  const [stepDraft, setStepDraft] = useState('');
+  const [stepEditing, setStepEditing] = useState<number | null>(null);
   const [notes, setNotes] = useState('');
+  const [source, setSource] = useState('');
   const [saving, setSaving] = useState(false);
   const lineRef = useRef<React.ComponentRef<typeof TextInput>>(null);
   const known = useMemo(() => knownIngredientNames(library), [library]);
@@ -167,7 +178,12 @@ export const RecipeForm: React.FC<{
     setName(recipe?.name ?? '');
     setServings(recipe?.servings ?? DEFAULT_SERVINGS);
     setIngredients(recipe?.ingredients ?? []);
-    setNotes(recipe?.notes ?? '');
+    const sections = parseRecipeNotes(recipe?.notes);
+    setSteps(sections.steps);
+    setStepDraft('');
+    setStepEditing(null);
+    setNotes(sections.notes);
+    setSource(sections.source);
     setLine('');
     setEditingId(null);
     setSaving(false);
@@ -213,7 +229,14 @@ export const RecipeForm: React.FC<{
       rows.map((row) => (row.id === id ? { ...row, staple: !row.staple } : row)),
     );
 
-  const canSave = Boolean(ctx) && name.trim().length > 0 && !saving;
+  // A step still in the box counts: nobody should lose it by tapping Save first.
+  const notesText = formatRecipeNotes({
+    steps: stepsWithDraft(steps, stepEditing, stepDraft),
+    notes,
+    source,
+  });
+  const tooLong = (notesText?.length ?? 0) > MAX_NOTES_TEXT;
+  const canSave = Boolean(ctx) && name.trim().length > 0 && !saving && !tooLong;
 
   const handleSave = async () => {
     if (!ctx || !canSave) return;
@@ -230,7 +253,7 @@ export const RecipeForm: React.FC<{
     const next = {
       name: name.trim(),
       servings,
-      notes: notes.trim() || null,
+      notes: notesText,
       ingredients: finalIngredients,
     };
     try {
@@ -242,7 +265,8 @@ export const RecipeForm: React.FC<{
         const changes: Record<string, unknown> = {};
         if (next.name !== recipe.name) changes.name = next.name;
         if (next.servings !== recipe.servings) changes.servings = next.servings;
-        if (next.notes !== recipe.notes) changes.notes = next.notes;
+        // Old free text is compared in its current form, so saving only a new name leaves it alone.
+        if (next.notes !== normalizeRecipeNotes(recipe.notes)) changes.notes = next.notes;
         if (JSON.stringify(next.ingredients) !== JSON.stringify(recipe.ingredients))
           changes.ingredients = next.ingredients;
         if (Object.keys(changes).length > 0) await updateRecord('recipes', recipe.id, changes);
@@ -355,6 +379,15 @@ export const RecipeForm: React.FC<{
           ) : null}
         </View>
 
+        <RecipeStepsEditor
+          steps={steps}
+          onChange={setSteps}
+          draft={stepDraft}
+          onDraftChange={setStepDraft}
+          editing={stepEditing}
+          onEditingChange={setStepEditing}
+        />
+
         <View>
           <SectionLabel>{t('recipes.notes')}</SectionLabel>
           <TextField
@@ -362,11 +395,30 @@ export const RecipeForm: React.FC<{
             onChangeText={setNotes}
             placeholder={t('recipes.form.notesPlaceholder')}
             multiline
-            maxLength={5000}
             textAlignVertical="top"
             style={{ minHeight: 96, paddingTop: 12 }}
           />
         </View>
+
+        <View>
+          <SectionLabel>{t('recipes.source')}</SectionLabel>
+          <TextField
+            value={source}
+            onChangeText={setSource}
+            placeholder={t('recipes.form.sourcePlaceholder')}
+            maxLength={300}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="url"
+            returnKeyType="done"
+          />
+        </View>
+
+        {tooLong ? (
+          <Text className="text-sm leading-5 text-danger" accessibilityLiveRegion="polite">
+            {t('recipes.form.tooLong')}
+          </Text>
+        ) : null}
       </View>
     </BottomSheet>
   );

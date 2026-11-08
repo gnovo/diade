@@ -9,6 +9,7 @@ export * from './ingredientNames';
 export * from './listTemplates';
 export * from './mealPlan';
 export * from './recipeMarkdown';
+export * from './recipeSections';
 export * from './recipes';
 export * from './recurrence';
 

@@ -253,7 +253,7 @@ def s01():
 
 
 def s02():
-    s = Svg('02 Recipe sheet (PR B; import moved to screen 12)')
+    s = Svg('02 Recipe sheet (PR B; steps, notes and source added; import moved to screen 12)')
     ghost(s, recipes_screen)
     sheet(s, 96, 'New recipe', footer='Save')
     s.text(16, 160, 'NAME', 12, fill='#666')
@@ -262,22 +262,32 @@ def s02():
     stepper(s, 263, 240, 4)
     s.text(16, 304, 'INGREDIENTS', 12, fill='#666')
     input_box(s, 16, 312, 343, 'Add an ingredient, e.g. 400 g spaghetti')
-    card(s, 16, 376, 343, 144)
-    for i, (n, q, p) in enumerate([('Spaghetti', '400 g', False), ('Guanciale', '454 g', False), ('Salt', '1 tsp', True)]):
+    card(s, 16, 376, 343, 96)
+    for i, (n, q, p) in enumerate([('Spaghetti', '400 g', False), ('Salt', '1 tsp', True)]):
         y = 376 + i * 48
         if i:
             s.line(16, y, 359, y)
         s.text(32, y + 29, n, 14, bold=True)
         s.text(160, y + 29, q, 14, fill='#666')
         pill(s, 232, y + 12, 'Pantry', p)
-        s.text(341, y + 29, '×', 20, 'middle')
-    s.text(16, 552, 'NOTES', 12, fill='#666')
-    s.rect(16, 560, 343, 96, 8)
-    s.text(28, 584, 'Steps, tips, where it came from…', 14, fill='#666')
+        s.text(341, y + 29, '\u00d7', 20, 'middle')
+    s.text(16, 496, 'STEPS', 12, fill='#666')
+    s.rect(16, 504, 343, 56, 8)
+    s.text(28, 536, 'Add a step, e.g. Boil the pasta for 10 minutes', 12, fill='#666')
+    button(s, 16, 568, 120, 'Add step', False, 32)
+    card(s, 16, 612, 343, 104)
+    s.text(32, 640, '1.', 14, bold=True, fill='#666')
+    s.text(60, 640, 'Boil the pasta.', 14)
+    s.line(16, 664, 359, 664)
+    s.rect(16, 664, 343, 52, 8, '#e6e6e6')
+    s.text(32, 694, '2.', 14, bold=True, fill='#666')
+    s.text(60, 694, 'Fry the guanciale.', 14)
+    s.text(W / 2, 730, 'Notes and Source continue below', 11, 'middle', '#666')
     s.callout(343, 128)
     s.callout(343, 336)
     s.callout(343, 400)
-    s.callout(343, 480)
+    s.callout(343, 532)
+    s.callout(343, 690)
     s.finish('02-recipe-sheet.svg')
 
 
@@ -517,6 +527,41 @@ def s11():
     s.finish('11-import-review.svg')
 
 
+def s14():
+    s = Svg('14 Recipe detail with sections')
+    status_bar(s)
+    header(s, 'Spaghetti carbonara', plus=False, back='Recipes')
+    s.text(335, 72, 'Edit', 14, 'end', bold=True)
+    s.text(16, 120, '4 servings', 12, fill='#666')
+    card(s, 16, 136, 343, 136)
+    s.text(32, 162, 'INGREDIENTS', 12, fill='#666')
+    for i, (n, q) in enumerate([('Spaghetti', '400 g'), ('Guanciale', '200 g'), ('Eggs', '4')]):
+        y = 176 + i * 32
+        s.text(32, y + 14, n, 14, bold=True)
+        s.text(343, y + 14, q, 14, 'end', '#666')
+    card(s, 16, 284, 343, 128)
+    s.text(32, 310, 'STEPS', 12, fill='#666')
+    for i, step in enumerate(['Boil the pasta.', 'Fry the guanciale.', 'Toss with the egg and cheese.']):
+        y = 324 + i * 28
+        s.text(32, y + 14, f'{i + 1}.', 14, bold=True, fill='#666')
+        s.text(60, y + 14, step, 14)
+    card(s, 16, 424, 343, 72)
+    s.text(32, 450, 'NOTES', 12, fill='#666')
+    s.text(32, 474, 'Never add cream.', 14)
+    card(s, 16, 508, 343, 72)
+    s.text(32, 534, 'SOURCE', 12, fill='#666')
+    s.text(32, 558, 'https://example.test/carbonara', 14)
+    s.line(32, 562, 262, 562)
+    button(s, 16, 600, 343, 'Share', False, 48)
+    button(s, 16, 656, 343, 'Delete recipe', False, 48)
+    tab_bar(s, 2)
+    s.callout(343, 180)
+    s.callout(343, 340)
+    s.callout(343, 474)
+    s.callout(343, 558)
+    s.finish('14-recipe-detail.svg')
+
+
 def s12():
     s = Svg('12 New recipe: write or import')
     ghost(s, recipes_screen)
@@ -561,6 +606,6 @@ def flow():
 
 
 if __name__ == '__main__':
-    for fn in (s01, s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, s12, s13, flow):
+    for fn in (s01, s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, s12, s13, s14, flow):
         fn()
     print('wrote', len(os.listdir(OUT)), 'files to', OUT)

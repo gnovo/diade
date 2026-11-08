@@ -1,8 +1,8 @@
 # Recipes as markdown
 
-How Díade reads recipes from markdown (Recipes → + → "Importar de markdown", under the notes of the New recipe sheet) and writes them back ("Partilhar em markdown").
+How Díade reads recipes from markdown (Recipes → + → "Importar") and writes them back ("Partilhar em markdown").
 Code: `packages/domain/src/recipeMarkdown.ts` (reading, writing), `recipes.ts` (one ingredient line),
-`ingredientNames.ts` (typo detection). Tests and example notes: `packages/domain/src/recipeMarkdown.test.ts`,
+`recipeSections.ts` (the steps / notes / source inside a recipe's notes), `ingredientNames.ts` (typo detection). Tests and example notes: `packages/domain/src/recipeMarkdown.test.ts`,
 `packages/domain/src/__fixtures__/recipes/`.
 
 Reading never fails and never saves by itself: it produces drafts that the import sheet shows for review.
@@ -57,12 +57,35 @@ One note can hold several recipes. Each starts at a `# ` heading.
 | Servings | `servings:`, `serves:`, `doses:` or `porções:` (any case). `4-6` reads as 4. Missing or below 1 gives 4, above 50 gives 50. Front matter `servings:` is used when the recipe has none. |
 | Tags | `tags:` is read and ignored. |
 | Ingredients | The lines under a heading (any level `##`–`######`) or label (`Ingredients:`, `**Ingredientes**`) that contains "ingredient" or "ingrediente". Up to 100. |
-| Everything else | Becomes the notes, with the author's own headings kept (up to 5000 characters). |
-| Notes | After a `## Notes` / `## Notas` heading (or `Notes:` label) everything is notes, exactly as written. |
+| Steps, Notes, Source | A heading (or label) named Steps, Method, Instructions, Directions, Preparation, Passos, Preparação, Modo de preparo opens the **steps**; Notes / Notas the **notes**; Source / Fonte the **source**. Whatever the heading level or language, they are stored as `## Steps`, `## Notes`, `## Source` (see below). |
+| Everything else | Becomes the notes, with the author's own headings kept (up to 5000 characters in all). |
+| Inside Notes or Source | Everything is text, exactly as written, until a `## Steps`, `## Notes` or `## Source` heading (level 2). Ingredients, labels and fields are not read there. |
 
 Bullets of any kind are accepted: `-`, `*`, `+`, `•`, `1.`, `1)`, and Obsidian checkboxes (`- [ ]`). Markup is stripped from
 ingredient lines: `**bold**`, `[[wiki links]]` (an alias wins), `[links](url)`, backticks. A group label inside the list ("For
 the sauce:") is dropped. Headings inside a code fence are ignored.
+
+## Steps, notes and source (what is stored)
+
+A recipe's `notes` column is one markdown text, written in sections the app edits (`recipeSections.ts`):
+
+```md
+## Steps
+1. Boil the pasta.
+2. Fry the guanciale.
+
+## Notes
+Never add cream.
+
+## Source
+https://example.test/carbonara
+```
+
+- Only the sections that have something are written. A step is one paragraph (line breaks become spaces).
+- Text with no known heading (every recipe saved before sections existed) reads as notes, and is written back under `## Notes` the next time it is saved.
+- Only these three level-2 headings are structure. Any other heading stays inside the free text.
+- A line of free text that would read as one of them is written with a leading backslash and read back without it (`\## Steps`), so nothing a member types is lost.
+- The recipe form shows the steps as a list, notes as free text and the source as a line; the share text and the import use the same sections.
 
 ## One ingredient line
 
@@ -114,6 +137,10 @@ servings: 4
 - 1 tbsp Truffle oil #pantry
 - 2 g Salt #fresh
 
+## Steps
+1. Boil.
+2. Toss.
+
 ## Notes
 Anything in the recipe's notes, as is.
 ```
@@ -128,7 +155,7 @@ To keep it exact:
   pantry), so ordinary lines stay clean.
 - A name that starts with a digit and has no amount is written `\1000 Island dressing`.
 - A counted item whose name starts with a unit word is written `2 x Cup noodles` (plain `2 Cup noodles` would read as 480 ml).
-- A `# ` line inside notes is written `\# ` so it does not start another recipe; reading removes the backslash.
+- A `# ` line inside steps, notes or source is written `\# ` so it does not start another recipe; reading removes the backslash.
 
 Not preserved: ingredient ids (new ones are made on import), and a name containing `*`, `__`, `~~`, a backtick or `[[`, which
 reading treats as markup.
