@@ -13,6 +13,7 @@ export const LOCAL_TABLES = [
   'local_capture_items',
   'local_important_dates',
   'local_recipes',
+  'local_meal_plans',
   'local_external_calendars',
   'local_external_events',
   'local_outbox',
@@ -80,6 +81,7 @@ async function openLocalDb(): Promise<SQLite.SQLiteDatabase> {
       name TEXT NOT NULL,
       icon TEXT,
       category TEXT NOT NULL DEFAULT 'groceries',
+      plan_id TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       deleted_at TEXT
@@ -93,6 +95,9 @@ async function openLocalDb(): Promise<SQLite.SQLiteDatabase> {
       unit TEXT,
       notes TEXT,
       position REAL,
+      -- A JSON array of what each recipe asked for, when the item came from a meal plan; see GroceryContribution.
+      contributions TEXT,
+      edited_by_hand INTEGER NOT NULL DEFAULT 0,
       is_checked INTEGER NOT NULL DEFAULT 0,
       checked_by TEXT,
       checked_at TEXT,
@@ -140,6 +145,19 @@ async function openLocalDb(): Promise<SQLite.SQLiteDatabase> {
       notes TEXT,
       -- A JSON array of ingredients; see RecipeIngredient in @diade/domain.
       ingredients TEXT NOT NULL DEFAULT '[]',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS local_meal_plans (
+      id TEXT PRIMARY KEY NOT NULL,
+      space_id TEXT NOT NULL,
+      creator_id TEXT NOT NULL,
+      starts_on TEXT NOT NULL,
+      ends_on TEXT NOT NULL,
+      -- A JSON array of { recipeId, servings }; see MealPlanRecipe in @diade/domain.
+      recipes TEXT NOT NULL DEFAULT '[]',
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       deleted_at TEXT
@@ -229,6 +247,9 @@ async function migrateLocalSchema(db: SQLite.SQLiteDatabase): Promise<void> {
   await addColumn('local_external_events', 'highlighted', 'INTEGER NOT NULL DEFAULT 0');
   await addColumn('local_list_items', 'position', 'REAL');
   await addColumn('local_important_dates', 'person_name', 'TEXT');
+  await addColumn('local_lists', 'plan_id', 'TEXT');
+  await addColumn('local_list_items', 'contributions', 'TEXT');
+  await addColumn('local_list_items', 'edited_by_hand', 'INTEGER NOT NULL DEFAULT 0');
 }
 
 // --- Transactions ---

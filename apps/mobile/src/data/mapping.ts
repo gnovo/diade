@@ -13,10 +13,11 @@ const BOOLEAN_KEYS = new Set([
   'redacted',
   'isRecurringInstance',
   'highlighted',
+  'editedByHand',
 ]);
 
 /** Stored as JSON text locally; arrays and objects in the domain. */
-const JSON_KEYS = new Set(['ingredients']);
+const JSON_KEYS = new Set(['ingredients', 'recipes', 'contributions']);
 
 export type Row = Record<string, unknown>;
 
@@ -31,12 +32,16 @@ export function toColumns(record: Row): { columns: string[]; values: unknown[] }
   for (const [key, value] of Object.entries(record)) {
     if (value === undefined) continue;
     columns.push(toColumn(key));
-    values.push(BOOLEAN_KEYS.has(key) ? (value ? 1 : 0) : JSON_KEYS.has(key) ? JSON.stringify(value) : value);
+    // A null JSON column stays SQL NULL ("not from a plan") rather than the text 'null'.
+    values.push(
+      BOOLEAN_KEYS.has(key) ? (value ? 1 : 0) : JSON_KEYS.has(key) && value !== null ? JSON.stringify(value) : value,
+    );
   }
   return { columns, values };
 }
 
 function parseJson(value: unknown): unknown {
+  if (value === null) return null;
   if (typeof value !== 'string') return value;
   try {
     return JSON.parse(value);

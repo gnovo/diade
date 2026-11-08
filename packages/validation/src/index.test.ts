@@ -249,3 +249,52 @@ describe('recipes sync payloads', () => {
     if (result.success) expect(result.data).not.toHaveProperty('visibility');
   });
 });
+
+describe('meal plans sync payloads', () => {
+  const recipeId = '66666666-6666-4666-8666-666666666666';
+  const plan = { startsOn: '2026-11-09', endsOn: '2026-11-15', recipes: [{ recipeId, servings: 4 }] };
+
+  it('accepts a plan with a period and recipes, and defaults the recipes to none', () => {
+    expect(parseSyncPayload('meal_plans', 'INSERT', plan).success).toBe(true);
+    const bare = parseSyncPayload('meal_plans', 'INSERT', { startsOn: '2026-11-09', endsOn: '2026-11-09' });
+    expect(bare).toMatchObject({ success: true, data: { recipes: [] } });
+  });
+
+  it('accepts partial updates', () => {
+    expect(parseSyncPayload('meal_plans', 'UPDATE', { recipes: plan.recipes }).success).toBe(true);
+    expect(parseSyncPayload('meal_plans', 'UPDATE', { startsOn: '2026-11-02' }).success).toBe(true);
+  });
+
+  it('rejects a backwards period, a bad date and a bad servings count', () => {
+    expect(parseSyncPayload('meal_plans', 'INSERT', { ...plan, endsOn: '2026-11-01' }).success).toBe(false);
+    expect(parseSyncPayload('meal_plans', 'UPDATE', { startsOn: '2026-11-10', endsOn: '2026-11-09' }).success).toBe(false);
+    expect(parseSyncPayload('meal_plans', 'INSERT', { ...plan, startsOn: '2026-02-31' }).success).toBe(false);
+    expect(parseSyncPayload('meal_plans', 'INSERT', { ...plan, recipes: [{ recipeId, servings: 0 }] }).success).toBe(false);
+  });
+
+  it('rejects the same recipe twice and a recipe id that is not a UUID', () => {
+    const twice = { ...plan, recipes: [plan.recipes[0], plan.recipes[0]] };
+    expect(parseSyncPayload('meal_plans', 'INSERT', twice).success).toBe(false);
+    expect(parseSyncPayload('meal_plans', 'INSERT', { ...plan, recipes: [{ recipeId: 'x', servings: 2 }] }).success).toBe(false);
+  });
+});
+
+describe('plan provenance on lists and items', () => {
+  const recipeId = '66666666-6666-4666-8666-666666666666';
+  const contribution = { recipeId, recipeName: 'Carbonara', key: 'egg|count', quantity: 3, unit: 'unit' };
+
+  it('lets a list point at a plan, or at none', () => {
+    expect(parseSyncPayload('lists', 'INSERT', { name: 'Groceries', planId: recipeId }).success).toBe(true);
+    expect(parseSyncPayload('lists', 'INSERT', { name: 'Groceries', planId: null }).success).toBe(true);
+    expect(parseSyncPayload('lists', 'INSERT', { name: 'Groceries', planId: 'nope' }).success).toBe(false);
+  });
+
+  it('carries contributions and the hand-edited flag on items', () => {
+    const base = { listId: recipeId, name: 'Eggs' };
+    expect(parseSyncPayload('list_items', 'INSERT', { ...base, contributions: [contribution], editedByHand: false }).success).toBe(true);
+    expect(parseSyncPayload('list_items', 'INSERT', { ...base, contributions: null }).success).toBe(true);
+    expect(parseSyncPayload('list_items', 'UPDATE', { editedByHand: true }).success).toBe(true);
+    expect(parseSyncPayload('list_items', 'UPDATE', { contributions: [{ ...contribution, unit: 'oz' }] }).success).toBe(false);
+    expect(parseSyncPayload('list_items', 'UPDATE', { contributions: [{ ...contribution, quantity: -1 }] }).success).toBe(false);
+  });
+});

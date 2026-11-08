@@ -6,6 +6,7 @@ import type {
   CaptureItem,
   ImportantDate,
   Recipe,
+  MealPlan,
   ExternalCalendar,
   ExternalEvent,
 } from '@diade/domain';
@@ -85,3 +86,5 @@ export async function getPendingCount(): Promise<number> {
 }
 
 export const getActiveRecipes = () => selectActive<Recipe>('local_recipes', 'name COLLATE NOCASE ASC');
+
+export const getActiveMealPlans = () => selectActive<MealPlan>('local_meal_plans', 'starts_on ASC, created_at ASC');

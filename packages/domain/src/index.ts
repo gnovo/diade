@@ -8,10 +8,12 @@ export * from './importantDates';
 export * from './externalCalendar';
 export * from './listTemplates';
 export * from './recipes';
+export * from './mealPlan';
 
 import type { ImportantDateType, ImportantDateRepeat } from './importantDates';
 import type { ExternalCalendar, ExternalEvent } from './externalCalendar';
 import type { Recipe } from './recipes';
+import type { MealPlan, GroceryContribution } from './mealPlan';
 
 // --- Identity & Space ---
 
@@ -119,6 +121,8 @@ export interface SharedList extends BaseRecord {
   name: string;
   icon: string | null;
   category: ListCategory;
+  /** The meal plan this list was generated from, if any. */
+  planId: string | null;
 }
 
 export interface ListItem {
@@ -130,6 +134,10 @@ export interface ListItem {
   notes: string | null;
   /** Manual order within the list. Null until the list is first reordered; nulls sort last. */
   position: number | null;
+  /** What each recipe asked for, when the item came from a meal plan; null for ordinary items. */
+  contributions: GroceryContribution[] | null;
+  /** A member changed the name or quantity of a plan item, so "Update from plan" leaves it alone. */
+  editedByHand: boolean;
   isChecked: boolean;
   checkedBy: string | null;
   checkedAt: string | null;
@@ -158,7 +166,8 @@ export type SyncEntityName =
   | 'list_items'
   | 'capture_items'
   | 'important_dates'
-  | 'recipes';
+  | 'recipes'
+  | 'meal_plans';
 export type MutationOperation = 'INSERT' | 'UPDATE' | 'DELETE';
 
 export interface ClientMutation {
@@ -198,6 +207,8 @@ export interface SyncPullResult {
   importantDates: ImportantDate[];
   /** Absent from an API that predates recipes. */
   recipes?: Recipe[];
+  /** Absent from an API that predates meal plans. */
+  mealPlans?: MealPlan[];
   /** Absent from an API that predates Google Calendar sync. */
   externalCalendars?: ExternalCalendar[];
   externalEvents?: ExternalEvent[];

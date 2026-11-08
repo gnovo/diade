@@ -78,3 +78,35 @@ removed, scaled, hand-edited, checked).
 - Period: store dates, show a localised range ("Mon 9 to Sun 15 Nov"). Open question: default start
   today, or the coming Monday?
 - Create-list action navigates into the new list.
+
+## Decisions taken in the build (what shipped)
+
+- **Plural rule:** `singularWord` drops one trailing `s` from each word, for matching only (the shown name
+  is the first spelling). Words of 3 letters or fewer and words ending in `ss`, `us` or `is` are left alone.
+  Irregular plurals (`tomato`/`tomatoes`, `peach`/`peaches`, `pão`/`pães`) are deliberately not merged: two
+  rows beat a wrong merge. The test table is in `mealPlan.test.ts`.
+- **Staples:** one binary flag, as suggested. A merged row is a staple only if every ingredient feeding it is
+  flagged, so a recipe where you do need the olive oil wins. The "Pantry staples · N left out" group adds a
+  staple with one tap; it stays tied to its recipes, so "Update from plan" scales it instead of removing it.
+  Revisit a middle tier (rice, pasta) only if it is missed in use.
+- **Period default:** the Monday on or after today (a plan made on a Sunday is for the week that starts
+  tomorrow). "This week" is one tap away. Storage is `YYYY-MM-DD` dates.
+- **Plan shown:** the one running today, else the next to start, else the latest. Other plans are listed
+  below it. A plan generates one list; after that the plan offers "Open list" (no second list).
+- **Contributions** carry a `key` (`ingredientMatchKey|family`) beside what the brief listed, so an item is
+  matched back to its row even if its name was edited. Amounts are stored in the family's base unit (g, ml,
+  tsp, unit, pinch), already scaled to the plan.
+- **Display:** list quantities are written with a `.` decimal whichever language wrote them, so both members
+  compare the same text. 6 tsp reads as 2 tbsp only when it comes out even.
+- **Hand edits:** there is no item editor yet. `edited_by_hand` is set when a quantity is typed over a
+  checked plan item (the re-add path). When an item editor arrives it must set the flag too.
+- **Update from plan** also refreshes provenance silently when the text is already right, and a hand-edited
+  row no recipe asks for any more keeps its text but stops being a plan row.
+
+## Verified on the device (Pixel 6, dev build)
+
+Plan created (Sunday defaults to next week), recipe picked with servings 6, list generated with scaled amounts and
+source recipes, staple added by one tap, plan raised to 8, diff showed 600 to 800 g, 3 to 4 and 750 g to 1 kg
+(checked row stays checked), applied, and everything synced. Not exercised on a device: two recipes sharing an
+ingredient (covered by the domain tests); the recipe form reset the app twice while typing a second recipe, cause
+not found (no crash in logcat), so it is worth watching.

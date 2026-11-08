@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import type { RecipeIngredient } from '@diade/domain';
+import type { GroceryContribution, MealPlanRecipe, RecipeIngredient } from '@diade/domain';
 import {
   pgTable,
   text,
@@ -193,6 +193,27 @@ export const recipes = pgTable('recipes', {
   deletedAt: timestamp('deleted_at'),
 });
 
+/**
+ * A meal plan, always shared within the space: a pool of recipes (with servings) for a period, not a
+ * calendar. The recipes are one JSON array on the plan, edited and read whole, like a recipe's ingredients.
+ * `starts_on` and `ends_on` are plain calendar days.
+ */
+export const mealPlans = pgTable('meal_plans', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  spaceId: uuid('space_id')
+    .notNull()
+    .references(() => spaces.id, { onDelete: 'cascade' }),
+  creatorId: text('creator_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  startsOn: date('starts_on', { mode: 'string' }).notNull(),
+  endsOn: date('ends_on', { mode: 'string' }).notNull(),
+  recipes: jsonb('recipes').$type<MealPlanRecipe[]>().notNull().default(sql`'[]'::jsonb`),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  deletedAt: timestamp('deleted_at'),
+});
+
 export const lists = pgTable('lists', {
   id: uuid('id').primaryKey().defaultRandom(),
   spaceId: uuid('space_id')
@@ -204,6 +225,8 @@ export const lists = pgTable('lists', {
   name: text('name').notNull(),
   icon: text('icon'),
   category: text('category').notNull().default('groceries'),
+  /** The meal plan this list was generated from; the list is an ordinary list afterwards. */
+  planId: uuid('plan_id').references(() => mealPlans.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   deletedAt: timestamp('deleted_at'),
@@ -220,6 +243,10 @@ export const listItems = pgTable('list_items', {
   notes: text('notes'),
   /** Manual order within the list. Null until the list is first reordered; nulls sort last. */
   position: doublePrecision('position'),
+  /** What each recipe asked for, when the item was generated from a meal plan. */
+  contributions: jsonb('contributions').$type<GroceryContribution[]>(),
+  /** A member changed the name or quantity: "Update from plan" never overwrites it. */
+  editedByHand: boolean('edited_by_hand').notNull().default(false),
   isChecked: boolean('is_checked').notNull().default(false),
   checkedBy: text('checked_by').references(() => users.id, { onDelete: 'set null' }),
   checkedAt: timestamp('checked_at'),

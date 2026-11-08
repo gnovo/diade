@@ -18,6 +18,7 @@ import {
   captureItems,
   importantDates,
   recipes,
+  mealPlans,
   syncMutations,
   spaceMembers,
 } from '../db/schema';
@@ -45,6 +46,16 @@ export async function authorizeMutation(
   userId: string,
 ): Promise<Access> {
   const { entity, operation, recordId } = mutation;
+
+  // A list may only point at a plan of its own space.
+  if (entity === 'lists' && typeof data.planId === 'string' && operation !== 'DELETE') {
+    const [plan] = await db
+      .select({ id: mealPlans.id })
+      .from(mealPlans)
+      .where(and(eq(mealPlans.id, data.planId), eq(mealPlans.spaceId, spaceId)))
+      .limit(1);
+    if (!plan) return 'forbidden';
+  }
 
   if (operation === 'INSERT') {
     if (entity === 'list_items') {
@@ -107,6 +118,15 @@ export async function authorizeMutation(
         .select({ id: recipes.id })
         .from(recipes)
         .where(and(eq(recipes.id, recordId), eq(recipes.spaceId, spaceId)))
+        .limit(1);
+      return row ? 'ok' : 'not_found';
+    }
+    case 'meal_plans': {
+      // Always shared: any member may edit, but only within their own space.
+      const [row] = await db
+        .select({ id: mealPlans.id })
+        .from(mealPlans)
+        .where(and(eq(mealPlans.id, recordId), eq(mealPlans.spaceId, spaceId)))
         .limit(1);
       return row ? 'ok' : 'not_found';
     }
@@ -226,6 +246,7 @@ async function applyMutation(
           name: d.name,
           icon: d.icon ?? null,
           category: d.category ?? 'groceries',
+          planId: d.planId ?? null,
           createdAt: now,
           updatedAt: now,
         });
@@ -240,6 +261,7 @@ async function applyMutation(
       if (d.name !== undefined) changes.name = d.name;
       if (d.icon !== undefined) changes.icon = d.icon;
       if (d.category !== undefined) changes.category = d.category;
+      if (d.planId !== undefined) changes.planId = d.planId;
       await db.update(lists).set(changes).where(where);
       return;
     }
@@ -255,6 +277,8 @@ async function applyMutation(
           unit: d.unit ?? null,
           notes: d.notes ?? null,
           position: d.position ?? null,
+          contributions: d.contributions ?? null,
+          editedByHand: d.editedByHand ?? false,
           isChecked,
           checkedBy: isChecked ? userId : null,
           checkedAt: isChecked ? now : null,
@@ -274,6 +298,8 @@ async function applyMutation(
       if (d.unit !== undefined) changes.unit = d.unit;
       if (d.notes !== undefined) changes.notes = d.notes;
       if (d.position !== undefined) changes.position = d.position;
+      if (d.contributions !== undefined) changes.contributions = d.contributions;
+      if (d.editedByHand !== undefined) changes.editedByHand = d.editedByHand;
       if (d.isChecked !== undefined) {
         changes.isChecked = Boolean(d.isChecked);
         changes.checkedBy = d.isChecked ? userId : null;
@@ -372,6 +398,33 @@ async function applyMutation(
       if (d.notes !== undefined) changes.notes = d.notes;
       if (d.ingredients !== undefined) changes.ingredients = d.ingredients;
       await db.update(recipes).set(changes).where(where);
+      return;
+    }
+
+    case 'meal_plans': {
+      if (operation === 'INSERT') {
+        await db.insert(mealPlans).values({
+          id: recordId,
+          spaceId,
+          creatorId: userId,
+          startsOn: d.startsOn,
+          endsOn: d.endsOn,
+          recipes: d.recipes ?? [],
+          createdAt: now,
+          updatedAt: now,
+        });
+        return;
+      }
+      const where = and(eq(mealPlans.id, recordId), eq(mealPlans.spaceId, spaceId));
+      if (operation === 'DELETE') {
+        await db.update(mealPlans).set({ deletedAt: now, updatedAt: now }).where(where);
+        return;
+      }
+      const changes: Partial<typeof mealPlans.$inferInsert> = { updatedAt: now };
+      if (d.startsOn !== undefined) changes.startsOn = d.startsOn;
+      if (d.endsOn !== undefined) changes.endsOn = d.endsOn;
+      if (d.recipes !== undefined) changes.recipes = d.recipes;
+      await db.update(mealPlans).set(changes).where(where);
       return;
     }
 
@@ -595,6 +648,8 @@ export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) 
         unit: listItems.unit,
         notes: listItems.notes,
         position: listItems.position,
+        contributions: listItems.contributions,
+        editedByHand: listItems.editedByHand,
         isChecked: listItems.isChecked,
         checkedBy: listItems.checkedBy,
         checkedAt: listItems.checkedAt,
@@ -642,6 +697,17 @@ export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) 
         and(
           eq(recipes.spaceId, spaceId),
           or(gt(recipes.updatedAt, sinceDate), gt(recipes.deletedAt, sinceDate)),
+        ),
+      );
+
+    // Meal plans (always shared within the space)
+    const mealPlanRecords = await db
+      .select()
+      .from(mealPlans)
+      .where(
+        and(
+          eq(mealPlans.spaceId, spaceId),
+          or(gt(mealPlans.updatedAt, sinceDate), gt(mealPlans.deletedAt, sinceDate)),
         ),
       );
 
@@ -700,6 +766,12 @@ export function createSyncRouter(getDb: (c: any) => DbClient, getAuth: (c: any) 
           createdAt: r.createdAt.toISOString(),
           updatedAt: r.updatedAt.toISOString(),
           deletedAt: r.deletedAt?.toISOString() || null,
+        })),
+        mealPlans: mealPlanRecords.map((p) => ({
+          ...p,
+          createdAt: p.createdAt.toISOString(),
+          updatedAt: p.updatedAt.toISOString(),
+          deletedAt: p.deletedAt?.toISOString() || null,
         })),
       },
     });

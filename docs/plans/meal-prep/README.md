@@ -17,8 +17,8 @@ brief for the PR, then `dev-notes.md`. Wireframes: `design/meal-prep/index.html`
 | PR | Scope | Brief | Status |
 |---|---|---|---|
 | A | Wizard motion on the UI thread | [pr-a](pr-a-wizard-motion.md) | merged (#15) |
-| B | Recipes: library, CRUD, metric parser, pantry flag | [pr-b](pr-b-recipes.md) | in review |
-| C | Plan + grocery generation + merge rules | [pr-c](pr-c-plan-and-groceries.md) | not started |
+| B | Recipes: library, CRUD, metric parser, pantry flag | [pr-b](pr-b-recipes.md) | merged (#16) |
+| C | Plan + grocery generation + merge rules | [pr-c](pr-c-plan-and-groceries.md) | built, not yet committed |
 | D | New-list wizard | [pr-d](pr-d-new-list-wizard.md) | not started |
 | E | Markdown import and export | [pr-e](pr-e-markdown-import.md) | not started |
 
@@ -46,7 +46,7 @@ These were settled in conversation. Do not reopen them without a reason.
    the kind of magic that deletes things you added by hand.
 7. **Pantry staples are a flag per ingredient** (salt, olive oil), pre-filled from a built-in en/pt-PT
    dictionary and overridable. Generated lists leave staples out by default and offer them in a
-   collapsed group, so salt is not bought every week. Open: whether one flag is enough (see PR C).
+   collapsed group, so salt is not bought every week. PR C kept the single flag (see the brief).
 8. **Navigation: the Lists tab gets a switch** (Lists | Recipes | Plan). Five tabs are already full.
 9. **Out of v1:** nutrition, prices, photos, per-day slots, recipe tags.
 10. **Shared motion.** Wizards use `StepPager`, `StepProgress`, `FoldingFooter` from
@@ -63,11 +63,15 @@ Shipped in PR B:
 - Domain: `packages/domain/src/recipes.ts` (parser, formatter, staple dictionary). Validation:
   `createRecipeSchema` / `updateRecipeSchema` in `packages/validation`.
 
-Planned (details in the briefs):
+Shipped in PR C:
 
-- `meal_plans(id, space_id, creator_id, starts_on date, ends_on date, recipes jsonb [{recipeId, servings}], ...)`: PR C
-- `lists.plan_id` (nullable) and, on `list_items`, a record of which recipes contributed and whether the
-  item was edited by hand: PR C
+- `meal_plans(id, space_id, creator_id, starts_on date, ends_on date, recipes jsonb [{recipeId, servings}], created_at, updated_at, deleted_at)`
+- `lists.plan_id` (nullable, FK with `ON DELETE SET NULL`); `list_items.contributions jsonb` (null for ordinary
+  items) and `list_items.edited_by_hand boolean`.
+- Domain: `packages/domain/src/mealPlan.ts` (merge rules, diff, periods). Writes for generate and update:
+  `apps/mobile/src/data/mealPlanWrites.ts`.
+
+Planned (details in the briefs): nothing else is added to the schema; D and E reuse these.
 
 ## How to add a synced entity (what PR B touched)
 
