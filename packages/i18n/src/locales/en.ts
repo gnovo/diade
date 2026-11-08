@@ -547,6 +547,7 @@ export const en = {
     shareMarkdown: 'Share as markdown',
     shareFailed: 'Could not share',
     import: {
+      or: 'or',
       entry: 'Import from markdown',
       title: 'Import recipes',
       pasteLabel: 'Paste markdown',

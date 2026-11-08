@@ -23,6 +23,7 @@ import {
 const MAX_NAME = 120;
 const MAX_NOTES = 5000;
 const MAX_INGREDIENTS = 100;
+const MAX_LINE = 5000;
 
 /** Flags that leave nothing usable to import: such a line is skipped unless it is fixed. */
 const UNUSABLE: IngredientFlag[] = ['noName', 'outOfRange'];
@@ -73,16 +74,28 @@ const LABEL =
 
 /** Strips markdown that is not text: links, emphasis, code ticks. */
 function plain(text: string): string {
-  return text
-    .replace(/\[\[(?:[^\]|]*\|)?([^\]]*)\]\]/g, '$1')
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/(\*\*|__|~~|`)/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return (
+    text
+      // Bounded, so a line of repeated brackets cannot make the match quadratic.
+      .replace(/\[\[(?:[^\]|]{0,200}\|)?([^\]]{0,200})\]\]/g, '$1')
+      .replace(/\[([^\]]{0,200})\]\([^)]{0,500}\)/g, '$1')
+      .replace(/(\*\*|__|~~|`)/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+  );
 }
 
 const sectionTitle = (text: string): string =>
   normalizeIngredientName(plain(text).replace(/:$/, ''));
+
+/** "Title ##" to "Title": the closing hashes of a heading, only when set apart by a space ("C#" keeps its #). */
+function closingHashesRemoved(text: string): string {
+  let end = text.length;
+  while (end > 0 && text[end - 1] === '#') end--;
+  return end < text.length && end > 0 && text[end - 1] === ' '
+    ? text.slice(0, end).trimEnd()
+    : text;
+}
 
 function parseServings(value: string): number {
   const found = /\d+/.exec(value);
@@ -92,7 +105,7 @@ function parseServings(value: string): number {
 }
 
 /** The pantry flag, written as an Obsidian-style tag after the amount: "- 1 tsp Salt #pantry". */
-const STAPLE_TAG = /\s+#(pantry|fresh)\s*$/i;
+const STAPLE_TAG = /^#(pantry|fresh)$/i;
 /** A name that starts with a digit, written `\1000 Island dressing` so the digit is not read as an amount. */
 const ESCAPED_NAME = /^\\(\d.*)$/;
 
@@ -102,8 +115,10 @@ const ESCAPED_NAME = /^\\(\d.*)$/;
  */
 export function draftLineFromText(id: string, text: string): DraftLine | null {
   const written = plain(text.replace(BULLET_OR_CHECKBOX, ''));
-  const tag = STAPLE_TAG.exec(written);
-  const raw = tag ? written.slice(0, tag.index) : written;
+  // `plain` leaves single spaces, so the tag is whatever follows the last " #".
+  const hash = written.lastIndexOf(' #');
+  const tag = hash >= 0 ? STAPLE_TAG.exec(written.slice(hash + 1).trim()) : null;
+  const raw = tag ? written.slice(0, hash).trim() : written;
   if (!raw) return null;
   const escaped = ESCAPED_NAME.exec(raw);
   const { ingredient, flag, convertedFrom } = escaped
@@ -191,7 +206,7 @@ function parseChunk(chunk: Chunk, newId: () => string): DraftRecipe {
   }
 
   const warnings: DraftWarning[] = [];
-  let name = plain(chunk.heading ?? '').replace(/\s+#+$/, '');
+  let name = closingHashesRemoved(plain(chunk.heading ?? ''));
   if (!name) warnings.push('missingName');
   name = name.slice(0, MAX_NAME).trim();
 
@@ -229,7 +244,12 @@ function takeFrontMatter(lines: string[]): { meta: Record<string, string>; rest:
  * if it has an ingredient list. A recipe with no ingredients is still returned, with a warning.
  */
 export function parseRecipesMarkdown(text: string, newId: () => string): DraftRecipe[] {
-  const all = text.replace(/^﻿/, '').replace(/\r\n?/g, '\n').split('\n');
+  // A line longer than any recipe line is cut: it bounds the work every pattern below can do on it.
+  const all = text
+    .replace(/^﻿/, '')
+    .replace(/\r\n?/g, '\n')
+    .split('\n')
+    .map((line) => (line.length > MAX_LINE ? line.slice(0, MAX_LINE) : line));
   const { meta, rest } = takeFrontMatter(all);
   const chunks = splitRecipes(rest);
   const drafts = chunks.map((chunk) => parseChunk(chunk, newId));

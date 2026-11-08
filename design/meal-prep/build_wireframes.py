@@ -262,10 +262,15 @@ def s02():
     s.text(16, 552, 'NOTES', 12, fill='#666')
     s.rect(16, 560, 343, 96, 8)
     s.text(28, 584, 'Steps, tips, where it came from…', 14, fill='#666')
+    s.line(16, 677, 160, 677)
+    s.text(W / 2, 681, 'or', 12, 'middle', '#666')
+    s.line(215, 677, 359, 677)
+    button(s, 16, 692, 343, 'Import from markdown', False, 40)
     s.callout(343, 128)
     s.callout(343, 336)
     s.callout(343, 400)
     s.callout(343, 480)
+    s.callout(343, 712)
     s.finish('02-recipe-sheet.svg')
 
 

@@ -242,6 +242,7 @@ export const ListsScreen: React.FC = () => {
   const recipeSheet = (
     <RecipeForm
       library={recipes.data}
+      onImport={() => setImportOpen(true)}
       visible={recipeForm.open}
       recipe={recipeForm.recipe}
       onClose={() => setRecipeForm((f) => ({ ...f, open: false }))}
@@ -416,7 +417,6 @@ export const ListsScreen: React.FC = () => {
             <RecipesLibrary
               recipes={recipes.data}
               onOpen={(recipe) => setOpenRecipeId(recipe.id)}
-              onImport={() => setImportOpen(true)}
             />
           ) : section === 'plan' ? (
             <PlanView

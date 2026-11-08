@@ -89,16 +89,21 @@ const ReviewLine: React.FC<{
       ) : (
         <View
           className={
-            flag ? 'my-1 py-1 px-2 border border-border-strong rounded-md' : 'min-h-[44px]'
+            flag
+              ? 'my-1 py-1 px-2 border border-border-strong rounded-md'
+              : 'min-h-[44px] px-2 border border-transparent'
           }
         >
           <View className="flex-row items-center min-h-[40px]">
+            {/* Every row has the same badge slot and amount column, so the names line up. */}
             {flag ? (
               <View className="w-6 h-6 rounded-full border border-border-strong items-center justify-center mr-2">
                 <Text className="text-xs font-bold text-ink">?</Text>
               </View>
-            ) : null}
-            {amount ? <Text className="w-16 text-sm text-ink-muted">{amount}</Text> : null}
+            ) : (
+              <View className="w-6 mr-2" />
+            )}
+            {readable ? <Text className="w-16 text-sm text-ink-muted">{amount}</Text> : null}
             <Text className="flex-1 text-sm font-medium text-ink mr-2">
               {readable ? ingredient.name : line.raw}
               {line.convertedFrom ? (

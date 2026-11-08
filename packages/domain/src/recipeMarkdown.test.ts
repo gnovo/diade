@@ -417,3 +417,28 @@ describe('flagSimilarNames', () => {
     expect(loose[0].lines[0].flag).toBe('looseMeasure');
   });
 });
+
+describe('hostile input', () => {
+  const started = (text: string) => {
+    const t0 = Date.now();
+    parseRecipesMarkdown(text, () => 'x');
+    return Date.now() - t0;
+  };
+
+  it('stays fast on long runs of the characters the patterns repeat on', () => {
+    const n = 50000;
+    for (const piece of ['[[\\', '[', ' ', ',', '#', '-', '*', '1 ', '\t']) {
+      expect(started(`# R\n## Ingredients\n- ${piece.repeat(n)}x`)).toBeLessThan(1500);
+      expect(started(`# ${piece.repeat(n)}x`)).toBeLessThan(1500);
+    }
+    expect(started(`# R\n## Ingredients\n- 1 kg meat${','.repeat(n)}x`)).toBeLessThan(1500);
+  });
+
+  it('cuts a line longer than a recipe line can be', () => {
+    const [recipe] = parseRecipesMarkdown(
+      `# R\n## Ingredients\n- 1 kg ${'a'.repeat(20000)}`,
+      () => 'x',
+    );
+    expect(recipe.lines[0].raw.length).toBeLessThan(5001);
+  });
+});

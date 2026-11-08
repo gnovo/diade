@@ -553,6 +553,7 @@ export const ptPT: Shape<Catalog> = {
     shareMarkdown: 'Partilhar em markdown',
     shareFailed: 'Não foi possível partilhar',
     import: {
+      or: 'ou',
       entry: 'Importar de markdown',
       title: 'Importar receitas',
       pasteLabel: 'Cole o markdown',

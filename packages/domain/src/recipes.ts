@@ -182,7 +182,23 @@ export interface ParsedIngredient {
   unit: RecipeUnit;
 }
 
-const TO_TASTE = /\s*(?:,|-|–)?\s*\b(?:to taste|q\.?\s?b\.?|a gosto|ao gosto)\s*$/i;
+const TASTE_WORDS = /\b(?:to taste|q\.?\s?b\.?|a gosto|ao gosto)\s*$/i;
+
+/** Drops a trailing "to taste" (and the comma or dash before it). Plain string steps, so cost stays linear. */
+function stripToTaste(text: string): { text: string; toTaste: boolean } {
+  const match = TASTE_WORDS.exec(text);
+  if (!match) return { text, toTaste: false };
+  let end = match.index;
+  while (end > 0 && /[\s,\-–]/.test(text[end - 1])) end--;
+  return { text: clean(text.slice(0, end)), toTaste: true };
+}
+
+/** `text` without the given characters at its end. */
+function trimEndChars(text: string, chars: string): string {
+  let end = text.length;
+  while (end > 0 && chars.includes(text[end - 1])) end--;
+  return text.slice(0, end);
+}
 const BULLET = /^\s*(?:[-*•]|\d+[.)])\s+/;
 const CONNECTOR = /^(?:(?:de|do|da|of)\s+|d['’])/i;
 
@@ -219,11 +235,9 @@ function unitMatches(rest: string): UnitMatch[] {
  */
 export function parseIngredientLine(input: string): ParsedIngredient {
   let text = clean(input.replace(BULLET, ''));
-  let toTaste = false;
-  if (TO_TASTE.test(text)) {
-    text = clean(text.replace(TO_TASTE, ''));
-    toTaste = true;
-  }
+  const stripped = stripToTaste(text);
+  text = stripped.text;
+  const toTaste = stripped.toTaste;
 
   const asName = (value: string): ParsedIngredient => ({
     name: capitalizeFirst(clean(value.replace(CONNECTOR, ''))),
@@ -355,7 +369,7 @@ export function assessIngredientLine(input: string): AssessedIngredient {
   if (!ingredient.name) return result('noName');
 
   let text = clean(input.replace(BULLET, ''));
-  text = clean(text.replace(TO_TASTE, ''));
+  text = stripToTaste(text).text;
   const numberMatch = LEADING_NUMBER.exec(text);
   const quantity = numberMatch ? parseQuantityNumber(numberMatch[1]) : null;
   // No number: a name, with "to taste" as its amount. Nothing to doubt.
@@ -382,7 +396,7 @@ export function assessIngredientLine(input: string): AssessedIngredient {
   if (outOfRange) return result('outOfRange');
 
   const [first = '', second = ''] = afterNumber.split(/\s+/);
-  const word = first.toLowerCase().replace(/[.,;:]+$/, '');
+  const word = trimEndChars(first.toLowerCase(), '.,;:');
   if (LOOSE_MEASURES.has(word)) return result('looseMeasure');
   const abbreviated = first.endsWith('.') || UNIT_ABBREVIATIONS.has(word);
   // "2 jars of pesto": a word standing between the number and "of" is a measure.

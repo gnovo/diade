@@ -1,6 +1,6 @@
 # Recipes as markdown
 
-How Díade reads recipes from markdown (Recipes → "Importar de markdown") and writes them back ("Partilhar em markdown").
+How Díade reads recipes from markdown (Recipes → + → "Importar de markdown", under the notes of the New recipe sheet) and writes them back ("Partilhar em markdown").
 Code: `packages/domain/src/recipeMarkdown.ts` (reading, writing), `recipes.ts` (one ingredient line),
 `ingredientNames.ts` (typo detection). Tests and example notes: `packages/domain/src/recipeMarkdown.test.ts`,
 `packages/domain/src/__fixtures__/recipes/`.

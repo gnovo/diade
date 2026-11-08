@@ -122,11 +122,10 @@ export const RecipeDetailScreen: React.FC<{
  * Lists / Recipes switch and the scroll view belong to the screen that shows it, so they stay put
  * while this fades in.
  */
-export const RecipesLibrary: React.FC<{
-  recipes: Recipe[];
-  onOpen: (recipe: Recipe) => void;
-  onImport: () => void;
-}> = ({ recipes, onOpen, onImport }) => {
+export const RecipesLibrary: React.FC<{ recipes: Recipe[]; onOpen: (recipe: Recipe) => void }> = ({
+  recipes,
+  onOpen,
+}) => {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
 
@@ -145,7 +144,6 @@ export const RecipesLibrary: React.FC<{
     return (
       <Card>
         <EmptyState message={t('recipes.empty')} />
-        <Button label={t('recipes.import.entry')} variant="outline" onPress={onImport} />
       </Card>
     );
   }
@@ -191,7 +189,6 @@ export const RecipesLibrary: React.FC<{
           </View>
         </Pressable>
       ))}
-      <Button label={t('recipes.import.entry')} variant="ghost" onPress={onImport} />
     </>
   );
 };

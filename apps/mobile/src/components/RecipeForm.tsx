@@ -143,7 +143,9 @@ export const RecipeForm: React.FC<{
   onSaved?: (id: string) => void;
   /** Every recipe, so ingredient names already in use can be offered while typing. */
   library: Recipe[];
-}> = ({ visible, onClose, recipe, onSaved, library }) => {
+  /** Shown under the notes of a new recipe: closes this form and opens the markdown import. */
+  onImport?: () => void;
+}> = ({ visible, onClose, recipe, onSaved, library, onImport }) => {
   const { t, i18n } = useTranslation();
   const ctx = useWriteContext();
   const decimal = decimalFor(i18n.language);
@@ -367,6 +369,24 @@ export const RecipeForm: React.FC<{
             style={{ minHeight: 96, paddingTop: 12 }}
           />
         </View>
+
+        {!editing && onImport ? (
+          <View>
+            <View className="flex-row items-center mb-2" accessible={false}>
+              <View className="flex-1 h-px bg-border" />
+              <Text className="mx-3 text-sm text-ink-muted">{t('recipes.import.or')}</Text>
+              <View className="flex-1 h-px bg-border" />
+            </View>
+            <Button
+              label={t('recipes.import.entry')}
+              variant="outline"
+              onPress={() => {
+                onClose();
+                onImport();
+              }}
+            />
+          </View>
+        ) : null}
       </View>
     </BottomSheet>
   );
