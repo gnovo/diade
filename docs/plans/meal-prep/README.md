@@ -33,6 +33,9 @@ Follow-ups after E, in order. Full detail, process notes and a starting prompt: 
 4. "Update from plan" re-proposes rows left off in the wizard review (needs a dismissed-keys column on lists).
 5. A `.md` file picker / share target (new native module, needs an APK release).
 
+Order for the next round: quick wins (empty Compras, Import chooser), Plano redesign, recipe sections and cooking view, then the
+catalog in three PRs (F, G, H). See [v2-ux-and-catalog.md](v2-ux-and-catalog.md).
+
 Dependencies: C needs B. D needs B and C (it reuses the recipe picker and the generator). E needs B
 only, so it can move earlier if wanted. Update this table when a PR merges.
 
@@ -64,6 +67,20 @@ These were settled in conversation. Do not reopen them without a reason.
     `apps/mobile/src/components/StepPager.tsx`: Reanimated, UI thread, 460 ms, curve
     `bezier(0.32, 0.72, 0, 1)`, reduce-motion respected. The previous curve (0.2, 0, 0, 1) front-loaded
     nearly all travel into the first tenth of the duration and read as a snap followed by a stall.
+
+## Decisions for the next round (locked in a brainstorm, 2026-11-08)
+
+These extend the list above. Full reasoning and the slicing are in [v2-ux-and-catalog.md](v2-ux-and-catalog.md).
+
+11. **An ingredient catalog is a synced entity per space.** The ingredients array stays on the recipe (decision 2 holds: a
+    recipe is still edited and read whole); each line keeps the name as written and gains an optional `ingredientId`.
+    Built-in en/pt-PT dictionary in code, rows created on first use. Brief: [pr-f-ingredient-catalog.md](pr-f-ingredient-catalog.md).
+12. **Staples live on the catalog entry** (a default), and a recipe line may override it. This revises decision 7.
+13. **Existing recipes get their ids lazily in the app**, not through a SQL rewrite of the JSON.
+14. **A plan stays a weekly pool** (decision 5 holds). A plan always exists for a week; there is no "New plan" or "Delete plan".
+15. **Recipe structure is markdown in `notes`**: `## Steps`, `## Notes`, `## Source`, with a structured editor over it. Unknown
+    sections are kept as free text so the round trip is lossless.
+16. **A new Compras list starts empty.** Starter items stay only for the pharmacy and travel templates.
 
 ## Data model (current and planned)
 
