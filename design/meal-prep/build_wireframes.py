@@ -562,6 +562,50 @@ def s14():
     s.finish('14-recipe-detail.svg')
 
 
+def cooking_frame(s, active):
+    """The cooking view: full screen, no tab bar. Close, the recipe name, and the two tabs."""
+    status_bar(s)
+    s.circle(40, 76, 22, '#e6e6e6')
+    s.text(40, 82, '\u00d7', 22, 'middle')
+    s.text(80, 82, 'Spaghetti carbonara', 16, bold=True)
+    segmented(s, 112, ['Steps', 'Ingredients'], active)
+
+
+def s15():
+    s = Svg('15 Cooking view: steps')
+    cooking_frame(s, 0)
+    s.text(16, 196, 'Step 2 of 4', 12, fill='#666')
+    s.rect(16, 206, 343, 4, 2, '#e6e6e6')
+    s.rect(16, 206, 171, 4, 2, '#000')
+    for j, line in enumerate(['Fry the guanciale in its own', 'fat until the edges turn', 'golden and crisp.']):
+        s.text(16, 276 + j * 38, line, 26, bold=False)
+    button(s, 16, 724, 163, 'Back', False, 56)
+    button(s, 196, 724, 163, 'Next step', True, 56)
+    s.callout(343, 120)
+    s.callout(343, 206)
+    s.callout(343, 300)
+    s.callout(343, 752)
+    s.finish('15-cooking-steps.svg')
+
+
+def s16():
+    s = Svg('16 Cooking view: ingredients')
+    cooking_frame(s, 1)
+    s.text(16, 196, '2 of 4 ready', 12, fill='#666')
+    for i, (n, q, on) in enumerate([('Spaghetti', '400 g', True), ('Guanciale', '200 g', True), ('Eggs', '4', False), ('Pecorino', '50 g', False)]):
+        y = 212 + i * 64
+        if i:
+            s.line(16, y, 359, y)
+        checkbox(s, 16, y + 20, on)
+        s.text(56, y + 38, n, 16, fill='#666' if on else '#000')
+        if on:
+            s.line(56, y + 33, 56 + len(n) * 9, y + 33, '#666', 1.5)
+        s.text(359, y + 38, q, 16, 'end', '#666')
+    s.callout(343, 196)
+    s.callout(343, 262)
+    s.finish('16-cooking-ingredients.svg')
+
+
 def s12():
     s = Svg('12 New recipe: write or import')
     ghost(s, recipes_screen)
@@ -606,6 +650,6 @@ def flow():
 
 
 if __name__ == '__main__':
-    for fn in (s01, s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, s12, s13, s14, flow):
+    for fn in (s01, s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, s12, s13, s14, s15, s16, flow):
         fn()
     print('wrote', len(os.listdir(OUT)), 'files to', OUT)

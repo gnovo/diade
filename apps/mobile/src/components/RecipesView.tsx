@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, BackHandler, Linking, Pressable, Share, Text, View } from 'react-native';
 import { deleteRecord } from '../data/repository';
 import { Icon } from '../design';
+import { CookingView } from './CookingView';
 import { decimalFor } from './RecipeForm';
 import { Button, Card, EmptyState, ScreenScaffold, SectionLabel, TextField } from './ui';
 
@@ -56,6 +57,7 @@ export const RecipeDetailScreen: React.FC<{
   }, [onBack]);
 
   // The system share sheet carries the text to any app, and has its own Copy action: no clipboard module needed.
+  const [cooking, setCooking] = useState(false);
   const sections = useMemo(() => parseRecipeNotes(recipe.notes), [recipe.notes]);
   // Identical steps get distinct keys: the text plus how many came before it.
   const stepRows = useMemo(() => {
@@ -154,9 +156,16 @@ export const RecipeDetailScreen: React.FC<{
         </Card>
       ) : null}
 
+      {sections.steps.length > 0 ? (
+        <>
+          <Button label={t('recipes.cook.start')} onPress={() => setCooking(true)} />
+          <View className="h-3" />
+        </>
+      ) : null}
       <Button label={t('recipes.shareMarkdown')} variant="outline" onPress={share} />
       <View className="h-3" />
       <Button label={t('recipes.deleteRecipe')} variant="danger" onPress={confirmDelete} />
+      <CookingView recipe={recipe} visible={cooking} onClose={() => setCooking(false)} />
     </ScreenScaffold>
   );
 };
