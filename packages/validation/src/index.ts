@@ -195,8 +195,6 @@ export const recipeIngredientSchema = z.object({
   quantity: z.number().finite().positive().max(100000).nullable(),
   unit: recipeUnitSchema,
   staple: z.boolean(),
-  /** The catalog entry (see `ingredientId` in @diade/domain); absent on a line saved before the catalog. */
-  ingredientId: z.string().uuid().optional(),
 });
 
 const recipeIngredientsSchema = z

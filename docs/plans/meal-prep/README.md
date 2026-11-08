@@ -74,10 +74,13 @@ These were settled in conversation. Do not reopen them without a reason.
 These extend the list above. Full reasoning and the slicing are in [v2-ux-and-catalog.md](v2-ux-and-catalog.md).
 
 11. **An ingredient catalog is a synced entity per space.** The ingredients array stays on the recipe (decision 2 holds: a
-    recipe is still edited and read whole); each line keeps the name as written and gains an optional `ingredientId`.
-    Built-in en/pt-PT dictionary in code, rows created on first use. Brief: [pr-f-ingredient-catalog.md](pr-f-ingredient-catalog.md).
+    recipe is still edited and read whole) and each line keeps only the name as written. A built-in en/pt-PT dictionary in code
+    joins synonyms and plurals for everyone; the household's own aliases and merges live in the synced catalog. **A catalog row is made
+    only when a member does something that needs one** (a merge, a rename, a staple default), never on every recipe save: each row is one
+    sync mutation, and a recipe with ten ingredients would push eleven, which exceeded the Worker's CPU limit on the dev backend.
+    Brief: [pr-f-ingredient-catalog.md](pr-f-ingredient-catalog.md).
 12. **Staples live on the catalog entry** (a default), and a recipe line may override it. This revises decision 7.
-13. **Existing recipes get their ids lazily in the app**, not through a SQL rewrite of the JSON.
+13. **Recipe lines carry no ingredient id** (revised from "lazy ids"). A line is matched to its ingredient by name, through the resolver, so no backfill and no rewrite of the JSON is needed.
 14. **A plan stays a weekly pool** (decision 5 holds). A plan always exists for a week; there is no "New plan" or "Delete plan".
 15. **Recipe structure is markdown in `notes`**: `## Steps`, `## Notes`, `## Source`, with a structured editor over it. Unknown
     sections are kept as free text so the round trip is lossless.

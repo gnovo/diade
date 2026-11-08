@@ -4,8 +4,6 @@ import {
   createIngredientResolver,
   DEFAULT_RESOLVER,
   ingredientId,
-  missingIngredients,
-  withIngredientIds,
 } from './ingredientCatalog';
 import { INGREDIENT_SYNONYMS } from './ingredientDictionary';
 import { ingredientMatchKey } from './ingredientKeys';
@@ -136,56 +134,5 @@ describe('ingredientId', () => {
       INGREDIENT_SYNONYMS.flat().map((n) => ingredientId(space, ingredientMatchKey(n))),
     );
     expect(ids.size).toBe(new Set(INGREDIENT_SYNONYMS.flat().map(ingredientMatchKey)).size);
-  });
-});
-
-describe('missingIngredients', () => {
-  const space = '11111111-1111-4111-8111-111111111111';
-
-  it('lists each resolved ingredient once, keeping the first spelling', () => {
-    const out = missingIngredients(
-      space,
-      ['Eggplant', 'Aubergines', 'Salt', ' '],
-      [],
-      DEFAULT_RESOLVER,
-    );
-    expect(out.map((e) => e.name)).toEqual(['Eggplant', 'Salt']);
-    expect(out[0].id).toBe(ingredientId(space, DEFAULT_RESOLVER.key('aubergine')));
-  });
-
-  it('leaves out what the catalog already has, and names with no letters', () => {
-    const have = [{ id: ingredientId(space, DEFAULT_RESOLVER.key('salt')) }];
-    expect(
-      missingIngredients(space, ['Sal', '...', 'Flour'], have, DEFAULT_RESOLVER).map((e) => e.name),
-    ).toEqual(['Flour']);
-  });
-});
-
-describe('withIngredientIds', () => {
-  const space = '11111111-1111-4111-8111-111111111111';
-
-  it('stamps each line with the id of its resolved ingredient, so synonyms share one', () => {
-    const [a, b, c] = withIngredientIds(
-      space,
-      [{ name: 'Aubergine' }, { name: 'Eggplants', ingredientId: 'old' }, { name: 'Salt' }],
-      DEFAULT_RESOLVER,
-    );
-    expect(a.ingredientId).toBe(b.ingredientId);
-    expect(a.ingredientId).not.toBe(c.ingredientId);
-    expect(a.ingredientId).toBe(ingredientId(space, DEFAULT_RESOLVER.key('aubergine')));
-  });
-
-  it('follows a merge, and leaves a name with no letters alone', () => {
-    const resolver = createIngredientResolver([
-      { id: 'm', matchKey: 'meat', aliases: [], mergedIntoId: null, deletedAt: null },
-      { id: 't', matchKey: 'meet', aliases: [], mergedIntoId: 'm', deletedAt: null },
-    ]);
-    const [meet, blank] = withIngredientIds<{ name: string; ingredientId?: string }>(
-      space,
-      [{ name: 'Meet' }, { name: '...' }],
-      resolver,
-    );
-    expect(meet.ingredientId).toBe(ingredientId(space, 'meat'));
-    expect(blank).toEqual({ name: '...' });
   });
 });

@@ -17,7 +17,6 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, Text, View } from 'react-native';
 import { newId } from '../data/ids';
 import { importRecipes } from '../data/recipeImportActions';
-import { useIngredientCatalog } from '../data/useIngredientCatalog';
 import { Icon } from '../design';
 import { BottomSheet } from './BottomSheet';
 import { decimalFor } from './RecipeForm';
@@ -273,7 +272,6 @@ export const ImportRecipesSheet: React.FC<{
 }> = ({ visible, onClose, existing }) => {
   const { t, i18n } = useTranslation();
   const ctx = useWriteContext();
-  const { resolver } = useIngredientCatalog();
   const decimal = decimalFor(i18n.language);
   const [step, setStep] = useState(0);
   const [text, setText] = useState('');
@@ -317,7 +315,6 @@ export const ImportRecipesSheet: React.FC<{
       await importRecipes(
         ctx,
         chosen.map((review) => draftToRecipeInput(review.draft)),
-        resolver,
       );
       onClose();
     } catch (err) {

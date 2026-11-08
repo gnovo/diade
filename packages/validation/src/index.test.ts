@@ -463,23 +463,4 @@ describe('ingredient catalog sync payloads', () => {
     expect(withKey.success).toBe(true);
     if (withKey.success) expect(withKey.data).not.toHaveProperty('matchKey');
   });
-
-  it('accepts an optional ingredientId on a recipe line', () => {
-    const line = { id: 'a', name: 'Meat', quantity: 500, unit: 'g', staple: false };
-    expect(
-      parseSyncPayload('recipes', 'INSERT', { name: 'Stew', ingredients: [line] }).success,
-    ).toBe(true);
-    expect(
-      parseSyncPayload('recipes', 'INSERT', {
-        name: 'Stew',
-        ingredients: [{ ...line, ingredientId: mergedInto }],
-      }).success,
-    ).toBe(true);
-    expect(
-      parseSyncPayload('recipes', 'INSERT', {
-        name: 'Stew',
-        ingredients: [{ ...line, ingredientId: 'x' }],
-      }).success,
-    ).toBe(false);
-  });
 });

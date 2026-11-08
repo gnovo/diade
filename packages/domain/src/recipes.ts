@@ -20,11 +20,6 @@ export interface RecipeIngredient {
    * meal plan leaves it out unless asked.
    */
   staple: boolean;
-  /**
-   * The catalog entry this line is (see `ingredientCatalog.ts`), set when the recipe is saved. Absent on a recipe
-   * saved before the catalog existed: such a line is matched by its name, as before.
-   */
-  ingredientId?: string;
 }
 
 export interface Recipe {
