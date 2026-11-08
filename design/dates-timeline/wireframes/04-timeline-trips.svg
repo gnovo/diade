@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812" font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
+<!-- 04 Trips filter: only trips, no hero, no birthdays, no ticks, no Today marker · mobile 375x812 · 8px grid -->
+<rect x="0" y="0" width="375" height="812" fill="#fff"/>
+<text x="16" y="32" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">9:41</text>
+<rect x="311" y="22" width="32" height="12" rx="3" fill="#fff"/>
+<text x="16" y="96" font-size="28" text-anchor="start" stroke="none" fill="#000" font-weight="700">Dates</text>
+<circle cx="335" cy="80" r="24" fill="#000"/>
+<line x1="327" y1="80" x2="343" y2="80" stroke="#fff" stroke-width="2.5"/>
+<line x1="335" y1="72" x2="335" y2="88" stroke="#fff" stroke-width="2.5"/>
+<rect x="16" y="120" width="56" height="40" rx="20" fill="#fff"/>
+<text x="44.0" y="145" font-size="14" text-anchor="middle" stroke="none" fill="#000">All</text>
+<rect x="80" y="120" width="80" height="40" rx="20" fill="#fff"/>
+<text x="120.0" y="145" font-size="14" text-anchor="middle" stroke="none" fill="#000">Couple</text>
+<rect x="168" y="120" width="104" height="40" rx="20" fill="#fff"/>
+<text x="220.0" y="145" font-size="14" text-anchor="middle" stroke="none" fill="#000">Birthdays</text>
+<rect x="280" y="120" width="72" height="40" rx="20" fill="#000"/>
+<text x="316.0" y="145" font-size="14" text-anchor="middle" stroke="none" fill="#fff">Trips</text>
+<rect x="360" y="120" width="72" height="40" rx="20" fill="#fff"/>
+<text x="396.0" y="145" font-size="14" text-anchor="middle" stroke="none" fill="#000">Other</text>
+<rect x="16" y="176" width="343" height="80" rx="8" fill="#fff"/>
+<text x="48" y="232" font-size="28" text-anchor="middle" stroke="none" fill="#000" font-weight="700">3</text>
+<text x="72" y="216" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">trips together</text>
+<text x="72" y="236" font-size="12" text-anchor="start" stroke="none" fill="#666">The first was Porto Santo, Oct 2020</text>
+<text x="16" y="288" font-size="12" text-anchor="start" stroke="none" fill="#666">TRIPS</text>
+<line x1="40" y1="312" x2="40" y2="552" stroke="#000"/>
+<text x="72" y="312" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">2022</text>
+<line x1="112" y1="308" x2="359" y2="308" stroke="#e6e6e6" stroke-width="1.5"/>
+<line x1="56" y1="352" x2="72" y2="352" stroke="#000"/>
+<rect x="72" y="320" width="287" height="64" rx="8" fill="#fff"/>
+<circle cx="40" cy="352" r="16" fill="#e6e6e6"/>
+<text x="40" y="356" font-size="12" text-anchor="middle" stroke="none" fill="#666">bag</text>
+<text x="88" y="348" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">First trip to Porto</text>
+<text x="88" y="368" font-size="12" text-anchor="start" stroke="none" fill="#666">23 Apr 2022 · 4 years 6 months ago</text>
+<text x="343" y="357" font-size="20" text-anchor="middle" stroke="none" fill="#000">›</text>
+<text x="72" y="400" font-size="12" text-anchor="start" stroke="none" fill="#666">↕ 1 year 4 months</text>
+<text x="72" y="424" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">2020</text>
+<line x1="112" y1="420" x2="359" y2="420" stroke="#e6e6e6" stroke-width="1.5"/>
+<line x1="56" y1="464" x2="72" y2="464" stroke="#000"/>
+<rect x="72" y="432" width="287" height="64" rx="8" fill="#fff"/>
+<circle cx="40" cy="464" r="16" fill="#e6e6e6"/>
+<text x="40" y="468" font-size="12" text-anchor="middle" stroke="none" fill="#666">bag</text>
+<text x="88" y="460" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">First trip to Lisbon</text>
+<text x="88" y="480" font-size="12" text-anchor="start" stroke="none" fill="#666">1 Dec 2020 · 5 years 11 months ago</text>
+<text x="343" y="469" font-size="20" text-anchor="middle" stroke="none" fill="#000">›</text>
+<text x="72" y="512" font-size="12" text-anchor="start" stroke="none" fill="#666">↕ 2 months</text>
+<line x1="56" y1="552" x2="72" y2="552" stroke="#000"/>
+<rect x="72" y="520" width="287" height="64" rx="8" fill="#fff"/>
+<circle cx="40" cy="552" r="16" fill="#e6e6e6"/>
+<text x="40" y="556" font-size="12" text-anchor="middle" stroke="none" fill="#666">bag</text>
+<text x="88" y="548" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">First trip to Porto Santo</text>
+<text x="88" y="568" font-size="12" text-anchor="start" stroke="none" fill="#666">2 Oct 2020 · 6 years 1 month ago</text>
+<text x="343" y="557" font-size="20" text-anchor="middle" stroke="none" fill="#000">›</text>
+<line x1="0" y1="748" x2="375" y2="748" stroke="#000"/>
+<rect x="9.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="37.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="37.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Today</text>
+<rect x="84.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="112.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="112.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Calendar</text>
+<rect x="159.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="187.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="187.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Lists</text>
+<rect x="234.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="262.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="262.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Home</text>
+<rect x="309.5" y="756" width="56" height="32" rx="16" fill="#000"/>
+<text x="337.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#fff">▫</text>
+<text x="337.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#000">Dates</text>
+<g><circle cx="8" cy="140" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="144" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">1</text></g>
+<g><circle cx="8" cy="216" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="220" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">2</text></g>
+<g><circle cx="8" cy="352" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="356" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">3</text></g>
+<g><circle cx="8" cy="404" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="408" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">4</text></g>
+</svg>

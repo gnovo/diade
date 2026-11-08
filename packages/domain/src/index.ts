@@ -5,6 +5,7 @@
 export * from './datetime';
 export * from './externalCalendar';
 export * from './importantDates';
+export * from './importantDateTimeline';
 export * from './ingredientAisles';
 export * from './ingredientCatalog';
 export * from './ingredientDictionary';
