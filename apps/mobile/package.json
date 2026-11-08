@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "expo start",
+    "start": "op run --env-file=.env.local.tpl -- expo start",
     "android": "expo run:android",
     "android:dev": "bash scripts/run-android-dev.sh",
     "android:dev:local": "bash scripts/run-android-dev.sh --local",
