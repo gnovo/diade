@@ -16,5 +16,26 @@
   "preview_urls": false,
   "observability": {
     "enabled": true
+  },
+  // Development environment: `wrangler deploy --env dev`. It is a separate Worker with its own
+  // secrets (set with `wrangler secret put --env dev`), pointed at the Neon `dev` branch, and has no
+  // cron, so it never syncs anything on its own. A plain `wrangler deploy` still deploys production.
+  "env": {
+    "dev": {
+      "name": "diade-api-dev",
+      "vars": {
+        "ENVIRONMENT": "development",
+        "BETTER_AUTH_URL": "https://diade-api-dev.diade.workers.dev"
+      },
+      "triggers": {
+        "crons": []
+      },
+      "upload_source_maps": true,
+      "workers_dev": true,
+      "preview_urls": false,
+      "observability": {
+        "enabled": true
+      }
+    }
   }
 }

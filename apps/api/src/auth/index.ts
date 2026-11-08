@@ -7,6 +7,8 @@ import * as schema from '../db/schema';
 
 /** Native app deep-link scheme (apps/mobile/app.json `scheme`). Trusted for OAuth callbacks. */
 export const APP_SCHEME = 'diade://';
+/** Scheme of the development build of the app (APP_VARIANT=dev), trusted outside production only. */
+export const DEV_APP_SCHEME = 'diade-dev://';
 /** Expo Go development scheme. Matches any exp:// host because no authority is given. */
 export const EXPO_GO_SCHEME = 'exp://';
 
@@ -29,6 +31,14 @@ export const ALLOWED_EMAILS: readonly string[] = [
 
 export function isAllowedEmail(email: string | null | undefined): boolean {
   return !!email && ALLOWED_EMAILS.includes(email.trim().toLowerCase());
+}
+
+/**
+ * Where Better Auth may send the browser back to after Google sign-in. Production trusts only the
+ * release app's scheme, so a development build can never be used to complete a production sign-in.
+ */
+export function trustedOriginsFor(env: Pick<AuthEnv, 'ENVIRONMENT'>): string[] {
+  return env.ENVIRONMENT === 'production' ? [APP_SCHEME] : [APP_SCHEME, DEV_APP_SCHEME, EXPO_GO_SCHEME];
 }
 
 export function createAuth(db: DbClient, env: AuthEnv) {
@@ -60,7 +70,7 @@ export function createAuth(db: DbClient, env: AuthEnv) {
     emailAndPassword: { enabled: false },
     // Expo Go returns to exp://<dev-server>. The plugin only trusts that under NODE_ENV=development,
     // which Workers do not set, so trust it explicitly outside production.
-    trustedOrigins: [APP_SCHEME, ...(env.ENVIRONMENT === 'production' ? [] : [EXPO_GO_SCHEME])],
+    trustedOrigins: trustedOriginsFor(env),
     // Google OAuth tokens (including the refresh token used for Calendar sync) are encrypted
     // at rest with BETTER_AUTH_SECRET. calendar/tokens.ts decrypts them the same way.
     account: { encryptOAuthTokens: true },
