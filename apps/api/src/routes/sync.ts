@@ -405,6 +405,7 @@ async function applyMutation(
           name: d.name,
           servings: d.servings ?? 4,
           type: d.type ?? null,
+          nutrition: d.nutrition ?? null,
           notes: d.notes ?? null,
           ingredients: d.ingredients ?? [],
           createdAt: now,
@@ -421,6 +422,7 @@ async function applyMutation(
       if (d.name !== undefined) changes.name = d.name;
       if (d.servings !== undefined) changes.servings = d.servings;
       if (d.type !== undefined) changes.type = d.type;
+      if (d.nutrition !== undefined) changes.nutrition = d.nutrition;
       if (d.notes !== undefined) changes.notes = d.notes;
       if (d.ingredients !== undefined) changes.ingredients = d.ingredients;
       await db.update(recipes).set(changes).where(where);
@@ -442,6 +444,9 @@ async function applyMutation(
             aliases: d.aliases ?? [],
             mergedIntoId: d.mergedIntoId ?? null,
             staple: d.staple ?? null,
+            kcalPer100g: d.kcalPer100g ?? null,
+            proteinPer100g: d.proteinPer100g ?? null,
+            gramsPerUnit: d.gramsPerUnit ?? null,
             createdAt: now,
             updatedAt: now,
           })
@@ -458,6 +463,9 @@ async function applyMutation(
       if (d.aliases !== undefined) changes.aliases = d.aliases;
       if (d.mergedIntoId !== undefined) changes.mergedIntoId = d.mergedIntoId;
       if (d.staple !== undefined) changes.staple = d.staple;
+      if (d.kcalPer100g !== undefined) changes.kcalPer100g = d.kcalPer100g;
+      if (d.proteinPer100g !== undefined) changes.proteinPer100g = d.proteinPer100g;
+      if (d.gramsPerUnit !== undefined) changes.gramsPerUnit = d.gramsPerUnit;
       await db.update(ingredients).set(changes).where(where);
       return;
     }

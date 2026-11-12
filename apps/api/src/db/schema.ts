@@ -2,6 +2,7 @@ import type {
   GroceryContribution,
   MealPlanRecipe,
   RecipeIngredient,
+  RecipeNutritionOverride,
   RecipeType,
 } from '@diade/domain';
 import { sql } from 'drizzle-orm';
@@ -195,6 +196,8 @@ export const recipes = pgTable('recipes', {
   type: text('type').$type<RecipeType>(),
   notes: text('notes'),
   ingredients: jsonb('ingredients').$type<RecipeIngredient[]>().notNull().default(sql`'[]'::jsonb`),
+  /** Per-serving kcal and protein a member typed in; null when the ingredients decide. */
+  nutrition: jsonb('nutrition').$type<RecipeNutritionOverride>(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   deletedAt: timestamp('deleted_at'),
@@ -224,6 +227,10 @@ export const ingredients = pgTable(
     mergedIntoId: uuid('merged_into_id'),
     /** The household's own call on whether it is a pantry staple; null means it has not decided (recipe lines decide). */
     staple: boolean('staple'),
+    /** The household's own values; null where the built-in table decides (see ingredientNutrition in @diade/domain). */
+    kcalPer100g: doublePrecision('kcal_per_100g'),
+    proteinPer100g: doublePrecision('protein_per_100g'),
+    gramsPerUnit: doublePrecision('grams_per_unit'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
     deletedAt: timestamp('deleted_at'),

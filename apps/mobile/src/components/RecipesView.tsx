@@ -1,22 +1,29 @@
 import {
   formatAmount,
   formatRecipeMarkdown,
+  type IngredientResolver,
+  isHighProtein,
+  type Macros,
   normalizeIngredientName,
   parseRecipeNotes,
   RECIPE_TYPES,
   type Recipe,
   type RecipeIngredient,
   type RecipeType,
+  recipeNutrition,
 } from '@diade/domain';
+import type { TFunction } from '@diade/i18n';
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, BackHandler, Linking, Pressable, Share, Text, View } from 'react-native';
 import { deleteRecord } from '../data/repository';
+import { useIngredientCatalog } from '../data/useIngredientCatalog';
 import { Icon, type IconName, useColor } from '../design';
 import { BottomSheet } from './BottomSheet';
 import { CookingView } from './CookingView';
 import { FilterChips } from './FilterChips';
+import { RecipeNutritionCard } from './NutritionViews';
 import { decimalFor } from './RecipeForm';
 import { Button, Card, EmptyState, ScreenScaffold, SectionLabel, TextField } from './ui';
 
@@ -24,7 +31,10 @@ const IngredientLine: React.FC<{
   ingredient: RecipeIngredient;
   first: boolean;
   decimal: string;
-}> = ({ ingredient, first, decimal }) => {
+  /** The line's calories for the amount written: a number, null when unknown, absent when not measured. */
+  kcal?: Macros | null;
+}> = ({ ingredient, first, decimal, kcal }) => {
+  const { t } = useTranslation();
   const amount = formatAmount(ingredient.quantity, ingredient.unit, decimal);
   return (
     <View>
@@ -32,10 +42,24 @@ const IngredientLine: React.FC<{
       <View className="flex-row items-center min-h-[44px]">
         <Text className="flex-1 text-sm font-medium text-ink mr-2">{ingredient.name}</Text>
         {amount ? <Text className="text-sm text-ink-muted">{amount}</Text> : null}
+        {kcal !== undefined ? (
+          <Text className="w-20 text-xs text-ink-muted text-right">
+            {kcal ? t('recipes.nutrition.lineKcal', { kcal: kcal.kcal }) : '—'}
+          </Text>
+        ) : null}
       </View>
     </View>
   );
 };
+
+/** What a library card says about a recipe after its type: calories and protein when all of it is known, else its size. */
+function cardMeta(recipe: Recipe, resolver: IngredientResolver, t: TFunction): string {
+  const type = recipe.type ? `${t(`recipes.types.${recipe.type}`)} · ` : '';
+  const nutrition = recipeNutrition(recipe, resolver);
+  const macros = nutrition.complete ? nutrition.perServing : null;
+  if (macros) return type + t('recipes.macros', { kcal: macros.kcal, protein: macros.protein });
+  return `${type}${t('recipes.ingredients', { count: recipe.ingredients.length })} · ${t('recipes.servings', { count: recipe.servings })}`;
+}
 
 /** A source that is a single web address opens in the browser; anything else is just text. */
 const isLink = (source: string): boolean => /^https?:\/\/\S+$/i.test(source);
@@ -78,6 +102,10 @@ export const RecipeDetailScreen: React.FC<{
   const decimal = decimalFor(i18n.language);
   const fresh = recipe.ingredients.filter((row) => !row.staple);
   const pantry = recipe.ingredients.filter((row) => row.staple);
+  const { resolver } = useIngredientCatalog();
+  const nutrition = useMemo(() => recipeNutrition(recipe, resolver), [recipe, resolver]);
+  const lineKcal = (row: RecipeIngredient) =>
+    row.id in nutrition.lines ? nutrition.lines[row.id] : undefined;
 
   // The system back button closes the recipe before it leaves the tab, as it does for a list.
   useEffect(() => {
@@ -146,6 +174,7 @@ export const RecipeDetailScreen: React.FC<{
         </Pressable>
       }
     >
+      <RecipeNutritionCard recipe={recipe} nutrition={nutrition} />
       <Card>
         <SectionLabel
           right={
@@ -160,14 +189,26 @@ export const RecipeDetailScreen: React.FC<{
           <EmptyState message={t('recipes.noIngredients')} />
         ) : null}
         {fresh.map((row, index) => (
-          <IngredientLine key={row.id} ingredient={row} first={index === 0} decimal={decimal} />
+          <IngredientLine
+            key={row.id}
+            ingredient={row}
+            first={index === 0}
+            decimal={decimal}
+            kcal={lineKcal(row)}
+          />
         ))}
         {pantry.length > 0 ? (
           <View className={fresh.length > 0 ? 'mt-4 pt-4 border-t border-border' : ''}>
             <SectionLabel>{t('recipes.pantryHeading')}</SectionLabel>
             <Text className="text-sm leading-5 text-ink-muted mb-1">{t('recipes.pantryHint')}</Text>
             {pantry.map((row, index) => (
-              <IngredientLine key={row.id} ingredient={row} first={index === 0} decimal={decimal} />
+              <IngredientLine
+                key={row.id}
+                ingredient={row}
+                first={index === 0}
+                decimal={decimal}
+                kcal={lineKcal(row)}
+              />
             ))}
           </View>
         ) : null}
@@ -247,19 +288,41 @@ export const RecipesLibrary: React.FC<{
   onOpenIngredients: () => void;
 }> = ({ recipes, onOpen, onOpenIngredients }) => {
   const { t } = useTranslation();
+  const { resolver } = useIngredientCatalog();
   const [query, setQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState<RecipeType | 'all'>('all');
+  const [typeFilter, setTypeFilter] = useState<RecipeType | 'all' | 'highProtein'>('all');
 
   // Only the types some recipe has get a chip, and none show until one does: no empty filters.
   const usedTypes = useMemo(
     () => RECIPE_TYPES.filter((type) => recipes.some((r) => r.type === type)),
     [recipes],
   );
-  const activeType = typeFilter !== 'all' && usedTypes.includes(typeFilter) ? typeFilter : 'all';
+  const highProtein = useMemo(
+    () =>
+      new Set(
+        recipes
+          .filter((r) => {
+            const nutrition = recipeNutrition(r, resolver);
+            return nutrition.complete && isHighProtein(nutrition.perServing);
+          })
+          .map((r) => r.id),
+      ),
+    [recipes, resolver],
+  );
+  const activeType =
+    (typeFilter === 'highProtein' && highProtein.size > 0) ||
+    (typeFilter !== 'all' && typeFilter !== 'highProtein' && usedTypes.includes(typeFilter))
+      ? typeFilter
+      : 'all';
 
   const matches = useMemo(() => {
     const needle = normalizeIngredientName(query);
-    const ofType = activeType === 'all' ? recipes : recipes.filter((r) => r.type === activeType);
+    const ofType =
+      activeType === 'all'
+        ? recipes
+        : activeType === 'highProtein'
+          ? recipes.filter((r) => highProtein.has(r.id))
+          : recipes.filter((r) => r.type === activeType);
     if (!needle) return ofType;
     // Searching "salmon" also finds the recipes that use it, not only ones named after it.
     return ofType.filter(
@@ -267,7 +330,7 @@ export const RecipesLibrary: React.FC<{
         normalizeIngredientName(r.name).includes(needle) ||
         r.ingredients.some((row) => normalizeIngredientName(row.name).includes(needle)),
     );
-  }, [recipes, query, activeType]);
+  }, [recipes, query, activeType, highProtein]);
 
   if (recipes.length === 0) {
     return (
@@ -301,13 +364,16 @@ export const RecipesLibrary: React.FC<{
           clearButtonMode="while-editing"
         />
       </View>
-      {usedTypes.length > 0 ? (
+      {usedTypes.length > 0 || highProtein.size > 0 ? (
         <FilterChips
           label={t('recipes.typeFilter')}
           value={activeType}
           onChange={setTypeFilter}
           options={[
             { value: 'all', label: t('recipes.typeAll') },
+            ...(highProtein.size > 0
+              ? [{ value: 'highProtein' as const, label: t('recipes.highProtein') }]
+              : []),
             ...usedTypes.map((type) => ({ value: type, label: t(`recipes.types.${type}`) })),
           ]}
         />
@@ -330,12 +396,7 @@ export const RecipesLibrary: React.FC<{
             </View>
             <View className="flex-1">
               <Text className="text-base font-semibold text-ink">{recipe.name}</Text>
-              <Text className="text-sm text-ink-muted mt-0.5">
-                {recipe.type ? `${t(`recipes.types.${recipe.type}`)} · ` : ''}
-                {t('recipes.ingredients', { count: recipe.ingredients.length })}
-                {' · '}
-                {t('recipes.servings', { count: recipe.servings })}
-              </Text>
+              <Text className="text-sm text-ink-muted mt-0.5">{cardMeta(recipe, resolver, t)}</Text>
             </View>
             <Icon name="chevron-right" size={18} />
           </View>

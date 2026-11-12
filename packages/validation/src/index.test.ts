@@ -473,6 +473,31 @@ describe('ingredient catalog sync payloads', () => {
     expect(parseSyncPayload('ingredients', 'UPDATE', { staple: 'yes' }).success).toBe(false);
   });
 
+  it('accepts household nutrition values in range, or null', () => {
+    const ok = { kcalPer100g: 143, proteinPer100g: 12.6, gramsPerUnit: 55 };
+    expect(parseSyncPayload('ingredients', 'UPDATE', ok).success).toBe(true);
+    expect(
+      parseSyncPayload('ingredients', 'UPDATE', {
+        kcalPer100g: null,
+        proteinPer100g: null,
+        gramsPerUnit: null,
+      }).success,
+    ).toBe(true);
+    expect(parseSyncPayload('ingredients', 'UPDATE', { kcalPer100g: 950 }).success).toBe(false);
+    expect(parseSyncPayload('ingredients', 'UPDATE', { proteinPer100g: -1 }).success).toBe(false);
+    expect(parseSyncPayload('ingredients', 'UPDATE', { gramsPerUnit: 0 }).success).toBe(false);
+  });
+
+  it("accepts a recipe's own per-serving values, or null to hand back to the ingredients", () => {
+    const nutrition = { kcal: 520, protein: 38 };
+    expect(parseSyncPayload('recipes', 'INSERT', { name: 'Bowl', nutrition }).success).toBe(true);
+    expect(parseSyncPayload('recipes', 'UPDATE', { nutrition: null }).success).toBe(true);
+    expect(parseSyncPayload('recipes', 'UPDATE', { nutrition: { kcal: 520 } }).success).toBe(false);
+    expect(
+      parseSyncPayload('recipes', 'UPDATE', { nutrition: { ...nutrition, fat: 10 } }).success,
+    ).toBe(false);
+  });
+
   it('lets an update change the name, aliases or merge, but not the match key', () => {
     expect(parseSyncPayload('ingredients', 'UPDATE', { name: 'Beef' }).success).toBe(true);
     expect(

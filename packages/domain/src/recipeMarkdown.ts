@@ -31,6 +31,9 @@ const MAX_NAME = 120;
 const MAX_NOTES = 5000;
 const MAX_INGREDIENTS = 100;
 const MAX_LINE = 5000;
+/** Per serving: what the API accepts for a recipe's own values. */
+const MAX_KCAL = 5000;
+const MAX_PROTEIN = 500;
 
 /** Flags that leave nothing usable to import: such a line is skipped unless it is fixed. */
 const UNUSABLE: IngredientFlag[] = ['noName', 'outOfRange'];
@@ -55,13 +58,15 @@ export type DraftWarning =
 export interface DraftRecipe {
   name: string;
   servings: number;
+  /** Per-serving `kcal:` and `protein:`, when the note gives both. */
+  nutrition: { kcal: number; protein: number } | null;
   notes: string | null;
   lines: DraftLine[];
   warnings: DraftWarning[];
 }
 
 /** What `createRecipeSchema` takes. */
-export type RecipeInput = Pick<Recipe, 'name' | 'servings' | 'notes' | 'ingredients'>;
+export type RecipeInput = Pick<Recipe, 'name' | 'servings' | 'notes' | 'ingredients' | 'nutrition'>;
 
 // --- Reading ---
 
@@ -70,6 +75,8 @@ const HEADING = /^(#{2,6})\s+(.*)$/;
 const FENCE = /^\s*(?:```|~~~)/;
 const BULLET_OR_CHECKBOX = /^\s*(?:(?:[-*+•]|\d+[.)])\s+)?(?:\[[ xX]\]\s*)?/;
 const META = /^\s*(servings?|serves|doses?|por[cç][õo]es|por[cç][aã]o|tags?)\s*:\s*(.*)$/i;
+/** Per-serving nutrition: `kcal: 520`, `calorias: 520`, `protein: 38 g`, `proteína: 38`. */
+const NUTRITION_META = /^\s*(kcal|calories|calorias|protein|proteins|prote[ií]nas?)\s*:\s*(.*)$/i;
 const INGREDIENTS_TITLE = /\bingredient(?:e)?s?\b/;
 /** A `# ` line inside notes is written `\\# ` so it does not start another recipe. */
 const ESCAPED_H1 = /^(\\+)(#\s)/;
@@ -101,6 +108,12 @@ function closingHashesRemoved(text: string): string {
   return end < text.length && end > 0 && text[end - 1] === ' '
     ? text.slice(0, end).trimEnd()
     : text;
+}
+
+/** A non-negative number, with a decimal point or comma, or null when the value has none. */
+function parseAmount(value: string): number | null {
+  const found = /\d+(?:[.,]\d+)?/.exec(value);
+  return found ? Number(found[0].replace(',', '.')) : null;
 }
 
 function parseServings(value: string): number {
@@ -158,6 +171,8 @@ function splitRecipes(lines: string[]): Chunk[] {
 
 function parseChunk(chunk: Chunk, newId: () => string): DraftRecipe {
   let servings = DEFAULT_SERVINGS;
+  let kcal: number | null = null;
+  let protein: number | null = null;
   const notes: string[] = [];
   const lines: DraftLine[] = [];
   let section: 'body' | 'ingredients' | 'other' | 'verbatim' = 'body';
@@ -218,6 +233,13 @@ function parseChunk(chunk: Chunk, newId: () => string): DraftRecipe {
       if (!/^tags?$/i.test(meta[1])) servings = parseServings(meta[2]);
       continue;
     }
+    const macro = section === 'body' ? NUTRITION_META.exec(line) : null;
+    if (macro) {
+      const amount = parseAmount(macro[2]);
+      if (/^(kcal|calories|calorias)$/i.test(macro[1])) kcal = amount;
+      else protein = amount;
+      continue;
+    }
     notes.push(line);
   }
 
@@ -237,7 +259,11 @@ function parseChunk(chunk: Chunk, newId: () => string): DraftRecipe {
     warnings.push('ingredientsTruncated');
   }
 
-  return { name, servings, notes: noteText || null, lines, warnings };
+  const nutrition =
+    kcal !== null && protein !== null && kcal <= MAX_KCAL && protein <= MAX_PROTEIN
+      ? { kcal, protein }
+      : null;
+  return { name, servings, nutrition, notes: noteText || null, lines, warnings };
 }
 
 /** Obsidian front matter at the top of a note: only `servings` / `title` are read, the rest is dropped. */
@@ -329,7 +355,10 @@ function ingredientLine(ingredient: RecipeIngredient): string {
  * Amounts stay as stored (1500 g, not 1.5 kg). Steps, notes and source go last, as the sections of `recipeSections`, and read back the same.
  */
 export function formatRecipeMarkdown(recipe: RecipeInput): string {
-  const out = [`# ${recipe.name}`, `servings: ${recipe.servings}`, '', '## Ingredients'];
+  const out = [`# ${recipe.name}`, `servings: ${recipe.servings}`];
+  if (recipe.nutrition)
+    out.push(`kcal: ${recipe.nutrition.kcal}`, `protein: ${recipe.nutrition.protein}`);
+  out.push('', '## Ingredients');
   for (const ingredient of recipe.ingredients) out.push(ingredientLine(ingredient));
   // Steps, notes and source, in the sections the app edits; old free text is written under "## Notes".
   const tail = formatRecipeNotes(parseRecipeNotes(recipe.notes));
@@ -351,6 +380,8 @@ export function draftToRecipeInput(draft: DraftRecipe): RecipeInput {
   return {
     name: draft.name,
     servings: draft.servings,
+    // Only when the note gave values: a recipe without them is the same as before nutrition existed.
+    ...(draft.nutrition ? { nutrition: draft.nutrition } : {}),
     notes: draft.notes,
     ingredients: draft.lines.filter(isImportable).map((line) => ({
       id: line.id,

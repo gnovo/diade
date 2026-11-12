@@ -210,10 +210,17 @@ const servingsSchema = z.number().int().min(MIN_SERVINGS).max(MAX_SERVINGS);
 
 const recipeTypeSchema = z.enum(RECIPE_TYPES).nullable();
 
+/** A recipe's own per-serving values; null hands the numbers back to the ingredients. */
+const recipeNutritionSchema = z
+  .object({ kcal: z.number().min(0).max(5000), protein: z.number().min(0).max(500) })
+  .strict()
+  .nullable();
+
 export const createRecipeSchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(120),
   servings: servingsSchema.default(DEFAULT_SERVINGS),
   type: recipeTypeSchema.optional(),
+  nutrition: recipeNutritionSchema.optional(),
   notes: z.string().max(5000).nullable().optional(),
   ingredients: recipeIngredientsSchema.default([]),
 });
@@ -222,6 +229,7 @@ export const updateRecipeSchema = z.object({
   name: z.string().trim().min(1).max(120).optional(),
   servings: servingsSchema.optional(),
   type: recipeTypeSchema.optional(),
+  nutrition: recipeNutritionSchema.optional(),
   notes: z.string().max(5000).nullable().optional(),
   ingredients: recipeIngredientsSchema.optional(),
 });
@@ -235,12 +243,20 @@ export const updateRecipeSchema = z.object({
 const ingredientNameSchema = z.string().trim().min(1, 'Name is required').max(120);
 const ingredientAliasesSchema = z.array(z.string().trim().min(1).max(120)).max(50);
 
+/** The household's values per 100 g and per unit; null takes one back to the built-in table. */
+const ingredientNutritionFields = {
+  kcalPer100g: z.number().min(0).max(900).nullable().optional(),
+  proteinPer100g: z.number().min(0).max(100).nullable().optional(),
+  gramsPerUnit: z.number().gt(0).max(5000).nullable().optional(),
+};
+
 export const createIngredientSchema = z.object({
   name: ingredientNameSchema,
   matchKey: z.string().trim().min(1).max(120),
   aliases: ingredientAliasesSchema.default([]),
   mergedIntoId: z.string().uuid().nullable().optional(),
   staple: z.boolean().nullable().optional(),
+  ...ingredientNutritionFields,
 });
 
 export const updateIngredientSchema = z.object({
@@ -248,6 +264,7 @@ export const updateIngredientSchema = z.object({
   aliases: ingredientAliasesSchema.optional(),
   mergedIntoId: z.string().uuid().nullable().optional(),
   staple: z.boolean().nullable().optional(),
+  ...ingredientNutritionFields,
 });
 
 // --- Meal Plans Schemas ---

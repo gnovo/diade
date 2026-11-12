@@ -40,6 +40,8 @@ export interface Recipe {
   type: RecipeType | null;
   notes: string | null;
   ingredients: RecipeIngredient[];
+  /** Per-serving calories and protein a member typed in; null (or absent) when the ingredients decide. */
+  nutrition?: { kcal: number; protein: number } | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -416,7 +418,8 @@ export function assessIngredientLine(input: string): AssessedIngredient {
 // --- Showing a quantity ---
 
 /** 1.5 → "1.5", 2 → "2", 0.333 → "0.33". `decimal` is "," for Portuguese. */
-function formatNumber(value: number, decimal: string): string {
+/** A number with at most two decimals, written with the given decimal mark ("," in Portuguese). */
+export function formatNumber(value: number, decimal: string): string {
   const text = String(Math.round(value * 100) / 100);
   return decimal === '.' ? text : text.replace('.', decimal);
 }

@@ -12,6 +12,7 @@ export * from './ingredientDictionary';
 export * from './ingredientKeys';
 export * from './ingredientMerges';
 export * from './ingredientNames';
+export * from './ingredientNutrition';
 export * from './listTemplates';
 export * from './mealPlan';
 export * from './recipeMarkdown';
