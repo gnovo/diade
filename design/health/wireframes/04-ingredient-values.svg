@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812" font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
+<!-- 04 Ingredient values on the catalog · mobile 375x812 · 8px grid -->
+<rect x="0" y="0" width="375" height="812" fill="#fff"/>
+<text x="16" y="32" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">9:41</text>
+<rect x="311" y="22" width="32" height="12" rx="3" fill="#fff"/>
+<text x="16" y="72" font-size="14" text-anchor="start" stroke="none" fill="#000">‹ Ingredients</text>
+<text x="16" y="96" font-size="28" text-anchor="start" stroke="none" fill="#000" font-weight="700">Ovo</text>
+<rect x="16" y="120" width="343" height="72" rx="8" fill="#fff"/>
+<text x="32" y="146" font-size="12" text-anchor="start" stroke="none" fill="#666">SOURCE</text>
+<text x="32" y="170" font-size="14" text-anchor="start" stroke="none" fill="#000">Built-in (INSA) · used in 4 recipes</text>
+<text x="16" y="224" font-size="12" text-anchor="start" stroke="none" fill="#666">Calories per 100 g</text>
+<rect x="16" y="232" width="343" height="48" rx="8" fill="#fff"/>
+<text x="28" y="261.0" font-size="14" text-anchor="start" stroke="none" fill="#000">143</text>
+<text x="16" y="304" font-size="12" text-anchor="start" stroke="none" fill="#666">Protein per 100 g</text>
+<rect x="16" y="312" width="343" height="48" rx="8" fill="#fff"/>
+<text x="28" y="341.0" font-size="14" text-anchor="start" stroke="none" fill="#000">12.6</text>
+<text x="16" y="384" font-size="12" text-anchor="start" stroke="none" fill="#666">Grams per unit (for "2 ovos")</text>
+<rect x="16" y="392" width="343" height="48" rx="8" fill="#fff"/>
+<text x="28" y="421.0" font-size="14" text-anchor="start" stroke="none" fill="#000">55</text>
+<text x="16" y="472" font-size="12" text-anchor="start" stroke="none" fill="#666">Changing a value saves it for the household and</text>
+<text x="16" y="488" font-size="12" text-anchor="start" stroke="none" fill="#666">updates every recipe that uses this ingredient.</text>
+<rect x="16" y="512" width="343" height="48" rx="8" fill="#000"/>
+<text x="187.5" y="541.0" font-size="14" text-anchor="middle" stroke="none" fill="#fff" font-weight="700">Save</text>
+<text x="187.5" y="600" font-size="14" text-anchor="middle" stroke="none" fill="#000" font-weight="700">Reset to built-in</text>
+<line x1="0" y1="748" x2="375" y2="748" stroke="#000"/>
+<rect x="9.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="37.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="37.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Today</text>
+<rect x="84.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="112.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="112.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Calendar</text>
+<rect x="159.5" y="756" width="56" height="32" rx="16" fill="#000"/>
+<text x="187.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#fff">▫</text>
+<text x="187.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#000">Lists</text>
+<rect x="234.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="262.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="262.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Home</text>
+<rect x="309.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="337.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="337.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Dates</text>
+<g><circle cx="8" cy="170" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="174" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">1</text></g>
+<g><circle cx="8" cy="256" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="260" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">2</text></g>
+<g><circle cx="8" cy="416" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="420" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">3</text></g>
+<g><circle cx="8" cy="600" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="604" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">4</text></g>
+</svg>

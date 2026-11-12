@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812" font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
+<!-- 10 A training block: done, or let it go · mobile 375x812 · 8px grid -->
+<rect x="0" y="0" width="375" height="812" fill="#fff"/>
+<g opacity="0.25">
+<text x="16" y="32" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">9:41</text>
+<rect x="311" y="22" width="32" height="12" rx="3" fill="#fff"/>
+<text x="16" y="96" font-size="28" text-anchor="start" stroke="none" fill="#000" font-weight="700">Calendar</text>
+<circle cx="335" cy="80" r="24" fill="#000"/>
+<line x1="327" y1="80" x2="343" y2="80" stroke="#fff" stroke-width="2.5"/>
+<line x1="335" y1="72" x2="335" y2="88" stroke="#fff" stroke-width="2.5"/>
+<text x="16" y="136" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Wed 18 Nov · week 2 of the cycle</text>
+<text x="16" y="160" font-size="12" text-anchor="start" stroke="none" fill="#666">Strength 1 of 2 · Bodyweight 1 of 3</text>
+<text x="16" y="196" font-size="12" text-anchor="start" stroke="none" fill="#666">07</text>
+<line x1="48" y1="192" x2="359" y2="192" stroke="#e6e6e6"/>
+<text x="16" y="228" font-size="12" text-anchor="start" stroke="none" fill="#666">08</text>
+<line x1="48" y1="224" x2="359" y2="224" stroke="#e6e6e6"/>
+<text x="16" y="260" font-size="12" text-anchor="start" stroke="none" fill="#666">09</text>
+<line x1="48" y1="256" x2="359" y2="256" stroke="#e6e6e6"/>
+<text x="16" y="292" font-size="12" text-anchor="start" stroke="none" fill="#666">10</text>
+<line x1="48" y1="288" x2="359" y2="288" stroke="#e6e6e6"/>
+<text x="16" y="324" font-size="12" text-anchor="start" stroke="none" fill="#666">11</text>
+<line x1="48" y1="320" x2="359" y2="320" stroke="#e6e6e6"/>
+<text x="16" y="356" font-size="12" text-anchor="start" stroke="none" fill="#666">12</text>
+<line x1="48" y1="352" x2="359" y2="352" stroke="#e6e6e6"/>
+<text x="16" y="388" font-size="12" text-anchor="start" stroke="none" fill="#666">13</text>
+<line x1="48" y1="384" x2="359" y2="384" stroke="#e6e6e6"/>
+<text x="16" y="420" font-size="12" text-anchor="start" stroke="none" fill="#666">14</text>
+<line x1="48" y1="416" x2="359" y2="416" stroke="#e6e6e6"/>
+<text x="16" y="452" font-size="12" text-anchor="start" stroke="none" fill="#666">15</text>
+<line x1="48" y1="448" x2="359" y2="448" stroke="#e6e6e6"/>
+<text x="16" y="484" font-size="12" text-anchor="start" stroke="none" fill="#666">16</text>
+<line x1="48" y1="480" x2="359" y2="480" stroke="#e6e6e6"/>
+<text x="16" y="516" font-size="12" text-anchor="start" stroke="none" fill="#666">17</text>
+<line x1="48" y1="512" x2="359" y2="512" stroke="#e6e6e6"/>
+<text x="16" y="548" font-size="12" text-anchor="start" stroke="none" fill="#666">18</text>
+<line x1="48" y1="544" x2="359" y2="544" stroke="#e6e6e6"/>
+<text x="16" y="580" font-size="12" text-anchor="start" stroke="none" fill="#666">19</text>
+<line x1="48" y1="576" x2="359" y2="576" stroke="#e6e6e6"/>
+<text x="16" y="612" font-size="12" text-anchor="start" stroke="none" fill="#666">20</text>
+<line x1="48" y1="608" x2="359" y2="608" stroke="#e6e6e6"/>
+<text x="16" y="644" font-size="12" text-anchor="start" stroke="none" fill="#666">21</text>
+<line x1="48" y1="640" x2="359" y2="640" stroke="#e6e6e6"/>
+<text x="16" y="676" font-size="12" text-anchor="start" stroke="none" fill="#666">22</text>
+<line x1="48" y1="672" x2="359" y2="672" stroke="#e6e6e6"/>
+<rect x="56" y="194.0" width="303" height="28" rx="6" fill="#e6e6e6" stroke-width="0"/>
+<text x="64" y="212.0" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Dog walk · either of us</text>
+<rect x="56" y="272.0" width="303" height="64.0" rx="6" fill="#fff" stroke-dasharray="6 4"/>
+<text x="64" y="290.0" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Walking pad</text>
+<text x="64" y="304.0" font-size="12" text-anchor="start" stroke="none" fill="#666">30 to 60 min, during calls</text>
+<rect x="56" y="354.0" width="148" height="28" rx="6" fill="#fff" stroke-dasharray="6 4"/>
+<text x="64" y="372.0" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Bodyweight · 20 min</text>
+<rect x="212" y="354.0" width="147" height="28" rx="6" fill="#e6e6e6" stroke-width="0"/>
+<text x="220" y="372.0" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Lunch · or 13:30</text>
+<rect x="56" y="386.0" width="303" height="28" rx="6" fill="#e6e6e6" stroke-width="0"/>
+<text x="64" y="404.0" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Dog walk · either of us</text>
+<rect x="56" y="514.0" width="303" height="28" rx="6" fill="#e6e6e6" stroke-width="0"/>
+<text x="64" y="532.0" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Dog walk · either of us</text>
+<rect x="56" y="432.0" width="303" height="64.0" rx="6" fill="#fff" stroke-dasharray="6 4"/>
+<text x="64" y="450.0" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Walking pad</text>
+<text x="64" y="464.0" font-size="12" text-anchor="start" stroke="none" fill="#666">week 2: QA and waiting</text>
+<text x="56" y="608.0" font-size="12" text-anchor="start" stroke="none" fill="#666">Nothing planned after 19:00</text>
+<rect x="56" y="642.0" width="303" height="28" rx="6" fill="#e6e6e6" stroke-width="0"/>
+<text x="64" y="660.0" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Dog walk · either of us</text>
+<line x1="0" y1="748" x2="375" y2="748" stroke="#000"/>
+<rect x="9.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="37.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="37.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Today</text>
+<rect x="84.5" y="756" width="56" height="32" rx="16" fill="#000"/>
+<text x="112.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#fff">▫</text>
+<text x="112.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#000">Calendar</text>
+<rect x="159.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="187.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="187.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Lists</text>
+<rect x="234.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="262.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="262.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Home</text>
+<rect x="309.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="337.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="337.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Dates</text>
+</g>
+<rect x="0" y="0" width="375" height="812" fill="#000" opacity="0.35" stroke="none"/>
+<rect x="0" y="448" width="375" height="380" rx="16" fill="#fff"/>
+<rect x="168" y="456" width="40" height="4" rx="2" fill="#000"/>
+<text x="187.5" y="488" font-size="14" text-anchor="middle" stroke="none" fill="#000" font-weight="700">Bodyweight and stretching</text>
+<text x="16" y="520" font-size="14" text-anchor="start" stroke="none" fill="#000">Today · 12:00 to 12:30 · 20 min</text>
+<text x="16" y="544" font-size="12" text-anchor="start" stroke="none" fill="#666">10 min bodyweight, 10 min stretching. Counts towards 3.</text>
+<rect x="16" y="568" width="343" height="48" rx="8" fill="#000"/>
+<text x="187.5" y="597.0" font-size="14" text-anchor="middle" stroke="none" fill="#fff" font-weight="700">Mark done</text>
+<rect x="16" y="632" width="343" height="48" rx="8" fill="#fff"/>
+<text x="187.5" y="661.0" font-size="14" text-anchor="middle" stroke="none" fill="#000">Not today</text>
+<text x="16" y="712" font-size="12" text-anchor="start" stroke="none" fill="#666">Not today changes nothing: the goal stays, other</text>
+<text x="16" y="728" font-size="12" text-anchor="start" stroke="none" fill="#666">blocks this week can still meet it.</text>
+<g><circle cx="8" cy="532" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="536" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">1</text></g>
+<g><circle cx="8" cy="592" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="596" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">2</text></g>
+<g><circle cx="8" cy="656" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="660" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">3</text></g>
+</svg>

@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812" font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
+<!-- 01 Recipe detail: per-serving nutrition · mobile 375x812 · 8px grid -->
+<rect x="0" y="0" width="375" height="812" fill="#fff"/>
+<text x="16" y="32" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">9:41</text>
+<rect x="311" y="22" width="32" height="12" rx="3" fill="#fff"/>
+<text x="16" y="72" font-size="14" text-anchor="start" stroke="none" fill="#000">‹ Recipes</text>
+<text x="16" y="96" font-size="28" text-anchor="start" stroke="none" fill="#000" font-weight="700">Bowl de frango e grão</text>
+<circle cx="343" cy="72" r="2" fill="#000"/>
+<circle cx="343" cy="80" r="2" fill="#000"/>
+<circle cx="343" cy="88" r="2" fill="#000"/>
+<rect x="16" y="120" width="343" height="128" rx="8" fill="#fff"/>
+<text x="32" y="146" font-size="12" text-anchor="start" stroke="none" fill="#666">PER SERVING</text>
+<text x="343" y="146" font-size="12" text-anchor="end" stroke="none" fill="#000" font-weight="700">Edit</text>
+<text x="32" y="192" font-size="28" text-anchor="start" stroke="none" fill="#000" font-weight="700">512</text>
+<text x="96" y="192" font-size="14" text-anchor="start" stroke="none" fill="#666">kcal</text>
+<text x="184" y="192" font-size="28" text-anchor="start" stroke="none" fill="#000" font-weight="700">41 g</text>
+<text x="248" y="192" font-size="14" text-anchor="start" stroke="none" fill="#666">protein</text>
+<rect x="32" y="208" width="100" height="24" rx="12" fill="#e6e6e6"/>
+<text x="82.0" y="224" font-size="12" text-anchor="middle" stroke="none" fill="#000">High protein</text>
+<text x="343" y="224" font-size="12" text-anchor="end" stroke="none" fill="#666">100 % of ingredients known</text>
+<rect x="16" y="264" width="343" height="208" rx="8" fill="#fff"/>
+<text x="32" y="290" font-size="12" text-anchor="start" stroke="none" fill="#666">INGREDIENTS</text>
+<text x="343" y="290" font-size="12" text-anchor="end" stroke="none" fill="#666">1 serving</text>
+<text x="32" y="326" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Frango cozido desfiado</text>
+<text x="255" y="326" font-size="14" text-anchor="end" stroke="none" fill="#666">130 g</text>
+<text x="343" y="326" font-size="12" text-anchor="end" stroke="none" fill="#666">215 kcal</text>
+<text x="32" y="358" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Grão-de-bico cozido</text>
+<text x="255" y="358" font-size="14" text-anchor="end" stroke="none" fill="#666">100 g</text>
+<text x="343" y="358" font-size="12" text-anchor="end" stroke="none" fill="#666">139 kcal</text>
+<text x="32" y="390" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Arroz</text>
+<text x="255" y="390" font-size="14" text-anchor="end" stroke="none" fill="#666">40 g</text>
+<text x="343" y="390" font-size="12" text-anchor="end" stroke="none" fill="#666">144 kcal</text>
+<text x="32" y="422" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Pimentos congelados</text>
+<text x="255" y="422" font-size="14" text-anchor="end" stroke="none" fill="#666">100 g</text>
+<text x="343" y="422" font-size="12" text-anchor="end" stroke="none" fill="#666">24 kcal</text>
+<text x="32" y="454" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Paprika, alho, limão</text>
+<text x="255" y="454" font-size="14" text-anchor="end" stroke="none" fill="#666">q.b.</text>
+<text x="343" y="454" font-size="12" text-anchor="end" stroke="none" fill="#666">—</text>
+<rect x="16" y="488" width="343" height="72" rx="8" fill="#fff"/>
+<text x="32" y="514" font-size="12" text-anchor="start" stroke="none" fill="#666">STEPS</text>
+<text x="32" y="538" font-size="14" text-anchor="start" stroke="none" fill="#000">1. Aquecer o frango e o grão.</text>
+<rect x="16" y="576" width="343" height="48" rx="8" fill="#000"/>
+<text x="187.5" y="605.0" font-size="14" text-anchor="middle" stroke="none" fill="#fff" font-weight="700">Start cooking</text>
+<line x1="0" y1="748" x2="375" y2="748" stroke="#000"/>
+<rect x="9.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="37.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="37.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Today</text>
+<rect x="84.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="112.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="112.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Calendar</text>
+<rect x="159.5" y="756" width="56" height="32" rx="16" fill="#000"/>
+<text x="187.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#fff">▫</text>
+<text x="187.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#000">Lists</text>
+<rect x="234.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="262.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="262.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Home</text>
+<rect x="309.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="337.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="337.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Dates</text>
+<g><circle cx="8" cy="146" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="150" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">1</text></g>
+<g><circle cx="8" cy="192" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="196" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">2</text></g>
+<g><circle cx="8" cy="220" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="224" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">3</text></g>
+<g><circle cx="8" cy="326" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="330" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">4</text></g>
+</svg>
