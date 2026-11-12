@@ -506,3 +506,32 @@ describe('per-serving nutrition in markdown', () => {
     });
   });
 });
+
+describe('recipe type in markdown', () => {
+  const read = (text: string) => parseRecipesMarkdown(text, () => 'x')[0];
+  it('reads the type in English or Portuguese, accents or not', () => {
+    expect(read('# A\ntype: snack\n\n## Ingredients\n- 1 egg\n').type).toBe('snack');
+    expect(read('# A\ntipo: Pequeno-almoço\n\n## Ingredientes\n- 1 ovo\n').type).toBe('breakfast');
+    expect(read('# A\ntipo: refeicao\n\n## Ingredientes\n- 1 ovo\n').type).toBe('meal');
+    expect(read('# A\ntipo: Preparação\n\n## Ingredientes\n- 1 ovo\n').type).toBe('prep');
+  });
+
+  it('drops a type it does not know, and keeps it out of the notes', () => {
+    const draft = read('# A\ntype: dessert\n\n## Ingredients\n- 1 egg\n');
+    expect(draft.type).toBeNull();
+    expect(draft.notes).toBeNull();
+    expect(draftToRecipeInput(draft)).not.toHaveProperty('type');
+  });
+
+  it('writes the type back so it survives a round trip', () => {
+    const text = formatRecipeMarkdown({
+      name: 'Bowl',
+      servings: 1,
+      type: 'prep',
+      notes: null,
+      ingredients: [],
+    });
+    expect(text).toContain('servings: 1\ntype: prep\n');
+    expect(draftToRecipeInput(read(text)).type).toBe('prep');
+  });
+});
