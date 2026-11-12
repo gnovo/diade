@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1464" height="480" viewBox="0 0 1464 480" font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
+<!-- Flow: six PRs, left to right · mobile 375x812 · 8px grid -->
+<rect x="0" y="0" width="1464" height="480" fill="#fff"/>
+<rect x="24" y="48" width="216" height="360" rx="8" fill="#e6e6e6"/>
+<text x="40" y="80" font-size="12" text-anchor="start" stroke="none" fill="#666">H1</text>
+<text x="40" y="112" font-size="20" text-anchor="start" stroke="none" fill="#000" font-weight="700">Recipe nutrition</text>
+<rect x="40" y="136" width="184" height="40" rx="6" fill="#fff"/>
+<text x="56" y="161" font-size="14" text-anchor="start" stroke="none" fill="#000">01 Per serving</text>
+<rect x="40" y="192" width="184" height="40" rx="6" fill="#fff"/>
+<text x="56" y="217" font-size="14" text-anchor="start" stroke="none" fill="#000">02 Library + filter</text>
+<rect x="40" y="248" width="184" height="40" rx="6" fill="#fff"/>
+<text x="56" y="273" font-size="14" text-anchor="start" stroke="none" fill="#000">03 Override</text>
+<rect x="40" y="304" width="184" height="40" rx="6" fill="#fff"/>
+<text x="56" y="329" font-size="14" text-anchor="start" stroke="none" fill="#000">04 Ingredient values</text>
+<line x1="240" y1="228" x2="264" y2="228" stroke="#000"/>
+<rect x="264" y="48" width="216" height="360" rx="8" fill="#e6e6e6"/>
+<text x="280" y="80" font-size="12" text-anchor="start" stroke="none" fill="#666">H2</text>
+<text x="280" y="112" font-size="20" text-anchor="start" stroke="none" fill="#000" font-weight="700">Prod content</text>
+<rect x="280" y="136" width="184" height="40" rx="6" fill="#fff"/>
+<text x="296" y="161" font-size="14" text-anchor="start" stroke="none" fill="#000">64 ingredients</text>
+<rect x="280" y="192" width="184" height="40" rx="6" fill="#fff"/>
+<text x="296" y="217" font-size="14" text-anchor="start" stroke="none" fill="#000">15 new recipes</text>
+<rect x="280" y="248" width="184" height="40" rx="6" fill="#fff"/>
+<text x="296" y="273" font-size="14" text-anchor="start" stroke="none" fill="#000">Vault recipes, lighter</text>
+<line x1="480" y1="228" x2="504" y2="228" stroke="#000"/>
+<rect x="504" y="48" width="216" height="360" rx="8" fill="#fff"/>
+<text x="520" y="80" font-size="12" text-anchor="start" stroke="none" fill="#666">H3</text>
+<text x="520" y="112" font-size="20" text-anchor="start" stroke="none" fill="#000" font-weight="700">Targets</text>
+<rect x="520" y="136" width="184" height="40" rx="6" fill="#fff"/>
+<text x="536" y="161" font-size="14" text-anchor="start" stroke="none" fill="#000">06 Profile</text>
+<rect x="520" y="192" width="184" height="40" rx="6" fill="#fff"/>
+<text x="536" y="217" font-size="14" text-anchor="start" stroke="none" fill="#000">05 Plan summary</text>
+<rect x="520" y="248" width="184" height="40" rx="6" fill="#fff"/>
+<text x="536" y="273" font-size="14" text-anchor="start" stroke="none" fill="#000">07 Today card</text>
+<line x1="720" y1="228" x2="744" y2="228" stroke="#000"/>
+<rect x="744" y="48" width="216" height="360" rx="8" fill="#fff"/>
+<text x="760" y="80" font-size="12" text-anchor="start" stroke="none" fill="#666">H4</text>
+<text x="760" y="112" font-size="20" text-anchor="start" stroke="none" fill="#000" font-weight="700">Training blocks</text>
+<rect x="760" y="136" width="184" height="40" rx="6" fill="#fff"/>
+<text x="776" y="161" font-size="14" text-anchor="start" stroke="none" fill="#000">08 Calendar day</text>
+<rect x="760" y="192" width="184" height="40" rx="6" fill="#fff"/>
+<text x="776" y="217" font-size="14" text-anchor="start" stroke="none" fill="#000">09 Set up week</text>
+<rect x="760" y="248" width="184" height="40" rx="6" fill="#fff"/>
+<text x="776" y="273" font-size="14" text-anchor="start" stroke="none" fill="#000">10 Block</text>
+<line x1="960" y1="228" x2="984" y2="228" stroke="#000"/>
+<rect x="984" y="48" width="216" height="360" rx="8" fill="#fff"/>
+<text x="1000" y="80" font-size="12" text-anchor="start" stroke="none" fill="#666">H5</text>
+<text x="1000" y="112" font-size="20" text-anchor="start" stroke="none" fill="#000" font-weight="700">Google Calendar</text>
+<rect x="1000" y="136" width="184" height="40" rx="6" fill="#fff"/>
+<text x="1016" y="161" font-size="14" text-anchor="start" stroke="none" fill="#000">Write scope</text>
+<rect x="1000" y="192" width="184" height="40" rx="6" fill="#fff"/>
+<text x="1016" y="217" font-size="14" text-anchor="start" stroke="none" fill="#000">"Díade · Treino"</text>
+<rect x="1000" y="248" width="184" height="40" rx="6" fill="#fff"/>
+<text x="1016" y="273" font-size="14" text-anchor="start" stroke="none" fill="#000">Free, not busy</text>
+<line x1="1200" y1="228" x2="1224" y2="228" stroke="#000"/>
+<rect x="1224" y="48" width="216" height="360" rx="8" fill="#fff"/>
+<text x="1240" y="80" font-size="12" text-anchor="start" stroke="none" fill="#666">H6</text>
+<text x="1240" y="112" font-size="20" text-anchor="start" stroke="none" fill="#000" font-weight="700">Health Connect</text>
+<rect x="1240" y="136" width="184" height="40" rx="6" fill="#fff"/>
+<text x="1256" y="161" font-size="14" text-anchor="start" stroke="none" fill="#000">Sessions tick blocks</text>
+<rect x="1240" y="192" width="184" height="40" rx="6" fill="#fff"/>
+<text x="1256" y="217" font-size="14" text-anchor="start" stroke="none" fill="#000">Steps</text>
+<rect x="1240" y="248" width="184" height="40" rx="6" fill="#fff"/>
+<text x="1256" y="273" font-size="14" text-anchor="start" stroke="none" fill="#000">Weight trend</text>
+<rect x="1240" y="304" width="184" height="40" rx="6" fill="#fff"/>
+<text x="1256" y="329" font-size="14" text-anchor="start" stroke="none" fill="#000">APK release</text>
+<text x="24" y="448" font-size="12" text-anchor="start" stroke="none" fill="#666">Grey: helps this week. H2 needs H1; H5 needs H4; H6 needs H4 and an APK release.</text>
+</svg>

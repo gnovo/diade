@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812" font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
+<!-- 06 Profile: nutrition, per member, off by default · mobile 375x812 · 8px grid -->
+<rect x="0" y="0" width="375" height="812" fill="#fff"/>
+<text x="16" y="32" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">9:41</text>
+<rect x="311" y="22" width="32" height="12" rx="3" fill="#fff"/>
+<text x="16" y="72" font-size="14" text-anchor="start" stroke="none" fill="#000">‹ Profile</text>
+<text x="16" y="96" font-size="28" text-anchor="start" stroke="none" fill="#000" font-weight="700">Nutrition</text>
+<rect x="16" y="120" width="343" height="80" rx="8" fill="#fff"/>
+<text x="32" y="152" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Show my targets</text>
+<text x="32" y="176" font-size="12" text-anchor="start" stroke="none" fill="#666">Only you see them. Off: the app looks as before.</text>
+<rect x="295" y="136" width="48" height="28" rx="14" fill="#000"/>
+<circle cx="329" cy="150" r="10" fill="#fff"/>
+<text x="16" y="232" font-size="12" text-anchor="start" stroke="none" fill="#666">DAILY TARGETS</text>
+<rect x="16" y="240" width="343" height="192" rx="8" fill="#fff"/>
+<text x="32" y="270" font-size="14" text-anchor="start" stroke="none" fill="#000">Calories</text>
+<text x="335" y="270" font-size="14" text-anchor="end" stroke="none" fill="#666">1,750 kcal</text>
+<line x1="32" y1="288" x2="343" y2="288" stroke="#e6e6e6"/>
+<text x="32" y="318" font-size="14" text-anchor="start" stroke="none" fill="#000">Protein</text>
+<text x="335" y="318" font-size="14" text-anchor="end" stroke="none" fill="#666">140 g</text>
+<line x1="32" y1="336" x2="343" y2="336" stroke="#e6e6e6"/>
+<text x="32" y="366" font-size="14" text-anchor="start" stroke="none" fill="#000">Water</text>
+<text x="335" y="366" font-size="14" text-anchor="end" stroke="none" fill="#666">2.5 L</text>
+<line x1="32" y1="384" x2="343" y2="384" stroke="#e6e6e6"/>
+<text x="32" y="414" font-size="14" text-anchor="start" stroke="none" fill="#000">Coffee</text>
+<text x="335" y="414" font-size="14" text-anchor="end" stroke="none" fill="#666">up to 4, before 15:00</text>
+<text x="16" y="464" font-size="12" text-anchor="start" stroke="none" fill="#666">EACH WEEK</text>
+<rect x="16" y="472" width="343" height="48" rx="8" fill="#fff"/>
+<text x="32" y="502" font-size="14" text-anchor="start" stroke="none" fill="#000">Flexible meals budget</text>
+<text x="335" y="502" font-size="14" text-anchor="end" stroke="none" fill="#666">1,000 kcal</text>
+<rect x="16" y="544" width="343" height="48" rx="8" fill="#fff"/>
+<text x="187.5" y="573.0" font-size="14" text-anchor="middle" stroke="none" fill="#000">Work out my targets</text>
+<text x="16" y="616" font-size="12" text-anchor="start" stroke="none" fill="#666">Asks age, height, weight, sex and activity once.</text>
+<text x="16" y="632" font-size="12" text-anchor="start" stroke="none" fill="#666">Only the targets are kept. Estimates, not medical advice.</text>
+<line x1="0" y1="748" x2="375" y2="748" stroke="#000"/>
+<rect x="9.5" y="756" width="56" height="32" rx="16" fill="#000"/>
+<text x="37.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#fff">▫</text>
+<text x="37.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#000">Today</text>
+<rect x="84.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="112.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="112.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Calendar</text>
+<rect x="159.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="187.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="187.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Lists</text>
+<rect x="234.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="262.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="262.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Home</text>
+<rect x="309.5" y="756" width="56" height="32" rx="16" fill="#fff"/>
+<text x="337.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#000">▫</text>
+<text x="337.5" y="804" font-size="12" text-anchor="middle" stroke="none" fill="#666">Dates</text>
+<g><circle cx="8" cy="160" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="164" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">1</text></g>
+<g><circle cx="8" cy="336" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="340" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">2</text></g>
+<g><circle cx="8" cy="496" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="500" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">3</text></g>
+<g><circle cx="8" cy="568" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="572" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">4</text></g>
+</svg>
