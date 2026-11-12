@@ -61,7 +61,7 @@ Settled in the brainstorm. Do not reopen them without a reason.
    for one person divided by seven: the plan's servings are household servings, so the summary divides by the
    number of members who eat (the plan's servings / the recipe's servings, split evenly for v1).
 8. **Training is blocks with weekly goals, not appointments.** A block is a window in which one session fits
-   ("Strength · 18:00 to 19:30 · 40 min"). The week has a goal per kind (3 strength in week 1). A session done
+   ("Strength · 17:30 to 19:00 · 40 min"). Nothing is planned after 19:00. The week has a goal per kind (3 strength in week 1). A session done
    in any block counts; a missed block is not a failure and the goal does not move. There are always more
    blocks than the goal, so a chaotic day never breaks the week.
 9. **The two-week work cycle is an anchor plus `INTERVAL=2`.** A member stores the Monday of a week 1
@@ -71,7 +71,7 @@ Settled in the brainstorm. Do not reopen them without a reason.
     (transparent) in Google Calendar so they never block a meeting.
 11. **Dog walks stay where they are.** They are already in Google Calendar and reach Díade through the
     existing sync. They are reserved household blocks; either member may take one, and a walk the partner takes
-    frees the block for the walking pad or yoga. They count towards steps, not training.
+    frees the block for the walking pad or a bodyweight session. They count towards steps, not training.
 12. **Google Calendar gets write access only for blocks**, into one dedicated calendar ("Díade · Treino") so
     it is easy to hide or remove. The current sync is read-only, so this is a scope change and a new consent.
 13. **Watch data comes from Health Connect** on the phone: both watches already write to it (Fitbit and
@@ -86,28 +86,32 @@ Fixed points, from the work rhythm and the dog. All times are Europe/Lisbon.
 | 07:00 to 08:00 | Dog walk (20 to 30 min, reserved) |
 | 08:00 to 09:15 | Focus |
 | 09:15 to 12:00 | Standup, then calls: **walking pad block** (30 to 60 min at 4 to 5 km/h) |
-| 12:00 to 13:00 | Lunch, or a spare strength block |
-| 13:00 to 14:00 | Dog walk (reserved) |
+| 12:00 to 12:30 | **Bodyweight and stretching block** (20 min), on its days |
+| 12:30 to 13:00 | **Lunch**, before the walk. When the morning runs over: 13:30 to 14:00, after it |
+| 13:00 to 14:00 | Dog walk (reserved; the walk itself takes 20 to 30 min) |
 | 14:00 to 17:00 | Focus |
 | 17:00 to 18:00 | Dog walk (reserved) |
-| 18:00 to 19:30 | **Strength block** (40 min) |
-| 20:15 to 21:00 | **Yoga block** (20 min) |
+| 17:30 to 19:00 | **Strength block** (40 min, started by 18:20) |
 | 21:00 to 22:00 | Dog walk (reserved) |
+
+**Nothing is planned after 19:00:** training that late does not happen. The evening holds only the last walk.
 
 What changes between the weeks of the cycle:
 
 | | Week 1 (implementation) | Week 2 (freezes, release) |
 |---|---|---|
 | Strength goal | **3** | **2** |
-| Strength blocks | Mon 18:00, Wed 18:00, Fri 15:00 (the learning slot), Sat 10:00 | Mon 18:00, Sat 10:00, Sun 10:00 |
-| Yoga goal | 2 | 3 (wind down during the crunch) |
-| Yoga blocks | Tue, Thu 20:15; Sun 18:00 | Tue, Wed, Thu 20:15; Sun 18:00 |
+| Strength blocks | Mon, Wed 17:30; Fri 15:00 (the learning slot); Sat 10:00 | Mon 17:30; Sat, Sun 10:00 |
+| Bodyweight and stretching goal | 2 | 3 (short sessions suit the crunch) |
+| Bodyweight and stretching blocks | Tue, Thu 12:00; Sun 17:30 | Tue, Wed, Thu 12:00; Sun 17:30 |
 | Walking pad | every weekday morning | every weekday morning, and Wed and Thu afternoons (QA and waiting) |
 | Batch prep | Sun 10:00 to 12:00 | Sun 15:00 to 17:00 (Sun morning may be a strength block) |
 
 The strength sessions are full body with adjustable dumbbells: goblet squat, Romanian deadlift, floor
 press, one-arm row, overhead press, lunges, plank, three sets of 8 to 12. Until the dumbbells arrive the saved
-bodyweight workouts (`wiki/health/workouts` in the personal vault) fill the same blocks.
+bodyweight workouts (`wiki/health/workouts` in the personal vault) fill the same blocks. A bodyweight and
+stretching session is 10 minutes of squats, push-ups, glute bridges and a plank, then 10 minutes of hip,
+hamstring, chest and upper-back stretches on the mat: the desk-job set.
 
 ## PRs
 
@@ -163,7 +167,7 @@ Not code: a reviewed data change, applied through the API as a member, never in 
 
 ### H4 · Training blocks
 
-- Event category `workout`, with a kind (`strength`, `yoga`, `walk`, `other`) and a duration in minutes. Personal
+- Event category `workout`, with a kind (`strength`, `bodyweight` (bodyweight and stretching), `walk`, `other`) and a duration in minutes. Personal
   by default. Calendar shows blocks as dashed windows, so they read as optional.
 - `space_members.cycle_anchor date` (a week-1 Monday). A "Set up my training week" sheet writes the default
   week above as recurring events, which the member then edits like any event.
@@ -190,7 +194,6 @@ Not code: a reviewed data change, applied through the API as a member, never in 
 
 ## Open questions
 
-- **Lunch time.** The plan puts a spare strength block at 12:00 to 13:00 and assumes lunch fits round it.
 - **Per-member servings in a plan.** Decision 7 splits servings evenly; a member who eats more would want
   their own share. Wait for real use.
 - **Which flexible meals.** A `flexible` flag on a recipe or on a plan entry, instead of the name suffix.

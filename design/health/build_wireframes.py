@@ -251,14 +251,14 @@ def s07():
     s.text(32, 352, 'Water 2.5 L · coffee up to 4, the last by 15:00', 12, fill='#666')
     s.line(32, 368, 343, 368, '#e6e6e6')
     s.text(32, 392, 'THIS WEEK', 12, fill='#666')
-    for i, (label, done, goal) in enumerate([('Strength', 1, 3), ('Yoga', 1, 2)]):
+    for i, (label, done, goal) in enumerate([('Strength', 1, 3), ('Bodyweight', 1, 2)]):
         y = 408 + i * 32
         s.text(32, y + 16, label, 14, bold=True)
         for j in range(goal):
             s.circle(152 + j * 24, y + 11, 8, '#000' if j < done else '#fff')
         s.text(343, y + 16, f'{done} of {goal}', 14, 'end', '#666')
     s.rect(32, 480, 311, 40, 6, '#fff', dash=True)
-    s.text(44, 505, 'Next: Strength · 18:00 to 19:30 · 40 min', 12, bold=True)
+    s.text(44, 505, 'Next: Strength · 17:30 to 19:00 · 40 min', 12, bold=True)
     card(s, 16, 552, 343, 120)
     s.text(32, 578, 'COMING UP', 12, fill='#666')
     s.text(32, 610, '13:00  Dog walk', 14)
@@ -286,10 +286,12 @@ def day_timeline(s, top=200):
     walk = 'Dog walk \u00b7 either of us'
     block(s, x, y_at(7) + 2, w, 28, walk, None, 'reserved')
     block(s, x, y_at(9, 30), w, y_at(11, 30) - y_at(9, 30), 'Walking pad', '30 to 60 min, during calls')
+    block(s, x, y_at(12) + 2, 148, 28, 'Bodyweight · 20 min', None)
+    block(s, x + 156, y_at(12) + 2, w - 156, 28, 'Lunch · or 13:30', None, 'reserved')
     block(s, x, y_at(13) + 2, w, 28, walk, None, 'reserved')
     block(s, x, y_at(17) + 2, w, 28, walk, None, 'reserved')
-    block(s, x, y_at(18), w, y_at(19, 30) - y_at(18), 'Strength · 40 min', 'Counts towards 2 this week')
-    block(s, x, y_at(20, 15), w, y_at(21) - y_at(20, 15), 'Yoga · 20 min', None)
+    block(s, x, y_at(14, 30), w, y_at(16, 30) - y_at(14, 30), 'Walking pad', 'week 2: QA and waiting')
+    s.text(x, y_at(20), 'Nothing planned after 19:00', 12, fill='#666')
     block(s, x, y_at(21) + 2, w, 28, walk, None, 'reserved')
     return y_at
 
@@ -297,8 +299,8 @@ def day_timeline(s, top=200):
 def calendar_day(s):
     status_bar(s)
     header(s, 'Calendar')
-    s.text(16, 136, 'Mon 16 Nov · week 2 of the cycle', 14, bold=True)
-    s.text(16, 160, 'Strength 0 of 2 · Yoga 0 of 3', 12, fill='#666')
+    s.text(16, 136, 'Wed 18 Nov · week 2 of the cycle', 14, bold=True)
+    s.text(16, 160, 'Strength 1 of 2 · Bodyweight 1 of 3', 12, fill='#666')
     day_timeline(s, 192)
     tab_bar(s, 1)
 
@@ -309,7 +311,9 @@ def s08():
     s.callout(0, 154)
     s.callout(0, 196)
     s.callout(0, 270)
-    s.callout(0, 554)
+    s.callout(0, 352)
+    s.callout(0, 448)
+    s.callout(0, 608)
     s.finish('08-calendar-blocks.svg')
 
 
@@ -321,8 +325,8 @@ def s09():
     s.text(32, 242, 'WORK CYCLE', 12, fill='#666')
     s.text(32, 268, 'Week 1 starts Mon 9 Nov, every 2 weeks', 14)
     segmented(s, 304, ['Week 1', 'Week 2'], 0)
-    for i, (label, goal, blocks) in enumerate([('Strength', 3, 'Mon, Wed 18:00 · Fri 15:00 · Sat 10:00'),
-                                              ('Yoga', 2, 'Tue, Thu 20:15 · Sun 18:00'),
+    for i, (label, goal, blocks) in enumerate([('Strength', 3, 'Mon, Wed 17:30 · Fri 15:00 · Sat 10:00'),
+                                              ('Bodyweight + stretch', 2, 'Tue, Thu 12:00 · Sun 17:30'),
                                               ('Walking pad', 5, 'Weekdays 09:30 to 11:30')]):
         y = 368 + i * 104
         card(s, 16, y, 343, 96)
@@ -341,9 +345,9 @@ def s09():
 def s10():
     s = Svg('10 A training block: done, or let it go')
     ghost(s, calendar_day)
-    sheet(s, 448, 'Strength block')
-    s.text(16, 520, 'Today · 18:00 to 19:30 · 40 min session', 14)
-    s.text(16, 544, 'Full body, dumbbells. Counts towards 3 this week.', 12, fill='#666')
+    sheet(s, 448, 'Bodyweight and stretching')
+    s.text(16, 520, 'Today · 12:00 to 12:30 · 20 min', 14)
+    s.text(16, 544, '10 min bodyweight, 10 min stretching. Counts towards 3.', 12, fill='#666')
     button(s, 16, 568, 343, 'Mark done', True)
     button(s, 16, 632, 343, 'Not today', False)
     s.text(16, 712, 'Not today changes nothing: the goal stays, other', 12, fill='#666')

@@ -8,8 +8,8 @@
 <circle cx="335" cy="80" r="24" fill="#000"/>
 <line x1="327" y1="80" x2="343" y2="80" stroke="#fff" stroke-width="2.5"/>
 <line x1="335" y1="72" x2="335" y2="88" stroke="#fff" stroke-width="2.5"/>
-<text x="16" y="136" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Mon 16 Nov · week 2 of the cycle</text>
-<text x="16" y="160" font-size="12" text-anchor="start" stroke="none" fill="#666">Strength 0 of 2 · Yoga 0 of 3</text>
+<text x="16" y="136" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Wed 18 Nov · week 2 of the cycle</text>
+<text x="16" y="160" font-size="12" text-anchor="start" stroke="none" fill="#666">Strength 1 of 2 · Bodyweight 1 of 3</text>
 <text x="16" y="196" font-size="12" text-anchor="start" stroke="none" fill="#666">07</text>
 <line x1="48" y1="192" x2="359" y2="192" stroke="#e6e6e6"/>
 <text x="16" y="228" font-size="12" text-anchor="start" stroke="none" fill="#666">08</text>
@@ -47,15 +47,18 @@
 <rect x="56" y="272.0" width="303" height="64.0" rx="6" fill="#fff" stroke-dasharray="6 4"/>
 <text x="64" y="290.0" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Walking pad</text>
 <text x="64" y="304.0" font-size="12" text-anchor="start" stroke="none" fill="#666">30 to 60 min, during calls</text>
+<rect x="56" y="354.0" width="148" height="28" rx="6" fill="#fff" stroke-dasharray="6 4"/>
+<text x="64" y="372.0" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Bodyweight · 20 min</text>
+<rect x="212" y="354.0" width="147" height="28" rx="6" fill="#e6e6e6" stroke-width="0"/>
+<text x="220" y="372.0" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Lunch · or 13:30</text>
 <rect x="56" y="386.0" width="303" height="28" rx="6" fill="#e6e6e6" stroke-width="0"/>
 <text x="64" y="404.0" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Dog walk · either of us</text>
 <rect x="56" y="514.0" width="303" height="28" rx="6" fill="#e6e6e6" stroke-width="0"/>
 <text x="64" y="532.0" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Dog walk · either of us</text>
-<rect x="56" y="544.0" width="303" height="48.0" rx="6" fill="#fff" stroke-dasharray="6 4"/>
-<text x="64" y="562.0" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Strength · 40 min</text>
-<text x="64" y="576.0" font-size="12" text-anchor="start" stroke="none" fill="#666">Counts towards 2 this week</text>
-<rect x="56" y="616.0" width="303" height="24.0" rx="6" fill="#fff" stroke-dasharray="6 4"/>
-<text x="64" y="634.0" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Yoga · 20 min</text>
+<rect x="56" y="432.0" width="303" height="64.0" rx="6" fill="#fff" stroke-dasharray="6 4"/>
+<text x="64" y="450.0" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Walking pad</text>
+<text x="64" y="464.0" font-size="12" text-anchor="start" stroke="none" fill="#666">week 2: QA and waiting</text>
+<text x="56" y="608.0" font-size="12" text-anchor="start" stroke="none" fill="#666">Nothing planned after 19:00</text>
 <rect x="56" y="642.0" width="303" height="28" rx="6" fill="#e6e6e6" stroke-width="0"/>
 <text x="64" y="660.0" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Dog walk · either of us</text>
 <line x1="0" y1="748" x2="375" y2="748" stroke="#000"/>
@@ -97,16 +100,16 @@
 <text x="295" y="403" font-size="14" text-anchor="middle" stroke="none" fill="#000" font-weight="700">3</text>
 <rect x="311" y="382" width="32" height="32" rx="16" fill="#fff"/>
 <text x="327" y="403" font-size="14" text-anchor="middle" stroke="none" fill="#000">+</text>
-<text x="32" y="448" font-size="12" text-anchor="start" stroke="none" fill="#666">Mon, Wed 18:00 · Fri 15:00 · Sat 10:00</text>
+<text x="32" y="448" font-size="12" text-anchor="start" stroke="none" fill="#666">Mon, Wed 17:30 · Fri 15:00 · Sat 10:00</text>
 <rect x="16" y="472" width="343" height="96" rx="8" fill="#fff"/>
-<text x="32" y="502" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Yoga</text>
+<text x="32" y="502" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Bodyweight + stretch</text>
 <text x="32" y="524" font-size="12" text-anchor="start" stroke="none" fill="#666">goal per week</text>
 <rect x="247" y="486" width="32" height="32" rx="16" fill="#fff"/>
 <text x="263" y="507" font-size="14" text-anchor="middle" stroke="none" fill="#000">−</text>
 <text x="295" y="507" font-size="14" text-anchor="middle" stroke="none" fill="#000" font-weight="700">2</text>
 <rect x="311" y="486" width="32" height="32" rx="16" fill="#fff"/>
 <text x="327" y="507" font-size="14" text-anchor="middle" stroke="none" fill="#000">+</text>
-<text x="32" y="552" font-size="12" text-anchor="start" stroke="none" fill="#666">Tue, Thu 20:15 · Sun 18:00</text>
+<text x="32" y="552" font-size="12" text-anchor="start" stroke="none" fill="#666">Tue, Thu 12:00 · Sun 17:30</text>
 <rect x="16" y="576" width="343" height="96" rx="8" fill="#fff"/>
 <text x="32" y="606" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Walking pad</text>
 <text x="32" y="628" font-size="12" text-anchor="start" stroke="none" fill="#666">goal per week</text>

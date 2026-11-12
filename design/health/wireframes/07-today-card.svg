@@ -29,12 +29,12 @@
 <circle cx="176" cy="419" r="8" fill="#fff"/>
 <circle cx="200" cy="419" r="8" fill="#fff"/>
 <text x="343" y="424" font-size="14" text-anchor="end" stroke="none" fill="#666">1 of 3</text>
-<text x="32" y="456" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Yoga</text>
+<text x="32" y="456" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Bodyweight</text>
 <circle cx="152" cy="451" r="8" fill="#000"/>
 <circle cx="176" cy="451" r="8" fill="#fff"/>
 <text x="343" y="456" font-size="14" text-anchor="end" stroke="none" fill="#666">1 of 2</text>
 <rect x="32" y="480" width="311" height="40" rx="6" fill="#fff" stroke-dasharray="6 4"/>
-<text x="44" y="505" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Next: Strength · 18:00 to 19:30 · 40 min</text>
+<text x="44" y="505" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Next: Strength · 17:30 to 19:00 · 40 min</text>
 <rect x="16" y="552" width="343" height="120" rx="8" fill="#fff"/>
 <text x="32" y="578" font-size="12" text-anchor="start" stroke="none" fill="#666">COMING UP</text>
 <text x="32" y="610" font-size="14" text-anchor="start" stroke="none" fill="#000">13:00  Dog walk</text>
