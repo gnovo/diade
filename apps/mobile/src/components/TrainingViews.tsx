@@ -31,6 +31,7 @@ import { updateRecord, writeBatch } from '../data/repository';
 import { useLiveQuery } from '../data/useLiveQuery';
 import { Icon, useColor } from '../design';
 import { BottomSheet } from './BottomSheet';
+import { TodaySteps } from './HealthViews';
 import { Button, Card, SectionLabel, Segmented, useWriteContext } from './ui';
 
 const NO_EVENTS: CalendarEvent[] = [];
@@ -476,6 +477,7 @@ export const TodayTraining: React.FC = () => {
       ) : (
         <Text className="text-sm text-ink-muted mt-2">{t('training.weekDone')}</Text>
       )}
+      <TodaySteps />
     </Card>
   );
 };

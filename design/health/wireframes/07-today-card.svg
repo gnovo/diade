@@ -9,7 +9,7 @@
 <line x1="335" y1="72" x2="335" y2="88" stroke="#fff" stroke-width="2.5"/>
 <rect x="16" y="128" width="343" height="56" rx="8" fill="#fff"/>
 <text x="32" y="162" font-size="14" text-anchor="start" stroke="none" fill="#666">Capture something…</text>
-<rect x="16" y="200" width="343" height="336" rx="8" fill="#fff"/>
+<rect x="16" y="200" width="343" height="360" rx="8" fill="#fff"/>
 <text x="32" y="226" font-size="12" text-anchor="start" stroke="none" fill="#666">YOUR DAY</text>
 <text x="343" y="226" font-size="12" text-anchor="end" stroke="none" fill="#666">Week 1 of the cycle</text>
 <text x="32" y="256" font-size="14" text-anchor="start" stroke="none" fill="#000" font-weight="700">Planned</text>
@@ -35,10 +35,11 @@
 <text x="343" y="456" font-size="14" text-anchor="end" stroke="none" fill="#666">1 of 2</text>
 <rect x="32" y="480" width="311" height="40" rx="6" fill="#fff" stroke-dasharray="6 4"/>
 <text x="44" y="505" font-size="12" text-anchor="start" stroke="none" fill="#000" font-weight="700">Next: Strength · 17:30 to 19:00 · 40 min</text>
-<rect x="16" y="552" width="343" height="120" rx="8" fill="#fff"/>
-<text x="32" y="578" font-size="12" text-anchor="start" stroke="none" fill="#666">COMING UP</text>
-<text x="32" y="610" font-size="14" text-anchor="start" stroke="none" fill="#000">13:00  Dog walk</text>
-<text x="32" y="642" font-size="14" text-anchor="start" stroke="none" fill="#000">17:00  Dog walk</text>
+<text x="32" y="544" font-size="12" text-anchor="start" stroke="none" fill="#666">6,240 steps today</text>
+<rect x="16" y="576" width="343" height="112" rx="8" fill="#fff"/>
+<text x="32" y="602" font-size="12" text-anchor="start" stroke="none" fill="#666">COMING UP</text>
+<text x="32" y="634" font-size="14" text-anchor="start" stroke="none" fill="#000">13:00  Dog walk</text>
+<text x="32" y="666" font-size="14" text-anchor="start" stroke="none" fill="#000">17:00  Dog walk</text>
 <line x1="0" y1="748" x2="375" y2="748" stroke="#000"/>
 <rect x="9.5" y="756" width="56" height="32" rx="16" fill="#000"/>
 <text x="37.5" y="777" font-size="14" text-anchor="middle" stroke="none" fill="#fff">▫</text>
@@ -59,4 +60,5 @@
 <g><circle cx="8" cy="352" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="356" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">2</text></g>
 <g><circle cx="8" cy="424" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="428" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">3</text></g>
 <g><circle cx="8" cy="500" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="504" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">4</text></g>
+<g><circle cx="8" cy="540" r="8" fill="#fff" stroke="#d33" stroke-dasharray="3 2"/><text x="8" y="544" font-size="11" text-anchor="middle" stroke="none" fill="#d33" font-weight="700">5</text></g>
 </svg>

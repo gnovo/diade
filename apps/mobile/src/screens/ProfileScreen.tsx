@@ -5,11 +5,13 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, Share, Text, View } from 'react-native';
 import { apiClient } from '../api/client';
+import { HealthScreen } from '../components/HealthViews';
 import { NutritionSettingsScreen } from '../components/NutritionSettingsScreen';
 import { Sheet } from '../components/Sheet';
 import { TrainingSettingsScreen } from '../components/TrainingViews';
 import { Button, SectionLabel, Segmented } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
+import { useHealth } from '../context/HealthContext';
 import { useNutrition } from '../context/NutritionContext';
 import { useTraining } from '../context/TrainingContext';
 import { inviteState } from '../data/invite';
@@ -78,6 +80,8 @@ export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> 
   const nutrition = useNutrition();
   const [trainingOpen, setTrainingOpen] = useState(false);
   const { training } = useTraining();
+  const [healthOpen, setHealthOpen] = useState(false);
+  const health = useHealth();
   const [open, setOpen] = useState<'appearance' | 'language' | null>(null);
 
   const invite = inviteState(space, members.length, new Date());
@@ -241,6 +245,11 @@ export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> 
           value={training ? t('training.on') : t('training.off')}
           onPress={() => setTrainingOpen(true)}
         />
+        <SettingRow
+          label={t('health.title')}
+          value={health.status === 'on' ? t('health.on') : t('health.off')}
+          onPress={() => setHealthOpen(true)}
+        />
       </Group>
 
       <Button label={t('profile.signOut')} variant="danger" onPress={confirmSignOut} />
@@ -252,6 +261,7 @@ export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> 
       <CalendarSettingsScreen visible={calendarOpen} onClose={() => setCalendarOpen(false)} />
       <NutritionSettingsScreen visible={nutritionOpen} onClose={() => setNutritionOpen(false)} />
       <TrainingSettingsScreen visible={trainingOpen} onClose={() => setTrainingOpen(false)} />
+      <HealthScreen visible={healthOpen} onClose={() => setHealthOpen(false)} />
     </Sheet>
   );
 };

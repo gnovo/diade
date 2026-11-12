@@ -242,7 +242,7 @@ def s07():
     header(s, 'Today')
     card(s, 16, 128, 343, 56)
     s.text(32, 162, 'Capture something…', 14, fill='#666')
-    card(s, 16, 200, 343, 336)
+    card(s, 16, 200, 343, 360)
     s.text(32, 226, 'YOUR DAY', 12, fill='#666')
     s.text(343, 226, 'Week 1 of the cycle', 12, 'end', '#666')
     metric_row(s, 256, 'Planned', '1,640', '1,750 kcal', 1640 / 1750)
@@ -259,15 +259,17 @@ def s07():
         s.text(343, y + 16, f'{done} of {goal}', 14, 'end', '#666')
     s.rect(32, 480, 311, 40, 6, '#fff', dash=True)
     s.text(44, 505, 'Next: Strength · 17:30 to 19:00 · 40 min', 12, bold=True)
-    card(s, 16, 552, 343, 120)
-    s.text(32, 578, 'COMING UP', 12, fill='#666')
-    s.text(32, 610, '13:00  Dog walk', 14)
-    s.text(32, 642, '17:00  Dog walk', 14)
+    s.text(32, 544, '6,240 steps today', 12, fill='#666')
+    card(s, 16, 576, 343, 112)
+    s.text(32, 602, 'COMING UP', 12, fill='#666')
+    s.text(32, 634, '13:00  Dog walk', 14)
+    s.text(32, 666, '17:00  Dog walk', 14)
     tab_bar(s, 0)
     s.callout(0, 268)
     s.callout(0, 352)
     s.callout(0, 424)
     s.callout(0, 500)
+    s.callout(0, 540)
     s.finish('07-today-card.svg')
 
 
@@ -358,6 +360,47 @@ def s10():
     s.finish('10-block-detail.svg')
 
 
+def s11():
+    s = Svg('11 Profile → Watch and scale: Health Connect, steps, weight trend')
+    status_bar(s)
+    s.circle(40, 80, 20, '#e6e6e6')
+    s.text(40, 85, '×', 14, 'middle')
+    s.text(72, 88, 'Watch and scale', 20, bold=True)
+    card(s, 16, 120, 343, 152)
+    s.text(32, 148, 'Read from Health Connect', 14, bold=True)
+    s.text(32, 172, 'A session inside a block marks it done.', 12, fill='#666')
+    s.text(32, 188, 'Read each time you open Díade.', 12, fill='#666')
+    toggle(s, 295, 134, True)
+    button(s, 32, 208, 311, 'Open Health Connect', False)
+    s.text(16, 304, 'TODAY', 12, fill='#666')
+    card(s, 16, 320, 343, 56)
+    s.text(32, 354, 'Steps', 14)
+    s.text(343, 354, '6,240', 20, 'end', bold=True)
+    s.text(16, 408, 'WEIGHT', 12, fill='#666')
+    card(s, 16, 424, 343, 304)
+    s.text(32, 456, 'Last 7 days, on average', 12, fill='#666')
+    s.text(343, 456, '86.5 kg', 20, 'end', bold=True)
+    s.text(343, 480, '−0.7 kg on the week before', 12, 'end', '#666')
+    s.line(32, 552, 343, 552, '#e6e6e6')
+    pts = [(40, 512), (88, 520), (136, 536), (184, 544), (232, 552), (280, 568), (328, 576)]
+    for (x1, y1), (x2, y2) in zip(pts, pts[1:]):
+        s.line(x1, y1, x2, y2, '#000', 2)
+    s.circle(328, 576, 4, '#000')
+    input_box(s, 32, 608, 199, 'Weight in kg, like 86.4')
+    button(s, 247, 608, 96, 'Add', True)
+    s.text(32, 688, 'The trend is the average of the last 7 days,', 12, fill='#666')
+    s.text(32, 704, 'so one heavy morning barely moves it.', 12, fill='#666')
+    s.text(16, 760, 'Everything is read on this phone. Only the blocks a', 12, fill='#666')
+    s.text(16, 776, 'session marks done reach the server.', 12, fill='#666')
+    s.callout(0, 148)
+    s.callout(0, 224)
+    s.callout(0, 354)
+    s.callout(0, 456)
+    s.callout(0, 552)
+    s.callout(0, 632)
+    s.finish('11-watch-and-scale.svg')
+
+
 def flow():
     s = Svg('Flow: six PRs, left to right')
     s.parts[0] = (
@@ -371,7 +414,7 @@ def flow():
         ('H3', 'Targets', ['06 Profile', '05 Plan summary', '07 Today card']),
         ('H4', 'Training blocks', ['08 Calendar day', '09 Set up week', '10 Block']),
         ('H5', 'Google Calendar', ['Write scope', '"Díade · Treino"', 'Free, not busy']),
-        ('H6', 'Health Connect', ['Sessions tick blocks', 'Steps', 'Weight trend', 'APK release']),
+        ('H6', 'Health Connect', ['11 Watch and scale', '07 Steps on Today', '10 Ticked by watch', 'APK release']),
     ]
     for i, (tag, title, items) in enumerate(cols):
         x = 24 + i * 240
@@ -388,6 +431,6 @@ def flow():
 
 
 if __name__ == '__main__':
-    for fn in (s01, s02, s03, s04, s05, s06, s07, s08, s09, s10, flow):
+    for fn in (s01, s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, flow):
         fn()
     print('wrote', len(os.listdir(mp.OUT)), 'files to', mp.OUT)
