@@ -17,6 +17,7 @@ import type React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, Share, Text, View } from 'react-native';
+import { TodayNutrition } from '../components/NutritionSummary';
 import {
   Button,
   Card,
@@ -29,6 +30,7 @@ import {
   useWriteContext,
 } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
+import { useNutrition } from '../context/NutritionContext';
 import { formatAgendaTime } from '../data/agenda';
 import { statusLabel } from '../data/importantDateDisplay';
 import { inviteState } from '../data/invite';
@@ -61,6 +63,7 @@ export const TodayScreen: React.FC = () => {
   const { t } = useTranslation();
   const format = useFormat();
   const { user, space, members } = useAuth();
+  const nutritionActive = useNutrition().active;
   const ctx = useWriteContext();
   const [captureText, setCaptureText] = useState('');
   const [saving, setSaving] = useState(false);
@@ -396,6 +399,8 @@ export const TodayScreen: React.FC = () => {
           ) : null}
         </Card>
       ) : null}
+
+      {nutritionActive ? <TodayNutrition /> : null}
 
       <Card>
         <SectionLabel>{t('today.comingUp')}</SectionLabel>

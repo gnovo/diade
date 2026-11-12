@@ -8,11 +8,13 @@ import type {
   HealthResponse,
   InviteCodeResponse,
   JoinSpaceRequest,
+  NutritionSettings,
   SyncPullResult,
   SyncPushPayload,
   SyncPushResult,
   UpdateCalendarRequest,
   UpdateExternalEventRequest,
+  UpdateNutritionSettingsRequest,
 } from '@diade/contracts';
 
 /** The user shape Better Auth returns; the app maps it to the domain User. */
@@ -143,6 +145,19 @@ export class DiadeApiClient {
   async createInviteCode(data: CreateInviteRequest = {}): Promise<InviteCodeResponse> {
     return this.request<InviteCodeResponse>('/api/spaces/invite', {
       method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // --- Nutrition settings (the signed-in member's own) ---
+
+  async getNutritionSettings(): Promise<NutritionSettings> {
+    return this.request<NutritionSettings>('/api/spaces/nutrition');
+  }
+
+  async updateNutritionSettings(data: UpdateNutritionSettingsRequest): Promise<NutritionSettings> {
+    return this.request<NutritionSettings>('/api/spaces/nutrition', {
+      method: 'PATCH',
       body: JSON.stringify(data),
     });
   }

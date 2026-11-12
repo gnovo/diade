@@ -11,6 +11,7 @@ import {
   parseDateOnly,
   planForWeek,
   type Recipe,
+  recipeNutrition,
   type SharedList,
   weekPeriod,
 } from '@diade/domain';
@@ -19,12 +20,15 @@ import type React from 'react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, Text, View } from 'react-native';
+import { useAuth } from '../context/AuthContext';
+import { useNutrition } from '../context/NutritionContext';
 import { generateGroceryList } from '../data/mealPlanActions';
 import { getActiveMealPlans } from '../data/queries';
 import { deleteRecord, insertRecord, updateRecord } from '../data/repository';
 import { useIngredientCatalog } from '../data/useIngredientCatalog';
 import { useLiveQuery } from '../data/useLiveQuery';
 import { Icon, useColor } from '../design';
+import { PlanNutritionCard } from './NutritionSummary';
 import { planItemsOf } from './PlanListSection';
 import { Stepper } from './RecipeForm';
 import { RecipePicker } from './RecipePicker';
@@ -87,6 +91,8 @@ export const PlanView: React.FC<{
   const ctx = useWriteContext();
   const plans = useLiveQuery(getActiveMealPlans, [] as MealPlan[]);
   const { resolver } = useIngredientCatalog();
+  const { members } = useAuth();
+  const nutrition = useNutrition();
   const today = new Date();
   // Weeks from today; a Sunday opens on the week that begins tomorrow, as new plans do.
   const [offset, setOffset] = useState(() =>
@@ -121,6 +127,14 @@ export const PlanView: React.FC<{
         : false,
     [build, generated, listItems, resolver],
   );
+
+  // Per serving when the recipe's numbers are complete, else its size, as on the library cards.
+  const servingLine = (recipe: Recipe): string => {
+    const numbers = recipeNutrition(recipe, resolver);
+    return numbers.complete && numbers.perServing
+      ? t('plan.perServing', { kcal: numbers.perServing.kcal, protein: numbers.perServing.protein })
+      : t('recipes.ingredients', { count: recipe.ingredients.length });
+  };
 
   const rangeText = (p: Pick<MealPlan, 'startsOn' | 'endsOn'>, compact = false) => {
     const dates = planDates(p);
@@ -226,6 +240,15 @@ export const PlanView: React.FC<{
         </Card>
       ) : (
         <>
+          {nutrition.active && nutrition.settings.targets ? (
+            <PlanNutritionCard
+              plan={plan}
+              recipes={recipes}
+              resolver={resolver}
+              eaters={members.length}
+              targets={nutrition.settings.targets}
+            />
+          ) : null}
           {plan.recipes.map((entry) => {
             const recipe = recipeById.get(entry.recipeId);
             const name = recipe?.name ?? t('plan.recipeGone');
@@ -238,9 +261,7 @@ export const PlanView: React.FC<{
                   <View className="flex-1 mr-2">
                     <Text className="text-base font-semibold text-ink">{name}</Text>
                     {recipe ? (
-                      <Text className="text-sm text-ink-muted mt-0.5">
-                        {t('recipes.ingredients', { count: recipe.ingredients.length })}
-                      </Text>
+                      <Text className="text-sm text-ink-muted mt-0.5">{servingLine(recipe)}</Text>
                     ) : null}
                   </View>
                   <Stepper

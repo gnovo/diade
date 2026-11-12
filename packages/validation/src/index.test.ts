@@ -9,6 +9,7 @@ import {
   syncPushSchema,
   updateExternalCalendarSchema,
   updateExternalEventSchema,
+  updateNutritionSettingsSchema,
 } from './index';
 
 describe('Validation Schemas', () => {
@@ -507,5 +508,27 @@ describe('ingredient catalog sync payloads', () => {
     const withKey = parseSyncPayload('ingredients', 'UPDATE', { name: 'Beef', matchKey: 'other' });
     expect(withKey.success).toBe(true);
     if (withKey.success) expect(withKey.data).not.toHaveProperty('matchKey');
+  });
+});
+
+describe('updateNutritionSettingsSchema', () => {
+  const targets = { kcal: 1750, protein: 140, waterMl: 2500, flexKcalPerWeek: 1000 };
+  it('accepts the switch, the targets, or both; null clears the targets', () => {
+    expect(updateNutritionSettingsSchema.safeParse({ enabled: true }).success).toBe(true);
+    expect(updateNutritionSettingsSchema.safeParse({ targets }).success).toBe(true);
+    expect(updateNutritionSettingsSchema.safeParse({ enabled: false, targets: null }).success).toBe(
+      true,
+    );
+  });
+  it('refuses targets out of range, fractions, missing fields and extra keys', () => {
+    for (const bad of [
+      { targets: { ...targets, kcal: 600 } },
+      { targets: { ...targets, protein: 140.5 } },
+      { targets: { kcal: 1750, protein: 140, waterMl: 2500 } },
+      { targets: { ...targets, fat: 60 } },
+      { enabled: true, userId: 'someone-else' },
+    ]) {
+      expect(updateNutritionSettingsSchema.safeParse(bad).success).toBe(false);
+    }
   });
 });

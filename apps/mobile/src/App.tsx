@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from './context/AuthContext';
+import { NutritionProvider } from './context/NutritionContext';
 import { ThemeProvider, useScheme, useThemeColors, useThemePreference } from './design';
 import { I18nProvider, useLanguagePreference } from './i18n';
 import { RootNavigator } from './navigation/RootNavigator';
@@ -32,8 +33,10 @@ function AppShell() {
     <SafeAreaProvider>
       <AuthProvider>
         <SyncProvider>
-          <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-          <RootNavigator />
+          <NutritionProvider>
+            <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+            <RootNavigator />
+          </NutritionProvider>
         </SyncProvider>
       </AuthProvider>
     </SafeAreaProvider>

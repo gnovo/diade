@@ -1,6 +1,7 @@
 import type {
   GroceryContribution,
   MealPlanRecipe,
+  NutritionTargets,
   RecipeIngredient,
   RecipeNutritionOverride,
   RecipeType,
@@ -94,6 +95,10 @@ export const spaceMembers = pgTable('space_members', {
     .references(() => users.id, { onDelete: 'cascade' }),
   role: text('role').notNull().default('member'), // 'owner' | 'member'
   joinedAt: timestamp('joined_at').notNull().defaultNow(),
+  /** Whether this member sees targets, the plan summary and the Today card. Their own setting; off by default. */
+  nutritionEnabled: boolean('nutrition_enabled').notNull().default(false),
+  /** This member's daily targets; only they can read them. Null until set. */
+  nutritionTargets: jsonb('nutrition_targets').$type<NutritionTargets>(),
 });
 
 // --- Core Organisation Tables ---
