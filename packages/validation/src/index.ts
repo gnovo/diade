@@ -78,6 +78,19 @@ export const updateTrainingSettingsSchema = z
   .object({ training: trainingSettingsSchema.nullable() })
   .strict();
 
+// --- Training calendar in Google ---
+
+/** The member's IANA time zone ("Europe/Lisbon"), so recurring blocks keep their local time in Google. */
+export const enableTrainingMirrorSchema = z
+  .object({
+    timeZone: z
+      .string()
+      .min(1)
+      .max(64)
+      .regex(/^[A-Za-z_]+(?:\/[A-Za-z0-9_+-]+)*$/),
+  })
+  .strict();
+
 // --- Visibility ---
 
 export const visibilitySchema = z.enum(['shared', 'personal']);

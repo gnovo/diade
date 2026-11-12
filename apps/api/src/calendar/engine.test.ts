@@ -9,9 +9,9 @@ import {
 } from './engine';
 import {
   GoogleApiError,
-  type GoogleClient,
   type GoogleEvent,
   type GoogleEventsPage,
+  type GoogleReader,
   type ListEventsParams,
 } from './google';
 import type { EventValues } from './mapper';
@@ -49,7 +49,7 @@ class MemoryStore implements EventStore {
 /** A scripted Google: each call returns (or throws) the next response. */
 function script(responses: Array<GoogleEventsPage | Error>) {
   const calls: ListEventsParams[] = [];
-  const client: GoogleClient = {
+  const client: GoogleReader = {
     listCalendars: async () => [],
     listEvents: async (_id, params) => {
       calls.push(params);

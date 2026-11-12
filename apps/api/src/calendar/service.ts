@@ -25,6 +25,7 @@ import {
   parseScopes,
   type TokenEnv,
 } from './tokens';
+import { trainingCalendarId } from './trainingMirror';
 
 export interface CalendarDeps {
   db: DbClient;
@@ -120,9 +121,11 @@ export async function refreshCalendarList(deps: CalendarDeps, userId: string): P
     throw new GoogleAuthError('Calendar access not granted');
 
   const now = nowOf(deps);
+  // The training calendar is Díade's own copy of the member's blocks: importing it would show every block twice.
+  const training = await trainingCalendarId(db, userId);
   const entries = (await clientFor(deps, account.id).listCalendars())
     .map(mapGoogleCalendar)
-    .filter((c): c is NonNullable<typeof c> => c !== null);
+    .filter((c): c is NonNullable<typeof c> => c !== null && c.googleCalendarId !== training);
 
   const existing = await db
     .select()

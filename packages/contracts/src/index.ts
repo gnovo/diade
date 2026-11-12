@@ -74,6 +74,16 @@ export interface TrainingSettingsResponse {
   training: TrainingSettings | null;
 }
 
+/** Whether the member's training blocks are copied to their Google calendar "Díade · Treino". */
+export interface TrainingCalendarStatus {
+  enabled: boolean;
+  /** Whether the Google grant includes the training scope; false means connecting again. */
+  canWrite: boolean;
+  blocks: number;
+  lastError: 'needs_reauth' | 'failed' | null;
+  syncedAt: string | null;
+}
+
 export interface InviteCodeResponse {
   inviteCode: string;
   expiresAt: string | null;

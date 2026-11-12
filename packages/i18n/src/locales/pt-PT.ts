@@ -631,6 +631,22 @@ export const ptPT: Shape<Catalog> = {
     progress: '{{done}} de {{goal}}',
     next: 'A seguir: {{title}} · {{day}}, {{start}}',
     weekDone: 'Todas as metas cumpridas esta semana.',
+    google: {
+      title: 'Mostrar no Google Calendar',
+      hint: 'Copia os seus blocos para um calendário só deles, "Díade · Treino", marcados como livres para nunca bloquearem uma reunião.',
+      copied_one: '1 bloco copiado para "Díade · Treino". As alterações seguem sozinhas.',
+      copied_other:
+        '{{count}} blocos copiados para "Díade · Treino". As alterações seguem sozinhas.',
+      needsReauth:
+        'O Google já não deixa o Díade escrever no calendário de treino. Ligue de novo para continuar.',
+      failed:
+        'A última cópia para o Google não terminou. Volta a tentar depois da próxima alteração.',
+      offline: 'Precisa de ligação para saber se está ligado.',
+      reconnect: 'Ligar o Google de novo',
+      notAllowedTitle: 'O Google não autorizou',
+      notAllowed:
+        'O Díade precisa de autorização para criar o seu próprio calendário de treino. Não chega aos seus outros calendários.',
+    },
   },
   nutrition: {
     title: 'Nutrição',

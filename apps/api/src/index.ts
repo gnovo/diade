@@ -5,6 +5,7 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { type AuthInstance, createAuth } from './auth';
 import { syncDueCalendars } from './calendar/service';
+import { mirrorTraining } from './calendar/trainingMirror';
 import { createDb, type DbClient } from './db';
 import { createCalendarRouter } from './routes/calendar';
 import { createSpacesRouter } from './routes/spaces';
@@ -88,6 +89,20 @@ app.route(
   createSyncRouter(
     (c) => c.get('db'),
     (c) => c.get('auth'),
+    // A changed event may be a training block: copy the blocks to Google after the response, on a connection of
+    // its own (the request's may be closed by then). It does nothing for a member who has not turned it on.
+    (c, userId, entities) => {
+      if (!entities.has('events')) return;
+      const env = (c.env || {}) as AppEnv['Bindings'];
+      const run = Promise.resolve()
+        .then(() => mirrorTraining({ db: createDb(env), env }, userId))
+        .catch((err) => console.error('[training mirror]', err));
+      try {
+        c.executionCtx.waitUntil(run);
+      } catch {
+        // No execution context (tests): the promise runs on its own.
+      }
+    },
   ),
 );
 

@@ -1,5 +1,6 @@
 /**
- * Thin Google Calendar REST client. Read-only: Díade never writes to Google.
+ * Thin Google Calendar REST client. It reads the member's calendars, and writes only to the one calendar Díade
+ * creates for their training blocks (the `calendar.app.created` scope cannot reach any other).
  * Pure `fetch`, so it runs in Workers and can be tested with a stub.
  */
 
@@ -89,9 +90,34 @@ export interface ListEventsParams {
   pageToken?: string;
 }
 
+/** An event Díade writes: a timed, recurring block. */
+export interface GoogleEventWrite {
+  summary: string;
+  description?: string;
+  start: { dateTime: string; timeZone: string };
+  end: { dateTime: string; timeZone: string };
+  recurrence?: string[];
+  transparency: 'transparent' | 'opaque';
+  visibility: 'private' | 'default';
+  reminders: { useDefault: boolean };
+  extendedProperties?: { private: Record<string, string> };
+}
+
+/** The reading half of the client: all the event sync needs. */
+export type GoogleReader = Pick<GoogleClient, 'listCalendars' | 'listEvents'>;
+
 export interface GoogleClient {
   listCalendars(): Promise<GoogleCalendarListEntry[]>;
   listEvents(calendarId: string, params: ListEventsParams): Promise<GoogleEventsPage>;
+  /** Creates a secondary calendar owned by the app. */
+  insertCalendar(summary: string, timeZone: string): Promise<{ id: string }>;
+  /** Deletes a calendar the app created; one already gone counts as deleted. */
+  deleteCalendar(calendarId: string): Promise<void>;
+  insertEvent(calendarId: string, event: GoogleEventWrite): Promise<{ id: string }>;
+  /** Replaces the fields given; a 404 or 410 means the event is gone (the member deleted it in Google). */
+  patchEvent(calendarId: string, eventId: string, event: GoogleEventWrite): Promise<{ id: string }>;
+  /** One already gone counts as deleted. */
+  deleteEvent(calendarId: string, eventId: string): Promise<void>;
 }
 
 /**
@@ -102,7 +128,12 @@ export function createGoogleClient(
   getAccessToken: (forceRefresh?: boolean) => Promise<string>,
   fetchFn: FetchFn = fetch,
 ): GoogleClient {
-  async function get<T>(path: string, query: Record<string, string | undefined>): Promise<T> {
+  async function send<T>(
+    method: 'GET' | 'POST' | 'PATCH' | 'DELETE',
+    path: string,
+    query: Record<string, string | undefined>,
+    body?: unknown,
+  ): Promise<T> {
     const url = new URL(`${API}${path}`);
     for (const [key, value] of Object.entries(query)) {
       if (value !== undefined) url.searchParams.set(key, value);
@@ -111,15 +142,30 @@ export function createGoogleClient(
     for (let attempt = 0; attempt < 2; attempt++) {
       const token = await getAccessToken(attempt > 0);
       const response = await fetchFn(url.toString(), {
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        method,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+          ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+        },
+        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
       });
       if (response.status === 401 && attempt === 0) continue;
       if (response.status === 401) throw new GoogleAuthError('Google rejected the access token');
       if (!response.ok) throw await toApiError(response);
-      return (await response.json()) as T;
+      // DELETE answers 204 with no body.
+      return (response.status === 204 ? undefined : await response.json()) as T;
     }
     throw new GoogleAuthError('Google rejected the access token');
   }
+  const get = <T>(path: string, query: Record<string, string | undefined>) =>
+    send<T>('GET', path, query);
+  /** A delete of something already gone is done. */
+  const ignoreGone = (err: unknown) => {
+    if (err instanceof GoogleApiError && (err.status === 404 || err.status === 410)) return;
+    throw err;
+  };
+  const events = (calendarId: string) => `/calendars/${encodeURIComponent(calendarId)}/events`;
 
   return {
     async listCalendars() {
@@ -161,6 +207,27 @@ export function createGoogleClient(
         nextSyncToken: page.nextSyncToken,
       };
     },
+
+    insertCalendar: (summary, timeZone) =>
+      send<{ id: string }>('POST', '/calendars', {}, { summary, timeZone }),
+
+    deleteCalendar: (calendarId) =>
+      send<void>('DELETE', `/calendars/${encodeURIComponent(calendarId)}`, {}).catch(ignoreGone),
+
+    insertEvent: (calendarId, event) => send<{ id: string }>('POST', events(calendarId), {}, event),
+
+    patchEvent: (calendarId, eventId, event) =>
+      send<{ id: string }>(
+        'PATCH',
+        `${events(calendarId)}/${encodeURIComponent(eventId)}`,
+        {},
+        event,
+      ),
+
+    deleteEvent: (calendarId, eventId) =>
+      send<void>('DELETE', `${events(calendarId)}/${encodeURIComponent(eventId)}`, {}).catch(
+        ignoreGone,
+      ),
   };
 }
 

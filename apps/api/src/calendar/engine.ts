@@ -1,9 +1,9 @@
 /**
- * Per-calendar event sync. Talks to Google through `GoogleClient` and to storage through
+ * Per-calendar event sync. Talks to Google through `GoogleReader` and to storage through
  * `EventStore`, so the whole policy (full vs incremental, 410 recovery, window roll-forward,
  * tombstoning) is testable without a network or a database.
  */
-import { GoogleApiError, type GoogleClient } from './google';
+import { GoogleApiError, type GoogleReader } from './google';
 import { type EventValues, mapGoogleEvent } from './mapper';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -58,7 +58,7 @@ const chunk = <T>(items: T[], size: number): T[][] => {
 };
 
 export async function syncCalendarEvents(
-  deps: { google: GoogleClient; store: EventStore },
+  deps: { google: GoogleReader; store: EventStore },
   calendar: SyncTarget,
   now: Date,
   options: { forceFull?: boolean } = {},
@@ -76,7 +76,7 @@ export async function syncCalendarEvents(
 }
 
 async function runIncremental(
-  { google, store }: { google: GoogleClient; store: EventStore },
+  { google, store }: { google: GoogleReader; store: EventStore },
   calendar: SyncTarget,
   now: Date,
 ): Promise<SyncResult> {
@@ -122,7 +122,7 @@ async function runIncremental(
 }
 
 async function runFull(
-  { google, store }: { google: GoogleClient; store: EventStore },
+  { google, store }: { google: GoogleReader; store: EventStore },
   calendar: SyncTarget,
   now: Date,
 ): Promise<SyncResult> {
