@@ -20,12 +20,14 @@ export * from './recipeMarkdown';
 export * from './recipeSections';
 export * from './recipes';
 export * from './recurrence';
+export * from './training';
 
 import type { ExternalCalendar, ExternalEvent } from './externalCalendar';
 import type { ImportantDateRepeat, ImportantDateType } from './importantDates';
 import type { Ingredient } from './ingredientCatalog';
 import type { GroceryContribution, MealPlan } from './mealPlan';
 import type { Recipe } from './recipes';
+import type { WorkoutDetails } from './training';
 
 // --- Identity & Space ---
 
@@ -71,7 +73,7 @@ export interface BaseRecord {
 
 // --- Calendar & Events ---
 
-export type EventCategory = 'general' | 'important_date';
+export type EventCategory = 'general' | 'important_date' | 'workout';
 
 export interface CalendarEvent extends BaseRecord {
   title: string;
@@ -84,6 +86,8 @@ export interface CalendarEvent extends BaseRecord {
   category: EventCategory;
   /** Starred: featured on the Today screen. */
   highlighted: boolean;
+  /** For a `workout` block: the kind of session, its length and the days it was done. */
+  workout?: WorkoutDetails | null;
 }
 
 // --- Important dates ---

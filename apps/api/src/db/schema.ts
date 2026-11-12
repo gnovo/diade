@@ -5,6 +5,8 @@ import type {
   RecipeIngredient,
   RecipeNutritionOverride,
   RecipeType,
+  TrainingSettings,
+  WorkoutDetails,
 } from '@diade/domain';
 import { sql } from 'drizzle-orm';
 import {
@@ -99,6 +101,8 @@ export const spaceMembers = pgTable('space_members', {
   nutritionEnabled: boolean('nutrition_enabled').notNull().default(false),
   /** This member's daily targets; only they can read them. Null until set. */
   nutritionTargets: jsonb('nutrition_targets').$type<NutritionTargets>(),
+  /** This member's work-cycle anchor and weekly training goals; only they can read them. Null until set. */
+  training: jsonb('training').$type<TrainingSettings>(),
 });
 
 // --- Core Organisation Tables ---
@@ -121,6 +125,8 @@ export const events = pgTable('events', {
   category: text('category').notNull().default('general'), // 'general' | 'important_date'
   /** Starred: featured in the Highlights section of the Today screen, for both members. */
   highlighted: boolean('highlighted').notNull().default(false),
+  /** For category 'workout' (a training block): the session's kind and length, and the days it was done. */
+  workout: jsonb('workout').$type<WorkoutDetails>(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   deletedAt: timestamp('deleted_at'),

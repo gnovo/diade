@@ -10,6 +10,7 @@ import {
   updateExternalCalendarSchema,
   updateExternalEventSchema,
   updateNutritionSettingsSchema,
+  updateTrainingSettingsSchema,
 } from './index';
 
 describe('Validation Schemas', () => {
@@ -529,6 +530,51 @@ describe('updateNutritionSettingsSchema', () => {
       { enabled: true, userId: 'someone-else' },
     ]) {
       expect(updateNutritionSettingsSchema.safeParse(bad).success).toBe(false);
+    }
+  });
+});
+
+describe('training blocks', () => {
+  const block = {
+    title: 'Força',
+    startAt: '2026-11-16T17:30:00.000Z',
+    endAt: '2026-11-16T19:00:00.000Z',
+    visibility: 'personal',
+    recurrenceRule: 'FREQ=WEEKLY;INTERVAL=2',
+    category: 'workout',
+    workout: { kind: 'strength', durationMin: 40, done: [] },
+  };
+  it('accepts a workout event and a change to its done days', () => {
+    expect(parseSyncPayload('events', 'INSERT', block).success).toBe(true);
+    expect(
+      parseSyncPayload('events', 'UPDATE', {
+        workout: { kind: 'strength', durationMin: 40, done: ['2026-11-16'] },
+      }).success,
+    ).toBe(true);
+  });
+  it('refuses an unknown kind, a malformed day and extra keys', () => {
+    for (const workout of [
+      { kind: 'yoga', durationMin: 20, done: [] },
+      { kind: 'strength', durationMin: 40, done: ['16/11/2026'] },
+      { kind: 'strength', durationMin: 40, done: [], calories: 300 },
+    ]) {
+      expect(parseSyncPayload('events', 'UPDATE', { workout }).success).toBe(false);
+    }
+  });
+
+  const goals = { strength: 3, bodyweight: 2, walk: 4 };
+  it('accepts training settings, or null', () => {
+    const training = { cycleAnchor: '2026-11-09', goals: { week1: goals, week2: goals } };
+    expect(updateTrainingSettingsSchema.safeParse({ training }).success).toBe(true);
+    expect(updateTrainingSettingsSchema.safeParse({ training: null }).success).toBe(true);
+  });
+  it('refuses a bad anchor, a missing week and negative goals', () => {
+    for (const training of [
+      { cycleAnchor: '9 Nov', goals: { week1: goals, week2: goals } },
+      { cycleAnchor: '2026-11-09', goals: { week1: goals } },
+      { cycleAnchor: '2026-11-09', goals: { week1: { ...goals, walk: -1 }, week2: goals } },
+    ]) {
+      expect(updateTrainingSettingsSchema.safeParse({ training }).success).toBe(false);
     }
   });
 });

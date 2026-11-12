@@ -3,6 +3,7 @@ import {
   createSpaceSchema,
   joinSpaceSchema,
   updateNutritionSettingsSchema,
+  updateTrainingSettingsSchema,
 } from '@diade/validation';
 import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
@@ -325,6 +326,49 @@ export function createSpacesRouter(
       success: true,
       data: { enabled: updated.enabled, targets: updated.targets ?? null },
     });
+  });
+
+  // GET /api/spaces/training - The signed-in member's own training settings (never the partner's)
+  router.get('/training', async (c) => {
+    const db = getDb(c);
+    const user = c.get('user');
+    const [membership] = await db
+      .select({ training: spaceMembers.training })
+      .from(spaceMembers)
+      .where(eq(spaceMembers.userId, user.id))
+      .limit(1);
+    if (!membership) {
+      return c.json(
+        {
+          success: false,
+          error: { code: 'NO_SPACE', message: 'User does not belong to any space yet' },
+        },
+        404,
+      );
+    }
+    return c.json({ success: true, data: { training: membership.training ?? null } });
+  });
+
+  // PATCH /api/spaces/training - Replace the signed-in member's own training settings
+  router.patch('/training', zValidator('json', updateTrainingSettingsSchema), async (c) => {
+    const db = getDb(c);
+    const user = c.get('user');
+    const { training } = c.req.valid('json');
+    const [updated] = await db
+      .update(spaceMembers)
+      .set({ training })
+      .where(eq(spaceMembers.userId, user.id))
+      .returning({ training: spaceMembers.training });
+    if (!updated) {
+      return c.json(
+        {
+          success: false,
+          error: { code: 'NO_SPACE', message: 'User does not belong to any space yet' },
+        },
+        404,
+      );
+    }
+    return c.json({ success: true, data: { training: updated.training ?? null } });
   });
 
   // POST /api/spaces/invite - Generate New Invite Code

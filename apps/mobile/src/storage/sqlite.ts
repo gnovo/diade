@@ -53,6 +53,8 @@ async function openLocalDb(): Promise<SQLite.SQLiteDatabase> {
       recurrence_rule TEXT,
       category TEXT NOT NULL DEFAULT 'general',
       highlighted INTEGER NOT NULL DEFAULT 0,
+      -- A training block's session as JSON (category 'workout'); NULL otherwise.
+      workout TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       deleted_at TEXT
@@ -282,6 +284,7 @@ async function migrateLocalSchema(db: SQLite.SQLiteDatabase): Promise<void> {
   await addColumn('local_ingredients', 'kcal_per100g', 'REAL');
   await addColumn('local_ingredients', 'protein_per100g', 'REAL');
   await addColumn('local_ingredients', 'grams_per_unit', 'REAL');
+  await addColumn('local_events', 'workout', 'TEXT');
 }
 
 // --- Transactions ---

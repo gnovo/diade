@@ -7,6 +7,7 @@ import type {
   SyncPullResult,
   SyncPushPayload,
   SyncPushResult,
+  TrainingSettings,
   User,
 } from '@diade/domain';
 
@@ -66,6 +67,11 @@ export interface NutritionSettings {
 export interface UpdateNutritionSettingsRequest {
   enabled?: boolean;
   targets?: NutritionTargets | null;
+}
+
+/** The signed-in member's own training settings, or null until set. */
+export interface TrainingSettingsResponse {
+  training: TrainingSettings | null;
 }
 
 export interface InviteCodeResponse {

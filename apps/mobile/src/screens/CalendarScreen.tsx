@@ -39,6 +39,7 @@ import { EventForm } from '../components/EventForm';
 import { ExternalEventDetail } from '../components/ExternalEventDetail';
 import { MonthView } from '../components/MonthView';
 import { TimeGrid } from '../components/TimeGrid';
+import { BlockSheet } from '../components/TrainingViews';
 import { Button, Card, EmptyState } from '../components/ui';
 import { ViewTransition } from '../components/ViewTransition';
 import { useAuth } from '../context/AuthContext';
@@ -75,6 +76,7 @@ export const CalendarScreen: React.FC = () => {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<CalendarEvent | null>(null);
+  const [block, setBlock] = useState<{ event: CalendarEvent; startAt: Date } | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [detail, setDetail] = useState<Extract<AgendaEntry, { kind: 'external' }> | null>(null);
@@ -171,8 +173,14 @@ export const CalendarScreen: React.FC = () => {
     return partnerFirstName;
   };
 
-  const openEvent = (eventId: string) => {
-    setEditing(events.data.find((e) => e.id === eventId) ?? null);
+  // A training block opens its own sheet for the day tapped; any other event opens the form.
+  const openEvent = (eventId: string, occurrenceStart: Date) => {
+    const event = events.data.find((e) => e.id === eventId) ?? null;
+    if (event?.category === 'workout') {
+      setBlock({ event, startAt: occurrenceStart });
+      return;
+    }
+    setEditing(event);
     setFormOpen(true);
   };
 
@@ -461,6 +469,14 @@ export const CalendarScreen: React.FC = () => {
         }}
       />
       <ExternalEventDetail entry={detail} onClose={() => setDetail(null)} />
+      <BlockSheet
+        block={block}
+        onClose={() => setBlock(null)}
+        onEdit={(event) => {
+          setEditing(event);
+          setFormOpen(true);
+        }}
+      />
       <CalendarFiltersSheet
         visible={filtersOpen}
         onClose={() => setFiltersOpen(false)}

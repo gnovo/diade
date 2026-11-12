@@ -112,7 +112,7 @@ export const TimeGrid: React.FC<
   };
   const open = (entry: AgendaEntry) => {
     if (entry.kind === 'external') onOpenExternal(entry);
-    else if (entry.kind === 'event') onOpenEvent(entry.item.eventId);
+    else if (entry.kind === 'event') onOpenEvent(entry.item.eventId, entry.item.startAt);
   };
 
   const columns = useMemo(
@@ -258,7 +258,9 @@ export const TimeGrid: React.FC<
                     const height =
                       Math.max(block.endMin - block.startMin, MIN_BLOCK_MINUTES) *
                       (HOUR_HEIGHT / 60);
-                    const label = titleOf(entry);
+                    // A training block is an offer, not an appointment: a dashed outline, solid once done.
+                    const workout = entry.kind === 'event' ? entry.item.workoutDone : null;
+                    const label = workout === true ? `✓ ${titleOf(entry)}` : titleOf(entry);
                     return (
                       <Pressable
                         key={block.id}
@@ -277,10 +279,14 @@ export const TimeGrid: React.FC<
                         <View
                           style={{
                             flex: 1,
-                            backgroundColor: tint(color, mine ? 0.3 : 0.16),
-                            borderLeftWidth: 3,
+                            backgroundColor: tint(
+                              color,
+                              workout === false ? 0.08 : mine ? 0.3 : 0.16,
+                            ),
+                            borderLeftWidth: workout === false ? 1.5 : 3,
                             borderLeftColor: color,
-                            borderWidth: mine ? 0 : 1,
+                            borderWidth: workout === false ? 1.5 : mine ? 0 : 1,
+                            borderStyle: workout === false ? 'dashed' : 'solid',
                             borderColor: color,
                             borderRadius: 6,
                             paddingHorizontal: week ? 3 : 6,

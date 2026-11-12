@@ -20,7 +20,8 @@ const StarMark: React.FC = () => {
 };
 
 export interface AgendaRowHandlers {
-  onOpenEvent: (eventId: string) => void;
+  /** The occurrence's start comes along, so a training block opens on its own day. */
+  onOpenEvent: (eventId: string, occurrenceStart: Date) => void;
   onOpenExternal: (entry: Extract<AgendaEntry, { kind: 'external' }>) => void;
   onToggleTask: (task: Extract<AgendaEntry, { kind: 'task' }>['task']) => void;
   partnerName: (userId: string | null) => string;
@@ -42,7 +43,7 @@ export const AgendaRow: React.FC<{ entry: AgendaEntry; now: Date } & AgendaRowHa
       const { item } = entry;
       return (
         <Pressable
-          onPress={() => onOpenEvent(item.eventId)}
+          onPress={() => onOpenEvent(item.eventId, item.startAt)}
           accessibilityRole="button"
           accessibilityLabel={`${item.title}, ${formatAgendaTime(t, item)}`}
           className="px-4 py-3 flex-row items-center justify-between min-h-[56px]"
@@ -58,6 +59,9 @@ export const AgendaRow: React.FC<{ entry: AgendaEntry; now: Date } & AgendaRowHa
               {formatAgendaTime(t, item)}
               {item.recurring ? ` · ${t('calendar.repeats')}` : ''}
               {item.category === 'important_date' ? ` · ${t('calendar.important')}` : ''}
+              {item.workoutDone === null
+                ? ''
+                : ` · ${t(item.workoutDone ? 'training.doneShort' : 'training.blockShort')}`}
             </Text>
           </View>
           <Pill

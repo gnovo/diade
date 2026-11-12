@@ -18,6 +18,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, Share, Text, View } from 'react-native';
 import { TodayNutrition } from '../components/NutritionSummary';
+import { TodayTraining } from '../components/TrainingViews';
 import {
   Button,
   Card,
@@ -401,6 +402,7 @@ export const TodayScreen: React.FC = () => {
       ) : null}
 
       {nutritionActive ? <TodayNutrition /> : null}
+      <TodayTraining />
 
       <Card>
         <SectionLabel>{t('today.comingUp')}</SectionLabel>

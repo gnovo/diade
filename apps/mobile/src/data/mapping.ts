@@ -20,7 +20,14 @@ const BOOLEAN_KEYS = new Set([
 const NULLABLE_BOOLEAN_KEYS = new Set(['staple']);
 
 /** Stored as JSON text locally; arrays and objects in the domain. */
-const JSON_KEYS = new Set(['ingredients', 'recipes', 'contributions', 'aliases', 'nutrition']);
+const JSON_KEYS = new Set([
+  'ingredients',
+  'recipes',
+  'contributions',
+  'aliases',
+  'nutrition',
+  'workout',
+]);
 
 export type Row = Record<string, unknown>;
 
