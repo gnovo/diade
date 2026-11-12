@@ -12,6 +12,7 @@ import type {
   SyncPullResult,
   SyncPushPayload,
   SyncPushResult,
+  TrainingSettingsResponse,
   UpdateCalendarRequest,
   UpdateExternalEventRequest,
   UpdateNutritionSettingsRequest,
@@ -159,6 +160,21 @@ export class DiadeApiClient {
     return this.request<NutritionSettings>('/api/spaces/nutrition', {
       method: 'PATCH',
       body: JSON.stringify(data),
+    });
+  }
+
+  // --- Training settings (the signed-in member's own) ---
+
+  async getTrainingSettings(): Promise<TrainingSettingsResponse> {
+    return this.request<TrainingSettingsResponse>('/api/spaces/training');
+  }
+
+  async updateTrainingSettings(
+    training: TrainingSettingsResponse['training'],
+  ): Promise<TrainingSettingsResponse> {
+    return this.request<TrainingSettingsResponse>('/api/spaces/training', {
+      method: 'PATCH',
+      body: JSON.stringify({ training }),
     });
   }
 

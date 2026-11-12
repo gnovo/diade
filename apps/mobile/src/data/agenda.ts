@@ -2,6 +2,7 @@ import {
   type CalendarEvent,
   type EventCategory,
   expandEventOccurrences,
+  isDoneOn,
   type Visibility,
 } from '@diade/domain';
 import type { TFunction } from '@diade/i18n';
@@ -18,6 +19,8 @@ export interface AgendaItem {
   category: EventCategory;
   recurring: boolean;
   highlighted: boolean;
+  /** Whether this occurrence of a training block was marked done; null for other events. */
+  workoutDone: boolean | null;
 }
 
 /** Flattens events (including recurring series) into occurrences inside [from, to], soonest first. */
@@ -36,6 +39,10 @@ export function buildAgenda(events: CalendarEvent[], from: Date, to: Date): Agen
         category: event.category,
         recurring: Boolean(event.recurrenceRule),
         highlighted: event.highlighted,
+        workoutDone:
+          event.category === 'workout' && event.workout
+            ? isDoneOn(event.workout, occurrence.startAt)
+            : null,
       });
     }
   }

@@ -116,7 +116,13 @@ export const EventForm: React.FC<EventFormProps> = ({ visible, onClose, event })
       endAt: end.toISOString(),
       isAllDay,
       visibility,
-      recurrenceRule: repeat === 'NONE' ? null : `FREQ=${repeat}`,
+      // An unchanged repeat keeps its rule: a training block's INTERVAL=2 must survive an edit of its time.
+      recurrenceRule:
+        repeat === 'NONE'
+          ? null
+          : event?.recurrenceRule && repeatFromRule(event.recurrenceRule) === repeat
+            ? event.recurrenceRule
+            : `FREQ=${repeat}`,
       highlighted,
     };
 

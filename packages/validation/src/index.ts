@@ -3,6 +3,7 @@ import {
   EXTERNAL_VISIBILITIES,
   IMPORTANT_DATE_REPEATS,
   IMPORTANT_DATE_TYPES,
+  MAX_DONE_DAYS,
   MAX_PLAN_RECIPES,
   MAX_SERVINGS,
   MIN_SERVINGS,
@@ -13,6 +14,7 @@ import {
   RECIPE_UNITS,
   type SyncEntityName,
   TASK_PRIORITIES,
+  WORKOUT_KINDS,
 } from '@diade/domain';
 import { z } from 'zod';
 
@@ -52,13 +54,46 @@ export const updateNutritionSettingsSchema = z
   })
   .strict();
 
+// --- Training settings (per member) ---
+
+const dateOnlyString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD');
+
+const weeklyGoalsSchema = z
+  .object({
+    strength: z.number().int().min(0).max(14),
+    bodyweight: z.number().int().min(0).max(14),
+    walk: z.number().int().min(0).max(14),
+  })
+  .strict();
+
+export const trainingSettingsSchema = z
+  .object({
+    cycleAnchor: dateOnlyString,
+    goals: z.object({ week1: weeklyGoalsSchema, week2: weeklyGoalsSchema }).strict(),
+  })
+  .strict();
+
+/** null clears the settings. */
+export const updateTrainingSettingsSchema = z
+  .object({ training: trainingSettingsSchema.nullable() })
+  .strict();
+
 // --- Visibility ---
 
 export const visibilitySchema = z.enum(['shared', 'personal']);
 
 // --- Calendar & Events Schemas ---
 
-export const eventCategorySchema = z.enum(['general', 'important_date']);
+export const eventCategorySchema = z.enum(['general', 'important_date', 'workout']);
+
+/** A training block's session: its kind, its length, and the days it was done. */
+export const workoutDetailsSchema = z
+  .object({
+    kind: z.enum(WORKOUT_KINDS),
+    durationMin: z.number().int().min(0).max(600),
+    done: z.array(dateOnlyString).max(MAX_DONE_DAYS),
+  })
+  .strict();
 
 export const createEventSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200),
@@ -70,6 +105,7 @@ export const createEventSchema = z.object({
   recurrenceRule: z.string().max(255).nullable().optional(),
   category: eventCategorySchema.default('general'),
   highlighted: z.boolean().default(false),
+  workout: workoutDetailsSchema.nullable().optional(),
 });
 
 export const updateEventSchema = createEventSchema.partial().extend({
@@ -419,6 +455,7 @@ const eventUpdatePayload = z.object({
   recurrenceRule: z.string().max(255).nullable().optional(),
   category: eventCategorySchema.optional(),
   highlighted: z.boolean().optional(),
+  workout: workoutDetailsSchema.nullable().optional(),
 });
 
 const taskUpdatePayload = z.object({

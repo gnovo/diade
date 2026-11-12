@@ -198,6 +198,7 @@ async function applyMutation(
           recurrenceRule: d.recurrenceRule ?? null,
           category: d.category ?? 'general',
           highlighted: d.highlighted ?? false,
+          workout: d.workout ?? null,
           createdAt: now,
           updatedAt: now,
         });
@@ -218,6 +219,7 @@ async function applyMutation(
       if (d.recurrenceRule !== undefined) changes.recurrenceRule = d.recurrenceRule;
       if (d.category !== undefined) changes.category = d.category;
       if (d.highlighted !== undefined) changes.highlighted = d.highlighted;
+      if (d.workout !== undefined) changes.workout = d.workout;
       await db.update(events).set(changes).where(where);
       return;
     }
