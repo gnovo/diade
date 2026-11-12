@@ -1,3 +1,4 @@
+import { sizes } from '@diade/design-tokens';
 import {
   builtInNutrition,
   formatNumber,
@@ -16,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, Text, View } from 'react-native';
 import { setIngredientNutrition } from '../data/ingredientActions';
 import { updateRecord } from '../data/repository';
+import { Icon } from '../design';
 import { BottomSheet } from './BottomSheet';
 import { decimalFor } from './RecipeForm';
 import { Button, Card, EmptyState, Pill, SectionLabel, TextField, useWriteContext } from './ui';
@@ -142,9 +144,10 @@ export const RecipeNutritionCard: React.FC<{ recipe: Recipe; nutrition: RecipeNu
             onPress={() => setEditing(true)}
             accessibilityRole="button"
             accessibilityLabel={t('recipes.nutrition.editLabel')}
-            hitSlop={12}
+            // A 44 pt target that does not make the label row taller.
+            className="w-11 h-11 -my-4 -mr-3 rounded-full items-center justify-center active:bg-surface-sunken"
           >
-            <Text className="text-xs leading-4 font-semibold text-ink">{t('common.edit')}</Text>
+            <Icon name="pencil" size={sizes['icon-sm']} />
           </Pressable>
         }
       >
@@ -152,17 +155,18 @@ export const RecipeNutritionCard: React.FC<{ recipe: Recipe; nutrition: RecipeNu
       </SectionLabel>
       {perServing ? (
         <>
+          {/* Each figure is its own text with the title line height: nested in a smaller line, the "g" lost its descender. */}
           <View className="flex-row items-baseline gap-6">
-            <Text className="text-ink">
-              <Text className="text-title-1 font-bold">{perServing.kcal}</Text>
-              <Text className="text-sm text-ink-muted"> {t('recipes.nutrition.kcal')}</Text>
-            </Text>
-            <Text className="text-ink">
-              <Text className="text-title-1 font-bold">
+            <View className="flex-row items-baseline gap-1">
+              <Text className="text-title-1 font-bold text-ink">{perServing.kcal}</Text>
+              <Text className="text-sm text-ink-muted">{t('recipes.nutrition.kcal')}</Text>
+            </View>
+            <View className="flex-row items-baseline gap-1">
+              <Text className="text-title-1 font-bold text-ink">
                 {t('recipes.nutrition.grams', { value: perServing.protein })}
               </Text>
-              <Text className="text-sm text-ink-muted"> {t('recipes.nutrition.protein')}</Text>
-            </Text>
+              <Text className="text-sm text-ink-muted">{t('recipes.nutrition.protein')}</Text>
+            </View>
           </View>
           <View className="flex-row items-center justify-between mt-3 gap-2">
             {isHighProtein(perServing) ? <Pill label={t('recipes.highProtein')} /> : <View />}
