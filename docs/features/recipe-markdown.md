@@ -14,6 +14,7 @@ Copy this into a note (Obsidian or any app) and paste it into the import sheet.
 ```md
 # Spaghetti carbonara
 servings: 4
+type: meal
 tags: pasta, quick
 
 A Roman classic. Anything written here ends up in the recipe's notes.
@@ -36,6 +37,7 @@ The Portuguese template reads the same way:
 ```md
 # Bacalhau com natas
 doses: 6
+tipo: refeição
 
 ## Ingredientes
 - 800 g de bacalhau demolhado
@@ -55,6 +57,7 @@ One note can hold several recipes. Each starts at a `# ` heading.
 |---|---|
 | Recipe | A top-level `# ` heading starts one and gives its name (120 characters). Text before the first heading counts only if it has an ingredient list; then the name comes from front matter `title:`, or is asked for. |
 | Servings | `servings:`, `serves:`, `doses:` or `porções:` (any case). `4-6` reads as 4. Missing or below 1 gives 4, above 50 gives 50. Front matter `servings:` is used when the recipe has none. |
+| Type | `type:` or `tipo:`: `breakfast` / `pequeno-almoço`, `meal` / `refeição`, `snack` / `lanche`, `prep` / `preparação` (any case, accents optional). A word that is none of them is dropped. Sharing writes it back as `type: meal`. |
 | Nutrition | `kcal:` (or `calories:`, `calorias:`) and `protein:` (or `proteína:`), per serving, in the text before the first section. Both are needed; then they become the recipe's own values, which win over the ones worked out from the ingredients. `512,5` reads as 512.5; a trailing `g` is ignored. Calories above 5000 or protein above 500 are dropped. Sharing writes them back only when the recipe has its own values. |
 | Tags | `tags:` is read and ignored. |
 | Ingredients | The lines under a heading (any level `##`–`######`) or label (`Ingredients:`, `**Ingredientes**`) that contains "ingredient" or "ingrediente". Up to 100. |

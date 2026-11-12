@@ -25,6 +25,7 @@ import {
   normalizeIngredientName,
   type Recipe,
   type RecipeIngredient,
+  type RecipeType,
 } from './recipes';
 
 const MAX_NAME = 120;
@@ -60,13 +61,20 @@ export interface DraftRecipe {
   servings: number;
   /** Per-serving `kcal:` and `protein:`, when the note gives both. */
   nutrition: { kcal: number; protein: number } | null;
+  /** `type:` (or `tipo:`), when it names one of the recipe types in either language. */
+  type: RecipeType | null;
   notes: string | null;
   lines: DraftLine[];
   warnings: DraftWarning[];
 }
 
 /** What `createRecipeSchema` takes. */
-export type RecipeInput = Pick<Recipe, 'name' | 'servings' | 'notes' | 'ingredients' | 'nutrition'>;
+export type RecipeInput = Pick<
+  Recipe,
+  'name' | 'servings' | 'notes' | 'ingredients' | 'nutrition'
+> & {
+  type?: RecipeType | null;
+};
 
 // --- Reading ---
 
@@ -77,6 +85,22 @@ const BULLET_OR_CHECKBOX = /^\s*(?:(?:[-*+•]|\d+[.)])\s+)?(?:\[[ xX]\]\s*)?/;
 const META = /^\s*(servings?|serves|doses?|por[cç][õo]es|por[cç][aã]o|tags?)\s*:\s*(.*)$/i;
 /** Per-serving nutrition: `kcal: 520`, `calorias: 520`, `protein: 38 g`, `proteína: 38`. */
 const NUTRITION_META = /^\s*(kcal|calories|calorias|protein|proteins|prote[ií]nas?)\s*:\s*(.*)$/i;
+/** The recipe type: `type: snack`, `tipo: lanche`. */
+const TYPE_META = /^\s*(type|tipo)\s*:\s*(.*)$/i;
+/** Every way a type is written, accents removed: English, Portuguese, and the app's own labels. */
+const TYPE_WORDS: Record<string, RecipeType> = {
+  breakfast: 'breakfast',
+  'pequeno-almoco': 'breakfast',
+  'pequeno almoco': 'breakfast',
+  meal: 'meal',
+  refeicao: 'meal',
+  snack: 'snack',
+  lanche: 'snack',
+  prep: 'prep',
+  preparacao: 'prep',
+  'meal prep': 'prep',
+};
+
 const INGREDIENTS_TITLE = /\bingredient(?:e)?s?\b/;
 /** A `# ` line inside notes is written `\\# ` so it does not start another recipe. */
 const ESCAPED_H1 = /^(\\+)(#\s)/;
@@ -173,6 +197,7 @@ function parseChunk(chunk: Chunk, newId: () => string): DraftRecipe {
   let servings = DEFAULT_SERVINGS;
   let kcal: number | null = null;
   let protein: number | null = null;
+  let type: RecipeType | null = null;
   const notes: string[] = [];
   const lines: DraftLine[] = [];
   let section: 'body' | 'ingredients' | 'other' | 'verbatim' = 'body';
@@ -233,6 +258,12 @@ function parseChunk(chunk: Chunk, newId: () => string): DraftRecipe {
       if (!/^tags?$/i.test(meta[1])) servings = parseServings(meta[2]);
       continue;
     }
+    const typed = section === 'body' ? TYPE_META.exec(line) : null;
+    if (typed) {
+      // A value that names no type (a typo) is dropped with the line, like `tags:`.
+      type = TYPE_WORDS[normalizeIngredientName(plain(typed[2]))] ?? null;
+      continue;
+    }
     const macro = section === 'body' ? NUTRITION_META.exec(line) : null;
     if (macro) {
       const amount = parseAmount(macro[2]);
@@ -263,7 +294,7 @@ function parseChunk(chunk: Chunk, newId: () => string): DraftRecipe {
     kcal !== null && protein !== null && kcal <= MAX_KCAL && protein <= MAX_PROTEIN
       ? { kcal, protein }
       : null;
-  return { name, servings, nutrition, notes: noteText || null, lines, warnings };
+  return { name, servings, nutrition, type, notes: noteText || null, lines, warnings };
 }
 
 /** Obsidian front matter at the top of a note: only `servings` / `title` are read, the rest is dropped. */
@@ -356,6 +387,7 @@ function ingredientLine(ingredient: RecipeIngredient): string {
  */
 export function formatRecipeMarkdown(recipe: RecipeInput): string {
   const out = [`# ${recipe.name}`, `servings: ${recipe.servings}`];
+  if (recipe.type) out.push(`type: ${recipe.type}`);
   if (recipe.nutrition)
     out.push(`kcal: ${recipe.nutrition.kcal}`, `protein: ${recipe.nutrition.protein}`);
   out.push('', '## Ingredients');
@@ -382,6 +414,7 @@ export function draftToRecipeInput(draft: DraftRecipe): RecipeInput {
     servings: draft.servings,
     // Only when the note gave values: a recipe without them is the same as before nutrition existed.
     ...(draft.nutrition ? { nutrition: draft.nutrition } : {}),
+    ...(draft.type ? { type: draft.type } : {}),
     notes: draft.notes,
     ingredients: draft.lines.filter(isImportable).map((line) => ({
       id: line.id,
