@@ -20,6 +20,7 @@ import {
 import { useIngredientCatalog } from '../data/useIngredientCatalog';
 import { Icon } from '../design';
 import { BottomSheet } from './BottomSheet';
+import { NutritionSection } from './NutritionViews';
 import { Button, Card, EmptyState, SectionLabel, TextField, useWriteContext } from './ui';
 
 /**
@@ -405,6 +406,7 @@ export const IngredientsScreen: React.FC<{
             )}
           </View>
           <StaplesSection recipes={recipes} entries={entries} resolver={resolver} />
+          <NutritionSection recipes={recipes} entries={entries} resolver={resolver} />
         </ScrollView>
         <MergeNamesSheet
           visible={mergeOpen}

@@ -85,6 +85,13 @@
       "when": 1794176288702,
       "tag": "0011_recipe_type",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1794510602136,
+      "tag": "0012_recipe_nutrition",
+      "breakpoints": true
     }
   ]
 }

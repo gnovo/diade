@@ -25,6 +25,10 @@ export interface Ingredient {
   mergedIntoId: string | null;
   /** The household's own call on whether it is a pantry staple; null means it has not decided and recipe lines decide. */
   staple: boolean | null;
+  /** The household's own values per 100 g and per unit; null where it has not set one (the built-in table decides). */
+  kcalPer100g?: number | null;
+  proteinPer100g?: number | null;
+  gramsPerUnit?: number | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -37,7 +41,17 @@ export type CatalogEntry = Pick<
   /** The name shown; entries that only redirect (tests, older callers) may leave it out. */
   name?: string;
   staple?: boolean | null;
+  kcalPer100g?: number | null;
+  proteinPer100g?: number | null;
+  gramsPerUnit?: number | null;
 };
+
+/** The household's values for an ingredient, as its catalog entry holds them: each one may be unset. */
+export interface HouseholdNutrition {
+  kcalPer100g: number | null;
+  proteinPer100g: number | null;
+  gramsPerUnit: number | null;
+}
 
 export interface IngredientResolver {
   /** The match key a written name resolves to: what grocery rows are grouped by. */
@@ -50,6 +64,8 @@ export interface IngredientResolver {
   name(matchKey: string): string | null;
   /** Whether the household decided this ingredient is (true) or is not (false) a pantry staple; null when it has not decided. */
   staple(matchKey: string): boolean | null;
+  /** The household's own nutrition values for an ingredient, or null when it has set none. */
+  nutrition(matchKey: string): HouseholdNutrition | null;
 }
 
 /** Dictionary: every spelling's match key to the match key of its group's first name. */
@@ -100,6 +116,18 @@ export function createIngredientResolver(
         : [],
     ),
   );
+  const nutrition = new Map(
+    entries.flatMap((entry) => {
+      if (entry.deletedAt) return [];
+      const values: HouseholdNutrition = {
+        kcalPer100g: entry.kcalPer100g ?? null,
+        proteinPer100g: entry.proteinPer100g ?? null,
+        gramsPerUnit: entry.gramsPerUnit ?? null,
+      };
+      const any = Object.values(values).some((value) => value !== null);
+      return any ? [[entry.matchKey, values] as [string, HouseholdNutrition]] : [];
+    }),
+  );
   const canonicalKey = (matchKey: string): string => {
     const once = redirects.get(matchKey) ?? matchKey;
     const named = DICTIONARY.get(once) ?? once;
@@ -116,6 +144,7 @@ export function createIngredientResolver(
     },
     name: (matchKey) => names.get(matchKey) ?? null,
     staple: (matchKey) => staples.get(matchKey) ?? null,
+    nutrition: (matchKey) => nutrition.get(matchKey) ?? null,
   };
 }
 

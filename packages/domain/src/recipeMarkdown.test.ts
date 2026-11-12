@@ -470,3 +470,39 @@ describe('hostile input', () => {
     expect(recipe.lines[0].raw.length).toBeLessThan(5001);
   });
 });
+
+describe('per-serving nutrition in markdown', () => {
+  it('reads kcal and protein in either language, and needs both', () => {
+    const [en] = parseRecipesMarkdown(
+      '# Bowl\nservings: 2\nkcal: 520\nprotein: 38 g\n\n## Ingredients\n- 100 g rice\n',
+      () => 'x',
+    );
+    expect(en.nutrition).toEqual({ kcal: 520, protein: 38 });
+    const [pt] = parseRecipesMarkdown(
+      '# Bowl\ncalorias: 512,5\nproteína: 41\n\n## Ingredientes\n- 100 g arroz\n',
+      () => 'x',
+    );
+    expect(pt.nutrition).toEqual({ kcal: 512.5, protein: 41 });
+    const [half] = parseRecipesMarkdown(
+      '# Bowl\nkcal: 520\n\n## Ingredients\n- 100 g rice\n',
+      () => 'x',
+    );
+    expect(half.nutrition).toBeNull();
+    expect(half.notes).toBeNull();
+  });
+
+  it('writes them back so they survive a round trip', () => {
+    const text = formatRecipeMarkdown({
+      name: 'Bowl',
+      servings: 1,
+      nutrition: { kcal: 512, protein: 41 },
+      notes: null,
+      ingredients: [],
+    });
+    expect(text).toContain('kcal: 512\nprotein: 41\n');
+    expect(draftToRecipeInput(parseRecipesMarkdown(text, () => 'x')[0]).nutrition).toEqual({
+      kcal: 512,
+      protein: 41,
+    });
+  });
+});

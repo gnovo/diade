@@ -4,13 +4,18 @@
  * result into sync mutations. A merge is one or two mutations, never one per ingredient.
  */
 
-import { createIngredientResolver, type Ingredient, ingredientId } from './ingredientCatalog';
+import {
+  createIngredientResolver,
+  type HouseholdNutrition,
+  type Ingredient,
+  ingredientId,
+} from './ingredientCatalog';
 import { ingredientMatchKey } from './ingredientKeys';
 
 type Entry = Pick<
   Ingredient,
   'id' | 'name' | 'matchKey' | 'aliases' | 'mergedIntoId' | 'deletedAt'
-> & { staple?: boolean | null };
+> & { staple?: boolean | null } & Partial<HouseholdNutrition>;
 
 export type CatalogWrite =
   | {
@@ -21,12 +26,16 @@ export type CatalogWrite =
         matchKey: string;
         mergedIntoId?: string | null;
         staple?: boolean | null;
-      };
+      } & Partial<HouseholdNutrition>;
     }
   | {
       op: 'update';
       id: string;
-      changes: { name?: string; mergedIntoId?: string | null; staple?: boolean | null };
+      changes: {
+        name?: string;
+        mergedIntoId?: string | null;
+        staple?: boolean | null;
+      } & Partial<HouseholdNutrition>;
     };
 
 export type MergeResult = { writes: CatalogWrite[] } | { error: 'empty' | 'same' };
@@ -135,6 +144,46 @@ export function planSetStaple(
       op: 'insert',
       id: ingredientId(spaceId, key),
       input: { name: name.trim(), matchKey: key, staple },
+    },
+  ];
+}
+
+const NO_NUTRITION: HouseholdNutrition = {
+  kcalPer100g: null,
+  proteinPer100g: null,
+  gramsPerUnit: null,
+};
+
+/**
+ * Sets the household's nutrition values for an ingredient (null takes one back to the built-in table). Updates
+ * its catalog entry, or creates one when it has none and a value is set. One write at most.
+ */
+export function planSetNutrition(
+  spaceId: string,
+  entries: readonly Entry[],
+  name: string,
+  values: HouseholdNutrition,
+): CatalogWrite[] {
+  const key = createIngredientResolver(entries).key(name);
+  if (!key) return [];
+  const entry = entries.find((e) => !e.deletedAt && e.matchKey === key);
+  if (entry) {
+    const current: HouseholdNutrition = {
+      kcalPer100g: entry.kcalPer100g ?? null,
+      proteinPer100g: entry.proteinPer100g ?? null,
+      gramsPerUnit: entry.gramsPerUnit ?? null,
+    };
+    const same = (Object.keys(values) as Array<keyof HouseholdNutrition>).every(
+      (field) => current[field] === values[field],
+    );
+    return same ? [] : [{ op: 'update', id: entry.id, changes: { ...values } }];
+  }
+  if (Object.values(values).every((value) => value === null)) return [];
+  return [
+    {
+      op: 'insert',
+      id: ingredientId(spaceId, key),
+      input: { name: name.trim(), matchKey: key, ...NO_NUTRITION, ...values },
     },
   ];
 }

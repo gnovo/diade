@@ -40,6 +40,8 @@ export interface Recipe {
   type: RecipeType | null;
   notes: string | null;
   ingredients: RecipeIngredient[];
+  /** Per-serving calories and protein a member typed in; null (or absent) when the ingredients decide. */
+  nutrition?: { kcal: number; protein: number } | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

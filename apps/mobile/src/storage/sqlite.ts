@@ -148,6 +148,8 @@ async function openLocalDb(): Promise<SQLite.SQLiteDatabase> {
       notes TEXT,
       -- A JSON array of ingredients; see RecipeIngredient in @diade/domain.
       ingredients TEXT NOT NULL DEFAULT '[]',
+      -- Per-serving kcal and protein a member typed in, as JSON; NULL when the ingredients decide.
+      nutrition TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       deleted_at TEXT
@@ -177,6 +179,11 @@ async function openLocalDb(): Promise<SQLite.SQLiteDatabase> {
       merged_into_id TEXT,
       -- The household's own call on pantry staples (1, 0, or NULL for undecided).
       staple INTEGER,
+      -- The household's own nutrition values; NULL where the built-in table decides. Named as toColumn spells
+      -- kcalPer100g (no underscore before the digits), unlike the server's kcal_per_100g.
+      kcal_per100g REAL,
+      protein_per100g REAL,
+      grams_per_unit REAL,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       deleted_at TEXT
@@ -271,6 +278,10 @@ async function migrateLocalSchema(db: SQLite.SQLiteDatabase): Promise<void> {
   await addColumn('local_list_items', 'edited_by_hand', 'INTEGER NOT NULL DEFAULT 0');
   await addColumn('local_ingredients', 'staple', 'INTEGER');
   await addColumn('local_recipes', 'type', 'TEXT');
+  await addColumn('local_recipes', 'nutrition', 'TEXT');
+  await addColumn('local_ingredients', 'kcal_per100g', 'REAL');
+  await addColumn('local_ingredients', 'protein_per100g', 'REAL');
+  await addColumn('local_ingredients', 'grams_per_unit', 'REAL');
 }
 
 // --- Transactions ---

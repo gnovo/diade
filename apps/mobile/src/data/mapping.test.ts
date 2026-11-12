@@ -10,6 +10,20 @@ describe('row mapping', () => {
     expect(toKey('is_all_day')).toBe('isAllDay');
   });
 
+  it('maps the nutrition keys to the local columns and back', () => {
+    for (const key of ['kcalPer100g', 'proteinPer100g', 'gramsPerUnit']) {
+      expect(toKey(toColumn(key))).toBe(key);
+      expect(sqliteSource).toContain(`'${toColumn(key)}'`);
+    }
+    const { values } = toColumns({ id: 'r', nutrition: { kcal: 520, protein: 38 } });
+    expect(values[1]).toBe('{"kcal":520,"protein":38}');
+    expect(toColumns({ id: 'r', nutrition: null }).values[1]).toBeNull();
+    expect(fromRow({ id: 'r', nutrition: '{"kcal":520,"protein":38}' }).nutrition).toEqual({
+      kcal: 520,
+      protein: 38,
+    });
+  });
+
   it('keeps an undecided ingredient staple null, and round-trips true and false', () => {
     const stored = (staple: boolean | null) => toColumns({ id: 'a', staple }).values[1];
     expect(stored(true)).toBe(1);

@@ -1,9 +1,11 @@
 import {
   type CatalogWrite,
+  type HouseholdNutrition,
   type Ingredient,
   planMerge,
   planRename,
   planSeparate,
+  planSetNutrition,
   planSetStaple,
 } from '@diade/domain';
 import { type BatchWrite, type WriteContext, writeBatch } from './repository';
@@ -111,4 +113,14 @@ export async function setIngredientStaple(
   staple: boolean | null,
 ): Promise<void> {
   await writeBatch(ctx, toBatch(planSetStaple(ctx.spaceId, entries, name, staple)));
+}
+
+/** Sets the household's kcal, protein and grams per unit for an ingredient; null takes a value back to the table. One write. */
+export async function setIngredientNutrition(
+  ctx: WriteContext,
+  entries: readonly Ingredient[],
+  name: string,
+  values: HouseholdNutrition,
+): Promise<void> {
+  await writeBatch(ctx, toBatch(planSetNutrition(ctx.spaceId, entries, name, values)));
 }
