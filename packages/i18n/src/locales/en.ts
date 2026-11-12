@@ -820,7 +820,7 @@ export const en = {
   },
 
   plan: {
-    perServing: '{{kcal}} kcal · {{protein}} g protein a serving',
+    perServing: '{{kcal}} kcal · {{protein}} g',
     nutrition: {
       heading_one: 'Per day',
       heading_other: 'Per person, per day',

@@ -172,12 +172,14 @@ export const NutritionSettingsScreen: React.FC<{ visible: boolean; onClose: () =
   const [draft, setDraft] = useState<Draft>(() => toDraft(settings.targets, decimal));
   const [workOutOpen, setWorkOutOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [openedWith, setOpenedWith] = useState<typeof settings | null>(null);
-  // Start from the saved settings each time the screen opens.
-  if (visible && openedWith !== settings) {
-    setOpenedWith(settings);
-    setEnabled(settings.enabled);
-    setDraft(toDraft(settings.targets, decimal));
+  const [wasVisible, setWasVisible] = useState(false);
+  // Start from the saved settings each time the screen opens: a failed save or a close leaves nothing behind.
+  if (visible !== wasVisible) {
+    setWasVisible(visible);
+    if (visible) {
+      setEnabled(settings.enabled);
+      setDraft(toDraft(settings.targets, decimal));
+    }
   }
   const set = (field: keyof Draft) => (text: string) => setDraft((d) => ({ ...d, [field]: text }));
 
@@ -191,7 +193,6 @@ export const NutritionSettingsScreen: React.FC<{ visible: boolean; onClose: () =
     setSaving(true);
     try {
       await update({ enabled, ...(targets ? { targets } : {}) });
-      setOpenedWith(null);
       onClose();
     } catch (err) {
       Alert.alert(

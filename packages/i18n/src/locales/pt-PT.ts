@@ -829,7 +829,7 @@ export const ptPT: Shape<Catalog> = {
   },
 
   plan: {
-    perServing: '{{kcal}} kcal · {{protein}} g proteína por dose',
+    perServing: '{{kcal}} kcal · {{protein}} g',
     nutrition: {
       heading_one: 'Por dia',
       heading_other: 'Por pessoa, por dia',
