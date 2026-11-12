@@ -238,7 +238,7 @@ export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> 
         />
         <SettingRow
           label={t('training.title')}
-          value={training ? t('nutrition.on') : t('nutrition.off')}
+          value={training ? t('training.on') : t('training.off')}
           onPress={() => setTrainingOpen(true)}
         />
       </Group>

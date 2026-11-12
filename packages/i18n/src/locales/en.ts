@@ -573,6 +573,8 @@ export const en = {
 
   training: {
     title: 'Training',
+    on: 'On',
+    off: 'Off',
     close: 'Close training',
     blockShort: 'block',
     doneShort: 'done',

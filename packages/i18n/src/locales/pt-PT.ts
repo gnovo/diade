@@ -578,6 +578,8 @@ export const ptPT: Shape<Catalog> = {
 
   training: {
     title: 'Treino',
+    on: 'Ligado',
+    off: 'Desligado',
     close: 'Fechar treino',
     blockShort: 'bloco',
     doneShort: 'feito',
