@@ -1,5 +1,6 @@
 import {
   builtInNutrition,
+  formatNumber,
   type Ingredient,
   type IngredientResolver,
   ingredientMatchKey,
@@ -16,6 +17,7 @@ import { Alert, Pressable, Text, View } from 'react-native';
 import { setIngredientNutrition } from '../data/ingredientActions';
 import { updateRecord } from '../data/repository';
 import { BottomSheet } from './BottomSheet';
+import { decimalFor } from './RecipeForm';
 import { Button, Card, EmptyState, Pill, SectionLabel, TextField, useWriteContext } from './ui';
 
 /** A typed number: a comma works as the decimal point. Empty is null; anything that is not a number is NaN. */
@@ -25,8 +27,9 @@ function parseDecimal(text: string): number | null {
   return /^\d+(\.\d+)?$/.test(trimmed) ? Number(trimmed) : Number.NaN;
 }
 
-const shown = (value: number | null | undefined): string =>
-  value === null || value === undefined ? '' : String(value);
+/** A value for a text field, with the reader's decimal mark; empty when unset. */
+const shown = (value: number | null | undefined, decimal: string): string =>
+  value === null || value === undefined ? '' : formatNumber(value, decimal);
 
 const percent = (share: number): number => Math.round(share * 100);
 
@@ -40,15 +43,16 @@ const RecipeNutritionSheet: React.FC<{
   visible: boolean;
   onClose: () => void;
 }> = ({ recipe, nutrition, visible, onClose }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const decimal = decimalFor(i18n.language);
   const [kcal, setKcal] = useState('');
   const [protein, setProtein] = useState('');
   const [openFor, setOpenFor] = useState<string | null>(null);
   // Start from what the recipe shows each time the sheet opens.
   if (visible && openFor !== recipe.id) {
     setOpenFor(recipe.id);
-    setKcal(shown(nutrition.perServing?.kcal));
-    setProtein(shown(nutrition.perServing?.protein));
+    setKcal(shown(nutrition.perServing?.kcal, decimal));
+    setProtein(shown(nutrition.perServing?.protein, decimal));
   }
   const close = () => {
     setOpenFor(null);
@@ -211,7 +215,8 @@ const IngredientNutritionSheet: React.FC<{
   resolver: IngredientResolver;
   onClose: () => void;
 }> = ({ name, entries, resolver, onClose }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const decimal = decimalFor(i18n.language);
   const ctx = useWriteContext();
   const [kcal, setKcal] = useState('');
   const [protein, setProtein] = useState('');
@@ -221,9 +226,9 @@ const IngredientNutritionSheet: React.FC<{
   if (name && openFor !== name) {
     const own = resolver.nutrition(resolver.key(name));
     setOpenFor(name);
-    setKcal(shown(own?.kcalPer100g ?? table?.kcalPer100g));
-    setProtein(shown(own?.proteinPer100g ?? table?.proteinPer100g));
-    setGrams(shown(own?.gramsPerUnit ?? table?.gramsPerUnit));
+    setKcal(shown(own?.kcalPer100g ?? table?.kcalPer100g, decimal));
+    setProtein(shown(own?.proteinPer100g ?? table?.proteinPer100g, decimal));
+    setGrams(shown(own?.gramsPerUnit ?? table?.gramsPerUnit, decimal));
   }
   const close = () => {
     setOpenFor(null);
@@ -264,8 +269,8 @@ const IngredientNutritionSheet: React.FC<{
       <Text className="text-sm leading-5 text-ink-muted mb-4">
         {table
           ? t('ingredients.nutrition.builtInSource', {
-              kcal: table.kcalPer100g,
-              protein: table.proteinPer100g,
+              kcal: formatNumber(table.kcalPer100g, decimal),
+              protein: formatNumber(table.proteinPer100g, decimal),
             })
           : t('ingredients.nutrition.noBuiltIn')}
       </Text>
@@ -316,7 +321,8 @@ export const NutritionSection: React.FC<{
   entries: Ingredient[];
   resolver: IngredientResolver;
 }> = ({ recipes, entries, resolver }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const decimal = decimalFor(i18n.language);
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<string | null>(null);
   const rows = useMemo(() => nutritionRows(recipes, resolver), [recipes, resolver]);
@@ -352,8 +358,8 @@ export const NutritionSection: React.FC<{
                 <Text className={`text-sm ${values ? 'text-ink-muted' : 'font-semibold text-ink'}`}>
                   {values
                     ? t('ingredients.nutrition.value', {
-                        kcal: values.kcalPer100g,
-                        protein: values.proteinPer100g,
+                        kcal: formatNumber(values.kcalPer100g, decimal),
+                        protein: formatNumber(values.proteinPer100g, decimal),
                       })
                     : t('ingredients.nutrition.unknown')}
                 </Text>

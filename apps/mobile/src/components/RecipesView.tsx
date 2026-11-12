@@ -52,10 +52,11 @@ const IngredientLine: React.FC<{
   );
 };
 
-/** What a library card says about a recipe after its type: calories and protein when known, else its size. */
+/** What a library card says about a recipe after its type: calories and protein when all of it is known, else its size. */
 function cardMeta(recipe: Recipe, resolver: IngredientResolver, t: TFunction): string {
   const type = recipe.type ? `${t(`recipes.types.${recipe.type}`)} · ` : '';
-  const macros = recipeNutrition(recipe, resolver).perServing;
+  const nutrition = recipeNutrition(recipe, resolver);
+  const macros = nutrition.complete ? nutrition.perServing : null;
   if (macros) return type + t('recipes.macros', { kcal: macros.kcal, protein: macros.protein });
   return `${type}${t('recipes.ingredients', { count: recipe.ingredients.length })} · ${t('recipes.servings', { count: recipe.servings })}`;
 }
@@ -300,7 +301,10 @@ export const RecipesLibrary: React.FC<{
     () =>
       new Set(
         recipes
-          .filter((r) => isHighProtein(recipeNutrition(r, resolver).perServing))
+          .filter((r) => {
+            const nutrition = recipeNutrition(r, resolver);
+            return nutrition.complete && isHighProtein(nutrition.perServing);
+          })
           .map((r) => r.id),
       ),
     [recipes, resolver],

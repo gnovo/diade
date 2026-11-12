@@ -193,6 +193,7 @@ describe('recipeNutrition', () => {
     expect(result.computed).toEqual({ kcal: 530, protein: 53 });
     expect(result.measured).toBe(5);
     expect(result.coverage).toBe(1);
+    expect(result.complete).toBe(true);
     expect(result.lines['1']).toEqual({ kcal: 215, protein: 40 });
     expect(result.lines['6']).toBeUndefined();
   });
@@ -210,6 +211,7 @@ describe('recipeNutrition', () => {
     expect(result.known).toBe(1);
     expect(result.coverage).toBe(0.5);
     expect(result.lines['2']).toBeNull();
+    expect(result.complete).toBe(false);
     expect(result.computed).toEqual({ kcal: 157, protein: 14 });
   });
 
@@ -218,6 +220,13 @@ describe('recipeNutrition', () => {
     expect(result.perServing).toEqual({ kcal: 500, protein: 45 });
     expect(result.computed).toEqual({ kcal: 530, protein: 53 });
     expect(result.overridden).toBe(true);
+    expect(
+      recipeNutrition({
+        servings: 1,
+        ingredients: [line('1', 'Molho secreto', 50)],
+        nutrition: { kcal: 300, protein: 20 },
+      }).complete,
+    ).toBe(true);
   });
 
   it('has nothing to show for a recipe with no known line', () => {

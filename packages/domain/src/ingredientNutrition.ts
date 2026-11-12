@@ -531,6 +531,12 @@ export interface RecipeNutrition {
   measured: number;
   /** 0 to 1; 1 when the recipe has no measured line at all. */
   coverage: number;
+  /**
+   * Whether the numbers can stand on their own: the recipe has its own values, or every measured line is known.
+   * A list shows calories, and counts a recipe as high in protein, only then; a partial sum would read as a
+   * light dish (a steak whose only known line is the butter).
+   */
+  complete: boolean;
   /** Each line's own values for the amount written (the whole recipe, not one serving); null when unknown. Lines that are not measured are absent. */
   lines: Record<string, Macros | null>;
 }
@@ -578,6 +584,7 @@ export function recipeNutrition(
     known,
     measured,
     coverage: measured === 0 ? 1 : known / measured,
+    complete: override !== null || (known > 0 && known === measured),
     lines,
   };
 }
