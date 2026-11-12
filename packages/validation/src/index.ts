@@ -7,6 +7,7 @@ import {
   MAX_SERVINGS,
   MIN_SERVINGS,
   type MutationOperation,
+  NUTRITION_TARGET_LIMITS,
   parseDateOnly,
   RECIPE_TYPES,
   RECIPE_UNITS,
@@ -28,6 +29,28 @@ export const joinSpaceSchema = z.object({
 export const createInviteSchema = z.object({
   expiresInDays: z.number().int().positive().default(7),
 });
+
+// --- Nutrition settings (per member) ---
+
+const targetField = (field: keyof typeof NUTRITION_TARGET_LIMITS) =>
+  z.number().int().min(NUTRITION_TARGET_LIMITS[field].min).max(NUTRITION_TARGET_LIMITS[field].max);
+
+export const nutritionTargetsSchema = z
+  .object({
+    kcal: targetField('kcal'),
+    protein: targetField('protein'),
+    waterMl: targetField('waterMl'),
+    flexKcalPerWeek: targetField('flexKcalPerWeek'),
+  })
+  .strict();
+
+/** Either part may change on its own; null clears the targets. */
+export const updateNutritionSettingsSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    targets: nutritionTargetsSchema.nullable().optional(),
+  })
+  .strict();
 
 // --- Visibility ---
 

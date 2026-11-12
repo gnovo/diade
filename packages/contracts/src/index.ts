@@ -1,6 +1,7 @@
 import type {
   ExternalCalendar,
   ExternalVisibility,
+  NutritionTargets,
   Space,
   SpaceMember,
   SyncPullResult,
@@ -54,6 +55,17 @@ export interface CurrentSpaceResponse {
   space: Space;
   members: (SpaceMember & { user: User })[];
   role: 'owner' | 'member';
+}
+
+/** The signed-in member's own nutrition settings. The partner's are never returned. */
+export interface NutritionSettings {
+  enabled: boolean;
+  targets: NutritionTargets | null;
+}
+
+export interface UpdateNutritionSettingsRequest {
+  enabled?: boolean;
+  targets?: NutritionTargets | null;
 }
 
 export interface InviteCodeResponse {

@@ -1,4 +1,9 @@
-import { createInviteSchema, createSpaceSchema, joinSpaceSchema } from '@diade/validation';
+import {
+  createInviteSchema,
+  createSpaceSchema,
+  joinSpaceSchema,
+  updateNutritionSettingsSchema,
+} from '@diade/validation';
 import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
 import type { Context } from 'hono';
@@ -254,6 +259,71 @@ export function createSpacesRouter(
         space,
         role: newMembership.role,
       },
+    });
+  });
+
+  // GET /api/spaces/nutrition - The signed-in member's own nutrition settings (never the partner's)
+  router.get('/nutrition', async (c) => {
+    const db = getDb(c);
+    const user = c.get('user');
+    const [membership] = await db
+      .select({ enabled: spaceMembers.nutritionEnabled, targets: spaceMembers.nutritionTargets })
+      .from(spaceMembers)
+      .where(eq(spaceMembers.userId, user.id))
+      .limit(1);
+    if (!membership) {
+      return c.json(
+        {
+          success: false,
+          error: { code: 'NO_SPACE', message: 'User does not belong to any space yet' },
+        },
+        404,
+      );
+    }
+    return c.json({
+      success: true,
+      data: { enabled: membership.enabled, targets: membership.targets ?? null },
+    });
+  });
+
+  // PATCH /api/spaces/nutrition - Change the signed-in member's own nutrition settings
+  router.patch('/nutrition', zValidator('json', updateNutritionSettingsSchema), async (c) => {
+    const db = getDb(c);
+    const user = c.get('user');
+    const body = c.req.valid('json');
+    const changes: Partial<typeof spaceMembers.$inferInsert> = {};
+    if (body.enabled !== undefined) changes.nutritionEnabled = body.enabled;
+    if (body.targets !== undefined) changes.nutritionTargets = body.targets;
+    const [updated] =
+      Object.keys(changes).length > 0
+        ? await db
+            .update(spaceMembers)
+            .set(changes)
+            .where(eq(spaceMembers.userId, user.id))
+            .returning({
+              enabled: spaceMembers.nutritionEnabled,
+              targets: spaceMembers.nutritionTargets,
+            })
+        : await db
+            .select({
+              enabled: spaceMembers.nutritionEnabled,
+              targets: spaceMembers.nutritionTargets,
+            })
+            .from(spaceMembers)
+            .where(eq(spaceMembers.userId, user.id))
+            .limit(1);
+    if (!updated) {
+      return c.json(
+        {
+          success: false,
+          error: { code: 'NO_SPACE', message: 'User does not belong to any space yet' },
+        },
+        404,
+      );
+    }
+    return c.json({
+      success: true,
+      data: { enabled: updated.enabled, targets: updated.targets ?? null },
     });
   });
 

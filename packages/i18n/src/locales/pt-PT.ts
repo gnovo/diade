@@ -155,6 +155,13 @@ export const ptPT: Shape<Catalog> = {
   },
 
   today: {
+    nutrition: {
+      heading: 'O seu dia',
+      planned: 'O planeado para um dia médio desta semana, para si.',
+      noPlan:
+        'Nada planeado esta semana. Junte receitas em Listas → Plano para ver aqui o seu dia.',
+      drinks: 'Água {{water}} L · café até 4, o último até às 15:00',
+    },
     title: 'Hoje',
     capturePlaceholder: 'Registe uma tarefa, evento ou nota…',
     savedToInbox: 'Guardado na caixa de entrada',
@@ -569,6 +576,56 @@ export const ptPT: Shape<Catalog> = {
     deleteSeriesNote: 'Isto remove toda a série repetida.',
   },
 
+  nutrition: {
+    title: 'Nutrição',
+    on: 'Ligada',
+    off: 'Desligada',
+    close: 'Fechar nutrição',
+    show: 'Mostrar as minhas metas',
+    showHint:
+      'Só você as vê. Desligado, a app fica como antes; as receitas continuam a mostrar as calorias.',
+    daily: 'Por dia',
+    kcal: 'Calorias (kcal)',
+    protein: 'Proteína (g)',
+    water: 'Água (litros)',
+    waterHint: 'Em bebidas. Mais nos dias de treino.',
+    weekly: 'Por semana',
+    flex: 'Orçamento para refeições flexíveis (kcal)',
+    flexHint:
+      'Calorias por semana acima da meta diária, para a noite do hambúrguer ou um jantar fora. 0 desliga-o.',
+    disclaimer: 'Estimativas, não conselho médico. Mude-as quando quiser.',
+    invalidTitle: 'Verifique as metas',
+    invalid:
+      'Calorias de 1000 a 5000, proteína de 20 a 400 g, água de 0,5 a 6 litros, orçamento até 5000 kcal, tudo números inteiros.',
+    workOut: {
+      open: 'Calcular as minhas metas',
+      title: 'Calcular as minhas metas',
+      use: 'Usar estas metas',
+      age: 'Idade',
+      height: 'Altura (cm)',
+      weight: 'Peso (kg)',
+      sex: 'Sexo',
+      male: 'Masculino',
+      female: 'Feminino',
+      activity: 'Atividade',
+      activities: {
+        sedentary: 'Sobretudo sentado',
+        light: 'Pouco ativo',
+        moderate: 'Ativo',
+        active: 'Muito ativo',
+      },
+      activityHints: {
+        sedentary: 'Trabalho de secretária, pouco andar.',
+        light: 'Caminha quase todos os dias, ou treina 1 a 3 vezes por semana.',
+        moderate: 'Treina 3 a 5 vezes por semana.',
+        active: 'Treino intenso quase todos os dias, ou um trabalho físico.',
+      },
+      notKept:
+        'Usados uma vez para sugerir metas e não ficam guardados. A sugestão fica 500 kcal por dia abaixo do que gasta.',
+      invalidTitle: 'Verifique os números',
+      invalid: 'Idade de 16 a 100, altura de 120 a 230 cm, peso de 35 a 300 kg.',
+    },
+  },
   recipes: {
     title: 'Receitas',
     newRecipe: 'Nova receita',
@@ -772,6 +829,21 @@ export const ptPT: Shape<Catalog> = {
   },
 
   plan: {
+    perServing: '{{kcal}} kcal · {{protein}} g',
+    nutrition: {
+      heading_one: 'Por dia',
+      heading_other: 'Por pessoa, por dia',
+      kcal: 'Calorias',
+      kcalValue: '{{value}} / {{target}} kcal',
+      protein: 'Proteína',
+      proteinValue: '{{value}} / {{target}} g',
+      flex: 'Refeições flexíveis',
+      flexUntouched: 'Dentro da meta: {{budget}} kcal livres',
+      flexUsed: 'Usa {{used}} de {{budget}} kcal',
+      flexOver: '{{used}} kcal a mais, orçamento {{budget}}',
+      missing_one: '1 receita fica de fora: nem todos os ingredientes são conhecidos.',
+      missing_other: '{{count}} receitas ficam de fora: nem todos os ingredientes são conhecidos.',
+    },
     title: 'Plano',
     thisWeek: 'Esta semana',
     nextWeek: 'Próxima semana',

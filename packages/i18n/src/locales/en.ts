@@ -155,6 +155,12 @@ export const en = {
   },
 
   today: {
+    nutrition: {
+      heading: 'Your day',
+      planned: 'Planned for an average day this week, for you.',
+      noPlan: 'Nothing planned this week. Add recipes in Lists → Plan to see your day here.',
+      drinks: 'Water {{water}} L · coffee up to 4, the last by 15:00',
+    },
     title: 'Today',
     capturePlaceholder: 'Capture a task, event or note…',
     savedToInbox: 'Saved to your inbox',
@@ -565,6 +571,55 @@ export const en = {
     deleteSeriesNote: 'This removes the whole repeating series.',
   },
 
+  nutrition: {
+    title: 'Nutrition',
+    on: 'On',
+    off: 'Off',
+    close: 'Close nutrition',
+    show: 'Show my targets',
+    showHint: 'Only you see them. Off, the app looks as before; recipes still show their calories.',
+    daily: 'Each day',
+    kcal: 'Calories (kcal)',
+    protein: 'Protein (g)',
+    water: 'Water (litres)',
+    waterHint: 'From drinks. More on training days.',
+    weekly: 'Each week',
+    flex: 'Flexible meals budget (kcal)',
+    flexHint:
+      'Calories a week above your daily target, for the burger night or a meal out. 0 turns it off.',
+    disclaimer: 'Estimates, not medical advice. Change them whenever you like.',
+    invalidTitle: 'Check the targets',
+    invalid:
+      'Calories 1000 to 5000, protein 20 to 400 g, water 0.5 to 6 litres, budget up to 5000 kcal, all whole numbers.',
+    workOut: {
+      open: 'Work out my targets',
+      title: 'Work out my targets',
+      use: 'Use these targets',
+      age: 'Age',
+      height: 'Height (cm)',
+      weight: 'Weight (kg)',
+      sex: 'Sex',
+      male: 'Male',
+      female: 'Female',
+      activity: 'How active',
+      activities: {
+        sedentary: 'Mostly sitting',
+        light: 'Lightly active',
+        moderate: 'Active',
+        active: 'Very active',
+      },
+      activityHints: {
+        sedentary: 'Desk work, little walking.',
+        light: 'Walking most days, or training 1 to 3 times a week.',
+        moderate: 'Training 3 to 5 times a week.',
+        active: 'Hard training most days, or a physical job.',
+      },
+      notKept:
+        'These are used once to suggest targets and are not saved. The suggestion eats 500 kcal a day below what you use.',
+      invalidTitle: 'Check the numbers',
+      invalid: 'Age 16 to 100, height 120 to 230 cm, weight 35 to 300 kg.',
+    },
+  },
   recipes: {
     title: 'Recipes',
     newRecipe: 'New recipe',
@@ -765,6 +820,21 @@ export const en = {
   },
 
   plan: {
+    perServing: '{{kcal}} kcal · {{protein}} g',
+    nutrition: {
+      heading_one: 'Per day',
+      heading_other: 'Per person, per day',
+      kcal: 'Calories',
+      kcalValue: '{{value}} / {{target}} kcal',
+      protein: 'Protein',
+      proteinValue: '{{value}} / {{target}} g',
+      flex: 'Flexible meals',
+      flexUntouched: 'Within target: {{budget}} kcal free',
+      flexUsed: 'Uses {{used}} of {{budget}} kcal',
+      flexOver: '{{used}} kcal over, budget {{budget}}',
+      missing_one: '1 recipe is left out: not all its ingredients are known.',
+      missing_other: '{{count}} recipes are left out: not all their ingredients are known.',
+    },
     title: 'Plan',
     thisWeek: 'This week',
     nextWeek: 'Next week',

@@ -15,6 +15,7 @@ export * from './ingredientNames';
 export * from './ingredientNutrition';
 export * from './listTemplates';
 export * from './mealPlan';
+export * from './nutritionTargets';
 export * from './recipeMarkdown';
 export * from './recipeSections';
 export * from './recipes';

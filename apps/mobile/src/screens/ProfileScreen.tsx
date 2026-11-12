@@ -5,9 +5,11 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, Share, Text, View } from 'react-native';
 import { apiClient } from '../api/client';
+import { NutritionSettingsScreen } from '../components/NutritionSettingsScreen';
 import { Sheet } from '../components/Sheet';
 import { Button, SectionLabel, Segmented } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
+import { useNutrition } from '../context/NutritionContext';
 import { inviteState } from '../data/invite';
 import { Icon, ThemeToggle, useColor, useThemePreference } from '../design';
 import { useLanguagePreference } from '../i18n';
@@ -70,6 +72,8 @@ export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> 
   const inkMuted = useColor('ink-muted');
   const [generating, setGenerating] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [nutritionOpen, setNutritionOpen] = useState(false);
+  const nutrition = useNutrition();
   const [open, setOpen] = useState<'appearance' | 'language' | null>(null);
 
   const invite = inviteState(space, members.length, new Date());
@@ -223,6 +227,11 @@ export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> 
             ]}
           />
         </SettingRow>
+        <SettingRow
+          label={t('nutrition.title')}
+          value={nutrition.active ? t('nutrition.on') : t('nutrition.off')}
+          onPress={() => setNutritionOpen(true)}
+        />
       </Group>
 
       <Button label={t('profile.signOut')} variant="danger" onPress={confirmSignOut} />
@@ -232,6 +241,7 @@ export const ProfileScreen: React.FC<{ visible: boolean; onClose: () => void }> 
         </Text>
       ) : null}
       <CalendarSettingsScreen visible={calendarOpen} onClose={() => setCalendarOpen(false)} />
+      <NutritionSettingsScreen visible={nutritionOpen} onClose={() => setNutritionOpen(false)} />
     </Sheet>
   );
 };
