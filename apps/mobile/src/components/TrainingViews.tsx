@@ -1,3 +1,4 @@
+import type { TrainingCalendarStatus } from '@diade/contracts';
 import {
   type CalendarEvent,
   cycleWeek,
@@ -20,8 +21,10 @@ import { formatDayLabel, formatLongDate, type TFunction } from '@diade/i18n';
 import type React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { Alert, Modal, Pressable, ScrollView, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { apiClient } from '../api/client';
+import { connectGoogleTraining } from '../calendar/connect';
 import { useTraining } from '../context/TrainingContext';
 import { getActiveEvents } from '../data/queries';
 import { updateRecord, writeBatch } from '../data/repository';
@@ -69,6 +72,95 @@ const GoalStepper: React.FC<{ label: string; value: number; onChange: (next: num
       </Text>
       {button(1, 'plus', value >= 14, t('training.more', { kind: label }))}
     </View>
+  );
+};
+
+/**
+ * Whether the blocks are copied to the member's Google calendar "Díade · Treino" (shown as free, so they never block
+ * a meeting). Turning it on asks Google for the extra grant the first time; turning it off deletes that calendar.
+ */
+const GoogleTrainingCard: React.FC<{ visible: boolean }> = ({ visible }) => {
+  const { t } = useTranslation();
+  const track = useColor('border-strong');
+  const on = useColor('action');
+  const [status, setStatus] = useState<TrainingCalendarStatus | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [loadedFor, setLoadedFor] = useState(false);
+  if (visible !== loadedFor) {
+    setLoadedFor(visible);
+    if (visible) {
+      apiClient
+        .getTrainingCalendar()
+        .then(setStatus)
+        .catch(() => setStatus(null));
+    }
+  }
+
+  const turnOn = async () => {
+    if (!status?.canWrite) {
+      const connected = await connectGoogleTraining();
+      if (!connected.ok) {
+        Alert.alert(
+          t('training.google.notAllowedTitle'),
+          connected.message ?? t('training.google.notAllowed'),
+        );
+        return;
+      }
+    }
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Lisbon';
+    setStatus(await apiClient.enableTrainingCalendar(timeZone));
+  };
+
+  const toggle = async (value: boolean) => {
+    setBusy(true);
+    try {
+      if (value) await turnOn();
+      else setStatus(await apiClient.disableTrainingCalendar());
+    } catch (err) {
+      Alert.alert(
+        t('common.couldNotSave'),
+        err instanceof Error ? err.message : t('common.checkConnection'),
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const enabled = status?.enabled ?? false;
+  const note = !status
+    ? t('training.google.offline')
+    : !enabled
+      ? t('training.google.hint')
+      : status.lastError === 'needs_reauth'
+        ? t('training.google.needsReauth')
+        : status.lastError === 'failed'
+          ? t('training.google.failed')
+          : t('training.google.copied', { count: status.blocks });
+  return (
+    <Card>
+      <View className="flex-row items-center">
+        <View className="flex-1 mr-3">
+          <Text className="text-base font-semibold text-ink">{t('training.google.title')}</Text>
+          <Text className="text-sm leading-5 text-ink-muted mt-0.5">{note}</Text>
+        </View>
+        <Switch
+          value={enabled}
+          onValueChange={toggle}
+          disabled={busy || !status}
+          accessibilityLabel={t('training.google.title')}
+          trackColor={{ false: track, true: on }}
+        />
+      </View>
+      {enabled && status?.lastError === 'needs_reauth' ? (
+        <View className="mt-3">
+          <Button
+            label={t('training.google.reconnect')}
+            variant="outline"
+            onPress={() => toggle(true)}
+          />
+        </View>
+      ) : null}
+    </Card>
   );
 };
 
@@ -234,6 +326,7 @@ export const TrainingSettingsScreen: React.FC<{ visible: boolean; onClose: () =>
               disabled={busy}
             />
           </Card>
+          <GoogleTrainingCard visible={visible} />
           <Button label={t('common.save')} onPress={saveOnly} disabled={busy} />
         </ScrollView>
       </SafeAreaView>

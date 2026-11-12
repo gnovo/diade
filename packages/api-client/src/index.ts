@@ -12,6 +12,7 @@ import type {
   SyncPullResult,
   SyncPushPayload,
   SyncPushResult,
+  TrainingCalendarStatus,
   TrainingSettingsResponse,
   UpdateCalendarRequest,
   UpdateExternalEventRequest,
@@ -176,6 +177,23 @@ export class DiadeApiClient {
       method: 'PATCH',
       body: JSON.stringify({ training }),
     });
+  }
+
+  // --- Training blocks in Google Calendar ---
+
+  async getTrainingCalendar(): Promise<TrainingCalendarStatus> {
+    return this.request<TrainingCalendarStatus>('/api/calendar/training');
+  }
+
+  async enableTrainingCalendar(timeZone: string): Promise<TrainingCalendarStatus> {
+    return this.request<TrainingCalendarStatus>('/api/calendar/training', {
+      method: 'POST',
+      body: JSON.stringify({ timeZone }),
+    });
+  }
+
+  async disableTrainingCalendar(): Promise<TrainingCalendarStatus> {
+    return this.request<TrainingCalendarStatus>('/api/calendar/training', { method: 'DELETE' });
   }
 
   // --- Sync Engine ---

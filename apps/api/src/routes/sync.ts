@@ -527,9 +527,14 @@ async function applyMutation(
   }
 }
 
+/**
+ * `afterPush` runs once a push has applied at least one mutation, with the entities it touched. It must not delay
+ * the response: the Worker hands it to `waitUntil`.
+ */
 export function createSyncRouter(
   getDb: (c: Context) => DbClient,
   getAuth: (c: Context) => AuthInstance,
+  afterPush?: (c: Context, userId: string, entities: ReadonlySet<string>) => void,
 ) {
   const router = new Hono<{
     Variables: {
@@ -592,6 +597,7 @@ export function createSyncRouter(
 
     const appliedMutationIds: string[] = [];
     const rejectedMutations: RejectedMutation[] = [];
+    const touched = new Set<string>();
     const now = new Date();
 
     for (const mutation of mutations) {
@@ -663,7 +669,10 @@ export function createSyncRouter(
       });
 
       appliedMutationIds.push(mutation.id);
+      touched.add(mutation.entity);
     }
+
+    if (afterPush && touched.size > 0) afterPush(c, user.id, touched);
 
     return c.json({
       success: true,

@@ -23,6 +23,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
+import type { TrainingMirrorState } from '../calendar/trainingMirror';
 
 // --- Better Auth Tables ---
 
@@ -103,6 +104,8 @@ export const spaceMembers = pgTable('space_members', {
   nutritionTargets: jsonb('nutrition_targets').$type<NutritionTargets>(),
   /** This member's work-cycle anchor and weekly training goals; only they can read them. Null until set. */
   training: jsonb('training').$type<TrainingSettings>(),
+  /** What Díade wrote to this member's Google training calendar (see calendar/trainingMirror.ts). Server-only. */
+  trainingGoogle: jsonb('training_google').$type<TrainingMirrorState>(),
 });
 
 // --- Core Organisation Tables ---

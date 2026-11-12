@@ -625,6 +625,20 @@ export const en = {
     progress: '{{done}} of {{goal}}',
     next: 'Next: {{title}} · {{day}}, {{start}}',
     weekDone: 'Every goal met this week.',
+    google: {
+      title: 'Show in Google Calendar',
+      hint: 'Copies your blocks to a calendar of their own, "Díade · Treino", shown as free so they never block a meeting.',
+      copied_one: '1 block copied to "Díade · Treino". Changes follow on their own.',
+      copied_other: '{{count}} blocks copied to "Díade · Treino". Changes follow on their own.',
+      needsReauth:
+        'Google no longer lets Díade write the training calendar. Connect again to continue.',
+      failed: 'The last copy to Google did not finish. It tries again after your next change.',
+      offline: 'Needs a connection to see whether this is on.',
+      reconnect: 'Connect Google again',
+      notAllowedTitle: 'Google did not allow it',
+      notAllowed:
+        'Díade needs permission to create its own training calendar. It cannot reach your other calendars.',
+    },
   },
   nutrition: {
     title: 'Nutrition',

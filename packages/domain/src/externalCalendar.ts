@@ -24,6 +24,15 @@ export const GOOGLE_CALENDAR_SCOPES = [
   'https://www.googleapis.com/auth/calendar.events.readonly',
 ] as const;
 
+/**
+ * Asked only when a member shows their training blocks in Google Calendar: it lets Díade create one calendar and
+ * write to it, and reaches no other calendar.
+ */
+export const GOOGLE_TRAINING_SCOPE = 'https://www.googleapis.com/auth/calendar.app.created';
+
+/** The name of the calendar Díade creates for training blocks. */
+export const TRAINING_CALENDAR_NAME = 'Díade · Treino';
+
 const RANK: Record<ExternalVisibility, number> = { shared: 0, busy_only: 1, private: 2 };
 
 /** The narrower (more private) of two visibilities. */

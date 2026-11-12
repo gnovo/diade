@@ -1,6 +1,7 @@
 import type { ExternalCalendar, ExternalVisibility, GoogleAccessRole } from '@diade/domain';
 import {
   confirmExternalCalendarsSchema,
+  enableTrainingMirrorSchema,
   updateExternalCalendarSchema,
   updateExternalEventSchema,
 } from '@diade/validation';
@@ -20,6 +21,11 @@ import {
   updateEventOverride,
 } from '../calendar/service';
 import type { TokenEnv } from '../calendar/tokens';
+import {
+  disableTrainingMirror,
+  enableTrainingMirror,
+  trainingMirrorStatus,
+} from '../calendar/trainingMirror';
 import type { DbClient } from '../db';
 import type { externalCalendars } from '../db/schema';
 
@@ -207,6 +213,31 @@ export function createCalendarRouter(
     } catch (err) {
       return googleFailure(c, err);
     }
+  });
+
+  // GET /api/calendar/training - Whether the member's training blocks are copied to Google
+  router.get('/training', async (c) => {
+    return c.json({ success: true, data: await trainingMirrorStatus(getDb(c), c.get('user').id) });
+  });
+
+  // POST /api/calendar/training - Turn the copy on (or run it again) and write the blocks now
+  router.post('/training', zValidator('json', enableTrainingMirrorSchema), async (c) => {
+    const { timeZone } = c.req.valid('json');
+    const status = await enableTrainingMirror(deps(c), c.get('user').id, timeZone);
+    if (!status.canWrite) {
+      return fail(
+        c,
+        403,
+        'CALENDAR_NEEDS_REAUTH',
+        'Allow Díade to create its training calendar in Google',
+      );
+    }
+    return c.json({ success: true, data: status });
+  });
+
+  // DELETE /api/calendar/training - Turn the copy off and delete the training calendar from Google
+  router.delete('/training', async (c) => {
+    return c.json({ success: true, data: await disableTrainingMirror(deps(c), c.get('user').id) });
   });
 
   // DELETE /api/calendar/connection
