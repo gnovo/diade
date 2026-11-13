@@ -576,6 +576,38 @@ export const ptPT: Shape<Catalog> = {
     deleteSeriesNote: 'Isto remove toda a série repetida.',
   },
 
+  health: {
+    title: 'Relógio e balança',
+    on: 'Ligado',
+    off: 'Desligado',
+    close: 'Fechar relógio e balança',
+    connect: 'Ler do Health Connect',
+    offHint:
+      'As sessões do relógio marcam os seus blocos de treino como feitos, e os passos e as pesagens aparecem aqui. Tudo fica neste telemóvel.',
+    onHint: 'Uma sessão dentro de um bloco marca-o como feito. Lido sempre que abre a Díade.',
+    missing: 'O Health Connect não está neste telemóvel.',
+    update: 'O Health Connect precisa de uma atualização antes de a Díade o poder ler.',
+    missingSome:
+      'Alguns dados ainda não estão permitidos. Permita-os no Health Connect para os ver aqui.',
+    openSettings: 'Abrir o Health Connect',
+    notAllowedTitle: 'Nada permitido',
+    notAllowed: 'Permita pelo menos um tipo de dados no Health Connect para ligar isto.',
+    today: 'Hoje',
+    steps: 'Passos',
+    stepsToday_one: '1 passo hoje',
+    stepsToday_other: '{{steps}} passos hoje',
+    weight: 'Peso',
+    trend: 'Média dos últimos 7 dias',
+    kg: '{{value}} kg',
+    change: '{{value}} kg face à semana anterior',
+    noChange: 'Igual à semana anterior',
+    noWeight: 'Sem pesagens nos últimos 7 dias. Pese-se ou escreva o peso abaixo.',
+    chart: 'Tendência do peso nas últimas 8 semanas',
+    weighIn: 'Registar',
+    weighInPlaceholder: 'Peso em kg, por ex. 86,4',
+    weightHint:
+      'A tendência é a média dos últimos 7 dias, por isso uma manhã mais pesada quase não a mexe.',
+  },
   training: {
     title: 'Treino',
     on: 'Ligado',

@@ -4,6 +4,7 @@
 
 export * from './datetime';
 export * from './externalCalendar';
+export * from './healthData';
 export * from './importantDates';
 export * from './importantDateTimeline';
 export * from './ingredientAisles';

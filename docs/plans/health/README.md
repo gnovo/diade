@@ -119,12 +119,12 @@ Each one ships on its own and leaves the app working. Order is by value: H1 and 
 
 | PR | Scope | Status |
 |---|---|---|
-| H1 | Nutrition table, recipe kcal and protein, coverage, override | planned |
-| H2 | Prod content: values for every ingredient in use, 15 new recipes | planned (after H1) |
-| H3 | Member profile: nutrition on or off, targets; plan summary; Today card | planned |
-| H4 | Training blocks: `workout` category, cycle anchor, weekly goals | planned |
-| H5 | Write blocks to Google Calendar | planned (after H4) |
-| H6 | Health Connect: done sessions, steps, weight | planned (APK release) |
+| H1 | Nutrition table, recipe kcal and protein, coverage, override | merged (#55) |
+| H2 | Prod content: values for every ingredient in use, 15 new recipes | in dev; prod import pending |
+| H3 | Member profile: nutrition on or off, targets; plan summary; Today card | merged (#58) |
+| H4 | Training blocks: `workout` category, cycle anchor, weekly goals | merged (#59) |
+| H5 | Write blocks to Google Calendar | merged (#60) |
+| H6 | Health Connect: done sessions, steps, weight | this PR (APK release) |
 
 ### H1 · Recipe nutrition
 
@@ -176,21 +176,29 @@ Not code: a reviewed data change, applied through the API as a member, never in 
 
 ### H5 · Google Calendar
 
-- Ask for `calendar.events` (or `calendar.app.created`, which only reaches calendars the app made: check
-  which Google offers to this client first) and create the "Díade · Treino" calendar.
-- Push `workout` events one way, with `transparency: transparent`. Edits in Google to these events are read
-  back by the existing sync.
+- `calendar.app.created` (only reaches calendars the app made). Díade creates "Díade · Treino" and copies the
+  `workout` events into it, one way, as recurring events that are free, private and without reminders. Edits
+  made in Google are overwritten at the next sync; the calendar is left out of the import. Turning it off
+  deletes the calendar.
 
 ### H6 · Health Connect
 
-- A native module (`react-native-health-connect` or a current equivalent, with its Expo config plugin): read
-  exercise sessions, steps and weight. **Changes the native fingerprint, so it needs an APK release**
-  (see `docs/architecture/environments.md`).
-- A session inside a block's window (or overlapping it) marks the block done. Steps feed the Today card.
-- Weight: weekly weigh-ins from a smart scale that writes to Health Connect, or typed in; the chart shows the
-  7-day trend, not the daily number.
-- Check the state of the Fitbit Web API and Google Health API before deciding whether anything also needs a
-  server-side integration. Health Connect is on-device and needs none.
+- `react-native-health-connect` 4.1.3 (its Expo config plugin is built in) and `expo-build-properties` for
+  `minSdkVersion` 26. Permissions: read exercise sessions, steps and weight; write weight. **Changes the native
+  fingerprint, so it needs an APK release** (see `docs/architecture/environments.md`).
+- Profile → You → **Watch and scale**: one switch (Díade's own; the permissions live in Health Connect), steps
+  today, the weight trend and a field to type a weigh-in.
+- A session marks a block done when it is of the block's kind (strength training and weightlifting; calisthenics,
+  HIIT, pilates, stretching and yoga; walking and treadmill) and overlaps the block's window. The block it overlaps
+  most wins; a session shorter than 10 minutes, or one that overlaps no block of its kind, marks nothing, so a dog
+  walk never ticks the walking pad. Each session is used once, so a day the member unmarks stays unmarked.
+  Read when the app opens and each time it comes back to the front; sessions from the last 10 days count.
+- Steps since midnight go on the Today card. Health Connect merges the sources, so nothing counts twice.
+- Weight: weigh-ins from a smart scale through Health Connect, or typed in the app, which writes them to Health
+  Connect too, so there is one place for them and nothing on the server. The screen shows the 7-day average,
+  its change against the 7 days before, and 8 weeks of it as a line.
+- No server part: the legacy Fitbit Web API was turned off on 2026-11-02, and its replacement (the Google Health
+  API) is a server-side OAuth integration this does not need. Health Connect covers both watches on the phone.
 
 ## Open questions
 

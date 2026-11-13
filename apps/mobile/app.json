@@ -23,7 +23,13 @@
         "backgroundColor": "#0D4F46"
       },
       "package": "com.diade.app",
-      "versionCode": 3
+      "versionCode": 3,
+      "permissions": [
+        "android.permission.health.READ_EXERCISE",
+        "android.permission.health.READ_STEPS",
+        "android.permission.health.READ_WEIGHT",
+        "android.permission.health.WRITE_WEIGHT"
+      ]
     },
     "plugins": [
       "expo-secure-store",
@@ -46,6 +52,15 @@
           "supportedLocales": {
             "ios": ["en", "pt-PT"],
             "android": ["en", "pt-PT"]
+          }
+        }
+      ],
+      "react-native-health-connect",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
           }
         }
       ]
