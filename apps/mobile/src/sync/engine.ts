@@ -43,7 +43,9 @@ export interface SyncState {
 
 const CURSOR_KEY = 'pull_cursor';
 const LAST_SYNC_KEY = 'last_synced_at';
-const PUSH_BATCH_SIZE = 250; // matches the server's syncPushSchema max
+// The server takes up to 250 (syncPushSchema), but it applies each mutation with a few queries, about 9 ms of CPU
+// each, so a full batch (a recipe import) runs past the Worker's CPU limit and fails with 503 every time.
+const PUSH_BATCH_SIZE = 20;
 
 let state: SyncState = { status: 'idle', pendingCount: 0, lastSyncedAt: null, lastError: null };
 const stateListeners = new Set<(s: SyncState) => void>();
