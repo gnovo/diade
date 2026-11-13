@@ -108,6 +108,25 @@ export const DEFAULT_TEMPLATE: readonly BlockSpec[] = [
 export const blocksInWeek = (template: readonly BlockSpec[], week: CycleWeek): BlockSpec[] =>
   template.filter((block) => block.weeks === 'both' || block.weeks === week);
 
+/**
+ * The template for these goals: a kind with a goal of 0 in a week has no blocks in that week, so a block planned for
+ * both weeks keeps only the week that has a goal for it, and one with no such week is left out. Batch prep stays.
+ */
+export function templateFor(
+  template: readonly BlockSpec[],
+  goals: TrainingSettings['goals'],
+): BlockSpec[] {
+  const wanted = (spec: BlockSpec, week: CycleWeek) =>
+    spec.kind === 'other' || goals[week === 1 ? 'week1' : 'week2'][spec.kind] > 0;
+  return template.flatMap((spec): BlockSpec[] => {
+    const weeks = ([1, 2] as const).filter(
+      (week) => (spec.weeks === 'both' || spec.weeks === week) && wanted(spec, week),
+    );
+    if (weeks.length === 0) return [];
+    return [{ ...spec, weeks: weeks.length === 2 ? 'both' : weeks[0] }];
+  });
+}
+
 /** An event to create for a block: the caller adds the title (it is in the member's language) and visibility. */
 export interface BlockEvent {
   spec: BlockSpec;

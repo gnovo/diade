@@ -663,6 +663,7 @@ export const ptPT: Shape<Catalog> = {
     progress: '{{done}} de {{goal}}',
     next: 'A seguir: {{title}} · {{day}}, {{start}}',
     weekDone: 'Todas as metas cumpridas esta semana.',
+    noBlockLeft: 'Não há mais blocos esta semana para as metas que faltam.',
     google: {
       title: 'Mostrar no Google Calendar',
       hint: 'Copia os seus blocos para um calendário só deles, "Díade · Treino", marcados como livres para nunca bloquearem uma reunião.',
