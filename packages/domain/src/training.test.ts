@@ -12,6 +12,7 @@ import {
   setDone,
   type TrainingSettings,
   templateEvents,
+  templateFor,
   type WorkoutDetails,
   weekProgress,
 } from './training';
@@ -56,6 +57,36 @@ describe('the default template', () => {
         );
       }
     }
+  });
+});
+
+describe('templateFor', () => {
+  it('keeps the whole template when every goal is above 0', () => {
+    expect(templateFor(DEFAULT_TEMPLATE, DEFAULT_GOALS)).toEqual(DEFAULT_TEMPLATE);
+  });
+
+  it('leaves out a kind whose goal is 0 in both weeks, and keeps batch prep', () => {
+    const goals = {
+      week1: { ...DEFAULT_GOALS.week1, strength: 0 },
+      week2: { ...DEFAULT_GOALS.week2, strength: 0 },
+    };
+    const blocks = templateFor(DEFAULT_TEMPLATE, goals);
+    expect(blocks.some((b) => b.kind === 'strength')).toBe(false);
+    expect(blocks.filter((b) => b.kind === 'other')).toHaveLength(2);
+    expect(blocks.filter((b) => b.kind === 'walk')).toEqual(
+      DEFAULT_TEMPLATE.filter((b) => b.kind === 'walk'),
+    );
+  });
+
+  it('moves a block planned for both weeks to the one week with a goal', () => {
+    const goals = { week1: { ...DEFAULT_GOALS.week1, strength: 0 }, week2: DEFAULT_GOALS.week2 };
+    const strength = templateFor(DEFAULT_TEMPLATE, goals).filter((b) => b.kind === 'strength');
+    expect(blocksInWeek(strength, 1)).toHaveLength(0);
+    expect(blocksInWeek(strength, 2)).toEqual(
+      blocksInWeek(DEFAULT_TEMPLATE, 2)
+        .filter((b) => b.kind === 'strength')
+        .map((b) => ({ ...b, weeks: 2 })),
+    );
   });
 });
 

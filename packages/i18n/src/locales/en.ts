@@ -656,6 +656,7 @@ export const en = {
     progress: '{{done}} of {{goal}}',
     next: 'Next: {{title}} · {{day}}, {{start}}',
     weekDone: 'Every goal met this week.',
+    noBlockLeft: 'No blocks left this week for the goals still open.',
     google: {
       title: 'Show in Google Calendar',
       hint: 'Copies your blocks to a calendar of their own, "Díade · Treino", shown as free so they never block a meeting.',

@@ -12,6 +12,7 @@ import {
   setDone,
   type TrainingSettings,
   templateEvents,
+  templateFor,
   toDateInputValue,
   type WeeklyGoals,
   weekProgress,
@@ -236,7 +237,11 @@ export const TrainingSettingsScreen: React.FC<{ visible: boolean; onClose: () =>
       await save(settings);
       const writes = [
         ...blocks.map((b) => ({ op: 'delete' as const, entity: 'events' as const, id: b.id })),
-        ...templateEvents(DEFAULT_TEMPLATE, settings.cycleAnchor, today).map((block) => ({
+        ...templateEvents(
+          templateFor(DEFAULT_TEMPLATE, settings.goals),
+          settings.cycleAnchor,
+          today,
+        ).map((block) => ({
           op: 'insert' as const,
           entity: 'events' as const,
           input: {
@@ -491,7 +496,11 @@ export const TodayTraining: React.FC = () => {
           </Text>
         </View>
       ) : (
-        <Text className="text-sm text-ink-muted mt-2">{t('training.weekDone')}</Text>
+        <Text className="text-sm text-ink-muted mt-2">
+          {goals.every((p) => p.done >= p.goal)
+            ? t('training.weekDone')
+            : t('training.noBlockLeft')}
+        </Text>
       )}
       <TodaySteps />
     </Card>
