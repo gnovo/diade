@@ -98,6 +98,10 @@ const WeighIn: React.FC = () => {
           value={text}
           onChangeText={setText}
           keyboardType="decimal-pad"
+          returnKeyType="done"
+          onSubmitEditing={() => {
+            if (valid && !busy) save();
+          }}
           placeholder={t('health.weighInPlaceholder')}
           accessibilityLabel={t('health.weighIn')}
         />
@@ -175,7 +179,10 @@ export const HealthScreen: React.FC<{ visible: boolean; onClose: () => void }> =
           </Pressable>
           <Text className="flex-1 text-title-2 font-bold text-ink">{t('health.title')}</Text>
         </View>
-        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}>
+        <ScrollView
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
+          keyboardShouldPersistTaps="handled"
+        >
           <Card>
             <View className="flex-row items-center">
               <View className="flex-1 mr-3">
