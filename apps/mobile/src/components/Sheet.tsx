@@ -60,6 +60,9 @@ export const Sheet: React.FC<{
               paddingTop: spacing[4],
               paddingBottom: spacing[8],
             }}
+            // Screens opened from a sheet are Modals inside this ScrollView in the React tree, so without this
+            // it takes the first tap while their keyboard is up and only closes the keyboard.
+            keyboardShouldPersistTaps="handled"
           >
             {children}
           </ScrollView>

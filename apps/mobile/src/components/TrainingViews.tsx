@@ -21,7 +21,16 @@ import { formatDayLabel, formatLongDate, type TFunction } from '@diade/i18n';
 import type React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Modal, Pressable, ScrollView, Switch, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Modal,
+  Pressable,
+  ScrollView,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { apiClient } from '../api/client';
 import { connectGoogleTraining } from '../calendar/connect';
@@ -85,7 +94,8 @@ const GoogleTrainingCard: React.FC<{ visible: boolean }> = ({ visible }) => {
   const track = useColor('border-strong');
   const on = useColor('action');
   const [status, setStatus] = useState<TrainingCalendarStatus | null>(null);
-  const [busy, setBusy] = useState(false);
+  /** What is running: copying the blocks takes a while the first time, so the card says so. */
+  const [busy, setBusy] = useState<null | 'on' | 'off'>(null);
   const [loadedFor, setLoadedFor] = useState(false);
   if (visible !== loadedFor) {
     setLoadedFor(visible);
@@ -113,7 +123,7 @@ const GoogleTrainingCard: React.FC<{ visible: boolean }> = ({ visible }) => {
   };
 
   const toggle = async (value: boolean) => {
-    setBusy(true);
+    setBusy(value ? 'on' : 'off');
     try {
       if (value) await turnOn();
       else setStatus(await apiClient.disableTrainingCalendar());
@@ -123,20 +133,25 @@ const GoogleTrainingCard: React.FC<{ visible: boolean }> = ({ visible }) => {
         err instanceof Error ? err.message : t('common.checkConnection'),
       );
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   };
 
   const enabled = status?.enabled ?? false;
-  const note = !status
-    ? t('training.google.offline')
-    : !enabled
-      ? t('training.google.hint')
-      : status.lastError === 'needs_reauth'
-        ? t('training.google.needsReauth')
-        : status.lastError === 'failed'
-          ? t('training.google.failed')
-          : t('training.google.copied', { count: status.blocks });
+  const note =
+    busy === 'on'
+      ? t('training.google.copying')
+      : busy === 'off'
+        ? t('training.google.removing')
+        : !status
+          ? t('training.google.offline')
+          : !enabled
+            ? t('training.google.hint')
+            : status.lastError === 'needs_reauth'
+              ? t('training.google.needsReauth')
+              : status.lastError === 'failed'
+                ? t('training.google.failed')
+                : t('training.google.copied', { count: status.blocks });
   return (
     <Card>
       <View className="flex-row items-center">
@@ -144,10 +159,11 @@ const GoogleTrainingCard: React.FC<{ visible: boolean }> = ({ visible }) => {
           <Text className="text-base font-semibold text-ink">{t('training.google.title')}</Text>
           <Text className="text-sm leading-5 text-ink-muted mt-0.5">{note}</Text>
         </View>
+        {busy ? <ActivityIndicator className="mr-3" color={on} /> : null}
         <Switch
-          value={enabled}
+          value={busy ? busy === 'on' : enabled}
           onValueChange={toggle}
-          disabled={busy || !status}
+          disabled={busy !== null || !status}
           accessibilityLabel={t('training.google.title')}
           trackColor={{ false: track, true: on }}
         />

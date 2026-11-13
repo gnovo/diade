@@ -664,6 +664,8 @@ export const en = {
       needsReauth:
         'Google no longer lets Díade write the training calendar. Connect again to continue.',
       failed: 'The last copy to Google did not finish. It tries again after your next change.',
+      copying: 'Copying your blocks to Google. The first time can take half a minute.',
+      removing: 'Deleting the "Díade · Treino" calendar from Google.',
       offline: 'Needs a connection to see whether this is on.',
       reconnect: 'Connect Google again',
       notAllowedTitle: 'Google did not allow it',

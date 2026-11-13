@@ -673,6 +673,8 @@ export const ptPT: Shape<Catalog> = {
         'O Google já não deixa o Díade escrever no calendário de treino. Ligue de novo para continuar.',
       failed:
         'A última cópia para o Google não terminou. Volta a tentar depois da próxima alteração.',
+      copying: 'A copiar os blocos para o Google. Da primeira vez pode demorar meio minuto.',
+      removing: 'A apagar o calendário "Díade · Treino" do Google.',
       offline: 'Precisa de ligação para saber se está ligado.',
       reconnect: 'Ligar o Google de novo',
       notAllowedTitle: 'O Google não autorizou',
