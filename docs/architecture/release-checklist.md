@@ -2,7 +2,7 @@
 
 How to roll `main` out to the two phones when native code has changed, so an over-the-air update cannot reach them (see
 [environments.md](environments.md) for why, and `apps/mobile/scripts/release-android.sh` for what the scripts do). Nothing here has been run for the
-current batch of changes: it is the order to follow and the things to check at each step.
+current batch of changes (v0.1.0-3 to the health work, #49 to #63): it is the order to follow and the things to check at each step.
 
 The order matters: **database migration, then the Worker, then the APK.** A Worker that queries a table the database does not have fails every
 request, and an app that pushes an entity a Worker does not know gets a 400 that blocks its whole sync.
@@ -12,8 +12,8 @@ request, and an app that pushes an entity a Worker does not know gets a 400 that
 - [ ] `main` is the commit you mean to ship, CI green, and `apps/api/package.json` has `postgres` on `^3.4.9`. **Do not ship `postgres` 4.x**: on the Worker it makes
       every request that reaches the database use about 1 s of CPU, so sign-in and sync fail with 503 (found on the dev Worker; the pin and a Dependabot ignore are in #41).
 - [ ] Is an APK needed? `cd apps/mobile && pnpm fingerprint` and compare the `hash` with the installed build's `assets/fingerprint` (inside its APK; the last
-      value recorded for the installed build was `37f35f74905761cd55abac1a528446196f719db1`). If they differ, an OTA never reaches the phones and you need the APK.
-      The current value on `main` is `0d8f04a382c9e42a66b781a68145e87c6e59f6f6` (the Expo 58.0.23 and Sentry bumps changed it).
+      value recorded for the installed build, v0.1.0-3, was `0d8f04a382c9e42a66b781a68145e87c6e59f6f6`). If they differ, an OTA never reaches the phones and you need
+      the APK. The current value on `main` is `6fafe24e4babed067585417793fd5f5c68b0927b` (Health Connect, #61, changed it).
 - [ ] Both phones can update at the same time (a recipe saved with sections on one phone shows its `## Steps` text as raw notes on a phone still on the old build).
 
 ## 1. Production database
@@ -22,13 +22,21 @@ Migrations are additive (new tables and columns), so the old Worker and the old 
 
 ```bash
 cd apps/api
-# How many are applied? The repo has 10 (0000 to 0009); recipes, meal plans and the ingredient catalog are 0007 to 0009.
+# How many are applied? The repo has 16 (0000 to 0015). Since v0.1.0-3: 0011 recipe type, 0012 recipe nutrition, 0013 nutrition targets,
+# 0014 training, 0015 training Google calendar. All add nullable columns, nothing else.
 DATABASE_URL="$(neon connection-string production)" psql "$DATABASE_URL" -At -c "select count(*) from drizzle.__drizzle_migrations"
 DATABASE_URL="$(neon connection-string production)" npx drizzle-kit migrate
 ```
 
-- [ ] The ledger count equals the number of migrations afterwards, and `ingredients`, `meal_plans` and `recipes` exist.
+- [ ] The ledger count equals the number of migrations afterwards (16), and `space_members` has `nutrition_targets`, `training` and `training_google`.
 - Use the branch **by name** (`production`); never `neon branches reset`. Look at the target before running: this is the real data.
+
+## 1b. Google consent screen
+
+Only when the release adds a Google scope. The training calendar (#60) asks for `https://www.googleapis.com/auth/calendar.app.created`.
+
+- [ ] Google Cloud console → the production OAuth client's project → Data access: add `calendar.app.created`. Without it, turning on "Mostrar no Google
+      Calendar" fails at Google's consent step; nothing else is affected.
 
 ## 2. The Worker (production)
 
@@ -61,6 +69,14 @@ bash scripts/release-android.sh publish v<version>-<code>
 - [ ] The release exists on GitHub with the APK attached.
 - [ ] Obtainium offers it on both phones; update both. The APK is release-signed, so it installs over the existing app (a debug build with the same id never would).
 - [ ] The production app is `com.diade.app`; the dev app (`com.diade.app.dev`) is separate and untouched.
+
+## 3b. Content and first run (health, #55 to #63)
+
+- [ ] Import the new recipes in the production app: Listas → Receitas → + → Importar, and paste `docs/plans/health/recipes/new.md` (one `#` title per recipe, as done in dev). Their kcal and protein come from
+      the built-in table; no catalog values are needed (dev has none either). Set the type of "Peixe assado em papelote" to meal.
+- [ ] Profile → Nutrição and Treino: set targets and the training week on each phone (per member; nothing is copied from dev).
+- [ ] Profile → Relógio e balança: turn on, allow the four permissions. Needs the APK (Health Connect is native).
+- [ ] Optional: Treino → "Mostrar no Google Calendar". Needs step 1b.
 
 ## 4. After
 
