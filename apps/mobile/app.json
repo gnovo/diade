@@ -23,7 +23,7 @@
         "backgroundColor": "#0D4F46"
       },
       "package": "com.diade.app",
-      "versionCode": 3,
+      "versionCode": 4,
       "permissions": [
         "android.permission.health.READ_EXERCISE",
         "android.permission.health.READ_STEPS",
