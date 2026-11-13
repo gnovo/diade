@@ -11,9 +11,10 @@ request, and an app that pushes an entity a Worker does not know gets a 400 that
 
 - [ ] `main` is the commit you mean to ship, CI green, and `apps/api/package.json` has `postgres` on `^3.4.9`. **Do not ship `postgres` 4.x**: on the Worker it makes
       every request that reaches the database use about 1 s of CPU, so sign-in and sync fail with 503 (found on the dev Worker; the pin and a Dependabot ignore are in #41).
-- [ ] Is an APK needed? `cd apps/mobile && pnpm fingerprint` and compare the `hash` with the installed build's `assets/fingerprint` (inside its APK; the last
-      value recorded for the installed build, v0.1.0-3, was `0d8f04a382c9e42a66b781a68145e87c6e59f6f6`). If they differ, an OTA never reaches the phones and you need
-      the APK. The current value on `main` is `6fafe24e4babed067585417793fd5f5c68b0927b` (Health Connect, #61, changed it).
+- [ ] Is an APK needed? Compare the runtime version on `main` with the installed build's (`assets/fingerprint` inside its APK):
+      `cd apps/mobile && unset APP_VARIANT && npx expo-updates runtimeversion:resolve --platform android | jq -r .runtimeVersion`. Do not grep the first
+      `"hash"` out of `pnpm fingerprint`: that is a single file's hash, not the fingerprint. If they differ, an OTA never reaches the phones and you need the APK.
+      v0.1.0-4 (13 Nov 2026) is `6fafe24e4babed067585417793fd5f5c68b0927b`; the over-the-air update `ace3140d` (#66) went to it.
 - [ ] Both phones can update at the same time (a recipe saved with sections on one phone shows its `## Steps` text as raw notes on a phone still on the old build).
 
 ## 1. Production database
@@ -22,8 +23,8 @@ Migrations are additive (new tables and columns), so the old Worker and the old 
 
 ```bash
 cd apps/api
-# How many are applied? The repo has 16 (0000 to 0015). Since v0.1.0-3: 0011 recipe type, 0012 recipe nutrition, 0013 nutrition targets,
-# 0014 training, 0015 training Google calendar. All add nullable columns, nothing else.
+# How many are applied? Compare with the files in drizzle/migrations (16 on 13 Nov 2026, 0000 to 0015; production was at 12 before the health
+# rollout: 0011 was applied earlier, with #51). Check each pending one adds columns or tables only.
 DATABASE_URL="$(neon connection-string production)" psql "$DATABASE_URL" -At -c "select count(*) from drizzle.__drizzle_migrations"
 DATABASE_URL="$(neon connection-string production)" npx drizzle-kit migrate
 ```
@@ -64,7 +65,11 @@ bash scripts/release-android.sh apk "Notes for the release"
 bash scripts/release-android.sh publish v<version>-<code>
 ```
 
-`publish` finds the merged bump commit on `main` and publishes the draft with the tag on that commit, which is when Obtainium starts offering it. Requires `gh auth login` and the signing setup `build-android-prod.sh` needs.
+`publish` finds the merged bump commit on `main` and publishes the draft with the tag on that commit, which is when Obtainium starts offering it. Requires the signing setup `build-android-prod.sh` needs, and `gh` signed in as **`gnovo`** (`gh auth status`; `gh auth switch -u gnovo`). Another
+account can only read the repo, so `gh release create` fails with a misleading `"workflow" scope may be required` after the branch is already pushed. If
+that happens, do not run `apk` again (it bumps `versionCode` again): switch accounts and create the draft by hand from the APK already built:
+`gh release create v<version>-<code> android/app/build/outputs/apk/release/diade-<version>-<code>.apk --repo gnovo/diade --title v<version>-<code> --draft --notes "…"`.
+The script also leaves you on the release branch then; `git switch main`.
 
 - [ ] The release exists on GitHub with the APK attached.
 - [ ] Obtainium offers it on both phones; update both. The APK is release-signed, so it installs over the existing app (a debug build with the same id never would).
@@ -74,7 +79,7 @@ bash scripts/release-android.sh publish v<version>-<code>
 
 - [ ] Import the new recipes in the production app: Listas → Receitas → + → Importar, and paste `docs/plans/health/recipes/new.md` (one `#` title per recipe, as done in dev). Their kcal and protein come from
       the built-in table; no catalog values are needed (dev has none either). Set the type of "Peixe assado em papelote" to meal.
-- [ ] Profile → Nutrição and Treino: set targets and the training week on each phone (per member; nothing is copied from dev).
+- [ ] Profile → Nutrição and Treino: set targets and the training week on each phone (per member; nothing is copied from dev). Set the weekly goals **before** "Criar a minha semana de treino": a kind at 0 gets no blocks (#66).
 - [ ] Profile → Relógio e balança: turn on, allow the four permissions. Needs the APK (Health Connect is native).
 - [ ] Optional: Treino → "Mostrar no Google Calendar". Needs step 1b.
 
