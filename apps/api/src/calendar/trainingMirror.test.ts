@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createGoogleClient } from './google';
-import { eventBody, type MirrorSource, planMirror } from './trainingMirror';
+import { eventBody, type MirrorSource, planMirror, writeEach } from './trainingMirror';
 
 const block = (
   id: string,
@@ -99,5 +99,43 @@ describe('the Google client writes', () => {
     await expect(client.deleteCalendar('c')).resolves.toBeUndefined();
     await expect(client.deleteEvent('c', 'd')).rejects.toThrow('Boom');
     expect(fetchFn.mock.calls[0]![1].method).toBe('DELETE');
+  });
+});
+
+describe('writeEach', () => {
+  const later = () => new Promise<void>((resolve) => setTimeout(resolve, 1));
+
+  it('writes everything, no more than the limit at once', async () => {
+    let running = 0;
+    let most = 0;
+    const done: number[] = [];
+    await writeEach(
+      [1, 2, 3, 4, 5, 6, 7],
+      async (n) => {
+        running++;
+        most = Math.max(most, running);
+        await later();
+        done.push(n);
+        running--;
+      },
+      3,
+    );
+    expect(most).toBe(3);
+    expect(done.sort()).toEqual([1, 2, 3, 4, 5, 6, 7]);
+  });
+
+  it('starts nothing after a failure, lets the running ones finish, then throws', async () => {
+    const done: number[] = [];
+    const run = writeEach(
+      [1, 2, 3, 4, 5, 6],
+      async (n) => {
+        await later();
+        if (n === 1) throw new Error('quota');
+        done.push(n);
+      },
+      2,
+    );
+    await expect(run).rejects.toThrow('quota');
+    expect(done).toEqual([2]);
   });
 });

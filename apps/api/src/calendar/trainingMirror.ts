@@ -157,6 +157,34 @@ export async function trainingMirrorStatus(db: DbClient, userId: string): Promis
   };
 }
 
+/** Google calls in flight at once: a new calendar takes seconds per insert, and Google rate-limits bursts. */
+const WRITES_AT_ONCE = 5;
+
+/**
+ * Runs `write` over the items, `limit` at a time. After the first failure it starts no more, waits for the ones
+ * running, then throws that failure, so every write that succeeded has been recorded.
+ */
+export async function writeEach<T>(
+  items: readonly T[],
+  write: (item: T) => Promise<void>,
+  limit = WRITES_AT_ONCE,
+): Promise<void> {
+  let next = 0;
+  const failures: unknown[] = [];
+  const worker = async () => {
+    while (failures.length === 0 && next < items.length) {
+      const item = items[next++] as T;
+      try {
+        await write(item);
+      } catch (error) {
+        failures.push(error);
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  if (failures.length > 0) throw failures[0];
+}
+
 /**
  * Copies the member's blocks to Google. Creates the calendar the first time. Does nothing when the member has not
  * turned it on. Never throws for a Google failure: it records it, and the next mirror tries again.
@@ -195,11 +223,11 @@ export async function mirrorTraining(deps: MirrorDeps, userId: string): Promise<
       next.events,
       next.timeZone,
     );
-    for (const { eventId, googleId } of plan.remove) {
+    await writeEach(plan.remove, async ({ eventId, googleId }) => {
       await google.deleteEvent(calendarId, googleId);
       delete next.events[eventId];
-    }
-    for (const { source, body, googleId } of plan.update) {
+    });
+    await writeEach(plan.update, async ({ source, body, googleId }) => {
       try {
         await google.patchEvent(calendarId, googleId, body);
         next.events[source.id] = { googleId, body: JSON.stringify(body) };
@@ -210,11 +238,11 @@ export async function mirrorTraining(deps: MirrorDeps, userId: string): Promise<
         const created = await google.insertEvent(calendarId, body);
         next.events[source.id] = { googleId: created.id, body: JSON.stringify(body) };
       }
-    }
-    for (const { source, body } of plan.insert) {
+    });
+    await writeEach(plan.insert, async ({ source, body }) => {
       const created = await google.insertEvent(calendarId, body);
       next.events[source.id] = { googleId: created.id, body: JSON.stringify(body) };
-    }
+    });
     next.lastError = null;
     next.syncedAt = nowOf(deps).toISOString();
   } catch (err) {
